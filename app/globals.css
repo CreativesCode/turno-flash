@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  /* Light mode semantic colors */
+  --background: #ffffff;
+  --surface: #ffffff;
+  --muted-background: #f8fafc;
+  --subtle-background: #f1f5f9;
+  --border: #e2e8f0;
+  --foreground: #0f172a;
+  --foreground-muted: #475569;
+  --primary-foreground: #ffffff;
+  --secondary-foreground: #ffffff;
+}
+
+@theme inline {
+  /* Primary colors (Green) */
+  --color-primary-50: #f3fbf4;
+  --color-primary-100: #eaf9ec;
+  --color-primary-200: #d8f3dc;
+  --color-primary-300: #bbeac3;
+  --color-primary-400: #91dea0;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #1ba64e;
+  --color-primary-700: #13833c;
+  --color-primary-800: #0a5d29;
+  --color-primary-900: #043916;
+  --color-primary-950: #01210a;
+  --color-primary: #22c55e;
+
+  /* Secondary colors (Fuchsia/Pink) */
+  --color-secondary-50: #fff2f5;
+  --color-secondary-100: #ffe8ee;
+  --color-secondary-200: #fed5e0;
+  --color-secondary-300: #fab6c9;
+  --color-secondary-400: #f28aab;
+  --color-secondary-500: #db2777;
+  --color-secondary-600: #b91f63;
+  --color-secondary-700: #92164d;
+  --color-secondary-800: #680d35;
+  --color-secondary-900: #41051f;
+  --color-secondary-950: #260210;
+  --color-secondary: #db2777;
+
+  /* Semantic colors (reference CSS variables for dark mode support) */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted-background);
+  --color-subtle: var(--subtle-background);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  /* Fonts */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode semantic colors */
+    --background: #020617;
+    --surface: #0f172a;
+    --muted-background: #111827;
+    --subtle-background: #111827;
+    --border: #1e293b;
+    --foreground: #f8fafc;
+    --foreground-muted: #94a3b8;
+    --primary-foreground: #ffffff;
+    --secondary-foreground: #ffffff;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
