@@ -12,18 +12,21 @@ import {
   getMyOrganizationLicenseStatus,
   shouldShowLicenseNotification,
 } from "@/utils/license";
+import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function DashboardPage() {
   const { profile, signOut } = useAuth();
   const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const [licenseStatus, setLicenseStatus] =
     useState<LicenseStatusResult | null>(null);
   const [loadingLicense, setLoadingLicense] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [organizationName, setOrganizationName] = useState<string | null>(null);
 
-  // Cargar estado de licencia al montar el componente
+  // Cargar estado de licencia y nombre de organización al montar el componente
   useEffect(() => {
     const loadLicenseStatus = async () => {
       try {
@@ -48,10 +51,36 @@ export default function DashboardPage() {
       }
     };
 
+    const loadOrganizationName = async () => {
+      if (!profile?.organization_id) {
+        setOrganizationName(null);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("organizations")
+          .select("name")
+          .eq("id", profile.organization_id)
+          .single();
+
+        if (error) {
+          console.error("Error loading organization name:", error);
+          setOrganizationName(null);
+        } else {
+          setOrganizationName(data?.name || null);
+        }
+      } catch (error) {
+        console.error("Error loading organization name:", error);
+        setOrganizationName(null);
+      }
+    };
+
     if (profile) {
       loadLicenseStatus();
+      loadOrganizationName();
     }
-  }, [profile]);
+  }, [profile, supabase]);
 
   // Si está bloqueado por licencia expirada, mostrar pantalla de bloqueo
   if (isBlocked && profile?.role !== "admin") {
@@ -141,7 +170,7 @@ export default function DashboardPage() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/invite")}
-                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   >
                     Invitar usuarios
                   </button>
@@ -152,7 +181,7 @@ export default function DashboardPage() {
               {profile?.role === "owner" && (
                 <button
                   onClick={() => router.push("/dashboard/invite")}
-                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
                 >
                   Invitar usuarios
                 </button>
@@ -207,7 +236,7 @@ export default function DashboardPage() {
                       Organización
                     </dt>
                     <dd className="mt-1 text-sm text-foreground">
-                      {profile.organization_id}
+                      {organizationName || profile.organization_id}
                     </dd>
                   </div>
                 )}
@@ -220,7 +249,7 @@ export default function DashboardPage() {
                 <span
                   className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
                     profile?.is_active
-                      ? "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400"
+                      ? "bg-success-100 text-success-800"
                       : "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400"
                   }`}
                 >

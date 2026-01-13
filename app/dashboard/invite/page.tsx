@@ -128,12 +128,10 @@ export default function InvitePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-surface">
+      <div className="">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">
-              Invitar usuarios
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground"></h1>
             <button
               onClick={() => router.push("/dashboard")}
               className="rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle"
@@ -192,7 +190,7 @@ export default function InvitePage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full justify-center rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? "Enviando invitación..." : "Enviar invitación"}
             </button>

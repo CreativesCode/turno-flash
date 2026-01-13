@@ -669,7 +669,7 @@ Por favor confirma tu asistencia respondiendo:
             {canManageAppointments && (
               <button
                 onClick={handleCreate}
-                className="flex items-center gap-2 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
+                className="flex items-center gap-2 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
               >
                 <Plus className="h-4 w-4" />
                 Nuevo Turno
@@ -1113,7 +1113,7 @@ Por favor confirma tu asistencia respondiendo:
               <h2 className="text-xl font-bold text-foreground">Nuevo Turno</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-md p-1 hover:bg-muted"
+                className="rounded-md p-1 hover:bg-subtle"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1139,7 +1139,7 @@ Por favor confirma tu asistencia respondiendo:
                         is_active: true,
                       });
                     }}
-                    className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                    className="flex items-center gap-1 text-xs font-medium text-secondary-500 hover:text-secondary-600"
                   >
                     <Plus className="h-3 w-3" />
                     {showNewCustomerForm ? "Cancelar" : "Nuevo Cliente"}
@@ -1276,7 +1276,7 @@ Por favor confirma tu asistencia respondiendo:
 
               {/* Service */}
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="block text-sm font-medium text-foreground">
                   Servicio *
                 </label>
                 <select
@@ -1319,7 +1319,7 @@ Por favor confirma tu asistencia respondiendo:
 
               {/* Staff */}
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="block text-sm font-medium text-foreground">
                   Profesional (opcional)
                 </label>
                 <select
@@ -1382,14 +1382,14 @@ Por favor confirma tu asistencia respondiendo:
                     type="time"
                     value={formData.end_time}
                     readOnly
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm text-black shadow-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                   />
                 </div>
               </div>
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="block text-sm font-medium text-foreground">
                   Notas
                 </label>
                 <textarea
@@ -1406,21 +1406,21 @@ Por favor confirma tu asistencia respondiendo:
               {/* Buttons */}
               <div className="flex gap-3 pt-4">
                 <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  disabled={saving}
+                  className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
                   type="submit"
                   disabled={
                     saving || customers.length === 0 || services.length === 0
                   }
-                  className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? "Guardando..." : "Crear Turno"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  disabled={saving}
-                  className="flex-1 rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                >
-                  Cancelar
                 </button>
               </div>
             </form>
@@ -1441,7 +1441,7 @@ Por favor confirma tu asistencia respondiendo:
                   setShowDetailModal(false);
                   setSelectedAppointment(null);
                 }}
-                className="rounded-md p-1 hover:bg-muted"
+                className="rounded-md p-1 hover:bg-subtle"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1475,20 +1475,20 @@ Por favor confirma tu asistencia respondiendo:
 
             {/* Service Info */}
             <div className="mb-4 grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-sm font-medium text-foreground-muted mb-1">
+              <div className="p-4 rounded-lg bg-muted">
+                <h3 className="text-sm font-medium text-foreground-muted mb-2">
                   Servicio
                 </h3>
-                <p className="text-foreground">
+                <p className="text-foreground font-medium">
                   {selectedAppointment.service_name}
                 </p>
               </div>
               {selectedAppointment.staff_first_name && (
-                <div>
-                  <h3 className="text-sm font-medium text-foreground-muted mb-1">
+                <div className="p-4 rounded-lg bg-muted">
+                  <h3 className="text-sm font-medium text-foreground-muted mb-2">
                     Profesional
                   </h3>
-                  <p className="text-foreground">
+                  <p className="text-foreground font-medium">
                     {selectedAppointment.staff_first_name}{" "}
                     {selectedAppointment.staff_last_name}
                   </p>
@@ -1498,12 +1498,12 @@ Por favor confirma tu asistencia respondiendo:
 
             {/* Date and Time */}
             <div className="mb-4 grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-sm font-medium text-foreground-muted mb-1">
+              <div className="p-4 rounded-lg bg-muted">
+                <h3 className="text-sm font-medium text-foreground-muted mb-2">
                   Fecha
                 </h3>
-                <p className="text-foreground flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-zinc-400" />
+                <p className="text-foreground font-medium flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-foreground-muted" />
                   {new Date(
                     selectedAppointment.appointment_date
                   ).toLocaleDateString("es-ES", {
@@ -1513,12 +1513,12 @@ Por favor confirma tu asistencia respondiendo:
                   })}
                 </p>
               </div>
-              <div>
-                <h3 className="text-sm font-medium text-foreground-muted mb-1">
+              <div className="p-4 rounded-lg bg-muted">
+                <h3 className="text-sm font-medium text-foreground-muted mb-2">
                   Horario
                 </h3>
-                <p className="text-foreground flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-zinc-400" />
+                <p className="text-foreground font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-foreground-muted" />
                   {selectedAppointment.start_time} -{" "}
                   {selectedAppointment.end_time}
                 </p>

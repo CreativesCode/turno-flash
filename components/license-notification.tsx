@@ -2,9 +2,9 @@
 
 import { LicenseStatusResult } from "@/types/organization";
 import {
+  formatLicenseMessage,
   getLicenseAlertType,
   getLicenseMessageTitle,
-  formatLicenseMessage,
 } from "@/utils/license";
 import { X } from "lucide-react";
 import { useState } from "react";
@@ -88,10 +88,7 @@ export function LicenseNotification({
   const styles = getAlertStyles();
 
   return (
-    <div
-      className={`rounded-lg border p-4 ${styles.container}`}
-      role="alert"
-    >
+    <div className={`rounded-lg border p-4 ${styles.container}`} role="alert">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className={`text-sm font-semibold ${styles.title}`}>{title}</h3>
@@ -122,8 +119,8 @@ export function LicenseNotification({
           {licenseStatus.status === "expired" && (
             <div className={`mt-3 text-xs ${styles.message}`}>
               <p className="font-medium">
-                🚫 Tu licencia ha expirado. Por favor, contacta al
-                administrador para renovarla.
+                🚫 Tu licencia ha expirado. Por favor, contacta al administrador
+                para renovarla.
               </p>
             </div>
           )}
@@ -194,7 +191,9 @@ export function LicenseNotificationBanner({
     }
 
     if (licenseStatus.status === "grace_period") {
-      return `⚠️ Licencia vencida - ${licenseStatus.days_remaining || 0} días de gracia restantes`;
+      return `⚠️ Licencia vencida - ${
+        licenseStatus.days_remaining || 0
+      } días de gracia restantes`;
     }
 
     if (
@@ -208,7 +207,9 @@ export function LicenseNotificationBanner({
   };
 
   return (
-    <div className={`${getBannerStyles()} px-4 py-2 text-center text-sm font-medium`}>
+    <div
+      className={`${getBannerStyles()} px-4 py-2 text-center text-sm font-medium`}
+    >
       {getMessage()}
     </div>
   );

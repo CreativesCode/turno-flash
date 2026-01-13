@@ -249,7 +249,7 @@ Por favor confirma tu asistencia respondiendo:
             </div>
             <button
               onClick={() => router.push("/dashboard/appointments")}
-              className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-subtle dark:bg-zinc-800 dark:text-zinc-300"
+              className="flex items-center gap-2 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
             >
               Ver Turnos
             </button>
@@ -278,7 +278,7 @@ Por favor confirma tu asistencia respondiendo:
                   className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                     filterDays === days
                       ? "bg-blue-600 text-white"
-                      : "bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-300"
+                      : "bg-white text-zinc-700 hover:bg-zinc-100 border border-border"
                   }`}
                 >
                   {days === 0 ? "Hoy" : days === 1 ? "Mañana" : `${days} días`}

@@ -287,7 +287,7 @@ export default function ServicesPage() {
             {canManageServices && (
               <button
                 onClick={handleCreate}
-                className="flex items-center gap-2 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
+                className="flex items-center gap-2 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
               >
                 <Plus className="h-4 w-4" />
                 Nuevo Servicio
@@ -339,7 +339,7 @@ export default function ServicesPage() {
               {!searchTerm && (
                 <button
                   onClick={handleCreate}
-                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700"
+                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600"
                 >
                   <Plus className="h-4 w-4" />
                   Agregar Servicio
@@ -452,7 +452,7 @@ export default function ServicesPage() {
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-md p-1 hover:bg-muted"
+                className="rounded-md p-1 hover:bg-subtle"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -646,19 +646,19 @@ export default function ServicesPage() {
               {/* Buttons */}
               <div className="flex gap-3 pt-4">
                 <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {saving ? "Guardando..." : "Guardar"}
-                </button>
-                <button
                   type="button"
                   onClick={() => setShowModal(false)}
                   disabled={saving}
                   className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {saving ? "Guardando..." : "Guardar"}
                 </button>
               </div>
             </form>

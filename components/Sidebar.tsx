@@ -3,6 +3,7 @@
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
 import { useCapacitor } from "@/hooks/useCapacitor";
+import { createClient } from "@/utils/supabase/client";
 import {
   Bell,
   Building2,
@@ -18,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface NavItem {
   name: string;
@@ -39,6 +40,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile } = useCapacitor();
+  const supabase = useMemo(() => createClient(), []);
+  const [organizationName, setOrganizationName] = useState<string | null>(null);
 
   // Navigation items with permissions
   const navItems: NavItem[] = useMemo(
@@ -122,6 +125,38 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     });
   }, [navItems, profile]);
 
+  // Cargar nombre de la organización
+  useEffect(() => {
+    const loadOrganizationName = async () => {
+      if (!profile?.organization_id) {
+        setOrganizationName(null);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("organizations")
+          .select("name")
+          .eq("id", profile.organization_id)
+          .single();
+
+        if (error) {
+          console.error("Error loading organization name:", error);
+          setOrganizationName(null);
+        } else {
+          setOrganizationName(data?.name || null);
+        }
+      } catch (error) {
+        console.error("Error loading organization name:", error);
+        setOrganizationName(null);
+      }
+    };
+
+    if (profile) {
+      loadOrganizationName();
+    }
+  }, [profile, supabase]);
+
   const handleSignOut = async () => {
     await signOut();
     router.push("/login");
@@ -181,6 +216,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 : profile?.role === "owner"
                 ? "Dueño"
                 : "Staff"}
+              {": "}
+              <span className="font-semibold">{organizationName}</span>
             </p>
           </div>
 
