@@ -7,14 +7,21 @@ import { UserProfile } from "@/types/auth";
 import { OrganizationWithLicenseStatus } from "@/types/organization";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 interface OrganizationDetails extends OrganizationWithLicenseStatus {
   owner?: UserProfile | null;
   members?: UserProfile[];
 }
 
-export default function OrganizationDetailsPage() {
+function OrganizationDetailsContent() {
   const { profile } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -905,5 +912,26 @@ export default function OrganizationDetailsPage() {
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function OrganizationDetailsPage() {
+  return (
+    <Suspense
+      fallback={
+        <ProtectedRoute>
+          <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+            <div className="text-center">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Cargando...
+              </p>
+            </div>
+          </div>
+        </ProtectedRoute>
+      }
+    >
+      <OrganizationDetailsContent />
+    </Suspense>
   );
 }
