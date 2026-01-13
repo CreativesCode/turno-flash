@@ -82,6 +82,18 @@ export default function SetupPasswordPage() {
     }
 
     try {
+      // Obtener información del usuario para verificar metadata
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        setError("Error al obtener información del usuario");
+        setLoading(false);
+        return;
+      }
+
       // Actualizar la contraseña del usuario (usando el cliente memoizado)
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
@@ -91,6 +103,30 @@ export default function SetupPasswordPage() {
         setError(updateError.message);
         setLoading(false);
         return;
+      }
+
+      // Si el usuario fue invitado a una organización, asignarla al perfil
+      // Esto es un respaldo en caso de que el trigger no haya funcionado
+      const invitedOrgId = user.user_metadata?.invited_to_organization_id;
+      if (invitedOrgId) {
+        try {
+          const { error: profileUpdateError } = await supabase
+            .from("user_profiles")
+            .update({ organization_id: invitedOrgId })
+            .eq("user_id", user.id)
+            .is("organization_id", null); // Solo actualizar si no tiene organización
+
+          if (profileUpdateError) {
+            console.warn(
+              "Error updating profile with organization_id:",
+              profileUpdateError
+            );
+            // No fallar el flujo si esto falla, el trigger debería haberlo hecho
+          }
+        } catch (err) {
+          console.warn("Error assigning organization:", err);
+          // No fallar el flujo
+        }
       }
 
       // Contraseña configurada exitosamente, redirigir al dashboard

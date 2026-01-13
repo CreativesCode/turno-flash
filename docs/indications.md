@@ -108,7 +108,11 @@ Ver `docs/CORRECCION-capacitor.md` para más detalles sobre esta decisión arqui
 │   │   └── setup-password/ # Usuarios invitados crean contraseña
 │   └── dashboard/         # Panel protegido
 │       ├── invite/        # Invitar usuarios (solo admin)
-│       └── users/         # Gestión de usuarios (solo admin)
+│       ├── users/         # Gestión de usuarios (solo admin)
+│       └── organizations/ # Gestión de organizaciones
+│           ├── page.tsx   # Lista de organizaciones
+│           ├── new/       # Crear organización
+│           └── details/   # Detalles (usa ?id=xxx, no [id])
 │
 ├── components/
 │   └── protected-route.tsx # HOC para proteger rutas

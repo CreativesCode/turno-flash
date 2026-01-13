@@ -24,6 +24,7 @@ export interface AuthUser {
 export type Permission =
   | "manage_users"
   | "manage_organization"
+  | "create_organization"
   | "manage_services"
   | "manage_bookings"
   | "view_bookings"
@@ -34,6 +35,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   admin: [
     "manage_users",
     "manage_organization",
+    "create_organization",
     "manage_services",
     "manage_bookings",
     "view_bookings",

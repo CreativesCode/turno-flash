@@ -47,17 +47,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verificar que es admin
+    // Verificar permisos: debe ser admin o owner
     const { data: profile, error: profileError } = await userClient
       .from("user_profiles")
-      .select("role")
+      .select("role, organization_id")
       .eq("user_id", user.id)
       .single();
 
-    if (profileError || !profile || profile.role !== "admin") {
+    if (profileError || !profile) {
       return new Response(
         JSON.stringify({
-          error: "Solo los administradores pueden invitar usuarios",
+          error: "Error al verificar permisos",
         }),
         {
           status: 403,
@@ -66,14 +66,80 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Obtener el email a invitar del body
-    const { email, redirectTo } = await req.json();
+    const isAdmin = profile.role === "admin";
+    const isOwner = profile.role === "owner";
+
+    if (!isAdmin && !isOwner) {
+      return new Response(
+        JSON.stringify({
+          error: "Solo administradores y dueños pueden invitar usuarios",
+        }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Obtener el email y organization_id del body
+    const { email, redirectTo, organization_id } = await req.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: "El email es requerido" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Si es owner (no admin), debe proporcionar organization_id y debe ser su organización
+    if (isOwner && !isAdmin) {
+      if (!organization_id) {
+        return new Response(
+          JSON.stringify({
+            error: "Se requiere organization_id para invitar usuarios",
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      // Verificar que el organization_id pertenece al owner
+      if (profile.organization_id !== organization_id) {
+        return new Response(
+          JSON.stringify({
+            error:
+              "No tienes permiso para invitar usuarios a esta organización",
+          }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+
+    // Si es admin pero se proporciona organization_id, validarlo
+    if (isAdmin && organization_id) {
+      // Verificar que la organización existe
+      const { data: orgData, error: orgError } = await userClient
+        .from("organizations")
+        .select("id")
+        .eq("id", organization_id)
+        .single();
+
+      if (orgError || !orgData) {
+        return new Response(
+          JSON.stringify({
+            error: "Organización no encontrada",
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
     }
 
     // Cliente admin para invitar usuarios
@@ -84,6 +150,11 @@ Deno.serve(async (req) => {
       },
     });
 
+    // Preparar metadata para guardar organization_id si se proporciona
+    const userMetadata = organization_id
+      ? { invited_to_organization_id: organization_id }
+      : {};
+
     // Usar la Admin API para invitar al usuario
     // Esto genera un link con token en el hash, no PKCE
     const { data, error: inviteError } =
@@ -91,6 +162,7 @@ Deno.serve(async (req) => {
         redirectTo:
           redirectTo ||
           `${req.headers.get("origin")}/auth/callback?type=invite`,
+        data: userMetadata,
       });
 
     if (inviteError) {

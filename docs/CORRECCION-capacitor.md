@@ -183,11 +183,53 @@ CREATE POLICY "Users can only see their data"
 | Complejidad              | Alta           | Baja           |
 | Costo hosting            | $$$$           | $              |
 
+## Rutas Dinámicas y Static Export
+
+Con `output: 'export'`, Next.js requiere que todas las rutas dinámicas como `[id]` tengan `generateStaticParams()`. Esto es problemático porque:
+
+1. **No sabemos todas las rutas en build time** - Las organizaciones/usuarios se crean dinámicamente
+2. **Requiere generar rutas vacías** - `generateStaticParams()` debe retornar todas las rutas posibles
+3. **Complejidad innecesaria** - Para una SPA, es más simple usar query parameters
+
+### Solución: Query Parameters en lugar de Rutas Dinámicas
+
+**❌ NO hacer:**
+
+```
+/dashboard/organizations/[id]/page.tsx
+```
+
+**✅ Hacer:**
+
+```
+/dashboard/organizations/details/page.tsx?id=xxx
+```
+
+**Ejemplo:**
+
+```typescript
+// Usar useSearchParams() de Next.js
+const searchParams = useSearchParams();
+const id = searchParams.get("id");
+
+// Navegación
+router.push(`/dashboard/organizations/details?id=${orgId}`);
+```
+
+**Ventajas:**
+
+- ✅ No requiere `generateStaticParams()`
+- ✅ Funciona perfectamente con static export
+- ✅ Más simple y directo para SPAs
+- ✅ Mismo comportamiento en runtime
+
 ## Conclusión
 
 Para **SPA + Capacitor**, la auth **debe ser client-side**. El middleware es incompatible con static export que Capacitor requiere.
 
 La buena noticia: **RLS en Supabase protege los datos de verdad**. El middleware solo mejoraba la UX marginalmente.
+
+**Regla general:** Con `output: 'export'`, evitar rutas dinámicas `[param]`. Usar query parameters `?param=value` en su lugar.
 
 ## Action Items
 
