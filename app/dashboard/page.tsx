@@ -112,8 +112,19 @@ export default function DashboardPage() {
               <p className="mt-2 text-zinc-600 dark:text-zinc-400">
                 Bienvenido, {profile?.full_name || profile?.email || "Usuario"}
               </p>
+              {profile?.role && (
+                <span className="mt-2 inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                  Rol:{" "}
+                  {profile.role === "admin"
+                    ? "Administrador"
+                    : profile.role === "owner"
+                    ? "Dueño"
+                    : "Staff"}
+                </span>
+              )}
             </div>
             <div className="flex gap-3">
+              {/* Admin-only buttons */}
               {profile?.role === "admin" && (
                 <>
                   <button
@@ -136,6 +147,17 @@ export default function DashboardPage() {
                   </button>
                 </>
               )}
+
+              {/* Owner-only button */}
+              {profile?.role === "owner" && (
+                <button
+                  onClick={() => router.push("/dashboard/invite")}
+                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Invitar usuarios
+                </button>
+              )}
+
               <button
                 onClick={() => signOut().then(() => router.push("/login"))}
                 className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
@@ -210,15 +232,330 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Sistema de Gestión de Turnos */}
+          {profile?.organization_id && (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-4">
+                Gestión de Turnos
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {/* Turnos - Todos los roles con organización */}
+                <button
+                  onClick={() => router.push("/dashboard/appointments")}
+                  className="rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-100">
+                        Turnos
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-white">
+                        {profile?.role === "staff" ? "Ver" : "Gestionar"}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white/20 p-3">
+                      <svg
+                        className="h-6 w-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-blue-100">
+                    {profile?.role === "staff"
+                      ? "Ver agenda de citas"
+                      : "Ver y crear citas de clientes"}
+                  </p>
+                </button>
+
+                {/* Clientes - Owner y Admin pueden gestionar, Staff solo ver */}
+                <button
+                  onClick={() => router.push("/dashboard/customers")}
+                  className="rounded-lg bg-gradient-to-br from-green-500 to-green-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-100">
+                        Clientes
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-white">
+                        {profile?.role === "staff" ? "Ver" : "Gestionar"}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white/20 p-3">
+                      <svg
+                        className="h-6 w-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-green-100">
+                    {profile?.role === "staff"
+                      ? "Ver información de clientes"
+                      : "Administrar base de clientes"}
+                  </p>
+                </button>
+
+                {/* Servicios - Solo Owner y Admin */}
+                {(profile?.role === "admin" || profile?.role === "owner") && (
+                  <button
+                    onClick={() => router.push("/dashboard/services")}
+                    className="rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-purple-100">
+                          Servicios
+                        </p>
+                        <p className="mt-2 text-2xl font-bold text-white">
+                          Gestionar
+                        </p>
+                      </div>
+                      <div className="rounded-lg bg-white/20 p-3">
+                        <svg
+                          className="h-6 w-6 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-xs text-purple-100">
+                      Configurar servicios ofrecidos
+                    </p>
+                  </button>
+                )}
+
+                {/* Staff - Solo Owner y Admin */}
+                {(profile?.role === "admin" || profile?.role === "owner") && (
+                  <button
+                    onClick={() => router.push("/dashboard/staff")}
+                    className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-orange-100">
+                          Profesionales
+                        </p>
+                        <p className="mt-2 text-2xl font-bold text-white">
+                          Gestionar
+                        </p>
+                      </div>
+                      <div className="rounded-lg bg-white/20 p-3">
+                        <svg
+                          className="h-6 w-6 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-xs text-orange-100">
+                      Administrar equipo de trabajo
+                    </p>
+                  </button>
+                )}
+
+                {/* Recordatorios - Todos los roles */}
+                <button
+                  onClick={() => router.push("/dashboard/reminders")}
+                  className="rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-pink-100">
+                        Recordatorios
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-white">
+                        Enviar
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white/20 p-3">
+                      <svg
+                        className="h-6 w-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-pink-100">
+                    Enviar recordatorios por WhatsApp
+                  </p>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Mensaje para usuarios sin organización */}
+          {!profile?.organization_id && profile?.role !== "admin" && (
+            <div className="mt-8 rounded-lg bg-yellow-50 p-6 dark:bg-yellow-900/20">
+              <div className="flex items-start gap-3">
+                <svg
+                  className="h-6 w-6 text-yellow-600 dark:text-yellow-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                <div>
+                  <h3 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100">
+                    Sin Organización Asignada
+                  </h3>
+                  <p className="mt-2 text-sm text-yellow-800 dark:text-yellow-200">
+                    Necesitas que un administrador te asigne a una organización
+                    para acceder al sistema de gestión de turnos.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sección de acceso rápido */}
           <div className="mt-8 rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
             <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-              Próximos pasos
+              Acceso Rápido
             </h2>
             <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-              Esta es una página de ejemplo del dashboard. Aquí puedes agregar
-              las funcionalidades del panel del dueño según las indicaciones del
-              proyecto.
+              Accede rápidamente a las funcionalidades principales de tu
+              negocio.
             </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {profile?.organization_id && (
+                <>
+                  <button
+                    onClick={() => router.push("/dashboard/appointments")}
+                    className="flex items-center gap-3 rounded-lg border border-zinc-200 p-4 text-left transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                  >
+                    <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/20">
+                      <svg
+                        className="h-5 w-5 text-blue-600 dark:text-blue-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-black dark:text-zinc-50">
+                        Nuevo Turno
+                      </p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Crear cita para cliente
+                      </p>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => router.push("/dashboard/customers")}
+                    className="flex items-center gap-3 rounded-lg border border-zinc-200 p-4 text-left transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                  >
+                    <div className="rounded-lg bg-green-100 p-2 dark:bg-green-900/20">
+                      <svg
+                        className="h-5 w-5 text-green-600 dark:text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-black dark:text-zinc-50">
+                        Nuevo Cliente
+                      </p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Agregar cliente nuevo
+                      </p>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => router.push("/dashboard/appointments")}
+                    className="flex items-center gap-3 rounded-lg border border-zinc-200 p-4 text-left transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                  >
+                    <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900/20">
+                      <svg
+                        className="h-5 w-5 text-purple-600 dark:text-purple-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-black dark:text-zinc-50">
+                        Ver Calendario
+                      </p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Agenda completa
+                      </p>
+                    </div>
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

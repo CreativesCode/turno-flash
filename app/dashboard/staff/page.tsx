@@ -1,0 +1,712 @@
+"use client";
+
+import { ProtectedRoute } from "@/components/protected-route";
+import { useAuth } from "@/contexts/auth-context";
+import { StaffMember, StaffMemberFormData } from "@/types/appointments";
+import { createClient } from "@/utils/supabase/client";
+import {
+  Edit,
+  Eye,
+  EyeOff,
+  Mail,
+  Phone,
+  Plus,
+  Search,
+  Trash2,
+  Users,
+  X,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+
+export default function StaffPage() {
+  const { profile } = useAuth();
+  const supabase = useMemo(() => createClient(), []);
+
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+
+  // Check if user can manage staff (only owner and admin)
+  const canManageStaff = useMemo(() => {
+    return profile?.role === "admin" || profile?.role === "owner";
+  }, [profile]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  // Form data
+  const [formData, setFormData] = useState<StaffMemberFormData>({
+    first_name: "",
+    last_name: "",
+    nickname: "",
+    email: "",
+    phone: "",
+    color: "#3B82F6",
+    bio: "",
+    specialties: [],
+    is_active: true,
+    is_bookable: true,
+    accepts_online_bookings: true,
+    sort_order: 0,
+  });
+
+  // Load staff members
+  const loadStaff = useCallback(async () => {
+    if (!profile?.organization_id) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error: fetchError } = await supabase
+        .from("staff_members")
+        .select("*")
+        .eq("organization_id", profile.organization_id)
+        .order("sort_order", { ascending: true });
+
+      if (fetchError) {
+        setError("Error al cargar staff: " + fetchError.message);
+        console.error(fetchError);
+        return;
+      }
+
+      setStaffMembers(data || []);
+    } catch (err) {
+      console.error("Error loading staff:", err);
+      setError("Error inesperado al cargar staff");
+    } finally {
+      setLoading(false);
+    }
+  }, [profile?.organization_id, supabase]);
+
+  useEffect(() => {
+    loadStaff();
+  }, [loadStaff]);
+
+  // Filter staff by search term
+  const filteredStaff = useMemo(() => {
+    if (!searchTerm) return staffMembers;
+
+    const term = searchTerm.toLowerCase();
+    return staffMembers.filter(
+      (staff) =>
+        staff.first_name.toLowerCase().includes(term) ||
+        staff.last_name.toLowerCase().includes(term) ||
+        (staff.nickname && staff.nickname.toLowerCase().includes(term)) ||
+        (staff.email && staff.email.toLowerCase().includes(term)) ||
+        (staff.phone && staff.phone.includes(term))
+    );
+  }, [staffMembers, searchTerm]);
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      first_name: "",
+      last_name: "",
+      nickname: "",
+      email: "",
+      phone: "",
+      color: "#3B82F6",
+      bio: "",
+      specialties: [],
+      is_active: true,
+      is_bookable: true,
+      accepts_online_bookings: true,
+      sort_order: 0,
+    });
+    setEditingStaff(null);
+  };
+
+  // Open modal for creating
+  const handleCreate = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  // Open modal for editing
+  const handleEdit = (staff: StaffMember) => {
+    setFormData({
+      first_name: staff.first_name,
+      last_name: staff.last_name,
+      nickname: staff.nickname || "",
+      email: staff.email || "",
+      phone: staff.phone || "",
+      color: staff.color,
+      bio: staff.bio || "",
+      specialties: staff.specialties || [],
+      is_active: staff.is_active,
+      is_bookable: staff.is_bookable,
+      accepts_online_bookings: staff.accepts_online_bookings,
+      sort_order: staff.sort_order,
+    });
+    setEditingStaff(staff);
+    setShowModal(true);
+  };
+
+  // Save staff (create or update)
+  const handleSave = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!profile?.organization_id) {
+      setError("No se encontró la organización");
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const dataToSave = {
+        ...formData,
+        specialties: formData.specialties?.length ? formData.specialties : null,
+      };
+
+      if (editingStaff) {
+        // Update existing staff
+        const { error: updateError } = await supabase
+          .from("staff_members")
+          .update({
+            ...dataToSave,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", editingStaff.id);
+
+        if (updateError) {
+          setError("Error al actualizar: " + updateError.message);
+          console.error(updateError);
+          return;
+        }
+
+        setSuccess("Profesional actualizado exitosamente");
+      } else {
+        // Create new staff
+        const { error: insertError } = await supabase
+          .from("staff_members")
+          .insert({
+            ...dataToSave,
+            organization_id: profile.organization_id,
+          });
+
+        if (insertError) {
+          setError("Error al crear: " + insertError.message);
+          console.error(insertError);
+          return;
+        }
+
+        setSuccess("Profesional creado exitosamente");
+      }
+
+      setShowModal(false);
+      resetForm();
+      await loadStaff();
+
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error("Error saving staff:", err);
+      setError("Error inesperado al guardar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete staff
+  const handleDelete = async (staff: StaffMember) => {
+    if (
+      !confirm(
+        `¿Estás seguro de eliminar a ${staff.first_name} ${staff.last_name}?\n\nEsta acción no se puede deshacer.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("staff_members")
+        .delete()
+        .eq("id", staff.id);
+
+      if (deleteError) {
+        setError("Error al eliminar: " + deleteError.message);
+        console.error(deleteError);
+        return;
+      }
+
+      setSuccess("Profesional eliminado exitosamente");
+      await loadStaff();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error("Error deleting staff:", err);
+      setError("Error inesperado al eliminar");
+    }
+  };
+
+  // Toggle active status
+  const toggleActive = async (staff: StaffMember) => {
+    try {
+      const { error: updateError } = await supabase
+        .from("staff_members")
+        .update({ is_active: !staff.is_active })
+        .eq("id", staff.id);
+
+      if (updateError) {
+        setError("Error al actualizar: " + updateError.message);
+        return;
+      }
+
+      await loadStaff();
+    } catch (err) {
+      console.error("Error toggling active:", err);
+      setError("Error inesperado");
+    }
+  };
+
+  // Handle specialties input
+  const handleSpecialtiesChange = (value: string) => {
+    const specialtiesArray = value
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    setFormData({ ...formData, specialties: specialtiesArray });
+  };
+
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+          <div className="text-center">
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Cargando profesionales...
+            </p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  return (
+    <ProtectedRoute>
+      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
+                Profesionales
+              </h1>
+              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+                Gestiona tu equipo de trabajo
+              </p>
+            </div>
+            {canManageStaff && (
+              <button
+                onClick={handleCreate}
+                className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <Plus className="h-4 w-4" />
+                Nuevo Profesional
+              </button>
+            )}
+          </div>
+
+          {/* Messages */}
+          {error && (
+            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+              {success}
+            </div>
+          )}
+
+          {/* Search */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+              <input
+                type="text"
+                placeholder="Buscar profesionales..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-10 pr-4 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50"
+              />
+            </div>
+          </div>
+
+          {/* Staff Grid */}
+          {filteredStaff.length === 0 ? (
+            <div className="rounded-lg bg-white p-12 text-center shadow-sm dark:bg-zinc-900">
+              <Users className="mx-auto h-12 w-12 text-zinc-400" />
+              <h3 className="mt-4 text-lg font-semibold text-black dark:text-zinc-50">
+                {searchTerm
+                  ? "No se encontraron profesionales"
+                  : "No hay profesionales"}
+              </h3>
+              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                {searchTerm
+                  ? "Intenta con otro término de búsqueda"
+                  : "Comienza agregando tu equipo de trabajo"}
+              </p>
+              {!searchTerm && (
+                <button
+                  onClick={handleCreate}
+                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar Profesional
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredStaff.map((staff) => (
+                <div
+                  key={staff.id}
+                  className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:bg-zinc-900"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold"
+                        style={{ backgroundColor: staff.color }}
+                      >
+                        {staff.first_name[0]}
+                        {staff.last_name[0]}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+                          {staff.first_name} {staff.last_name}
+                        </h3>
+                        {staff.nickname && (
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                            "{staff.nickname}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {!staff.is_active && (
+                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                        Inactivo
+                      </span>
+                    )}
+                    {!staff.is_bookable && (
+                      <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+                        No reservable
+                      </span>
+                    )}
+                    {staff.accepts_online_bookings && (
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                        Online
+                      </span>
+                    )}
+                  </div>
+
+                  {staff.bio && (
+                    <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                      {staff.bio}
+                    </p>
+                  )}
+
+                  <div className="mt-4 space-y-2">
+                    {staff.phone && (
+                      <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                        <Phone className="h-4 w-4" />
+                        <span>{staff.phone}</span>
+                      </div>
+                    )}
+                    {staff.email && (
+                      <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                        <Mail className="h-4 w-4" />
+                        <span className="truncate">{staff.email}</span>
+                      </div>
+                    )}
+                    {staff.specialties && staff.specialties.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {staff.specialties.map((specialty) => (
+                          <span
+                            key={specialty}
+                            className="inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                          >
+                            {specialty}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {canManageStaff && (
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        onClick={() => toggleActive(staff)}
+                        className="flex items-center justify-center rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                        title={staff.is_active ? "Desactivar" : "Activar"}
+                      >
+                        {staff.is_active ? (
+                          <Eye className="h-4 w-4" />
+                        ) : (
+                          <EyeOff className="h-4 w-4" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleEdit(staff)}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                      >
+                        <Edit className="h-4 w-4" />
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(staff)}
+                        className="flex items-center justify-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-black dark:text-zinc-50">
+                {editingStaff ? "Editar Profesional" : "Nuevo Profesional"}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="rounded-md p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Nombre *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.first_name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, first_name: e.target.value })
+                    }
+                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Apellido *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.last_name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, last_name: e.target.value })
+                    }
+                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Apodo
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.nickname}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nickname: e.target.value })
+                    }
+                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    placeholder="Ej: Pepe"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Teléfono
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Especialidades (separadas por coma)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.specialties?.join(", ") || ""}
+                    onChange={(e) => handleSpecialtiesChange(e.target.value)}
+                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    placeholder="Ej: Cortes, Color, Peinados"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Biografía
+                </label>
+                <textarea
+                  value={formData.bio}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bio: e.target.value })
+                  }
+                  rows={2}
+                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  placeholder="Breve descripción del profesional..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Color
+                </label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={formData.color}
+                    onChange={(e) =>
+                      setFormData({ ...formData, color: e.target.value })
+                    }
+                    className="h-10 w-20 cursor-pointer rounded border border-zinc-300 dark:border-zinc-600"
+                  />
+                  <input
+                    type="text"
+                    value={formData.color}
+                    onChange={(e) =>
+                      setFormData({ ...formData, color: e.target.value })
+                    }
+                    className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    placeholder="#3B82F6"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="is_active"
+                    checked={formData.is_active}
+                    onChange={(e) =>
+                      setFormData({ ...formData, is_active: e.target.checked })
+                    }
+                    className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="is_active"
+                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                  >
+                    Profesional activo
+                  </label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="is_bookable"
+                    checked={formData.is_bookable}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        is_bookable: e.target.checked,
+                      })
+                    }
+                    className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="is_bookable"
+                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                  >
+                    Se pueden reservar turnos con esta persona
+                  </label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="accepts_online_bookings"
+                    checked={formData.accepts_online_bookings}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        accepts_online_bookings: e.target.checked,
+                      })
+                    }
+                    className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="accepts_online_bookings"
+                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                  >
+                    Acepta reservas online
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {saving ? "Guardando..." : "Guardar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  disabled={saving}
+                  className="flex-1 rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </ProtectedRoute>
+  );
+}
