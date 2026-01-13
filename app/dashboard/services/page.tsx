@@ -260,10 +260,10 @@ export default function ServicesPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-foreground-muted">
               Cargando servicios...
             </p>
           </div>
@@ -274,22 +274,20 @@ export default function ServicesPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
-                Servicios
-              </h1>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              <h1 className="text-3xl font-bold text-foreground">Servicios</h1>
+              <p className="mt-2 text-foreground-muted">
                 Gestiona los servicios que ofreces
               </p>
             </div>
             {canManageServices && (
               <button
                 onClick={handleCreate}
-                className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex items-center gap-2 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
               >
                 <Plus className="h-4 w-4" />
                 Nuevo Servicio
@@ -299,13 +297,13 @@ export default function ServicesPage() {
 
           {/* Messages */}
           {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
               {success}
             </div>
           )}
@@ -313,22 +311,22 @@ export default function ServicesPage() {
           {/* Search */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-foreground-muted" />
               <input
                 type="text"
                 placeholder="Buscar servicios..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-10 pr-4 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50"
+                className="w-full rounded-lg border border-border bg-surface py-2 pl-10 pr-4 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
               />
             </div>
           </div>
 
           {/* Services Grid */}
           {filteredServices.length === 0 ? (
-            <div className="rounded-lg bg-white p-12 text-center shadow-sm dark:bg-zinc-900">
-              <Package className="mx-auto h-12 w-12 text-zinc-400" />
-              <h3 className="mt-4 text-lg font-semibold text-black dark:text-zinc-50">
+            <div className="rounded-lg bg-surface p-12 text-center shadow-sm">
+              <Package className="mx-auto h-12 w-12 text-foreground-muted" />
+              <h3 className="mt-4 text-lg font-semibold text-foreground">
                 {searchTerm
                   ? "No se encontraron servicios"
                   : "No hay servicios"}
@@ -341,7 +339,7 @@ export default function ServicesPage() {
               {!searchTerm && (
                 <button
                   onClick={handleCreate}
-                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700"
                 >
                   <Plus className="h-4 w-4" />
                   Agregar Servicio
@@ -353,7 +351,7 @@ export default function ServicesPage() {
               {filteredServices.map((service) => (
                 <div
                   key={service.id}
-                  className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:bg-zinc-900"
+                  className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
@@ -362,11 +360,11 @@ export default function ServicesPage() {
                         style={{ backgroundColor: service.color }}
                       />
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+                        <h3 className="text-lg font-semibold text-foreground">
                           {service.name}
                         </h3>
                         {!service.is_active && (
-                          <span className="inline-block mt-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                          <span className="inline-block mt-1 rounded-full bg-danger-100 px-2 py-0.5 text-xs font-medium text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
                             Inactivo
                           </span>
                         )}
@@ -375,13 +373,13 @@ export default function ServicesPage() {
                   </div>
 
                   {service.description && (
-                    <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                    <p className="mt-3 text-sm text-foreground-muted line-clamp-2">
                       {service.description}
                     </p>
                   )}
 
                   <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    <div className="flex items-center gap-2 text-sm text-foreground-muted">
                       <Clock className="h-4 w-4" />
                       <span>
                         {service.duration_minutes} min
@@ -390,7 +388,7 @@ export default function ServicesPage() {
                       </span>
                     </div>
                     {service.price && (
-                      <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                      <div className="flex items-center gap-2 text-sm text-foreground-muted">
                         <DollarSign className="h-4 w-4" />
                         <span>
                           {service.currency} {service.price}
@@ -398,7 +396,7 @@ export default function ServicesPage() {
                       </div>
                     )}
                     {!service.available_for_online_booking && (
-                      <div className="text-xs text-yellow-600 dark:text-yellow-400">
+                      <div className="text-xs text-warning-600 dark:text-warning-400">
                         No disponible para reserva online
                       </div>
                     )}
@@ -413,7 +411,7 @@ export default function ServicesPage() {
                     <div className="mt-4 flex gap-2">
                       <button
                         onClick={() => toggleActive(service)}
-                        className="flex items-center justify-center rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                        className="flex items-center justify-center rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle"
                         title={service.is_active ? "Desactivar" : "Activar"}
                       >
                         {service.is_active ? (
@@ -424,14 +422,14 @@ export default function ServicesPage() {
                       </button>
                       <button
                         onClick={() => handleEdit(service)}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                       >
                         <Edit className="h-4 w-4" />
                         Editar
                       </button>
                       <button
                         onClick={() => handleDelete(service)}
-                        className="flex items-center justify-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                        className="flex items-center justify-center gap-2 rounded-md bg-danger-50 px-3 py-2 text-sm font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400 dark:hover:bg-danger-900/30"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -447,14 +445,14 @@ export default function ServicesPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-surface p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-black dark:text-zinc-50">
+              <h2 className="text-xl font-bold text-foreground">
                 {editingService ? "Editar Servicio" : "Nuevo Servicio"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-md p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="rounded-md p-1 hover:bg-muted"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -463,7 +461,7 @@ export default function ServicesPage() {
             <form onSubmit={handleSave} className="space-y-4">
               {/* Basic Info */}
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="block text-sm font-medium text-foreground">
                   Nombre del Servicio *
                 </label>
                 <input
@@ -473,13 +471,13 @@ export default function ServicesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                   placeholder="Ej: Corte de pelo, Manicure"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="block text-sm font-medium text-foreground">
                   Descripción
                 </label>
                 <textarea
@@ -488,7 +486,7 @@ export default function ServicesPage() {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows={2}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                   placeholder="Descripción del servicio..."
                 />
               </div>
@@ -496,7 +494,7 @@ export default function ServicesPage() {
               {/* Duration and Price */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Duración (min) *
                   </label>
                   <input
@@ -511,12 +509,12 @@ export default function ServicesPage() {
                         duration_minutes: parseInt(e.target.value),
                       })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Buffer (min)
                   </label>
                   <input
@@ -530,12 +528,12 @@ export default function ServicesPage() {
                         buffer_time_minutes: parseInt(e.target.value),
                       })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Precio
                   </label>
                   <input
@@ -551,14 +549,14 @@ export default function ServicesPage() {
                           : null,
                       })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                   />
                 </div>
               </div>
 
               {/* Color */}
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="block text-sm font-medium text-foreground">
                   Color
                 </label>
                 <div className="mt-1 flex items-center gap-2">
@@ -568,7 +566,7 @@ export default function ServicesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, color: e.target.value })
                     }
-                    className="h-10 w-20 cursor-pointer rounded border border-zinc-300 dark:border-zinc-600"
+                    className="h-10 w-20 cursor-pointer rounded border border-border"
                   />
                   <input
                     type="text"
@@ -576,7 +574,7 @@ export default function ServicesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, color: e.target.value })
                     }
-                    className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="flex-1 rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                     placeholder="#3B82F6"
                   />
                 </div>
@@ -596,7 +594,7 @@ export default function ServicesPage() {
                   />
                   <label
                     htmlFor="is_active"
-                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                    className="ml-2 block text-sm text-foreground"
                   >
                     Servicio activo
                   </label>
@@ -617,7 +615,7 @@ export default function ServicesPage() {
                   />
                   <label
                     htmlFor="available_for_online_booking"
-                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                    className="ml-2 block text-sm text-foreground"
                   >
                     Disponible para reserva online
                   </label>
@@ -638,7 +636,7 @@ export default function ServicesPage() {
                   />
                   <label
                     htmlFor="requires_approval"
-                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                    className="ml-2 block text-sm text-foreground"
                   >
                     Requiere aprobación manual
                   </label>
@@ -658,7 +656,7 @@ export default function ServicesPage() {
                   type="button"
                   onClick={() => setShowModal(false)}
                   disabled={saving}
-                  className="flex-1 rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                  className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>

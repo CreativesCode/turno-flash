@@ -250,7 +250,7 @@ export default function NewOrganizationPage() {
   if (checkingAuth || !profile || profile.role !== "admin") {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background px-4">
           <div className="text-center">
             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
             <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
@@ -266,8 +266,8 @@ export default function NewOrganizationPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
-        <div className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex min-h-screen flex-col bg-background">
+        <div className="border-b border-border bg-surface">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-black dark:text-zinc-50">
@@ -275,7 +275,7 @@ export default function NewOrganizationPage() {
               </h1>
               <button
                 onClick={() => router.push("/dashboard")}
-                className="rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                className="rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle"
               >
                 Volver al dashboard
               </button>
@@ -286,10 +286,10 @@ export default function NewOrganizationPage() {
         <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="rounded-lg bg-white p-8 shadow-sm dark:bg-zinc-900">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50">
+              <h2 className="text-xl font-semibold text-foreground">
                 Información de la organización
               </h2>
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-sm text-foreground-muted">
                 Crea una nueva organización y asigna un dueño. El dueño podrá
                 gestionar la organización, servicios y reservas.
               </p>
@@ -300,7 +300,7 @@ export default function NewOrganizationPage() {
               <div>
                 <label
                   htmlFor="org_name"
-                  className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                  className="block text-sm font-medium text-foreground"
                 >
                   Nombre de la organización *
                 </label>
@@ -316,7 +316,7 @@ export default function NewOrganizationPage() {
                       org_name: e.target.value,
                     }))
                   }
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-base text-foreground placeholder-foreground-muted shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500 sm:text-sm"
                   placeholder="Mi Negocio"
                 />
               </div>
@@ -326,7 +326,7 @@ export default function NewOrganizationPage() {
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="org_slug"
-                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                    className="block text-sm font-medium text-foreground"
                   >
                     Slug (identificador único) *
                   </label>
@@ -351,10 +351,10 @@ export default function NewOrganizationPage() {
                     }))
                   }
                   pattern="[a-z0-9-]+"
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-base text-foreground placeholder-foreground-muted shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500 sm:text-sm"
                   placeholder="mi-negocio"
                 />
-                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="mt-1 text-xs text-foreground-muted">
                   Solo letras minúsculas, números y guiones. Se usará en URLs.
                 </p>
               </div>
@@ -363,7 +363,7 @@ export default function NewOrganizationPage() {
               <div>
                 <label
                   htmlFor="org_timezone"
-                  className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                  className="block text-sm font-medium text-foreground"
                 >
                   Zona horaria
                 </label>
@@ -377,7 +377,7 @@ export default function NewOrganizationPage() {
                       org_timezone: e.target.value,
                     }))
                   }
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-base text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500 sm:text-sm"
                 >
                   <option value="UTC">UTC</option>
                   <option value="America/Argentina/Buenos_Aires">
@@ -402,7 +402,7 @@ export default function NewOrganizationPage() {
               <div>
                 <label
                   htmlFor="org_whatsapp_phone"
-                  className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                  className="block text-sm font-medium text-foreground"
                 >
                   Teléfono de WhatsApp (opcional)
                 </label>
@@ -417,7 +417,7 @@ export default function NewOrganizationPage() {
                       org_whatsapp_phone: e.target.value,
                     }))
                   }
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-base text-foreground placeholder-foreground-muted shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500 sm:text-sm"
                   placeholder="+5491123456789"
                 />
               </div>
@@ -438,7 +438,7 @@ export default function NewOrganizationPage() {
                   <div>
                     <label
                       htmlFor="license_start_date"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      className="block text-sm font-medium text-foreground"
                     >
                       Fecha de inicio
                     </label>
@@ -453,7 +453,7 @@ export default function NewOrganizationPage() {
                           license_start_date: e.target.value,
                         }))
                       }
-                      className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                      className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                     />
                   </div>
 
@@ -461,7 +461,7 @@ export default function NewOrganizationPage() {
                   <div>
                     <label
                       htmlFor="license_end_date"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      className="block text-sm font-medium text-foreground"
                     >
                       Fecha de fin
                     </label>
@@ -476,7 +476,7 @@ export default function NewOrganizationPage() {
                           license_end_date: e.target.value,
                         }))
                       }
-                      className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                      className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                     />
                   </div>
                 </div>
@@ -518,7 +518,7 @@ export default function NewOrganizationPage() {
                         }))
                       }
                       required
-                      className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                      className="block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                     >
                       <option value="">Selecciona un usuario</option>
                       {users.map((user) => (
@@ -549,14 +549,14 @@ export default function NewOrganizationPage() {
                   type="button"
                   onClick={() => router.push("/dashboard")}
                   disabled={loading}
-                  className="flex-1 rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                  className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-200"
+                  className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading ? "Creando..." : "Crear organización"}
                 </button>

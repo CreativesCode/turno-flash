@@ -308,7 +308,7 @@ function OrganizationDetailsContent() {
             </h1>
             <button
               onClick={() => router.push("/dashboard/organizations")}
-              className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              className="mt-4 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700"
             >
               Volver a organizaciones
             </button>
@@ -323,8 +323,8 @@ function OrganizationDetailsContent() {
       <ProtectedRoute>
         <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
           <div className="text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
+            <p className="text-sm text-foreground-muted">
               Cargando organizaci?n...
             </p>
           </div>
@@ -343,7 +343,7 @@ function OrganizationDetailsContent() {
             </h1>
             <button
               onClick={() => router.push("/dashboard/organizations")}
-              className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              className="mt-4 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700"
             >
               Volver a organizaciones
             </button>
@@ -355,21 +355,21 @@ function OrganizationDetailsContent() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
               <button
                 onClick={() => router.push("/dashboard/organizations")}
-                className="mb-4 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                className="mb-4 text-sm text-foreground-muted hover:text-foreground"
               >
                 ? Volver a organizaciones
               </button>
               <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
                 {isEditing ? "Editar organizaci?n" : organization.name}
               </h1>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-foreground-muted">
                 {isEditing
                   ? "Modifica la informaci?n de la organizaci?n"
                   : "Detalles y configuraci?n de la organizaci?n"}
@@ -378,7 +378,7 @@ function OrganizationDetailsContent() {
             {isAdmin && !isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
               >
                 Editar organizaci?n
               </button>
@@ -387,7 +387,7 @@ function OrganizationDetailsContent() {
 
           {/* Mensajes */}
           {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
@@ -422,15 +422,15 @@ function OrganizationDetailsContent() {
             {/* Columna principal */}
             <div className="lg:col-span-2 space-y-6">
               {/* Informaci?n b?sica */}
-              <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
-                <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+              <div className="rounded-lg bg-surface p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-foreground">
                   Informaci?n b?sica
                 </h2>
 
                 {isEditing ? (
                   <form onSubmit={handleSave} className="mt-4 space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      <label className="block text-sm font-medium text-foreground">
                         Nombre *
                       </label>
                       <input
@@ -440,12 +440,12 @@ function OrganizationDetailsContent() {
                         onChange={(e) =>
                           setEditData({ ...editData, name: e.target.value })
                         }
-                        className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                        className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      <label className="block text-sm font-medium text-foreground">
                         Slug *
                       </label>
                       <input
@@ -459,7 +459,7 @@ function OrganizationDetailsContent() {
                             slug: e.target.value.toLowerCase(),
                           })
                         }
-                        className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                        className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                       />
                       <p className="mt-1 text-xs text-zinc-500">
                         Solo letras min?sculas, n?meros y guiones
@@ -467,7 +467,7 @@ function OrganizationDetailsContent() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      <label className="block text-sm font-medium text-foreground">
                         Zona horaria
                       </label>
                       <select
@@ -475,7 +475,7 @@ function OrganizationDetailsContent() {
                         onChange={(e) =>
                           setEditData({ ...editData, timezone: e.target.value })
                         }
-                        className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                        className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                       >
                         <option value="UTC">UTC</option>
                         <option value="America/Argentina/Buenos_Aires">
@@ -501,7 +501,7 @@ function OrganizationDetailsContent() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      <label className="block text-sm font-medium text-foreground">
                         Tel?fono WhatsApp
                       </label>
                       <input
@@ -513,7 +513,7 @@ function OrganizationDetailsContent() {
                             whatsapp_phone: e.target.value,
                           })
                         }
-                        className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                        className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                         placeholder="+5491123456789"
                       />
                     </div>
@@ -529,7 +529,7 @@ function OrganizationDetailsContent() {
                             is_active: e.target.checked,
                           })
                         }
-                        className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600"
+                        className="h-4 w-4 rounded border-border text-info focus:ring-info-500"
                       />
                       <label
                         htmlFor="is_active"
@@ -551,7 +551,7 @@ function OrganizationDetailsContent() {
                         type="button"
                         onClick={handleCancel}
                         disabled={saving}
-                        className="flex-1 rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                        className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Cancelar
                       </button>
@@ -563,7 +563,7 @@ function OrganizationDetailsContent() {
                       <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                         Nombre
                       </dt>
-                      <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                      <dd className="mt-1 text-sm text-foreground">
                         {organization.name}
                       </dd>
                     </div>
@@ -572,7 +572,7 @@ function OrganizationDetailsContent() {
                         Slug
                       </dt>
                       <dd className="mt-1">
-                        <code className="rounded bg-zinc-100 px-2 py-1 text-sm dark:bg-zinc-800">
+                        <code className="rounded bg-muted px-2 py-1 text-sm">
                           {organization.slug}
                         </code>
                       </dd>
@@ -581,16 +581,16 @@ function OrganizationDetailsContent() {
                       <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                         Zona horaria
                       </dt>
-                      <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                      <dd className="mt-1 text-sm text-foreground">
                         {organization.timezone}
                       </dd>
                     </div>
                     {organization.whatsapp_phone && (
                       <div>
-                        <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                        <dt className="text-sm font-medium text-foreground-muted">
                           Tel?fono WhatsApp
                         </dt>
-                        <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                        <dd className="mt-1 text-sm text-foreground">
                           {organization.whatsapp_phone}
                         </dd>
                       </div>
@@ -603,8 +603,8 @@ function OrganizationDetailsContent() {
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             organization.is_active
-                              ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                              : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                              ? "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400"
+                              : "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400"
                           }`}
                         >
                           {organization.is_active ? "Activa" : "Inactiva"}
@@ -615,7 +615,7 @@ function OrganizationDetailsContent() {
                       <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                         Fecha de creaci?n
                       </dt>
-                      <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                      <dd className="mt-1 text-sm text-foreground">
                         {new Date(organization.created_at).toLocaleString(
                           "es-ES",
                           {
@@ -633,8 +633,8 @@ function OrganizationDetailsContent() {
               </div>
 
               {/* Licencia */}
-              <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
-                <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+              <div className="rounded-lg bg-surface p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-foreground">
                   Licencia
                 </h2>
 
@@ -642,7 +642,7 @@ function OrganizationDetailsContent() {
                   <div className="mt-4 space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        <label className="block text-sm font-medium text-foreground">
                           Fecha de inicio
                         </label>
                         <input
@@ -654,12 +654,12 @@ function OrganizationDetailsContent() {
                               license_start_date: e.target.value,
                             })
                           }
-                          className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                          className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        <label className="block text-sm font-medium text-foreground">
                           Fecha de fin
                         </label>
                         <input
@@ -671,7 +671,7 @@ function OrganizationDetailsContent() {
                               license_end_date: e.target.value,
                             })
                           }
-                          className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                          className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                         />
                       </div>
                     </div>
@@ -689,12 +689,12 @@ function OrganizationDetailsContent() {
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             organization.license_status === "active"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                              ? "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400"
                               : organization.license_status === "grace_period"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+                              ? "bg-warning-100 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400"
                               : organization.license_status === "expired"
-                              ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
-                              : "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
+                              ? "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400"
+                              : "bg-muted text-foreground-muted"
                           }`}
                         >
                           {organization.license_status === "active"
@@ -709,10 +709,10 @@ function OrganizationDetailsContent() {
                     </div>
                     {organization.license_start_date && (
                       <div>
-                        <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                        <dt className="text-sm font-medium text-foreground-muted">
                           Fecha de inicio
                         </dt>
-                        <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                        <dd className="mt-1 text-sm text-foreground">
                           {new Date(
                             organization.license_start_date
                           ).toLocaleString("es-ES", {
@@ -727,10 +727,10 @@ function OrganizationDetailsContent() {
                     )}
                     {organization.license_end_date && (
                       <div>
-                        <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                        <dt className="text-sm font-medium text-foreground-muted">
                           Fecha de fin
                         </dt>
-                        <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                        <dd className="mt-1 text-sm text-foreground">
                           {new Date(
                             organization.license_end_date
                           ).toLocaleString("es-ES", {
@@ -745,10 +745,10 @@ function OrganizationDetailsContent() {
                     )}
                     {organization.days_remaining !== null && (
                       <div>
-                        <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                        <dt className="text-sm font-medium text-foreground-muted">
                           D?as restantes
                         </dt>
-                        <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                        <dd className="mt-1 text-sm text-foreground">
                           {organization.days_remaining > 0
                             ? `${organization.days_remaining} d?as`
                             : `Expirada hace ${Math.abs(
@@ -759,10 +759,10 @@ function OrganizationDetailsContent() {
                     )}
                     {organization.license_message && (
                       <div>
-                        <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                        <dt className="text-sm font-medium text-foreground-muted">
                           Mensaje
                         </dt>
-                        <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                        <dd className="mt-1 text-sm text-foreground">
                           {organization.license_message}
                         </dd>
                       </div>
@@ -775,20 +775,18 @@ function OrganizationDetailsContent() {
             {/* Columna lateral */}
             <div className="space-y-6">
               {/* Due?o */}
-              <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
-                <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-                  Due?o
-                </h2>
+              <div className="rounded-lg bg-surface p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-foreground">Due?o</h2>
                 {organization.owner ? (
                   <div className="mt-4">
                     <div className="text-sm font-medium text-black dark:text-zinc-50">
                       {organization.owner.full_name || organization.owner.email}
                     </div>
-                    <div className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                    <div className="mt-1 text-sm text-foreground-muted">
                       {organization.owner.email}
                     </div>
                     <div className="mt-2">
-                      <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900/20 dark:text-purple-400">
+                      <span className="inline-flex items-center rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-800 dark:bg-primary-900/20 dark:text-primary-400">
                         {organization.owner.role}
                       </span>
                     </div>
@@ -801,20 +799,20 @@ function OrganizationDetailsContent() {
               </div>
 
               {/* Miembros */}
-              <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
+              <div className="rounded-lg bg-surface p-6 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+                  <h2 className="text-lg font-semibold text-foreground">
                     Miembros
                   </h2>
-                  <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+                  <span className="rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-medium text-info-800 dark:bg-info-900/20 dark:text-info-400">
                     {organization.members?.length || 0}
                   </span>
                 </div>
 
                 {/* Formulario para agregar usuario */}
                 {(isAdmin || profile?.role === "owner") && (
-                  <div className="mt-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  <div className="mt-4 rounded-lg border border-border p-4">
+                    <h3 className="text-sm font-semibold text-foreground">
                       Agregar usuario
                     </h3>
                     <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
@@ -835,7 +833,7 @@ function OrganizationDetailsContent() {
                             value={selectedUserId}
                             onChange={(e) => setSelectedUserId(e.target.value)}
                             required
-                            className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                            className="block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                           >
                             <option value="">Selecciona un usuario</option>
                             {availableUsers.map((user) => (
@@ -853,7 +851,7 @@ function OrganizationDetailsContent() {
                         </p>
                       )}
                       {addUserSuccess && (
-                        <p className="text-xs text-green-600 dark:text-green-400">
+                        <p className="text-xs text-success-600 dark:text-success-400">
                           {addUserSuccess}
                         </p>
                       )}
@@ -864,7 +862,7 @@ function OrganizationDetailsContent() {
                           !selectedUserId ||
                           availableUsers.length === 0
                         }
-                        className="w-full rounded-md bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="w-full rounded-md bg-info px-3 py-2 text-xs font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {addingUser ? "Agregando..." : "Agregar usuario"}
                       </button>
@@ -890,10 +888,10 @@ function OrganizationDetailsContent() {
                         <span
                           className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                             member.role === "owner"
-                              ? "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400"
+                              ? "bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400"
                               : member.role === "staff"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
-                              : "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
+                              ? "bg-info-100 text-info-800 dark:bg-info-900/20 dark:text-info-400"
+                              : "bg-muted text-foreground-muted"
                           }`}
                         >
                           {member.role}

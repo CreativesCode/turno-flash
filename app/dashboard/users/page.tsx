@@ -290,7 +290,7 @@ export default function UsersManagementPage() {
   if (!profile || profile.role !== "admin") {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -304,21 +304,21 @@ export default function UsersManagementPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
+              <h1 className="text-3xl font-bold text-foreground">
                 Gestión de Usuarios
               </h1>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-foreground-muted">
                 Administra los usuarios del sistema y sus roles
               </p>
             </div>
             <button
               onClick={() => router.push("/dashboard")}
-              className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle"
             >
               Volver al dashboard
             </button>
@@ -326,13 +326,13 @@ export default function UsersManagementPage() {
 
           {/* Mensajes de éxito/error */}
           {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
               {success}
             </div>
           )}
@@ -340,14 +340,14 @@ export default function UsersManagementPage() {
           {/* Formulario de Invitación */}
           <div className="mb-8 rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
             <div className="mb-4">
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50">
+              <h2 className="text-xl font-semibold text-foreground">
                 Invitar nuevo usuario
               </h2>
               <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
                 El usuario recibirá un correo con un enlace para configurar su
                 contraseña y acceder a la plataforma.
               </p>
-              <div className="mt-3 rounded-md bg-blue-50 p-3 text-xs text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+              <div className="mt-3 rounded-md bg-info-50 p-3 text-xs text-info-800 dark:bg-info-900/20 dark:text-info-400">
                 <strong>Nota:</strong> Si ves un error 404, la Edge Function no
                 está desplegada. Puedes invitar usuarios desde el{" "}
                 <a
@@ -378,7 +378,7 @@ export default function UsersManagementPage() {
                     required
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-base text-foreground placeholder-foreground-muted shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500 sm:text-sm"
                     placeholder="usuario@ejemplo.com"
                   />
                 </div>
@@ -426,8 +426,8 @@ export default function UsersManagementPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
-                  <thead className="bg-zinc-50 dark:bg-zinc-800/50">
+                <table className="min-w-full divide-y divide-border">
+                  <thead className="bg-muted">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                         Email
@@ -452,18 +452,17 @@ export default function UsersManagementPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-200 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
+                  <tbody className="divide-y divide-border bg-surface">
                     {users.map((user) => (
-                      <tr
-                        key={user.id}
-                        className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-                      >
+                      <tr key={user.id} className="hover:bg-muted">
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900 dark:text-zinc-50">
                           {user.email}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900 dark:text-zinc-50">
                           {user.full_name || (
-                            <span className="text-zinc-400">Sin nombre</span>
+                            <span className="text-foreground-muted">
+                              Sin nombre
+                            </span>
                           )}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm">
@@ -496,7 +495,7 @@ export default function UsersManagementPage() {
                               )
                             }
                             disabled={updating === user.id}
-                            className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:focus:border-zinc-500 dark:focus:ring-zinc-500"
+                            className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground focus:border-info-500 focus:outline-none focus:ring-2 focus:ring-info-500 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <option value="admin">Administrador</option>
                             <option value="owner">Dueño</option>
@@ -509,7 +508,7 @@ export default function UsersManagementPage() {
                             </span>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground-muted">
                           {new Date(user.created_at).toLocaleDateString(
                             "es-ES",
                             {
@@ -588,11 +587,11 @@ export default function UsersManagementPage() {
       {/* Modal de confirmación de eliminación */}
       {userToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
+          <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
             <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
               Confirmar eliminación
             </h3>
-            <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-4 text-sm text-foreground-muted">
               ¿Estás seguro de que deseas eliminar al usuario{" "}
               <span className="font-medium text-black dark:text-zinc-50">
                 {userToDelete.email}
@@ -609,14 +608,14 @@ export default function UsersManagementPage() {
               <button
                 onClick={handleDeleteCancel}
                 disabled={deleting === userToDelete.id}
-                className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDeleteConfirm}
                 disabled={deleting === userToDelete.id}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-danger px-4 py-2 text-sm font-medium text-danger-foreground transition-colors hover:bg-danger-700 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {deleting === userToDelete.id ? "Eliminando..." : "Eliminar"}
               </button>

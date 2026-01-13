@@ -1,76 +1,32 @@
 "use client";
 
+import { useAuth } from "@/contexts/auth-context";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-
-// Timeout para verificación de auth (10 segundos)
-const AUTH_CHECK_TIMEOUT_MS = 10000;
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 export default function InvitePage() {
+  const { profile, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const router = useRouter();
 
   // Memoizar el cliente de Supabase para evitar re-renders infinitos
   const supabase = useMemo(() => createClient(), []);
 
-  // Ref para evitar verificación múltiple
-  const hasChecked = useRef(false);
-
+  // Verificar que el usuario sea admin u owner
   useEffect(() => {
-    // Evitar verificación múltiple
-    if (hasChecked.current) return;
-    hasChecked.current = true;
-
-    // Verificar que el usuario esté autenticado y sea admin
-    const checkAuth = async () => {
-      // Timeout de seguridad
-      const timeoutId = setTimeout(() => {
-        console.warn("Auth check timeout in invite page");
-        router.push("/login");
-      }, AUTH_CHECK_TIMEOUT_MS);
-
-      try {
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-
-        if (sessionError || !session) {
-          clearTimeout(timeoutId);
-          router.push("/login");
-          return;
-        }
-
-        // Obtener el rol del usuario desde la base de datos
-        const { data: userData, error: profileError } = await supabase
-          .from("user_profiles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .single();
-
-        clearTimeout(timeoutId);
-
-        if (profileError || !userData || userData.role !== "admin") {
-          // Si no es admin, redirigir al dashboard
-          router.push("/dashboard");
-          return;
-        }
-
-        setUserRole(userData.role);
-      } catch (err) {
-        clearTimeout(timeoutId);
-        console.error("Error checking auth:", err);
-        router.push("/login");
-      }
-    };
-
-    checkAuth();
-  }, [router, supabase]);
+    if (
+      !authLoading &&
+      profile &&
+      profile.role !== "admin" &&
+      profile.role !== "owner"
+    ) {
+      router.push("/dashboard");
+    }
+  }, [profile, authLoading, router]);
 
   const handleInvite = async (e: FormEvent) => {
     e.preventDefault();
@@ -157,25 +113,30 @@ export default function InvitePage() {
     }
   };
 
-  if (!userRole) {
+  // Mostrar spinner mientras se carga la autenticación o si no es admin u owner
+  if (
+    authLoading ||
+    !profile ||
+    (profile.role !== "admin" && profile.role !== "owner")
+  ) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
-      <div className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="min-h-screen bg-background">
+      <div className="border-b border-border bg-surface">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-black dark:text-zinc-50">
+            <h1 className="text-2xl font-bold text-foreground">
               Invitar usuarios
             </h1>
             <button
               onClick={() => router.push("/dashboard")}
-              className="rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              className="rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle"
             >
               Volver al dashboard
             </button>
@@ -184,12 +145,12 @@ export default function InvitePage() {
       </div>
 
       <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="rounded-lg bg-white p-8 shadow-sm dark:bg-zinc-900">
+        <div className="rounded-lg bg-surface p-8 shadow-sm border border-border">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-black dark:text-zinc-50">
+            <h2 className="text-xl font-semibold text-foreground">
               Enviar invitación
             </h2>
-            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-2 text-sm text-foreground-muted">
               El usuario recibirá un correo con un enlace para configurar su
               contraseña y acceder a la plataforma.
             </p>
@@ -199,7 +160,7 @@ export default function InvitePage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                className="block text-sm font-medium text-foreground"
               >
                 Correo electrónico del nuevo usuario
               </label>
@@ -211,13 +172,13 @@ export default function InvitePage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-base text-foreground placeholder-foreground-muted shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500 sm:text-sm"
                 placeholder="usuario@ejemplo.com"
               />
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+              <div className="rounded-md bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
                 {error}
               </div>
             )}
@@ -231,17 +192,17 @@ export default function InvitePage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-200"
+              className="flex w-full justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? "Enviando invitación..." : "Enviar invitación"}
             </button>
           </form>
 
-          <div className="mt-8 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <div className="mt-8 border-t border-border pt-6">
+            <h3 className="text-sm font-semibold text-foreground">
               Cómo funciona
             </h3>
-            <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-foreground-muted">
               <li>Ingresa el correo electrónico del nuevo usuario</li>
               <li>El usuario recibirá un correo con un enlace de invitación</li>
               <li>

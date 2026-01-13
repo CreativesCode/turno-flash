@@ -16,7 +16,6 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 export default function CustomersPage() {
@@ -223,9 +222,9 @@ export default function CustomersPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Cargando clientes...
             </p>
@@ -237,21 +236,19 @@ export default function CustomersPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
-                Clientes
-              </h1>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              <h1 className="text-3xl font-bold text-foreground">Clientes</h1>
+              <p className="mt-2 text-foreground-muted">
                 Gestiona tu base de clientes
               </p>
             </div>
             <button
               onClick={handleCreate}
-              className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center gap-2 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
             >
               <Plus className="h-4 w-4" />
               Nuevo Cliente
@@ -260,7 +257,7 @@ export default function CustomersPage() {
 
           {/* Messages */}
           {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
@@ -274,22 +271,22 @@ export default function CustomersPage() {
           {/* Search */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-foreground-muted" />
               <input
                 type="text"
                 placeholder="Buscar clientes por nombre, teléfono o email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-10 pr-4 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50"
+                className="w-full rounded-lg border border-border bg-surface py-2 pl-10 pr-4 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
               />
             </div>
           </div>
 
           {/* Customers Grid */}
           {filteredCustomers.length === 0 ? (
-            <div className="rounded-lg bg-white p-12 text-center shadow-sm dark:bg-zinc-900">
+            <div className="rounded-lg bg-surface p-12 text-center shadow-sm">
               <User className="mx-auto h-12 w-12 text-zinc-400" />
-              <h3 className="mt-4 text-lg font-semibold text-black dark:text-zinc-50">
+              <h3 className="mt-4 text-lg font-semibold text-foreground">
                 {searchTerm ? "No se encontraron clientes" : "No hay clientes"}
               </h3>
               <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
@@ -312,11 +309,11 @@ export default function CustomersPage() {
               {filteredCustomers.map((customer) => (
                 <div
                   key={customer.id}
-                  className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:bg-zinc-900"
+                  className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+                      <h3 className="text-lg font-semibold text-foreground">
                         {customer.first_name} {customer.last_name}
                       </h3>
                       {customer.tags && customer.tags.length > 0 && (
@@ -324,7 +321,7 @@ export default function CustomersPage() {
                           {customer.tags.map((tag) => (
                             <span
                               key={tag}
-                              className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                              className="inline-flex items-center gap-1 rounded-full bg-info-500 px-2 py-0.5 text-xs font-medium text-white dark:bg-info-900/20 dark:text-info-400"
                             >
                               <Tag className="h-3 w-3" />
                               {tag}
@@ -334,7 +331,7 @@ export default function CustomersPage() {
                       )}
                     </div>
                     {!customer.is_active && (
-                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                      <span className="rounded-full bg-danger-100 px-2 py-0.5 text-xs font-medium text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
                         Inactivo
                       </span>
                     )}
@@ -362,7 +359,7 @@ export default function CustomersPage() {
                   </div>
 
                   {customer.notes && (
-                    <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                    <p className="mt-3 text-sm text-foreground-muted line-clamp-2">
                       {customer.notes}
                     </p>
                   )}
@@ -370,14 +367,14 @@ export default function CustomersPage() {
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => handleEdit(customer)}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                     >
                       <Edit className="h-4 w-4" />
                       Editar
                     </button>
                     <button
                       onClick={() => handleDelete(customer)}
-                      className="flex items-center justify-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                      className="flex items-center justify-center gap-2 rounded-md bg-danger-50 px-3 py-2 text-sm font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400 dark:hover:bg-danger-900/30"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -392,14 +389,14 @@ export default function CustomersPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
+          <div className="w-full max-w-2xl rounded-lg bg-surface p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-black dark:text-zinc-50">
+              <h2 className="text-xl font-bold text-foreground">
                 {editingCustomer ? "Editar Cliente" : "Nuevo Cliente"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-md p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="rounded-md p-1 hover:bg-muted"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -408,7 +405,7 @@ export default function CustomersPage() {
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Nombre *
                   </label>
                   <input
@@ -418,12 +415,12 @@ export default function CustomersPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, first_name: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Apellido *
                   </label>
                   <input
@@ -433,12 +430,12 @@ export default function CustomersPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, last_name: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Teléfono *
                   </label>
                   <input
@@ -448,13 +445,13 @@ export default function CustomersPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                     placeholder="+1234567890"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Email
                   </label>
                   <input
@@ -463,12 +460,12 @@ export default function CustomersPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     WhatsApp (opcional)
                   </label>
                   <input
@@ -480,7 +477,7 @@ export default function CustomersPage() {
                         whatsapp_number: e.target.value,
                       })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   />
                 </div>
 
@@ -492,11 +489,11 @@ export default function CustomersPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, is_active: e.target.checked })
                     }
-                    className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-border text-info focus:ring-info-500"
                   />
                   <label
                     htmlFor="is_active"
-                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                    className="ml-2 block text-sm text-foreground"
                   >
                     Cliente activo
                   </label>
@@ -504,7 +501,7 @@ export default function CustomersPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="block text-sm font-medium text-foreground">
                   Notas
                 </label>
                 <textarea
@@ -513,7 +510,7 @@ export default function CustomersPage() {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows={3}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   placeholder="Notas adicionales sobre el cliente..."
                 />
               </div>
@@ -530,7 +527,7 @@ export default function CustomersPage() {
                   type="button"
                   onClick={() => setShowModal(false)}
                   disabled={saving}
-                  className="flex-1 rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                  className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>

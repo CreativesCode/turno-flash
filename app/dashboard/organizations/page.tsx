@@ -146,10 +146,10 @@ export default function OrganizationsPage() {
   if (!profile || profile.role !== "admin") {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
+            <p className="text-sm text-foreground-muted">
               Verificando permisos...
             </p>
           </div>
@@ -160,12 +160,12 @@ export default function OrganizationsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
+              <h1 className="text-3xl font-bold text-foreground">
                 Gestión de Organizaciones
               </h1>
               <p className="mt-2 text-zinc-600 dark:text-zinc-400">
@@ -175,7 +175,7 @@ export default function OrganizationsPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => router.push("/dashboard/organizations/new")}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
               >
                 Crear organización
               </button>
@@ -190,13 +190,13 @@ export default function OrganizationsPage() {
 
           {/* Mensajes de éxito/error */}
           {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
               {success}
             </div>
           )}
@@ -220,8 +220,8 @@ export default function OrganizationsPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
-                  <thead className="bg-zinc-50 dark:bg-zinc-800/50">
+                <table className="min-w-full divide-y divide-border">
+                  <thead className="bg-muted">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                         Nombre
@@ -252,17 +252,17 @@ export default function OrganizationsPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-200 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
+                  <tbody className="divide-y divide-border bg-surface">
                     {organizations.map((org) => (
                       <tr
                         key={org.id}
                         className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                       >
-                        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground">
                           {org.name}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900 dark:text-zinc-50">
-                          <code className="rounded bg-zinc-100 px-2 py-1 text-xs dark:bg-zinc-800">
+                          <code className="rounded bg-muted px-2 py-1 text-xs">
                             {org.slug}
                           </code>
                         </td>
@@ -272,7 +272,7 @@ export default function OrganizationsPage() {
                               <div className="font-medium">
                                 {org.owner.full_name || org.owner.email}
                               </div>
-                              <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                              <div className="text-xs text-foreground-muted">
                                 {org.owner.email}
                               </div>
                             </div>
@@ -281,7 +281,7 @@ export default function OrganizationsPage() {
                           )}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900 dark:text-zinc-50">
-                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+                          <span className="inline-flex items-center rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-medium text-info-800 dark:bg-info-900/20 dark:text-info-400">
                             {org.member_count || 0}
                           </span>
                         </td>
@@ -301,12 +301,12 @@ export default function OrganizationsPage() {
                             <span
                               className={`inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                 org.license_status === "active"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                                  ? "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400"
                                   : org.license_status === "grace_period"
-                                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                  ? "bg-warning-100 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400"
                                   : org.license_status === "expired"
-                                  ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
-                                  : "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
+                                  ? "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400"
+                                  : "bg-muted text-foreground-muted"
                               }`}
                             >
                               {org.license_status === "active"
@@ -331,10 +331,10 @@ export default function OrganizationsPage() {
                             )}
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground-muted">
                           {org.timezone}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground-muted">
                           {new Date(org.created_at).toLocaleDateString(
                             "es-ES",
                             {
@@ -352,7 +352,7 @@ export default function OrganizationsPage() {
                                   `/dashboard/organizations/details?id=${org.id}`
                                 )
                               }
-                              className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                              className="rounded-md bg-info px-3 py-1.5 text-xs font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
                             >
                               Ver detalles
                             </button>
@@ -378,11 +378,11 @@ export default function OrganizationsPage() {
       {/* Modal de confirmación de eliminación */}
       {organizationToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
+          <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
             <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
               Confirmar eliminación
             </h3>
-            <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-4 text-sm text-foreground-muted">
               ¿Estás seguro de que deseas eliminar la organización{" "}
               <span className="font-medium text-black dark:text-zinc-50">
                 {organizationToDelete.name}
@@ -390,7 +390,7 @@ export default function OrganizationsPage() {
               ? Esta acción no se puede deshacer.
             </p>
             {organizationToDelete.member_count && organizationToDelete.member_count > 0 && (
-              <div className="mt-4 rounded-md bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+              <div className="mt-4 rounded-md bg-warning-50 p-3 text-sm text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
                 ⚠️ Esta organización tiene {organizationToDelete.member_count}{" "}
                 {organizationToDelete.member_count === 1 ? "miembro" : "miembros"}.
                 Los usuarios seguirán existiendo pero perderán su asociación con
@@ -408,7 +408,7 @@ export default function OrganizationsPage() {
               <button
                 onClick={handleDeleteConfirm}
                 disabled={deleting === organizationToDelete.id}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-danger px-4 py-2 text-sm font-medium text-danger-foreground transition-colors hover:bg-danger-700 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {deleting === organizationToDelete.id
                   ? "Eliminando..."

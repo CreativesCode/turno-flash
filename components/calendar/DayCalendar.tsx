@@ -59,19 +59,19 @@ export function DayCalendar({
     switch (status) {
       case "confirmed":
       case "client_confirmed":
-        return "bg-green-500 border-green-600";
+        return "bg-success-600 border-success-700";
       case "pending":
-        return "bg-yellow-500 border-yellow-600";
+        return "bg-warning-600 border-warning-700";
       case "completed":
-        return "bg-blue-500 border-blue-600";
+        return "bg-info-600 border-info-700";
       case "cancelled":
       case "no_show":
-        return "bg-red-500 border-red-600";
+        return "bg-danger-600 border-danger-700";
       case "checked_in":
       case "in_progress":
-        return "bg-purple-500 border-purple-600";
+        return "bg-primary-600 border-primary-700";
       default:
-        return "bg-zinc-500 border-zinc-600";
+        return "bg-foreground-muted border-border text-white";
     }
   };
 
@@ -106,19 +106,19 @@ export function DayCalendar({
     date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0];
 
   return (
-    <div className="rounded-lg bg-white shadow-sm dark:bg-zinc-900">
+    <div className="rounded-lg bg-surface shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-200 p-4 dark:border-zinc-700">
+      <div className="flex items-center justify-between border-b border-border p-4">
         <div className="flex items-center gap-2">
           <button
             onClick={goToPrevDay}
-            className="rounded-md p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="rounded-md p-2 hover:bg-muted"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={goToNextDay}
-            className="rounded-md p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="rounded-md p-2 hover:bg-muted"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -126,17 +126,17 @@ export function DayCalendar({
             onClick={goToToday}
             className={`rounded-md px-3 py-1 text-sm font-medium ${
               isToday
-                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+                ? "bg-info-100 text-info-700 dark:bg-info-900/30 dark:text-info-400"
+                : "bg-muted text-foreground hover:bg-subtle"
             }`}
           >
             Hoy
           </button>
         </div>
-        <h2 className="text-lg font-semibold capitalize text-black dark:text-zinc-50">
+        <h2 className="text-lg font-semibold capitalize text-foreground">
           {formatDate(date)}
         </h2>
-        <div className="text-sm text-zinc-500">
+        <div className="text-sm text-foreground-muted">
           {dayAppointments.length} turno
           {dayAppointments.length !== 1 ? "s" : ""}
         </div>
@@ -146,14 +146,14 @@ export function DayCalendar({
       <div className="relative max-h-[600px] overflow-y-auto">
         <div className="relative">
           {/* Time Labels */}
-          <div className="absolute left-0 top-0 w-16 border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900/50">
+          <div className="absolute left-0 top-0 w-16 border-r border-border bg-muted">
             {timeSlots.map((time, index) => (
               <div
                 key={time}
                 className="flex h-12 items-start justify-end pr-2 pt-1"
               >
                 {index % 2 === 0 && (
-                  <span className="text-xs text-zinc-500">{time}</span>
+                  <span className="text-xs text-foreground-muted">{time}</span>
                 )}
               </div>
             ))}
@@ -166,17 +166,17 @@ export function DayCalendar({
               <div
                 key={time}
                 onClick={() => onTimeSlotClick?.(time)}
-                className={`group h-12 border-b border-zinc-100 dark:border-zinc-800 ${
-                  index % 2 === 0 ? "border-zinc-200 dark:border-zinc-700" : ""
+                className={`group h-12 border-b border-border ${
+                  index % 2 === 0 ? "border-border" : ""
                 } ${
                   onTimeSlotClick
-                    ? "cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/10"
+                    ? "cursor-pointer hover:bg-info-50 dark:hover:bg-info-900/10"
                     : ""
                 }`}
               >
                 {onTimeSlotClick && (
                   <div className="hidden group-hover:flex items-center justify-center h-full">
-                    <Plus className="h-4 w-4 text-blue-500" />
+                    <Plus className="h-4 w-4 text-info" />
                   </div>
                 )}
               </div>
@@ -242,8 +242,8 @@ function CurrentTimeIndicator({ startHour }: { startHour: number }) {
       className="absolute left-0 right-0 z-10 flex items-center pointer-events-none"
       style={{ top: `${top}px` }}
     >
-      <div className="h-3 w-3 rounded-full bg-red-500" />
-      <div className="flex-1 h-0.5 bg-red-500" />
+      <div className="h-3 w-3 rounded-full bg-danger-600" />
+      <div className="flex-1 h-0.5 bg-danger-600" />
     </div>
   );
 }

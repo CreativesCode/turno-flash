@@ -86,19 +86,19 @@ export function WeekCalendar({
     switch (status) {
       case "confirmed":
       case "client_confirmed":
-        return "bg-green-500 border-green-600";
+        return "bg-success-600 border-success-700";
       case "pending":
-        return "bg-yellow-500 border-yellow-600";
+        return "bg-warning-600 border-warning-700";
       case "completed":
-        return "bg-blue-500 border-blue-600";
+        return "bg-info-600 border-info-700";
       case "cancelled":
       case "no_show":
-        return "bg-red-400 border-red-500";
+        return "bg-danger-600 border-danger-700";
       case "checked_in":
       case "in_progress":
-        return "bg-purple-500 border-purple-600";
+        return "bg-primary-600 border-primary-700";
       default:
-        return "bg-zinc-500 border-zinc-600";
+        return "bg-foreground-muted border-border text-white";
     }
   };
 
@@ -138,40 +138,40 @@ export function WeekCalendar({
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="rounded-lg bg-white shadow-sm dark:bg-zinc-900 overflow-hidden">
+    <div className="rounded-lg bg-surface shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-200 p-4 dark:border-zinc-700">
+      <div className="flex items-center justify-between border-b border-border p-4">
         <div className="flex items-center gap-2">
           <button
             onClick={goToPrevWeek}
-            className="rounded-md p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="rounded-md p-2 hover:bg-muted"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={goToNextWeek}
-            className="rounded-md p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="rounded-md p-2 hover:bg-muted"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
           <button
             onClick={goToToday}
-            className="rounded-md px-3 py-1 text-sm font-medium bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+            className="rounded-md px-3 py-1 text-sm font-medium bg-muted text-foreground hover:bg-subtle"
           >
             Hoy
           </button>
         </div>
-        <h2 className="text-lg font-semibold capitalize text-black dark:text-zinc-50">
+        <h2 className="text-lg font-semibold capitalize text-foreground">
           {formatWeekRange()}
         </h2>
-        <div className="text-sm text-zinc-500">
+        <div className="text-sm text-foreground-muted">
           {appointments.length} turno{appointments.length !== 1 ? "s" : ""}
         </div>
       </div>
 
       {/* Day Headers */}
-      <div className="grid grid-cols-8 border-b border-zinc-200 dark:border-zinc-700">
-        <div className="w-16 border-r border-zinc-200 dark:border-zinc-700" />
+      <div className="grid grid-cols-8 border-b border-border">
+        <div className="w-16 border-r border-border" />
         {weekDays.map((day) => {
           const dateStr = day.toISOString().split("T")[0];
           const isCurrentDay = dateStr === today;
@@ -182,23 +182,23 @@ export function WeekCalendar({
               key={dateStr}
               className={`flex flex-col items-center py-2 ${
                 isCurrentDay
-                  ? "bg-blue-50 dark:bg-blue-900/20"
-                  : "bg-zinc-50 dark:bg-zinc-900/50"
+                  ? "bg-info-50 dark:bg-info-900/20"
+                  : "bg-muted dark:bg-zinc-900/50"
               }`}
             >
-              <span className="text-xs text-zinc-500 uppercase">
+              <span className="text-xs text-foreground-muted uppercase">
                 {day.toLocaleDateString("es-ES", { weekday: "short" })}
               </span>
               <span
                 className={`mt-1 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                   isCurrentDay
-                    ? "bg-blue-600 text-white"
-                    : "text-black dark:text-zinc-50"
+                    ? "bg-info text-info-foreground"
+                    : "text-foreground"
                 }`}
               >
                 {day.getDate()}
               </span>
-              <span className="mt-1 text-xs text-zinc-400">
+              <span className="mt-1 text-xs text-foreground-muted">
                 {dayApts.length} turno{dayApts.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -210,13 +210,13 @@ export function WeekCalendar({
       <div className="max-h-[500px] overflow-y-auto">
         <div className="grid grid-cols-8">
           {/* Time Labels */}
-          <div className="w-16 border-r border-zinc-200 dark:border-zinc-700">
+          <div className="w-16 border-r border-border">
             {timeSlots.map((time) => (
               <div
                 key={time}
-                className="flex h-[60px] items-start justify-end pr-2 pt-1 border-b border-zinc-100 dark:border-zinc-800"
+                className="flex h-[60px] items-start justify-end pr-2 pt-1 border-b border-border"
               >
-                <span className="text-xs text-zinc-500">{time}</span>
+                <span className="text-xs text-foreground-muted">{time}</span>
               </div>
             ))}
           </div>
@@ -230,8 +230,8 @@ export function WeekCalendar({
             return (
               <div
                 key={dateStr}
-                className={`relative border-r border-zinc-100 dark:border-zinc-800 ${
-                  isCurrentDay ? "bg-blue-50/30 dark:bg-blue-900/10" : ""
+                className={`relative border-r border-border ${
+                  isCurrentDay ? "bg-info-50/30 dark:bg-info-900/10" : ""
                 }`}
               >
                 {/* Grid Lines */}
@@ -239,15 +239,15 @@ export function WeekCalendar({
                   <div
                     key={`${dateStr}-${time}`}
                     onClick={() => onTimeSlotClick?.(dateStr, time)}
-                    className={`h-[60px] border-b border-zinc-100 dark:border-zinc-800 ${
+                    className={`h-[60px] border-b border-border ${
                       onTimeSlotClick
-                        ? "cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 group"
+                        ? "cursor-pointer hover:bg-info-50 dark:hover:bg-info-900/20 group"
                         : ""
                     }`}
                   >
                     {onTimeSlotClick && (
                       <div className="hidden group-hover:flex items-center justify-center h-full">
-                        <Plus className="h-4 w-4 text-blue-500" />
+                        <Plus className="h-4 w-4 text-info" />
                       </div>
                     )}
                   </div>

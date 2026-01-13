@@ -1,7 +1,8 @@
 "use client";
 
-import { AuthProvider } from "@/contexts/auth-context";
 import { Sidebar } from "@/components/Sidebar";
+import { AuthProvider } from "@/contexts/auth-context";
+import { ThemeProvider } from "@/contexts/theme-context";
 
 /**
  * Layout para el dashboard y sus sub-páginas.
@@ -15,10 +16,12 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
-        <Sidebar />
-        <main className="lg:pl-64">{children}</main>
-      </div>
+      <ThemeProvider>
+        <div className="min-h-screen bg-background">
+          <Sidebar />
+          <main className="lg:pl-64">{children}</main>
+        </div>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

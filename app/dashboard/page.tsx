@@ -57,19 +57,19 @@ export default function DashboardPage() {
   if (isBlocked && profile?.role !== "admin") {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-zinc-50 dark:bg-black">
+        <div className="min-h-screen bg-background">
           {licenseStatus && (
             <LicenseNotificationBanner licenseStatus={licenseStatus} />
           )}
           <div className="flex min-h-screen items-center justify-center px-4">
-            <div className="w-full max-w-md rounded-lg bg-white p-8 text-center shadow-lg dark:bg-zinc-900">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+            <div className="w-full max-w-md rounded-lg bg-surface p-8 text-center shadow-lg">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-danger-100 dark:bg-danger-900/20">
                 <span className="text-3xl">🚫</span>
               </div>
-              <h1 className="mt-6 text-2xl font-bold text-black dark:text-zinc-50">
+              <h1 className="mt-6 text-2xl font-bold text-foreground">
                 Acceso Bloqueado
               </h1>
-              <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="mt-4 text-sm text-foreground-muted">
                 La licencia de tu organización ha expirado. Por favor, contacta
                 al administrador para renovarla y continuar usando la
                 aplicación.
@@ -84,7 +84,7 @@ export default function DashboardPage() {
               )}
               <button
                 onClick={() => signOut().then(() => router.push("/login"))}
-                className="mt-6 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                className="mt-6 w-full rounded-md bg-danger px-4 py-2 text-sm font-medium text-danger-foreground transition-colors hover:bg-danger-700 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2"
               >
                 Cerrar sesión
               </button>
@@ -97,7 +97,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen bg-background">
         {/* Banner de notificación de licencia en la parte superior */}
         {licenseStatus && shouldShowLicenseNotification(licenseStatus) && (
           <LicenseNotificationBanner licenseStatus={licenseStatus} />
@@ -106,14 +106,14 @@ export default function DashboardPage() {
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
+              <h1 className="text-3xl font-bold text-foreground">
                 Panel de Control
               </h1>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-foreground-muted">
                 Bienvenido, {profile?.full_name || profile?.email || "Usuario"}
               </p>
               {profile?.role && (
-                <span className="mt-2 inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                <span className="mt-2 inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground">
                   Rol:{" "}
                   {profile.role === "admin"
                     ? "Administrador"
@@ -129,13 +129,13 @@ export default function DashboardPage() {
                 <>
                   <button
                     onClick={() => router.push("/dashboard/users")}
-                    className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    className="rounded-md bg-primary-700 px-4 py-2 text-sm font-medium text-success-foreground transition-colors hover:bg-success-800 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2"
                   >
                     Gestión de usuarios
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/organizations")}
-                    className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                    className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   >
                     Gestión de organizaciones
                   </button>
@@ -160,7 +160,7 @@ export default function DashboardPage() {
 
               <button
                 onClick={() => signOut().then(() => router.push("/login"))}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                className="rounded-md bg-danger px-4 py-2 text-sm font-medium text-danger-foreground transition-colors hover:bg-danger-700 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2"
               >
                 Cerrar sesión
               </button>
@@ -178,35 +178,35 @@ export default function DashboardPage() {
             )}
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
-              <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+            <div className="rounded-lg bg-surface p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-foreground">
                 Información del Usuario
               </h2>
               <dl className="mt-4 space-y-2">
                 <div>
-                  <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  <dt className="text-sm font-medium text-foreground-muted">
                     Email
                   </dt>
-                  <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                  <dd className="mt-1 text-sm text-foreground">
                     {profile?.email || "N/A"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  <dt className="text-sm font-medium text-foreground-muted">
                     Rol
                   </dt>
-                  <dd className="mt-1 text-sm text-black dark:text-zinc-50">
-                    <span className="inline-flex rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                  <dd className="mt-1 text-sm text-foreground">
+                    <span className="inline-flex rounded-full bg-muted px-2 py-1 text-xs font-medium text-foreground">
                       {profile?.role || "staff"}
                     </span>
                   </dd>
                 </div>
                 {profile?.organization_id && (
                   <div>
-                    <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                    <dt className="text-sm font-medium text-foreground-muted">
                       Organización
                     </dt>
-                    <dd className="mt-1 text-sm text-black dark:text-zinc-50">
+                    <dd className="mt-1 text-sm text-foreground">
                       {profile.organization_id}
                     </dd>
                   </div>
@@ -214,16 +214,14 @@ export default function DashboardPage() {
               </dl>
             </div>
 
-            <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
-              <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-                Estado
-              </h2>
+            <div className="rounded-lg bg-surface p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-foreground">Estado</h2>
               <div className="mt-4">
                 <span
                   className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
                     profile?.is_active
-                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                      ? "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400"
+                      : "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400"
                   }`}
                 >
                   {profile?.is_active ? "Activo" : "Inactivo"}
@@ -235,20 +233,18 @@ export default function DashboardPage() {
           {/* Sistema de Gestión de Turnos */}
           {profile?.organization_id && (
             <div className="mt-8">
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-4">
+              <h2 className="text-xl font-semibold text-foreground mb-4">
                 Gestión de Turnos
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {/* Turnos - Todos los roles con organización */}
                 <button
                   onClick={() => router.push("/dashboard/appointments")}
-                  className="rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-linear-to-br from-info-500 to-info-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-blue-100">
-                        Turnos
-                      </p>
+                      <p className="text-sm font-medium text-white">Turnos</p>
                       <p className="mt-2 text-2xl font-bold text-white">
                         {profile?.role === "staff" ? "Ver" : "Gestionar"}
                       </p>
@@ -269,7 +265,7 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-blue-100">
+                  <p className="mt-2 text-xs text-info-100">
                     {profile?.role === "staff"
                       ? "Ver agenda de citas"
                       : "Ver y crear citas de clientes"}
@@ -279,11 +275,11 @@ export default function DashboardPage() {
                 {/* Clientes - Owner y Admin pueden gestionar, Staff solo ver */}
                 <button
                   onClick={() => router.push("/dashboard/customers")}
-                  className="rounded-lg bg-gradient-to-br from-green-500 to-green-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-linear-to-br from-success-500 to-success-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-green-100">
+                      <p className="text-sm font-medium text-success-100">
                         Clientes
                       </p>
                       <p className="mt-2 text-2xl font-bold text-white">
@@ -317,11 +313,11 @@ export default function DashboardPage() {
                 {(profile?.role === "admin" || profile?.role === "owner") && (
                   <button
                     onClick={() => router.push("/dashboard/services")}
-                    className="rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                    className="rounded-lg bg-linear-to-br from-primary-700 to-primary-800 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-purple-100">
+                        <p className="text-sm font-medium text-primary-100">
                           Servicios
                         </p>
                         <p className="mt-2 text-2xl font-bold text-white">
@@ -344,7 +340,7 @@ export default function DashboardPage() {
                         </svg>
                       </div>
                     </div>
-                    <p className="mt-2 text-xs text-purple-100">
+                    <p className="mt-2 text-xs text-primary-100">
                       Configurar servicios ofrecidos
                     </p>
                   </button>
@@ -354,11 +350,11 @@ export default function DashboardPage() {
                 {(profile?.role === "admin" || profile?.role === "owner") && (
                   <button
                     onClick={() => router.push("/dashboard/staff")}
-                    className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                    className="rounded-lg bg-linear-to-br from-warning-500 to-warning-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-orange-100">
+                        <p className="text-sm font-medium text-warning-100">
                           Profesionales
                         </p>
                         <p className="mt-2 text-2xl font-bold text-white">
@@ -381,7 +377,7 @@ export default function DashboardPage() {
                         </svg>
                       </div>
                     </div>
-                    <p className="mt-2 text-xs text-orange-100">
+                    <p className="mt-2 text-xs text-warning-100">
                       Administrar equipo de trabajo
                     </p>
                   </button>
@@ -390,7 +386,7 @@ export default function DashboardPage() {
                 {/* Recordatorios - Todos los roles */}
                 <button
                   onClick={() => router.push("/dashboard/reminders")}
-                  className="rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-linear-to-br from-secondary-500 to-secondary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -417,7 +413,7 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-pink-100">
+                  <p className="mt-2 text-xs text-secondary-100">
                     Enviar recordatorios por WhatsApp
                   </p>
                 </button>
@@ -427,10 +423,10 @@ export default function DashboardPage() {
 
           {/* Mensaje para usuarios sin organización */}
           {!profile?.organization_id && profile?.role !== "admin" && (
-            <div className="mt-8 rounded-lg bg-yellow-50 p-6 dark:bg-yellow-900/20">
+            <div className="mt-8 rounded-lg bg-warning-50 p-6 dark:bg-warning-900/20">
               <div className="flex items-start gap-3">
                 <svg
-                  className="h-6 w-6 text-yellow-600 dark:text-yellow-400"
+                  className="h-6 w-6 text-warning-600 dark:text-warning-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -443,10 +439,10 @@ export default function DashboardPage() {
                   />
                 </svg>
                 <div>
-                  <h3 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100">
+                  <h3 className="text-lg font-semibold text-warning-900 dark:text-warning-100">
                     Sin Organización Asignada
                   </h3>
-                  <p className="mt-2 text-sm text-yellow-800 dark:text-yellow-200">
+                  <p className="mt-2 text-sm text-warning-800 dark:text-warning-200">
                     Necesitas que un administrador te asigne a una organización
                     para acceder al sistema de gestión de turnos.
                   </p>
@@ -456,11 +452,11 @@ export default function DashboardPage() {
           )}
 
           {/* Sección de acceso rápido */}
-          <div className="mt-8 rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
-            <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+          <div className="mt-8 rounded-lg bg-surface p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-foreground">
               Acceso Rápido
             </h2>
-            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-2 text-sm text-foreground-muted">
               Accede rápidamente a las funcionalidades principales de tu
               negocio.
             </p>
@@ -469,11 +465,11 @@ export default function DashboardPage() {
                 <>
                   <button
                     onClick={() => router.push("/dashboard/appointments")}
-                    className="flex items-center gap-3 rounded-lg border border-zinc-200 p-4 text-left transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                    className="flex items-center gap-3 rounded-lg border border-border p-4 text-left transition-colors hover:bg-muted"
                   >
-                    <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/20">
+                    <div className="rounded-lg bg-info-100 p-2 dark:bg-info-900/20">
                       <svg
-                        className="h-5 w-5 text-blue-600 dark:text-blue-400"
+                        className="h-5 w-5 text-info-600 dark:text-info-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -487,10 +483,8 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-black dark:text-zinc-50">
-                        Nuevo Turno
-                      </p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <p className="font-medium text-foreground">Nuevo Turno</p>
+                      <p className="text-xs text-foreground-muted">
                         Crear cita para cliente
                       </p>
                     </div>
@@ -498,7 +492,7 @@ export default function DashboardPage() {
 
                   <button
                     onClick={() => router.push("/dashboard/customers")}
-                    className="flex items-center gap-3 rounded-lg border border-zinc-200 p-4 text-left transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                    className="flex items-center gap-3 rounded-lg border border-border p-4 text-left transition-colors hover:bg-muted"
                   >
                     <div className="rounded-lg bg-green-100 p-2 dark:bg-green-900/20">
                       <svg
@@ -516,10 +510,10 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-black dark:text-zinc-50">
+                      <p className="font-medium text-foreground">
                         Nuevo Cliente
                       </p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <p className="text-xs text-foreground-muted">
                         Agregar cliente nuevo
                       </p>
                     </div>
@@ -527,11 +521,11 @@ export default function DashboardPage() {
 
                   <button
                     onClick={() => router.push("/dashboard/appointments")}
-                    className="flex items-center gap-3 rounded-lg border border-zinc-200 p-4 text-left transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                    className="flex items-center gap-3 rounded-lg border border-border p-4 text-left transition-colors hover:bg-muted"
                   >
-                    <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900/20">
+                    <div className="rounded-lg bg-primary-100 p-2 dark:bg-primary-900/20">
                       <svg
-                        className="h-5 w-5 text-purple-600 dark:text-purple-400"
+                        className="h-5 w-5 text-primary-600 dark:text-primary-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -545,10 +539,10 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-black dark:text-zinc-50">
+                      <p className="font-medium text-foreground">
                         Ver Calendario
                       </p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <p className="text-xs text-foreground-muted">
                         Agenda completa
                       </p>
                     </div>

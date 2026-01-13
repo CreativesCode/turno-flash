@@ -568,24 +568,24 @@ Por favor confirma tu asistencia respondiendo:
   const getStatusColor = (status: string) => {
     switch (status) {
       case "confirmed":
-        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
+        return "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400";
       case "client_confirmed":
-        return "bg-teal-100 text-teal-800 dark:bg-teal-900/20 dark:text-teal-400";
+        return "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400";
       case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
+        return "bg-warning-100 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400";
       case "reminded":
-        return "bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-400";
+        return "bg-secondary-100 text-secondary-800 dark:bg-secondary-900/20 dark:text-secondary-400";
       case "completed":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
+        return "bg-info-100 text-info-800 dark:bg-info-900/20 dark:text-info-400";
       case "cancelled":
-        return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
+        return "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400";
       case "no_show":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400";
+        return "bg-warning-100 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400";
       case "checked_in":
       case "in_progress":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400";
+        return "bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400";
       default:
-        return "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300";
+        return "bg-muted text-foreground-muted";
     }
   };
 
@@ -620,18 +620,18 @@ Por favor confirma tu asistencia respondiendo:
   if (!profile?.organization_id) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
-            <AlertCircle className="mx-auto h-12 w-12 text-yellow-500" />
-            <h1 className="mt-4 text-2xl font-bold text-black dark:text-zinc-50">
+            <AlertCircle className="mx-auto h-12 w-12 text-warning-500" />
+            <h1 className="mt-4 text-2xl font-bold text-foreground">
               Sin Organización
             </h1>
-            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-2 text-sm text-foreground-muted">
               Necesitas pertenecer a una organización para gestionar turnos
             </p>
             <button
               onClick={() => router.push("/dashboard")}
-              className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              className="mt-4 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700"
             >
               Volver al Dashboard
             </button>
@@ -644,12 +644,10 @@ Por favor confirma tu asistencia respondiendo:
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Cargando turnos...
-            </p>
+            <p className="text-sm text-foreground-muted">Cargando turnos...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -658,22 +656,20 @@ Por favor confirma tu asistencia respondiendo:
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
-                Turnos
-              </h1>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              <h1 className="text-3xl font-bold text-foreground">Turnos</h1>
+              <p className="mt-2 text-foreground-muted">
                 Gestiona las citas de tus clientes
               </p>
             </div>
             {canManageAppointments && (
               <button
                 onClick={handleCreate}
-                className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex items-center gap-2 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
               >
                 <Plus className="h-4 w-4" />
                 Nuevo Turno
@@ -683,13 +679,13 @@ Por favor confirma tu asistencia respondiendo:
 
           {/* Messages */}
           {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
               {success}
             </div>
           )}
@@ -698,13 +694,13 @@ Por favor confirma tu asistencia respondiendo:
           <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-foreground-muted" />
               <input
                 type="text"
                 placeholder="Buscar turnos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-10 pr-4 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50"
+                className="w-full rounded-lg border border-border bg-surface py-2 pl-10 pr-4 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
               />
             </div>
 
@@ -713,14 +709,14 @@ Por favor confirma tu asistencia respondiendo:
               type="date"
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50"
+              className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
             />
 
             {/* Status filter */}
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50"
+              className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
             >
               <option value="all">Todos los estados</option>
               <option value="pending">Pendientes</option>
@@ -730,13 +726,13 @@ Por favor confirma tu asistencia respondiendo:
             </select>
 
             {/* View toggle */}
-            <div className="flex gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800">
+            <div className="flex gap-1 rounded-lg bg-muted p-1">
               <button
                 onClick={() => setView("list")}
                 className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                   view === "list"
-                    ? "bg-white text-blue-600 shadow-sm dark:bg-zinc-700 dark:text-blue-400"
-                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                    ? "bg-surface text-info shadow-sm"
+                    : "text-foreground-muted hover:text-foreground"
                 }`}
                 title="Vista de lista"
               >
@@ -747,8 +743,8 @@ Por favor confirma tu asistencia respondiendo:
                 onClick={() => setView("day")}
                 className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                   view === "day"
-                    ? "bg-white text-blue-600 shadow-sm dark:bg-zinc-700 dark:text-blue-400"
-                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                    ? "bg-surface text-info shadow-sm"
+                    : "text-foreground-muted hover:text-foreground"
                 }`}
                 title="Vista diaria"
               >
@@ -759,8 +755,8 @@ Por favor confirma tu asistencia respondiendo:
                 onClick={() => setView("week")}
                 className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                   view === "week"
-                    ? "bg-white text-blue-600 shadow-sm dark:bg-zinc-700 dark:text-blue-400"
-                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                    ? "bg-surface text-info shadow-sm"
+                    : "text-foreground-muted hover:text-foreground"
                 }`}
                 title="Vista semanal"
               >
@@ -772,13 +768,13 @@ Por favor confirma tu asistencia respondiendo:
 
           {/* Stats */}
           <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900">
+            <div className="rounded-lg bg-surface p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="text-sm text-foreground-muted">
                     Total {view === "week" ? "Semana" : "Día"}
                   </p>
-                  <p className="mt-1 text-2xl font-bold text-black dark:text-zinc-50">
+                  <p className="mt-1 text-2xl font-bold text-foreground">
                     {appointments.length}
                   </p>
                 </div>
@@ -786,13 +782,11 @@ Por favor confirma tu asistencia respondiendo:
               </div>
             </div>
 
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900">
+            <div className="rounded-lg bg-surface p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Confirmados
-                  </p>
-                  <p className="mt-1 text-2xl font-bold text-black dark:text-zinc-50">
+                  <p className="text-sm text-foreground-muted">Confirmados</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">
                     {
                       appointments.filter(
                         (a) =>
@@ -802,17 +796,15 @@ Por favor confirma tu asistencia respondiendo:
                     }
                   </p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-green-500" />
+                <CheckCircle className="h-8 w-8 text-success" />
               </div>
             </div>
 
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900">
+            <div className="rounded-lg bg-surface p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Completados
-                  </p>
-                  <p className="mt-1 text-2xl font-bold text-black dark:text-zinc-50">
+                  <p className="text-sm text-foreground-muted">Completados</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">
                     {
                       appointments.filter((a) => a.status === "completed")
                         .length
@@ -823,13 +815,11 @@ Por favor confirma tu asistencia respondiendo:
               </div>
             </div>
 
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900">
+            <div className="rounded-lg bg-surface p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Cancelados
-                  </p>
-                  <p className="mt-1 text-2xl font-bold text-black dark:text-zinc-50">
+                  <p className="text-sm text-foreground-muted">Cancelados</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">
                     {
                       appointments.filter(
                         (a) =>
@@ -847,14 +837,14 @@ Por favor confirma tu asistencia respondiendo:
           {view === "list" && (
             <>
               {filteredAppointments.length === 0 ? (
-                <div className="rounded-lg bg-white p-12 text-center shadow-sm dark:bg-zinc-900">
-                  <Calendar className="mx-auto h-12 w-12 text-zinc-400" />
-                  <h3 className="mt-4 text-lg font-semibold text-black dark:text-zinc-50">
+                <div className="rounded-lg bg-surface p-12 text-center shadow-sm">
+                  <Calendar className="mx-auto h-12 w-12 text-foreground-muted" />
+                  <h3 className="mt-4 text-lg font-semibold text-foreground">
                     {searchTerm || filterStatus !== "all"
                       ? "No se encontraron turnos"
                       : "No hay turnos programados"}
                   </h3>
-                  <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="mt-2 text-sm text-foreground-muted">
                     {searchTerm || filterStatus !== "all"
                       ? "Intenta con otros filtros"
                       : "Comienza creando tu primer turno"}
@@ -876,7 +866,7 @@ Por favor confirma tu asistencia respondiendo:
                   {filteredAppointments.map((appointment) => (
                     <div
                       key={appointment.id}
-                      className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:bg-zinc-900"
+                      className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -893,11 +883,11 @@ Por favor confirma tu asistencia respondiendo:
                               {appointment.customer_last_name[0]}
                             </div>
                             <div>
-                              <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+                              <h3 className="text-lg font-semibold text-foreground">
                                 {appointment.customer_first_name}{" "}
                                 {appointment.customer_last_name}
                               </h3>
-                              <div className="mt-1 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                              <div className="mt-1 flex items-center gap-2 text-sm text-foreground-muted">
                                 <Phone className="h-4 w-4" />
                                 {appointment.customer_phone}
                               </div>
@@ -906,8 +896,8 @@ Por favor confirma tu asistencia respondiendo:
 
                           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                             <div className="flex items-center gap-2 text-sm">
-                              <Calendar className="h-4 w-4 text-zinc-400" />
-                              <span className="text-zinc-700 dark:text-zinc-300">
+                              <Calendar className="h-4 w-4 text-foreground-muted" />
+                              <span className="text-foreground-muted">
                                 {new Date(
                                   appointment.appointment_date
                                 ).toLocaleDateString("es-ES", {
@@ -919,8 +909,8 @@ Por favor confirma tu asistencia respondiendo:
                             </div>
 
                             <div className="flex items-center gap-2 text-sm">
-                              <Clock className="h-4 w-4 text-zinc-400" />
-                              <span className="text-zinc-700 dark:text-zinc-300">
+                              <Clock className="h-4 w-4 text-foreground-muted" />
+                              <span className="text-foreground-muted">
                                 {appointment.start_time} -{" "}
                                 {appointment.end_time}
                               </span>
@@ -928,15 +918,15 @@ Por favor confirma tu asistencia respondiendo:
 
                             <div className="flex items-center gap-2 text-sm">
                               <Package className="h-4 w-4 text-zinc-400" />
-                              <span className="text-zinc-700 dark:text-zinc-300">
+                              <span className="text-foreground-muted">
                                 {appointment.service_name}
                               </span>
                             </div>
 
                             {appointment.staff_first_name && (
                               <div className="flex items-center gap-2 text-sm">
-                                <User className="h-4 w-4 text-zinc-400" />
-                                <span className="text-zinc-700 dark:text-zinc-300">
+                                <User className="h-4 w-4 text-foreground-muted" />
+                                <span className="text-foreground-muted">
                                   {appointment.staff_first_name}{" "}
                                   {appointment.staff_last_name}
                                 </span>
@@ -945,7 +935,7 @@ Por favor confirma tu asistencia respondiendo:
                           </div>
 
                           {appointment.notes && (
-                            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                            <p className="mt-3 text-sm text-foreground-muted">
                               {appointment.notes}
                             </p>
                           )}
@@ -971,7 +961,7 @@ Por favor confirma tu asistencia respondiendo:
                                     onClick={() =>
                                       updateStatus(appointment.id, "confirmed")
                                     }
-                                    className="rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
+                                    className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
                                   >
                                     Confirmar
                                   </button>
@@ -998,7 +988,7 @@ Por favor confirma tu asistencia respondiendo:
                                     onClick={() =>
                                       updateStatus(appointment.id, "checked_in")
                                     }
-                                    className="rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 transition-colors hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400"
+                                    className="rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400"
                                   >
                                     Check-in
                                   </button>
@@ -1013,7 +1003,7 @@ Por favor confirma tu asistencia respondiendo:
                                         "in_progress"
                                       )
                                     }
-                                    className="rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
+                                    className="rounded-md bg-info-50 px-2 py-1 text-xs font-medium text-info-700 transition-colors hover:bg-info-100 dark:bg-info-900/20 dark:text-info-400"
                                   >
                                     Iniciar
                                   </button>
@@ -1023,7 +1013,7 @@ Por favor confirma tu asistencia respondiendo:
                                     onClick={() =>
                                       updateStatus(appointment.id, "completed")
                                     }
-                                    className="rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
+                                    className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
                                   >
                                     Completar
                                   </button>
@@ -1033,7 +1023,7 @@ Por favor confirma tu asistencia respondiendo:
                                   onClick={() =>
                                     updateStatus(appointment.id, "no_show")
                                   }
-                                  className="rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 transition-colors hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400"
+                                  className="rounded-md bg-warning-50 px-2 py-1 text-xs font-medium text-warning-700 transition-colors hover:bg-warning-100 dark:bg-warning-900/20 dark:text-warning-400"
                                 >
                                   No vino
                                 </button>
@@ -1041,7 +1031,7 @@ Por favor confirma tu asistencia respondiendo:
                                   onClick={() =>
                                     updateStatus(appointment.id, "cancelled")
                                   }
-                                  className="rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400"
+                                  className="rounded-md bg-danger-50 px-2 py-1 text-xs font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400"
                                 >
                                   Cancelar
                                 </button>
@@ -1118,14 +1108,12 @@ Por favor confirma tu asistencia respondiendo:
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-surface p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-black dark:text-zinc-50">
-                Nuevo Turno
-              </h2>
+              <h2 className="text-xl font-bold text-foreground">Nuevo Turno</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-md p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="rounded-md p-1 hover:bg-muted"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1135,7 +1123,7 @@ Por favor confirma tu asistencia respondiendo:
               {/* Customer */}
               <div>
                 <div className="flex items-center justify-between">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Cliente *
                   </label>
                   <button
@@ -1163,7 +1151,7 @@ Por favor confirma tu asistencia respondiendo:
                   onChange={(e) =>
                     setFormData({ ...formData, customer_id: e.target.value })
                   }
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                 >
                   <option value="">Selecciona un cliente</option>
                   {customers.map((customer) => (
@@ -1181,8 +1169,8 @@ Por favor confirma tu asistencia respondiendo:
 
                 {/* New Customer Form */}
                 {showNewCustomerForm && (
-                  <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
-                    <h3 className="mb-3 text-sm font-semibold text-blue-900 dark:text-blue-100">
+                  <div className="mt-4 rounded-lg border border-info-200 bg-info-50 p-4 dark:border-info-800 dark:bg-info-900/20">
+                    <h3 className="mb-3 text-sm font-semibold text-info-900 dark:text-info-100">
                       Nuevo Cliente
                     </h3>
                     <div className="space-y-3">
@@ -1200,7 +1188,7 @@ Por favor confirma tu asistencia respondiendo:
                                 first_name: e.target.value,
                               })
                             }
-                            className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                            className="mt-1 block w-full rounded-md border border-border bg-surface px-2 py-1.5 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                             placeholder="Juan"
                           />
                         </div>
@@ -1218,7 +1206,7 @@ Por favor confirma tu asistencia respondiendo:
                                 last_name: e.target.value,
                               })
                             }
-                            className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                            className="mt-1 block w-full rounded-md border border-border bg-surface px-2 py-1.5 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                             placeholder="Pérez"
                           />
                         </div>
@@ -1238,7 +1226,7 @@ Por favor confirma tu asistencia respondiendo:
                                 phone: e.target.value,
                               })
                             }
-                            className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                            className="mt-1 block w-full rounded-md border border-border bg-surface px-2 py-1.5 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                             placeholder="+54 11 1234-5678"
                           />
                         </div>
@@ -1255,7 +1243,7 @@ Por favor confirma tu asistencia respondiendo:
                                 email: e.target.value,
                               })
                             }
-                            className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                            className="mt-1 block w-full rounded-md border border-border bg-surface px-2 py-1.5 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                             placeholder="email@ejemplo.com"
                           />
                         </div>
@@ -1295,7 +1283,7 @@ Por favor confirma tu asistencia respondiendo:
                   required
                   value={formData.service_id}
                   onChange={(e) => handleServiceChange(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                 >
                   <option value="">Selecciona un servicio</option>
                   {services.map((service) => (
@@ -1342,7 +1330,7 @@ Por favor confirma tu asistencia respondiendo:
                       staff_id: e.target.value || null,
                     })
                   }
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                 >
                   <option value="">Cualquiera disponible</option>
                   {staffMembers.map((staff) => (
@@ -1356,7 +1344,7 @@ Por favor confirma tu asistencia respondiendo:
               {/* Date and Time */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Fecha *
                   </label>
                   <input
@@ -1369,12 +1357,12 @@ Por favor confirma tu asistencia respondiendo:
                         appointment_date: e.target.value,
                       })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Hora inicio *
                   </label>
                   <input
@@ -1382,12 +1370,12 @@ Por favor confirma tu asistencia respondiendo:
                     required
                     value={formData.start_time}
                     onChange={(e) => handleStartTimeChange(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Hora fin
                   </label>
                   <input
@@ -1410,7 +1398,7 @@ Por favor confirma tu asistencia respondiendo:
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows={3}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                   placeholder="Notas adicionales sobre el turno..."
                 />
               </div>
@@ -1445,7 +1433,7 @@ Por favor confirma tu asistencia respondiendo:
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-black dark:text-zinc-50">
+              <h2 className="text-xl font-bold text-foreground">
                 Detalles del Turno
               </h2>
               <button
@@ -1453,7 +1441,7 @@ Por favor confirma tu asistencia respondiendo:
                   setShowDetailModal(false);
                   setSelectedAppointment(null);
                 }}
-                className="rounded-md p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="rounded-md p-1 hover:bg-muted"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1471,15 +1459,15 @@ Por favor confirma tu asistencia respondiendo:
             </div>
 
             {/* Client Info */}
-            <div className="mb-4 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800">
-              <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">
+            <div className="mb-4 p-4 rounded-lg bg-muted">
+              <h3 className="text-sm font-medium text-foreground-muted mb-2">
                 Cliente
               </h3>
-              <p className="text-lg font-semibold text-black dark:text-zinc-50">
+              <p className="text-lg font-semibold text-foreground">
                 {selectedAppointment.customer_first_name}{" "}
                 {selectedAppointment.customer_last_name}
               </p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 flex items-center gap-2 mt-1">
+              <p className="text-sm text-foreground-muted flex items-center gap-2 mt-1">
                 <Phone className="h-4 w-4" />
                 {selectedAppointment.customer_phone}
               </p>
@@ -1488,19 +1476,19 @@ Por favor confirma tu asistencia respondiendo:
             {/* Service Info */}
             <div className="mb-4 grid grid-cols-2 gap-4">
               <div>
-                <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                <h3 className="text-sm font-medium text-foreground-muted mb-1">
                   Servicio
                 </h3>
-                <p className="text-black dark:text-zinc-50">
+                <p className="text-foreground">
                   {selectedAppointment.service_name}
                 </p>
               </div>
               {selectedAppointment.staff_first_name && (
                 <div>
-                  <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                  <h3 className="text-sm font-medium text-foreground-muted mb-1">
                     Profesional
                   </h3>
-                  <p className="text-black dark:text-zinc-50">
+                  <p className="text-foreground">
                     {selectedAppointment.staff_first_name}{" "}
                     {selectedAppointment.staff_last_name}
                   </p>
@@ -1511,10 +1499,10 @@ Por favor confirma tu asistencia respondiendo:
             {/* Date and Time */}
             <div className="mb-4 grid grid-cols-2 gap-4">
               <div>
-                <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                <h3 className="text-sm font-medium text-foreground-muted mb-1">
                   Fecha
                 </h3>
-                <p className="text-black dark:text-zinc-50 flex items-center gap-2">
+                <p className="text-foreground flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-zinc-400" />
                   {new Date(
                     selectedAppointment.appointment_date
@@ -1526,10 +1514,10 @@ Por favor confirma tu asistencia respondiendo:
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                <h3 className="text-sm font-medium text-foreground-muted mb-1">
                   Horario
                 </h3>
-                <p className="text-black dark:text-zinc-50 flex items-center gap-2">
+                <p className="text-foreground flex items-center gap-2">
                   <Clock className="h-4 w-4 text-zinc-400" />
                   {selectedAppointment.start_time} -{" "}
                   {selectedAppointment.end_time}
@@ -1540,7 +1528,7 @@ Por favor confirma tu asistencia respondiendo:
             {/* Notes */}
             {selectedAppointment.notes && (
               <div className="mb-4">
-                <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                <h3 className="text-sm font-medium text-foreground-muted mb-1">
                   Notas
                 </h3>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -1555,7 +1543,7 @@ Por favor confirma tu asistencia respondiendo:
               selectedAppointment.status !== "cancelled" &&
               selectedAppointment.status !== "no_show" && (
                 <div className="mt-6 space-y-3">
-                  <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  <h3 className="text-sm font-medium text-foreground mb-2">
                     Cambiar Estado
                   </h3>
 
@@ -1586,7 +1574,7 @@ Por favor confirma tu asistencia respondiendo:
                           );
                           setShowDetailModal(false);
                         }}
-                        className="rounded-md bg-teal-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-teal-700"
+                        className="rounded-md bg-success px-4 py-2.5 text-sm font-medium text-success-foreground hover:bg-success-700"
                       >
                         👤 Cliente Confirmó
                       </button>
@@ -1619,7 +1607,7 @@ Por favor confirma tu asistencia respondiendo:
                           updateStatus(selectedAppointment.id, "in_progress");
                           setShowDetailModal(false);
                         }}
-                        className="rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                        className="rounded-md bg-info px-4 py-2.5 text-sm font-medium text-info-foreground hover:bg-info-700"
                       >
                         🚀 Iniciar Servicio
                       </button>
@@ -1652,7 +1640,7 @@ Por favor confirma tu asistencia respondiendo:
                           onClick={() =>
                             handleSendReminder(selectedAppointment)
                           }
-                          className="flex items-center justify-center gap-2 rounded-md bg-pink-600 px-4 py-2 text-sm font-medium text-white hover:bg-pink-700"
+                          className="flex items-center justify-center gap-2 rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary-700"
                         >
                           <MessageCircle className="h-4 w-4" />
                           Enviar Recordatorio
@@ -1665,7 +1653,7 @@ Por favor confirma tu asistencia respondiendo:
                           updateStatus(selectedAppointment.id, "no_show");
                           setShowDetailModal(false);
                         }}
-                        className="rounded-md bg-orange-100 px-4 py-2 text-sm font-medium text-orange-700 hover:bg-orange-200 dark:bg-orange-900/20 dark:text-orange-400"
+                        className="rounded-md bg-warning-100 px-4 py-2 text-sm font-medium text-warning-700 hover:bg-warning-200 dark:bg-warning-900/20 dark:text-warning-400"
                       >
                         ⚠️ No se presentó
                       </button>
@@ -1691,7 +1679,7 @@ Por favor confirma tu asistencia respondiendo:
                 setShowDetailModal(false);
                 setSelectedAppointment(null);
               }}
-              className="mt-4 w-full rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              className="mt-4 w-full rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-subtle"
             >
               Cerrar
             </button>

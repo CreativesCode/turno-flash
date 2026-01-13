@@ -16,7 +16,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 export default function StaffPage() {
@@ -276,10 +275,10 @@ export default function StaffPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
+            <p className="text-sm text-foreground-muted">
               Cargando profesionales...
             </p>
           </div>
@@ -290,22 +289,22 @@ export default function StaffPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
+              <h1 className="text-3xl font-bold text-foreground">
                 Profesionales
               </h1>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-foreground-muted">
                 Gestiona tu equipo de trabajo
               </p>
             </div>
             {canManageStaff && (
               <button
                 onClick={handleCreate}
-                className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex items-center gap-2 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
               >
                 <Plus className="h-4 w-4" />
                 Nuevo Profesional
@@ -315,13 +314,13 @@ export default function StaffPage() {
 
           {/* Messages */}
           {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
               {success}
             </div>
           )}
@@ -329,27 +328,27 @@ export default function StaffPage() {
           {/* Search */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-foreground-muted" />
               <input
                 type="text"
                 placeholder="Buscar profesionales..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-10 pr-4 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50"
+                className="w-full rounded-lg border border-border bg-surface py-2 pl-10 pr-4 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
               />
             </div>
           </div>
 
           {/* Staff Grid */}
           {filteredStaff.length === 0 ? (
-            <div className="rounded-lg bg-white p-12 text-center shadow-sm dark:bg-zinc-900">
-              <Users className="mx-auto h-12 w-12 text-zinc-400" />
-              <h3 className="mt-4 text-lg font-semibold text-black dark:text-zinc-50">
+            <div className="rounded-lg bg-surface p-12 text-center shadow-sm">
+              <Users className="mx-auto h-12 w-12 text-foreground-muted" />
+              <h3 className="mt-4 text-lg font-semibold text-foreground">
                 {searchTerm
                   ? "No se encontraron profesionales"
                   : "No hay profesionales"}
               </h3>
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-sm text-foreground-muted">
                 {searchTerm
                   ? "Intenta con otro término de búsqueda"
                   : "Comienza agregando tu equipo de trabajo"}
@@ -357,7 +356,7 @@ export default function StaffPage() {
               {!searchTerm && (
                 <button
                   onClick={handleCreate}
-                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700"
                 >
                   <Plus className="h-4 w-4" />
                   Agregar Profesional
@@ -369,7 +368,7 @@ export default function StaffPage() {
               {filteredStaff.map((staff) => (
                 <div
                   key={staff.id}
-                  className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:bg-zinc-900"
+                  className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
@@ -381,12 +380,12 @@ export default function StaffPage() {
                         {staff.last_name[0]}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+                        <h3 className="text-lg font-semibold text-foreground">
                           {staff.first_name} {staff.last_name}
                         </h3>
                         {staff.nickname && (
-                          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                            "{staff.nickname}"
+                          <p className="text-sm text-foreground-muted">
+                            &quot;{staff.nickname}&quot;
                           </p>
                         )}
                       </div>
@@ -395,7 +394,7 @@ export default function StaffPage() {
 
                   <div className="mt-2 flex flex-wrap gap-2">
                     {!staff.is_active && (
-                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                      <span className="rounded-full bg-danger-100 px-2 py-0.5 text-xs font-medium text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
                         Inactivo
                       </span>
                     )}
@@ -405,7 +404,7 @@ export default function StaffPage() {
                       </span>
                     )}
                     {staff.accepts_online_bookings && (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                      <span className="rounded-full bg-success-700 px-2 py-0.5 text-xs font-medium text-white dark:bg-success-900/20 dark:text-success-400">
                         Online
                       </span>
                     )}
@@ -419,13 +418,13 @@ export default function StaffPage() {
 
                   <div className="mt-4 space-y-2">
                     {staff.phone && (
-                      <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                      <div className="flex items-center gap-2 text-sm text-foreground-muted">
                         <Phone className="h-4 w-4" />
                         <span>{staff.phone}</span>
                       </div>
                     )}
                     {staff.email && (
-                      <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                      <div className="flex items-center gap-2 text-sm text-foreground-muted">
                         <Mail className="h-4 w-4" />
                         <span className="truncate">{staff.email}</span>
                       </div>
@@ -435,7 +434,7 @@ export default function StaffPage() {
                         {staff.specialties.map((specialty) => (
                           <span
                             key={specialty}
-                            className="inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                            className="inline-block rounded-full bg-info-500 px-2 py-0.5 text-xs text-white dark:bg-info-900/20 dark:text-info-400"
                           >
                             {specialty}
                           </span>
@@ -448,7 +447,7 @@ export default function StaffPage() {
                     <div className="mt-4 flex gap-2">
                       <button
                         onClick={() => toggleActive(staff)}
-                        className="flex items-center justify-center rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                        className="flex items-center justify-center rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle"
                         title={staff.is_active ? "Desactivar" : "Activar"}
                       >
                         {staff.is_active ? (
@@ -459,14 +458,14 @@ export default function StaffPage() {
                       </button>
                       <button
                         onClick={() => handleEdit(staff)}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                       >
                         <Edit className="h-4 w-4" />
                         Editar
                       </button>
                       <button
                         onClick={() => handleDelete(staff)}
-                        className="flex items-center justify-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                        className="flex items-center justify-center gap-2 rounded-md bg-danger-50 px-3 py-2 text-sm font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400 dark:hover:bg-danger-900/30"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -482,9 +481,9 @@ export default function StaffPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-surface p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-black dark:text-zinc-50">
+              <h2 className="text-xl font-bold text-foreground">
                 {editingStaff ? "Editar Profesional" : "Nuevo Profesional"}
               </h2>
               <button
@@ -498,7 +497,7 @@ export default function StaffPage() {
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Nombre *
                   </label>
                   <input
@@ -508,12 +507,12 @@ export default function StaffPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, first_name: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Apellido *
                   </label>
                   <input
@@ -523,12 +522,12 @@ export default function StaffPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, last_name: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Apodo
                   </label>
                   <input
@@ -537,13 +536,13 @@ export default function StaffPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, nickname: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                     placeholder="Ej: Pepe"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Teléfono
                   </label>
                   <input
@@ -552,12 +551,12 @@ export default function StaffPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Email
                   </label>
                   <input
@@ -566,26 +565,26 @@ export default function StaffPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-foreground">
                     Especialidades (separadas por coma)
                   </label>
                   <input
                     type="text"
                     value={formData.specialties?.join(", ") || ""}
                     onChange={(e) => handleSpecialtiesChange(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                     placeholder="Ej: Cortes, Color, Peinados"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="block text-sm font-medium text-foreground">
                   Biografía
                 </label>
                 <textarea
@@ -594,13 +593,13 @@ export default function StaffPage() {
                     setFormData({ ...formData, bio: e.target.value })
                   }
                   rows={2}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                  className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                   placeholder="Breve descripción del profesional..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="block text-sm font-medium text-foreground">
                   Color
                 </label>
                 <div className="mt-1 flex items-center gap-2">
@@ -610,7 +609,7 @@ export default function StaffPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, color: e.target.value })
                     }
-                    className="h-10 w-20 cursor-pointer rounded border border-zinc-300 dark:border-zinc-600"
+                    className="h-10 w-20 cursor-pointer rounded border border-border"
                   />
                   <input
                     type="text"
@@ -618,7 +617,7 @@ export default function StaffPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, color: e.target.value })
                     }
-                    className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="flex-1 rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
                     placeholder="#3B82F6"
                   />
                 </div>
@@ -633,11 +632,11 @@ export default function StaffPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, is_active: e.target.checked })
                     }
-                    className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-border text-info focus:ring-info-500"
                   />
                   <label
                     htmlFor="is_active"
-                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                    className="ml-2 block text-sm text-foreground"
                   >
                     Profesional activo
                   </label>
@@ -654,11 +653,11 @@ export default function StaffPage() {
                         is_bookable: e.target.checked,
                       })
                     }
-                    className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-border text-info focus:ring-info-500"
                   />
                   <label
                     htmlFor="is_bookable"
-                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                    className="ml-2 block text-sm text-foreground"
                   >
                     Se pueden reservar turnos con esta persona
                   </label>
@@ -675,11 +674,11 @@ export default function StaffPage() {
                         accepts_online_bookings: e.target.checked,
                       })
                     }
-                    className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-border text-info focus:ring-info-500"
                   />
                   <label
                     htmlFor="accepts_online_bookings"
-                    className="ml-2 block text-sm text-zinc-700 dark:text-zinc-300"
+                    className="ml-2 block text-sm text-foreground"
                   >
                     Acepta reservas online
                   </label>
@@ -698,7 +697,7 @@ export default function StaffPage() {
                   type="button"
                   onClick={() => setShowModal(false)}
                   disabled={saving}
-                  className="flex-1 rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                  className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>

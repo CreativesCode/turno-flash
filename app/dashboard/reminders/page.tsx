@@ -196,10 +196,10 @@ Por favor confirma tu asistencia respondiendo:
   if (!profile?.organization_id) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
-            <AlertCircle className="mx-auto h-12 w-12 text-yellow-500" />
-            <h1 className="mt-4 text-2xl font-bold text-black dark:text-zinc-50">
+            <AlertCircle className="mx-auto h-12 w-12 text-warning-500" />
+            <h1 className="mt-4 text-2xl font-bold text-foreground">
               Sin Organización
             </h1>
             <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
@@ -221,10 +221,10 @@ Por favor confirma tu asistencia respondiendo:
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
+            <p className="text-sm text-foreground-muted">
               Cargando recordatorios...
             </p>
           </div>
@@ -235,21 +235,21 @@ Por favor confirma tu asistencia respondiendo:
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-black dark:text-zinc-50">
+              <h1 className="text-3xl font-bold text-foreground">
                 Recordatorios
               </h1>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-foreground-muted">
                 Envía recordatorios a tus clientes por WhatsApp
               </p>
             </div>
             <button
               onClick={() => router.push("/dashboard/appointments")}
-              className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+              className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-subtle dark:bg-zinc-800 dark:text-zinc-300"
             >
               Ver Turnos
             </button>
@@ -257,13 +257,13 @@ Por favor confirma tu asistencia respondiendo:
 
           {/* Messages */}
           {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
               {success}
             </div>
           )}
@@ -289,7 +289,7 @@ Por favor confirma tu asistencia respondiendo:
             {appointments.length > 0 && canSendReminders && (
               <button
                 onClick={sendAllReminders}
-                className="flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                className="flex items-center gap-2 rounded-md bg-success px-4 py-2 text-sm font-medium text-success-foreground hover:bg-success-700"
               >
                 <Send className="h-4 w-4" />
                 Enviar Todos ({appointments.length})
@@ -299,13 +299,13 @@ Por favor confirma tu asistencia respondiendo:
 
           {/* Stats */}
           <div className="mb-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900">
+            <div className="rounded-lg bg-surface p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="text-sm text-foreground-muted">
                     Turnos {getFilterLabel()}
                   </p>
-                  <p className="mt-1 text-2xl font-bold text-black dark:text-zinc-50">
+                  <p className="mt-1 text-2xl font-bold text-foreground">
                     {appointments.length}
                   </p>
                 </div>
@@ -313,47 +313,43 @@ Por favor confirma tu asistencia respondiendo:
               </div>
             </div>
 
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900">
+            <div className="rounded-lg bg-surface p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Pendientes
-                  </p>
-                  <p className="mt-1 text-2xl font-bold text-black dark:text-zinc-50">
+                  <p className="text-sm text-foreground-muted">Pendientes</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">
                     {appointments.filter((a) => a.status === "pending").length}
                   </p>
                 </div>
-                <Bell className="h-8 w-8 text-yellow-500" />
+                <Bell className="h-8 w-8 text-warning-500" />
               </div>
             </div>
 
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900">
+            <div className="rounded-lg bg-surface p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Confirmados
-                  </p>
-                  <p className="mt-1 text-2xl font-bold text-black dark:text-zinc-50">
+                  <p className="text-sm text-foreground-muted">Confirmados</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">
                     {
                       appointments.filter((a) => a.status === "confirmed")
                         .length
                     }
                   </p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-green-500" />
+                <CheckCircle className="h-8 w-8 text-success" />
               </div>
             </div>
           </div>
 
           {/* Instructions */}
-          <div className="mb-6 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+          <div className="mb-6 rounded-lg border border-info-200 bg-info-50 p-4 dark:border-info-800 dark:bg-info-900/20">
             <div className="flex items-start gap-3">
-              <MessageCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+              <MessageCircle className="h-5 w-5 text-info-700 dark:text-info-400 mt-0.5" />
               <div>
-                <h3 className="font-medium text-blue-900 dark:text-blue-100">
+                <h3 className="font-bold text-info-700 dark:text-info-400">
                   Cómo funcionan los recordatorios
                 </h3>
-                <p className="mt-1 text-sm text-blue-800 dark:text-blue-200">
+                <p className="mt-1 text-sm text-info-600 dark:text-info-400">
                   Al hacer clic en &quot;Enviar&quot;, se abrirá WhatsApp con un
                   mensaje pre-escrito para el cliente. El turno se marcará como
                   &quot;Recordado&quot; en el sistema.
@@ -364,12 +360,12 @@ Por favor confirma tu asistencia respondiendo:
 
           {/* Appointments List */}
           {appointments.length === 0 ? (
-            <div className="rounded-lg bg-white p-12 text-center shadow-sm dark:bg-zinc-900">
-              <BellRing className="mx-auto h-12 w-12 text-zinc-400" />
-              <h3 className="mt-4 text-lg font-semibold text-black dark:text-zinc-50">
+            <div className="rounded-lg border border-border bg-surface p-12 text-center shadow-sm">
+              <BellRing className="mx-auto h-12 w-12 text-info-700 dark:text-info-400" />
+              <h3 className="mt-4 text-lg font-semibold text-foreground">
                 No hay turnos para recordar
               </h3>
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-sm text-foreground-muted">
                 No hay turnos programados para {getFilterLabel().toLowerCase()}{" "}
                 que necesiten recordatorio
               </p>
@@ -379,17 +375,17 @@ Por favor confirma tu asistencia respondiendo:
               {appointments.map((appointment) => (
                 <div
                   key={appointment.id}
-                  className="rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900"
+                  className="rounded-lg bg-surface p-6 shadow-sm dark:bg-zinc-900"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-info-100 text-info-600 font-semibold dark:bg-info-900/30 dark:text-info-400">
                           {appointment.customer_first_name[0]}
                           {appointment.customer_last_name[0]}
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+                          <h3 className="text-lg font-semibold text-foreground">
                             {appointment.customer_first_name}{" "}
                             {appointment.customer_last_name}
                           </h3>
@@ -405,8 +401,8 @@ Por favor confirma tu asistencia respondiendo:
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-3">
                         <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-zinc-400" />
-                          <span className="text-zinc-700 dark:text-zinc-300">
+                          <Clock className="h-4 w-4 text-foreground-muted" />
+                          <span className="text-foreground-muted">
                             {appointment.start_time} - {appointment.end_time}
                           </span>
                         </div>
@@ -450,7 +446,7 @@ Por favor confirma tu asistencia respondiendo:
                         <button
                           onClick={() => sendReminder(appointment)}
                           disabled={sending === appointment.id}
-                          className="flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                          className="flex items-center gap-2 rounded-md bg-success px-4 py-2 text-sm font-medium text-success-foreground hover:bg-success-700 disabled:opacity-50"
                         >
                           {sending === appointment.id ? (
                             <>
@@ -473,11 +469,11 @@ Por favor confirma tu asistencia respondiendo:
           )}
 
           {/* Bottom Info */}
-          <div className="mt-8 rounded-lg bg-zinc-100 p-4 dark:bg-zinc-800">
-            <h3 className="font-medium text-black dark:text-zinc-50">
+          <div className="mt-8 rounded-lg bg-secondary-100 p-4 dark:bg-secondary-900/20">
+            <h3 className="font-medium text-secondary-600">
               💡 Consejos para recordatorios efectivos
             </h3>
-            <ul className="mt-2 space-y-1 text-sm text-zinc-600 dark:text-zinc-400">
+            <ul className="mt-2 space-y-1 text-sm text-secondary-600">
               <li>• Envía recordatorios 24 horas antes del turno</li>
               <li>• Incluye toda la información relevante del turno</li>
               <li>• Pide confirmación para reducir ausencias</li>

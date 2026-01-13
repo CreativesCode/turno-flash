@@ -1,19 +1,21 @@
 "use client";
 
 import { useAuth } from "@/contexts/auth-context";
+import { useTheme } from "@/contexts/theme-context";
 import {
   Bell,
+  Building2,
   Calendar,
   Home,
   LogOut,
   Menu,
+  Moon,
   Package,
-  Settings,
-  Users,
-  X,
-  Building2,
+  Sun,
   UserCog,
   UserPlus,
+  Users,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,6 +31,7 @@ interface NavItem {
 
 export function Sidebar() {
   const { profile, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -132,7 +135,7 @@ export function Sidebar() {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed left-4 top-4 z-50 rounded-md bg-white p-2 shadow-md dark:bg-zinc-900 lg:hidden"
+        className="fixed left-4 top-4 z-50 rounded-md bg-surface p-2 shadow-md lg:hidden"
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
@@ -147,16 +150,16 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-white shadow-lg transition-transform duration-200 dark:bg-zinc-900 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-surface shadow-lg transition-transform duration-200 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center justify-center border-b border-zinc-200 dark:border-zinc-700">
+          <div className="flex h-16 items-center justify-center border-b border-border">
             <Link
               href="/dashboard"
-              className="text-xl font-bold text-blue-600 dark:text-blue-400"
+              className="text-xl font-bold text-info"
               onClick={() => setIsOpen(false)}
             >
               🗓️ TurnoFlash
@@ -164,11 +167,11 @@ export function Sidebar() {
           </div>
 
           {/* User Info */}
-          <div className="border-b border-zinc-200 p-4 dark:border-zinc-700">
-            <p className="text-sm font-medium text-black dark:text-zinc-50 truncate">
+          <div className="border-b border-border p-4">
+            <p className="text-sm font-medium text-foreground truncate">
               {profile?.full_name || profile?.email || "Usuario"}
             </p>
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs text-foreground-muted">
               {profile?.role === "admin"
                 ? "Administrador"
                 : profile?.role === "owner"
@@ -187,8 +190,8 @@ export function Sidebar() {
                     onClick={() => setIsOpen(false)}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       isActive(item.href)
-                        ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
-                        : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                        ? "bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-200"
+                        : "text-foreground-muted hover:bg-muted"
                     }`}
                   >
                     {item.icon}
@@ -200,10 +203,31 @@ export function Sidebar() {
           </nav>
 
           {/* Footer */}
-          <div className="border-t border-zinc-200 p-4 dark:border-zinc-700">
+          <div className="border-t border-border p-4 space-y-2">
+            <button
+              onClick={toggleTheme}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-foreground-muted transition-colors hover:bg-muted"
+              aria-label={
+                theme === "dark"
+                  ? "Cambiar a tema claro"
+                  : "Cambiar a tema oscuro"
+              }
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun className="h-5 w-5" />
+                  Tema Claro
+                </>
+              ) : (
+                <>
+                  <Moon className="h-5 w-5" />
+                  Tema Oscuro
+                </>
+              )}
+            </button>
             <button
               onClick={handleSignOut}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger-50 dark:hover:bg-danger-900/20"
             >
               <LogOut className="h-5 w-5" />
               Cerrar Sesión
