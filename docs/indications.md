@@ -1,384 +1,438 @@
-# WhatsApp Booking (Next.js SPA + Capacitor + Supabase) — Template “multi-instancia”
+# Turno Flash — Sistema de Reservas (Next.js SPA + Capacitor + Supabase)
 
 Sistema de **reservas/turnos** para salones, barberías, clínicas y talleres, pensado para **bajo costo**, **bajo consumo de datos** y operación cómoda **desde el móvil del dueño**.
 
 ---
 
-## Objetivo del producto
+## Objetivo del Producto
 
-- Reducir **doble reserva**, llamadas y desorden.
+- Reducir **doble reserva**, llamadas y desorden
 - Dar al negocio:
-
-  - **Calendario** móvil-first (día/semana) + gestión de turnos.
-  - **Página pública de reservas** ultraligera.
-  - Confirmaciones por **WhatsApp** (manual → semi-auto → auto).
+  - **Calendario** móvil-first (día/semana) + gestión de turnos
+  - **Página pública de reservas** ultraligera
+  - Confirmaciones por **WhatsApp** (manual → semi-auto → auto)
 
 ---
 
-## Estrategia de despliegue (low-cost real)
+## Stack Tecnológico
 
-### ✅ Multi-instancia “sin forks”
+### Frontend
 
-- **Un solo repositorio template**.
+- **Next.js** con `output: "export"` (static export) - **OBLIGATORIO para Capacitor**
+- **React** 19+ con Context API para estado global
+- **Tailwind CSS** para estilos
+- **TypeScript** estricto
+
+### Móvil
+
+- **Capacitor** (iOS/Android) - **un solo código base**
+- Build: `npm run build` → `npx cap sync` → build nativo
+
+### Backend
+
+- **Supabase** (PostgreSQL + Auth + Realtime + Edge Functions + Storage)
+  - **RLS (Row Level Security)** - protección real de datos
+  - Auth con magic links para invitaciones + contraseñas para login
+  - Edge Functions para operaciones sensibles (invitaciones, etc.)
+
+---
+
+## Arquitectura Implementada
+
+### ✅ Estado Actual
+
+El proyecto usa **static export** (`output: "export"`) porque:
+
+- ✅ **Capacitor requiere archivos estáticos** en `/out`
+- ✅ Deploy ultra barato (CDN)
+- ✅ Un solo código para web + móvil
+
+### Autenticación: 100% Client-Side
+
+**IMPORTANTE:** Con static export **NO se puede usar**:
+
+- ❌ Middleware de Next.js
+- ❌ Route handlers (API routes)
+- ❌ Server Components con datos dinámicos
+
+**SOLUCIÓN IMPLEMENTADA:**
+
+- ✅ **AuthContext** (React Context API) para estado global
+- ✅ **ProtectedRoute** (componente client-side) para UX
+- ✅ **RLS en Supabase** para protección REAL de datos
+- ✅ Magic links para invitaciones
+- ✅ Login con contraseña para usuarios existentes
+
+### Flujo de Autenticación
+
+1. **Sistema de Invitaciones:**
+
+   - Solo admins pueden invitar usuarios (`/dashboard/invite`)
+   - Se envía magic link de invitación
+   - Usuario configurable su contraseña (`/auth/setup-password`)
+   - Después del setup, login con email + contraseña
+
+2. **Login Regular:**
+
+   - Usuarios existentes usan `/login` con email + contraseña
+   - Redirige a `/dashboard` si es exitoso
+
+3. **Protección de Rutas:**
+   - `<ProtectedRoute>` verifica autenticación client-side
+   - Si no autenticado → redirige a `/login`
+   - **RLS en Supabase** protege los datos (server-side)
+
+### Seguridad
+
+**RLS (Row Level Security) es la ÚNICA protección real:**
+
+- Cada query SQL pasa por políticas RLS
+- Funciona en web, móvil, y desde cualquier cliente
+- No depende de Next.js ni middleware
+- Las políticas SQL controlan acceso a datos
+
+Ver `docs/CORRECCION-capacitor.md` para más detalles sobre esta decisión arquitectónica.
+
+---
+
+## Estructura del Proyecto
+
+```
+/
+├── app/                    # Next.js App Router
+│   ├── layout.tsx         # Root con AuthProvider
+│   ├── page.tsx           # Home (redirige según auth)
+│   ├── login/             # Login público (email + contraseña)
+│   ├── auth/
+│   │   ├── callback/      # Procesa magic links
+│   │   └── setup-password/ # Usuarios invitados crean contraseña
+│   └── dashboard/         # Panel protegido
+│       ├── invite/        # Invitar usuarios (solo admin)
+│       └── users/         # Gestión de usuarios (solo admin)
+│
+├── components/
+│   └── protected-route.tsx # HOC para proteger rutas
+│
+├── contexts/
+│   └── auth-context.tsx   # Estado global de autenticación
+│
+├── hooks/
+│   └── use-auth.ts        # Re-export desde context
+│
+├── types/
+│   └── auth.ts            # Tipos de auth y roles
+│
+├── utils/
+│   ├── auth.ts            # Helpers de permisos
+│   └── supabase/
+│       └── client.ts      # Cliente de Supabase
+│
+├── supabase/
+│   ├── migrations/        # Migraciones SQL (RLS)
+│   │   └── 001_auth_and_roles.sql
+│   └── functions/         # Edge Functions
+│       └── invite-user/   # Función para invitar usuarios
+│
+├── out/                   # ⭐ Generado por `npm run build`
+│   └── ...               # Archivos estáticos para Capacitor
+│
+├── ios/                   # Proyecto iOS (Capacitor)
+├── android/              # Proyecto Android (Capacitor)
+│
+├── capacitor.config.ts   # Config: webDir: "out"
+└── next.config.ts        # Config: output: "export"
+```
+
+---
+
+## Configuración y Setup
+
+### 1. Variables de Entorno
+
+Crea `.env.local` en la raíz:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key-aqui
+```
+
+### 2. Setup de Supabase
+
+**IMPORTANTE:** Ejecuta las migraciones SQL antes de usar la app.
+
+1. Ve a Supabase Dashboard → SQL Editor
+2. Ejecuta el contenido de `supabase/migrations/001_auth_and_roles.sql`
+3. Configura Redirect URLs en Authentication → URL Configuration:
+   - `http://localhost:3000/auth/callback`
+   - `https://tu-dominio.com/auth/callback` (producción)
+   - `capacitor://localhost/auth/callback` (móvil)
+
+Ver `docs/supabase-setup.md` para más detalles.
+
+### 3. Crear Primer Usuario Admin
+
+1. Crea un usuario desde la app (`/login`)
+2. En Supabase SQL Editor, ejecuta:
+
+```sql
+UPDATE public.user_profiles
+SET role = 'admin'
+WHERE email = 'tu-email@ejemplo.com';
+```
+
+### 4. Desplegar Edge Function (Opcional)
+
+Para que las invitaciones funcionen automáticamente, despliega la edge function:
+
+```bash
+npx supabase login
+npx supabase link --project-ref TU_PROJECT_REF
+npx supabase functions deploy invite-user
+```
+
+Ver `docs/deploy-edge-function.md` para instrucciones completas.
+
+**Alternativa:** Puedes invitar usuarios manualmente desde Supabase Dashboard → Authentication → Users → Invite user.
+
+---
+
+## Comandos Importantes
+
+### Desarrollo
+
+```bash
+npm run dev              # Next.js dev server (http://localhost:3000)
+npm run build            # Genera /out con archivos estáticos
+npm run lint             # Verificar código
+```
+
+### Build para Producción
+
+```bash
+npm run build            # Genera /out con archivos estáticos
+```
+
+### Capacitor (Móvil)
+
+```bash
+npm run build            # Primero generar /out
+npx cap sync             # Copiar /out a ios/ y android/
+npx cap open ios         # Abrir Xcode
+npx cap open android     # Abrir Android Studio
+```
+
+### Supabase (Opcional - Local)
+
+```bash
+npx supabase start       # Supabase local
+npx supabase db push     # Aplicar migraciones
+npx supabase gen types   # Generar tipos TypeScript
+```
+
+---
+
+## Roles y Permisos
+
+### Roles Disponibles
+
+- **`admin`**: Acceso total al sistema
+
+  - Puede gestionar usuarios, organizaciones, servicios, bookings
+  - Puede cambiar roles de otros usuarios
+  - No tiene restricciones
+
+- **`owner`**: Dueño del negocio
+
+  - Gestiona su organización
+  - Puede gestionar servicios y bookings
+  - No puede gestionar usuarios (solo admins)
+
+- **`staff`**: Empleado normal
+
+  - Puede ver y gestionar bookings
+  - No puede modificar configuración
+
+- **`special`**: Usuario con permisos especiales
+  - Permisos personalizables según necesidad
+
+### Permisos
+
+- `manage_users`: Gestionar usuarios (solo admin)
+- `manage_organization`: Gestionar organización
+- `manage_services`: Gestionar servicios
+- `manage_bookings`: Gestionar reservas
+- `view_bookings`: Ver reservas
+- `manage_settings`: Gestionar configuración
+
+---
+
+## Flujo de Invitaciones
+
+El sistema utiliza un flujo de **invitaciones** para el registro de usuarios:
+
+1. **Admin invita usuario:**
+
+   - Va a `/dashboard/invite`
+   - Ingresa email del nuevo usuario
+   - Sistema envía magic link de invitación
+
+2. **Usuario invitado:**
+
+   - Recibe email con magic link
+   - Hace clic → `/auth/callback?type=invite`
+   - Redirige a `/auth/setup-password`
+   - Crea su contraseña
+   - Redirige a `/dashboard`
+
+3. **Login subsiguiente:**
+   - Usuario va a `/login`
+   - Ingresa email + contraseña
+   - Accede a `/dashboard`
+
+**Ver `docs/invitation-flow.md` para documentación técnica completa.**
+
+---
+
+## Estrategia de Despliegue
+
+### Multi-instancia "sin forks"
+
+- **Un solo repositorio template**
 - Por **cada cliente**:
 
-  - 1 **Proyecto Supabase** (idealmente en cuenta del cliente).
-  - 1 **Proyecto Vercel** (o el hosting que prefiera) con env vars apuntando a “su” Supabase.
+  - 1 **Proyecto Supabase** (idealmente en cuenta del cliente)
+  - 1 **Proyecto Vercel/CDN** con env vars apuntando a "su" Supabase
 
-- Beneficio: actualizas el template una vez y puedes replicar cambios sin la pesadilla de forks.
+- Beneficio: actualizas el template una vez y puedes replicar cambios sin la pesadilla de forks
 
-### Por qué esta estrategia
+### Consideraciones de Costo
 
-- En Supabase Free:
+- **Supabase Free:**
 
-  - Los proyectos **se pausan tras 1 semana de inactividad** y hay **límite de 2 proyectos activos** en free. ([Supabase][1])
+  - Se pausan tras 1 semana de inactividad
+  - Límite de 2 proyectos activos en free
+  - Recomendación: que cada cliente sea owner de su Supabase
 
-- En Vercel Hobby (gratis):
+- **Vercel Hobby (gratis):**
 
-  - Se restringe a **uso personal/no comercial**; para clientes normalmente corresponde **Pro/Enterprise**. ([Vercel][2])
+  - Restringido a uso personal/no comercial
+  - Para clientes reales: Vercel Pro/Enterprise o CDN estático
 
-> Recomendación práctica: que **cada cliente sea owner** de su Supabase (y si aplica su Vercel). Tú quedas como colaborador.
-
----
-
-## Stack
-
-- **Frontend:** Next.js (SPA) + Tailwind (opcional)
-- **App móvil (dueño):** Capacitor (iOS/Android) **sin perder la base web**
-- **Backend:** Supabase
-
-  - Postgres + RLS
-  - Auth (OTP/magic link)
-  - Realtime (actualizaciones instantáneas)
-  - Edge Functions (webhooks y lógica sensible)
-  - Storage (logo/imagen mínima)
-
-- **WhatsApp:** 3 niveles de integración (A/B/C)
+- **Static Export:**
+  - Permite deploy en cualquier CDN (Vercel, Netlify, Cloudflare, S3+CloudFront)
+  - Costo mínimo o $0 dependiendo del proveedor
 
 ---
 
-## Requisitos clave (no negociables)
+## Modelo de Datos (Propuesto)
 
-### SPA real
+### Tablas Principales
 
-- La app se comporta como **Single Page App**:
+- **`user_profiles`**: Perfiles de usuario con roles
+- **`organizations`**: Organizaciones/negocios
+- **`services`**: Servicios ofrecidos
+- **`availability_rules`**: Horarios semanales
+- **`availability_exceptions`**: Excepciones (feriados, etc.)
+- **`customers`**: Clientes
+- **`bookings`**: Reservas/turnos
 
-  - navegación client-side
-  - render “ligero”
+### Reglas de Negocio
 
-- Recomendado: **Static export** para minimizar costo de cómputo (sin SSR).
-
-  - Next `output: 'export'` (cuando aplique) + hosting estático en Vercel/CDN.
-  - Toda lógica sensible se mueve a **Supabase (DB/Edge Functions)**.
-
-### Capacitor siempre
-
-- El proyecto **siempre mantiene**:
-
-  - carpeta `ios/` y `android/`
-  - `capacitor.config.*`
-  - workflow `build web → cap sync → build nativo`
-
-- No se crea un “segundo frontend” para móvil: **un solo código**.
-
-### “Modo bajo datos”
-
-- Sin imágenes pesadas, sin dependencias grandes innecesarias.
-- Caching agresivo (PWA) + carga incremental de slots.
+- **Anti solape:** Un turno no puede solaparse con otro del mismo recurso
+- **RLS:** Todas las tablas protegidas con Row Level Security
+- **Validaciones:** En base de datos (triggers, constraints) + UI
 
 ---
 
-## Módulos (MVP)
+## WhatsApp: Niveles de Integración (Futuro)
 
-### 1) Panel del dueño (móvil-first)
+### Nivel A — "Click to WhatsApp" (MVP, costo ~0)
 
-- Login (OTP / magic link).
-- Setup rápido:
-
-  - negocio (nombre, zona horaria)
-  - servicios (duración, buffer, precio opcional)
-  - horarios semanales + excepciones (feriados/vacaciones)
-
-- Calendario:
-
-  - vista **Hoy** y **Semana**
-  - aprobar / cancelar / reprogramar
-
-- Acciones rápidas WhatsApp:
-
-  - “Enviar confirmación”
-  - “Enviar recordatorio”
-
-### 2) Página pública de reservas (ultraligera)
-
-- URL tipo: `/{slug}`
-- Pasos:
-
-  1. elegir servicio
-  2. elegir día/hora disponible
-  3. nombre + teléfono
-  4. crear turno
-
-- Feedback inmediato:
-
-  - estado: `pending` / `confirmed` / `canceled` / `no_show`
-
-- Botón “Confirmar por WhatsApp” (Nivel A).
-
-### 3) Anti doble-reserva (core diferenciador)
-
-- La base de datos debe impedir solapes (ver sección “Modelo de datos y reglas”).
-
----
-
-## WhatsApp: niveles de integración
-
-### Nivel A — “Click to WhatsApp” (MVP, costo ~0)
-
-- No API. Se usa `wa.me` con mensaje prellenado.
-- El sistema crea el turno y muestra botones:
-
-  - “Enviar al cliente”
-  - “Avisarme a mí”
-
-- Ventajas: rápido, cero verificación, funciona con WhatsApp normal.
+- No API. Se usa `wa.me` con mensaje prellenado
+- El sistema crea el turno y muestra botones
+- Ventajas: rápido, cero verificación, funciona con WhatsApp normal
 
 ### Nivel B — Semi-automático (costo ~0)
 
-- Plantillas de texto pre-armadas dentro del panel.
-- Historial básico de “mensajes preparados” (sin envío automático).
+- Plantillas de texto pre-armadas dentro del panel
+- Historial básico de "mensajes preparados"
 
 ### Nivel C — WhatsApp Business Platform (automático)
 
-- Envío automático desde Edge Function + webhook.
-- Regla clave:
-
-  - puedes responder sin plantilla dentro de una **ventana de 24h** desde el último mensaje del usuario; fuera de esa ventana normalmente necesitas **Message Templates aprobados**. ([WhatsApp Business][3])
-
-- Pricing:
-
-  - Meta tiene esquema oficial de pricing y actualizaciones (cambia por país/categoría). ([Facebook Developers][4])
+- Envío automático desde Edge Function + webhook
+- Requiere Message Templates aprobados
+- Pricing variable según Meta
 
 > En el template, Nivel C debe estar implementado como **add-on**, para que el cliente pague el costo variable.
 
 ---
 
-## Arquitectura (alto nivel)
+## Principios Inmutables
 
-**Frontend (Next SPA)**
-
-- Panel dueño (privado)
-- Booking page (pública)
-
-**Supabase**
-
-- Postgres (fuente de verdad)
-- Realtime para:
-
-  - refrescar calendario
-  - bloquear slots en UI si alguien reserva
-
-- Edge Functions:
-
-  - `create_booking` (opcional, recomendado si no quieres exponer lógica compleja en RLS)
-  - `whatsapp_webhook`
-  - `send_whatsapp_message` (Nivel C)
-
-- Storage:
-
-  - `org-assets/logo.png` (opcional)
+1. **`output: 'export'` es obligatorio** (Capacitor lo requiere)
+2. **RLS es la única seguridad real** (todo lo demás es UX)
+3. **Client-side auth es suficiente** (con RLS protegiendo datos)
+4. **Un solo código para web + móvil** (no crear variantes)
+5. **Edge Functions para secretos** (nunca en el cliente)
 
 ---
 
-## Modelo de datos (propuesto)
+## Troubleshooting Común
 
-Tablas mínimas:
+### Build genera server, no /out
 
-- `organizations`
+❌ **Problema:** Falta `output: 'export'` en next.config.ts
 
-  - `id`, `name`, `timezone`, `slug`, `whatsapp_phone`, `created_at`
+✅ **Solución:** Verifica que `next.config.ts` tenga `output: "export"`
 
-- `services`
+### Capacitor app muestra pantalla en blanco
 
-  - `id`, `organization_id`, `name`, `duration_min`, `buffer_min`, `price_cents?`, `is_active`
+❌ **Problema:** `webDir` incorrecto o /out no existe
 
-- `availability_rules`
+✅ **Solución:**
 
-  - `id`, `organization_id`, `weekday` (0-6), `start_time`, `end_time`
+1. Ejecuta `npm run build` (debe generar `/out`)
+2. Verifica que `capacitor.config.ts` tenga `webDir: "out"`
+3. Ejecuta `npx cap sync`
 
-- `availability_exceptions`
+### Auth no funciona
 
-  - `id`, `organization_id`, `date`, `is_closed`, `start_time?`, `end_time?`
+❌ **Problema:** Variables de entorno o migraciones no ejecutadas
 
-- `customers`
+✅ **Solución:**
 
-  - `id`, `organization_id`, `name`, `phone`
+1. Verifica `.env.local` con las variables correctas
+2. Ejecuta migración SQL en Supabase Dashboard
+3. Verifica Redirect URLs en Supabase
+4. Reinicia el servidor de desarrollo
 
-- `bookings`
+### No puedo invitar usuarios
 
-  - `id`, `organization_id`, `service_id`, `customer_id`, `start_at`, `end_at`, `status`, `source` (`public|admin`), `notes?`, `created_at`
+❌ **Problema:** No eres admin o edge function no desplegada
 
-- (opcional MVP+) `staff`, `staff_services`, `booking_staff`
+✅ **Solución:**
 
-### Reglas fuertes (anti solape)
-
-- Un turno “bloqueante” no puede solaparse con otro del mismo recurso:
-
-  - Si MVP sin staff: recurso = `organization_id`
-  - Si con staff: recurso = `staff_id`
-
-- Implementación recomendada:
-
-  - restricción en DB (la BD manda), más validación en UI.
-  - si luego agregas “staff”, migras la restricción al nivel staff.
+1. Verifica que tu rol sea `admin` en `user_profiles`
+2. Puedes invitar manualmente desde Supabase Dashboard
+3. O despliega la edge function `invite-user` (ver `docs/deploy-edge-function.md`)
 
 ---
 
-## Seguridad: Auth + RLS (Supabase)
+## Próximos Pasos / Roadmap
 
-### Roles
+### MVP Pendiente
 
-- **Owner/Admin**: gestiona todo.
-- **Public (anon)**: solo ve servicios/slots y crea booking bajo reglas.
+- [ ] Gestión de organizaciones
+- [ ] CRUD de servicios
+- [ ] Sistema de reservas/bookings
+- [ ] Calendario móvil-first
+- [ ] Integración WhatsApp (Nivel A)
+- [ ] Página pública de reservas (`/{slug}`)
 
-### RLS recomendado
-
-- Tablas privadas (owner):
-
-  - `services`, `availability_*`, `bookings` (lectura completa), `customers`
-
-- Público:
-
-  - lectura limitada de `services` activos y disponibilidad “derivada”
-  - `insert` en `bookings` solo si:
-
-    - pertenece al `organization_id` del `slug` visitado
-    - el slot es válido y libre
-    - se setean campos controlados (`status=pending`, `source=public`)
-
-> Si quieres máxima simplicidad y control, usa una Edge Function `create_booking` y mantén RLS público muy restrictivo.
-
----
-
-## Estructura del repositorio (template)
-
-```
-/
-  app/                       # Next.js (SPA)
-  public/
-  supabase/
-    migrations/              # SQL migrations (source of truth)
-    seed.sql                 # opcional
-  capacitor.config.ts
-  android/
-  ios/
-  scripts/
-    provision-client.ts      # opcional (automatiza onboarding)
-  README.md
-```
-
----
-
-## Configuración Next.js (SPA + export)
-
-**Objetivo:** deploy estático para minimizar costos.
-
-- Evitar SSR y endpoints propios (salvo que realmente lo necesites).
-- Consumir Supabase directamente desde el cliente (anon key) + Edge Functions para secretos.
-
-Checklist:
-
-- rutas como client components donde aplique
-- caching y splitting por rutas
-- evitar librerías pesadas para el calendario (primero lista + semana simple)
-
----
-
-## Capacitor (workflow recomendado)
-
-### Desarrollo
-
-- `npm run dev` (web)
-- `npx cap sync` (cuando cambie webDir/build)
-- `npx cap open ios|android` (para correr nativo)
-
-### Producción
-
-- `npm run build` (genera el bundle estático)
-- `npx cap sync`
-- build y firma en Xcode/Android Studio
-
-Buenas prácticas:
-
-- manejar deep links (más adelante)
-- usar plugin Network para detectar offline y encolar acciones (MVP+)
-
----
-
-## Variables de entorno (por instancia/cliente)
-
-En Vercel (o tu hosting):
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` _(solo si usas server/edge propio; si todo está en Supabase Functions, no lo pongas aquí)_
-- `APP_BASE_URL` (para links)
-- `DEFAULT_TIMEZONE` (fallback)
-- `WHATSAPP_MODE` = `A | B | C`
-- (Nivel C) `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TOKEN`, `WHATSAPP_VERIFY_TOKEN`
-
-En Supabase (Edge Functions secrets):
-
-- tokens y secretos de WhatsApp (Nivel C)
-- cualquier secreto externo
-
----
-
-## Onboarding de un nuevo cliente (15–30 min)
-
-1. **Crear Supabase Project** (ideal en cuenta del cliente).
-2. Aplicar schema:
-
-   - `supabase db push` (migrations)
-
-3. Insertar configuración inicial:
-
-   - org + slug + horarios + servicios
-
-4. **Crear Vercel Project**:
-
-   - apuntar al repo template
-   - set env vars (URL/ANON KEY)
-   - deploy
-
-5. Configurar dominio (opcional)
-6. Validar: crear reserva pública + ver calendario del dueño
-
----
-
-## Reglas UX “low data” (obligatorias)
-
-- Booking page:
-
-  - máximo 2–3 requests para reservar
-  - carga por día (no cargar todo el mes)
-  - sin imágenes pesadas
-
-- Owner:
-
-  - lista “Hoy” (lo más rápido)
-  - calendario semanal ligero
-
-- Offline:
-
-  - si no hay red, permitir ver caché y “cola” de acciones (MVP+)
-
----
-
-## Roadmap (después del MVP)
+### Futuro
 
 - Multi-staff y asignación automática por servicio
-- Recordatorios automáticos (Nivel C)
+- Recordatorios automáticos (WhatsApp Nivel C)
 - Reprogramación por link
 - Depósito/pagos (Stripe) como add-on
 - Métricas: ocupación, cancelaciones, clientes recurrentes
@@ -386,426 +440,19 @@ En Supabase (Edge Functions secrets):
 
 ---
 
-## Nota sobre “gratis” vs “producción”
+## Documentación Adicional
 
-Este template está optimizado para costos mínimos, pero:
-
-- Supabase Free pausa proyectos por inactividad y limita activos. ([Supabase][1])
-- Vercel Hobby es para uso no comercial. ([Vercel][2])
-  Para clientes reales, lo correcto es contemplar al menos **un plan pago básico** o que el cliente sea owner y asuma el plan según su caso.
-
----
-
-## Definición de “hecho” para el MVP
-
-- [ ] Crear org + servicios + horarios desde móvil
-- [ ] Booking público crea turno sin solapes
-- [ ] Dueño ve “Hoy” en realtime
-- [ ] Botón WhatsApp (Nivel A) funcionando
-- [ ] Deploy por instancia replicable sin forks
-
-# WhatsApp Booking (Next.js SPA + Capacitor + Supabase) — Template “multi-instancia”
-
-Sistema de **reservas/turnos** para salones, barberías, clínicas y talleres, pensado para **bajo costo**, **bajo consumo de datos** y operación cómoda **desde el móvil del dueño**.
+- `docs/CORRECCION-capacitor.md` - Explicación detallada de la arquitectura client-side
+- `docs/invitation-flow.md` - Documentación técnica del flujo de invitaciones
+- `docs/supabase-setup.md` - Instrucciones detalladas de setup de Supabase
+- `docs/deploy-edge-function.md` - Cómo desplegar edge functions
+- `docs/mejoras-arquitectura.md` - Patrones y buenas prácticas (opcional)
 
 ---
 
-## Objetivo del producto
-
-- Reducir **doble reserva**, llamadas y desorden.
-- Dar al negocio:
-
-  - **Calendario** móvil-first (día/semana) + gestión de turnos.
-  - **Página pública de reservas** ultraligera.
-  - Confirmaciones por **WhatsApp** (manual → semi-auto → auto).
-
----
-
-## Estrategia de despliegue (low-cost real)
-
-### ✅ Multi-instancia “sin forks”
-
-- **Un solo repositorio template**.
-- Por **cada cliente**:
-
-  - 1 **Proyecto Supabase** (idealmente en cuenta del cliente).
-  - 1 **Proyecto Vercel** (o el hosting que prefiera) con env vars apuntando a “su” Supabase.
-
-- Beneficio: actualizas el template una vez y puedes replicar cambios sin la pesadilla de forks.
-
-### Por qué esta estrategia
-
-- En Supabase Free:
-
-  - Los proyectos **se pausan tras 1 semana de inactividad** y hay **límite de 2 proyectos activos** en free. ([Supabase][1])
-
-- En Vercel Hobby (gratis):
-
-  - Se restringe a **uso personal/no comercial**; para clientes normalmente corresponde **Pro/Enterprise**. ([Vercel][2])
-
-> Recomendación práctica: que **cada cliente sea owner** de su Supabase (y si aplica su Vercel). Tú quedas como colaborador.
-
----
-
-## Stack
-
-- **Frontend:** Next.js (SPA) + Tailwind (opcional)
-- **App móvil (dueño):** Capacitor (iOS/Android) **sin perder la base web**
-- **Backend:** Supabase
-
-  - Postgres + RLS
-  - Auth (OTP/magic link)
-  - Realtime (actualizaciones instantáneas)
-  - Edge Functions (webhooks y lógica sensible)
-  - Storage (logo/imagen mínima)
-
-- **WhatsApp:** 3 niveles de integración (A/B/C)
-
----
-
-## Requisitos clave (no negociables)
-
-### SPA real
-
-- La app se comporta como **Single Page App**:
-
-  - navegación client-side
-  - render “ligero”
-
-- Recomendado: **Static export** para minimizar costo de cómputo (sin SSR).
-
-  - Next `output: 'export'` (cuando aplique) + hosting estático en Vercel/CDN.
-  - Toda lógica sensible se mueve a **Supabase (DB/Edge Functions)**.
-
-### Capacitor siempre
-
-- El proyecto **siempre mantiene**:
-
-  - carpeta `ios/` y `android/`
-  - `capacitor.config.*`
-  - workflow `build web → cap sync → build nativo`
-
-- No se crea un “segundo frontend” para móvil: **un solo código**.
-
-### “Modo bajo datos”
-
-- Sin imágenes pesadas, sin dependencias grandes innecesarias.
-- Caching agresivo (PWA) + carga incremental de slots.
-
----
-
-## Módulos (MVP)
-
-### 1) Panel del dueño (móvil-first)
-
-- Login (OTP / magic link).
-- Setup rápido:
-
-  - negocio (nombre, zona horaria)
-  - servicios (duración, buffer, precio opcional)
-  - horarios semanales + excepciones (feriados/vacaciones)
-
-- Calendario:
-
-  - vista **Hoy** y **Semana**
-  - aprobar / cancelar / reprogramar
-
-- Acciones rápidas WhatsApp:
-
-  - “Enviar confirmación”
-  - “Enviar recordatorio”
-
-### 2) Página pública de reservas (ultraligera)
-
-- URL tipo: `/{slug}`
-- Pasos:
-
-  1. elegir servicio
-  2. elegir día/hora disponible
-  3. nombre + teléfono
-  4. crear turno
-
-- Feedback inmediato:
-
-  - estado: `pending` / `confirmed` / `canceled` / `no_show`
-
-- Botón “Confirmar por WhatsApp” (Nivel A).
-
-### 3) Anti doble-reserva (core diferenciador)
-
-- La base de datos debe impedir solapes (ver sección “Modelo de datos y reglas”).
-
----
-
-## WhatsApp: niveles de integración
-
-### Nivel A — “Click to WhatsApp” (MVP, costo ~0)
-
-- No API. Se usa `wa.me` con mensaje prellenado.
-- El sistema crea el turno y muestra botones:
-
-  - “Enviar al cliente”
-  - “Avisarme a mí”
-
-- Ventajas: rápido, cero verificación, funciona con WhatsApp normal.
-
-### Nivel B — Semi-automático (costo ~0)
-
-- Plantillas de texto pre-armadas dentro del panel.
-- Historial básico de “mensajes preparados” (sin envío automático).
-
-### Nivel C — WhatsApp Business Platform (automático)
-
-- Envío automático desde Edge Function + webhook.
-- Regla clave:
-
-  - puedes responder sin plantilla dentro de una **ventana de 24h** desde el último mensaje del usuario; fuera de esa ventana normalmente necesitas **Message Templates aprobados**. ([WhatsApp Business][3])
-
-- Pricing:
-
-  - Meta tiene esquema oficial de pricing y actualizaciones (cambia por país/categoría). ([Facebook Developers][4])
-
-> En el template, Nivel C debe estar implementado como **add-on**, para que el cliente pague el costo variable.
-
----
-
-## Arquitectura (alto nivel)
-
-**Frontend (Next SPA)**
-
-- Panel dueño (privado)
-- Booking page (pública)
-
-**Supabase**
-
-- Postgres (fuente de verdad)
-- Realtime para:
-
-  - refrescar calendario
-  - bloquear slots en UI si alguien reserva
-
-- Edge Functions:
-
-  - `create_booking` (opcional, recomendado si no quieres exponer lógica compleja en RLS)
-  - `whatsapp_webhook`
-  - `send_whatsapp_message` (Nivel C)
-
-- Storage:
-
-  - `org-assets/logo.png` (opcional)
-
----
-
-## Modelo de datos (propuesto)
-
-Tablas mínimas:
-
-- `organizations`
-
-  - `id`, `name`, `timezone`, `slug`, `whatsapp_phone`, `created_at`
-
-- `services`
-
-  - `id`, `organization_id`, `name`, `duration_min`, `buffer_min`, `price_cents?`, `is_active`
-
-- `availability_rules`
-
-  - `id`, `organization_id`, `weekday` (0-6), `start_time`, `end_time`
-
-- `availability_exceptions`
-
-  - `id`, `organization_id`, `date`, `is_closed`, `start_time?`, `end_time?`
-
-- `customers`
-
-  - `id`, `organization_id`, `name`, `phone`
-
-- `bookings`
-
-  - `id`, `organization_id`, `service_id`, `customer_id`, `start_at`, `end_at`, `status`, `source` (`public|admin`), `notes?`, `created_at`
-
-- (opcional MVP+) `staff`, `staff_services`, `booking_staff`
-
-### Reglas fuertes (anti solape)
-
-- Un turno “bloqueante” no puede solaparse con otro del mismo recurso:
-
-  - Si MVP sin staff: recurso = `organization_id`
-  - Si con staff: recurso = `staff_id`
-
-- Implementación recomendada:
-
-  - restricción en DB (la BD manda), más validación en UI.
-  - si luego agregas “staff”, migras la restricción al nivel staff.
-
----
-
-## Seguridad: Auth + RLS (Supabase)
-
-### Roles
-
-- **Owner/Admin**: gestiona todo.
-- **Public (anon)**: solo ve servicios/slots y crea booking bajo reglas.
-
-### RLS recomendado
-
-- Tablas privadas (owner):
-
-  - `services`, `availability_*`, `bookings` (lectura completa), `customers`
-
-- Público:
-
-  - lectura limitada de `services` activos y disponibilidad “derivada”
-  - `insert` en `bookings` solo si:
-
-    - pertenece al `organization_id` del `slug` visitado
-    - el slot es válido y libre
-    - se setean campos controlados (`status=pending`, `source=public`)
-
-> Si quieres máxima simplicidad y control, usa una Edge Function `create_booking` y mantén RLS público muy restrictivo.
-
----
-
-## Estructura del repositorio (template)
-
-```
-/
-  app/                       # Next.js (SPA)
-  public/
-  supabase/
-    migrations/              # SQL migrations (source of truth)
-    seed.sql                 # opcional
-  capacitor.config.ts
-  android/
-  ios/
-  scripts/
-    provision-client.ts      # opcional (automatiza onboarding)
-  README.md
-```
-
----
-
-## Configuración Next.js (SPA + export)
-
-**Objetivo:** deploy estático para minimizar costos.
-
-- Evitar SSR y endpoints propios (salvo que realmente lo necesites).
-- Consumir Supabase directamente desde el cliente (anon key) + Edge Functions para secretos.
-
-Checklist:
-
-- rutas como client components donde aplique
-- caching y splitting por rutas
-- evitar librerías pesadas para el calendario (primero lista + semana simple)
-
----
-
-## Capacitor (workflow recomendado)
-
-### Desarrollo
-
-- `npm run dev` (web)
-- `npx cap sync` (cuando cambie webDir/build)
-- `npx cap open ios|android` (para correr nativo)
-
-### Producción
-
-- `npm run build` (genera el bundle estático)
-- `npx cap sync`
-- build y firma en Xcode/Android Studio
-
-Buenas prácticas:
-
-- manejar deep links (más adelante)
-- usar plugin Network para detectar offline y encolar acciones (MVP+)
-
----
-
-## Variables de entorno (por instancia/cliente)
-
-En Vercel (o tu hosting):
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` _(solo si usas server/edge propio; si todo está en Supabase Functions, no lo pongas aquí)_
-- `APP_BASE_URL` (para links)
-- `DEFAULT_TIMEZONE` (fallback)
-- `WHATSAPP_MODE` = `A | B | C`
-- (Nivel C) `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TOKEN`, `WHATSAPP_VERIFY_TOKEN`
-
-En Supabase (Edge Functions secrets):
-
-- tokens y secretos de WhatsApp (Nivel C)
-- cualquier secreto externo
-
----
-
-## Onboarding de un nuevo cliente (15–30 min)
-
-1. **Crear Supabase Project** (ideal en cuenta del cliente).
-2. Aplicar schema:
-
-   - `supabase db push` (migrations)
-
-3. Insertar configuración inicial:
-
-   - org + slug + horarios + servicios
-
-4. **Crear Vercel Project**:
-
-   - apuntar al repo template
-   - set env vars (URL/ANON KEY)
-   - deploy
-
-5. Configurar dominio (opcional)
-6. Validar: crear reserva pública + ver calendario del dueño
-
----
-
-## Reglas UX “low data” (obligatorias)
-
-- Booking page:
-
-  - máximo 2–3 requests para reservar
-  - carga por día (no cargar todo el mes)
-  - sin imágenes pesadas
-
-- Owner:
-
-  - lista “Hoy” (lo más rápido)
-  - calendario semanal ligero
-
-- Offline:
-
-  - si no hay red, permitir ver caché y “cola” de acciones (MVP+)
-
----
-
-## Roadmap (después del MVP)
-
-- Multi-staff y asignación automática por servicio
-- Recordatorios automáticos (Nivel C)
-- Reprogramación por link
-- Depósito/pagos (Stripe) como add-on
-- Métricas: ocupación, cancelaciones, clientes recurrentes
-- Roles: recepcionista vs dueño
-
----
-
-## Nota sobre “gratis” vs “producción”
-
-Este template está optimizado para costos mínimos, pero:
-
-- Supabase Free pausa proyectos por inactividad y limita activos. ([Supabase][1])
-- Vercel Hobby es para uso no comercial. ([Vercel][2])
-  Para clientes reales, lo correcto es contemplar al menos **un plan pago básico** o que el cliente sea owner y asuma el plan según su caso.
-
----
-
-## Definición de “hecho” para el MVP
-
-- [ ] Crear org + servicios + horarios desde móvil
-- [ ] Booking público crea turno sin solapes
-- [ ] Dueño ve “Hoy” en realtime
-- [ ] Botón WhatsApp (Nivel A) funcionando
-- [ ] Deploy por instancia replicable sin forks
+## Referencias
+
+- [Supabase Auth Documentation](https://supabase.com/docs/guides/auth)
+- [Next.js Static Export](https://nextjs.org/docs/app/building-your-application/deploying/static-exports)
+- [Capacitor Documentation](https://capacitorjs.com/docs)
+- [Supabase RLS](https://supabase.com/docs/guides/auth/row-level-security)
