@@ -221,8 +221,8 @@ Por favor confirma tu asistencia respondiendo:
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-background">
-          <div className="text-center">
+        <div className="flex min-h-screen w-full items-center justify-center bg-background">
+          <div className="flex flex-col items-center justify-center text-center">
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
             <p className="text-sm text-foreground-muted">
               Cargando recordatorios...

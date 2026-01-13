@@ -67,7 +67,7 @@ export default function LoginPage() {
         </div>
       </nav>
 
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-gradient-to-br from-primary-50/50 via-background to-secondary-50/50 dark:from-primary-950/30 dark:via-background dark:to-secondary-950/30 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-linear-to-br from-primary-50/50 via-background to-secondary-50/50 dark:from-primary-950/30 dark:via-background dark:to-secondary-950/30 px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -144,7 +144,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                variant="primary"
+                variant="secondary"
                 size="lg"
                 disabled={loading}
                 className="w-full"

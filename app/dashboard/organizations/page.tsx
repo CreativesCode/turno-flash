@@ -2,8 +2,8 @@
 
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
-import { OrganizationWithLicenseStatus } from "@/types/organization";
 import { UserProfile } from "@/types/auth";
+import { OrganizationWithLicenseStatus } from "@/types/organization";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -18,10 +18,13 @@ export default function OrganizationsPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
 
-  const [organizations, setOrganizations] = useState<OrganizationWithOwner[]>([]);
+  const [organizations, setOrganizations] = useState<OrganizationWithOwner[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [organizationToDelete, setOrganizationToDelete] = useState<OrganizationWithOwner | null>(null);
+  const [organizationToDelete, setOrganizationToDelete] =
+    useState<OrganizationWithOwner | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -146,8 +149,8 @@ export default function OrganizationsPage() {
   if (!profile || profile.role !== "admin") {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-background">
-          <div className="text-center">
+        <div className="flex min-h-screen w-full items-center justify-center bg-background">
+          <div className="flex flex-col items-center justify-center text-center">
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
             <p className="text-sm text-foreground-muted">
               Verificando permisos...
@@ -205,9 +208,9 @@ export default function OrganizationsPage() {
           <div className="rounded-lg bg-white shadow-sm dark:bg-zinc-900">
             {loading ? (
               <div className="flex items-center justify-center p-12">
-                <div className="text-center">
+                <div className="flex flex-col items-center justify-center text-center">
                   <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="text-sm text-foreground-muted">
                     Cargando organizaciones...
                   </p>
                 </div>
@@ -321,12 +324,16 @@ export default function OrganizationsPage() {
                               <span className="text-xs text-zinc-500 dark:text-zinc-400">
                                 {org.days_remaining > 0
                                   ? `${org.days_remaining} días restantes`
-                                  : `Expirada hace ${Math.abs(org.days_remaining)} días`}
+                                  : `Expirada hace ${Math.abs(
+                                      org.days_remaining
+                                    )} días`}
                               </span>
                             )}
                             {org.license_start_date && org.license_end_date && (
                               <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                                {new Date(org.license_end_date).toLocaleDateString("es-ES")}
+                                {new Date(
+                                  org.license_end_date
+                                ).toLocaleDateString("es-ES")}
                               </span>
                             )}
                           </div>
@@ -361,7 +368,9 @@ export default function OrganizationsPage() {
                               disabled={deleting === org.id}
                               className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                              {deleting === org.id ? "Eliminando..." : "Eliminar"}
+                              {deleting === org.id
+                                ? "Eliminando..."
+                                : "Eliminar"}
                             </button>
                           </div>
                         </td>
@@ -389,14 +398,17 @@ export default function OrganizationsPage() {
               </span>
               ? Esta acción no se puede deshacer.
             </p>
-            {organizationToDelete.member_count && organizationToDelete.member_count > 0 && (
-              <div className="mt-4 rounded-md bg-warning-50 p-3 text-sm text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
-                ⚠️ Esta organización tiene {organizationToDelete.member_count}{" "}
-                {organizationToDelete.member_count === 1 ? "miembro" : "miembros"}.
-                Los usuarios seguirán existiendo pero perderán su asociación con
-                esta organización.
-              </div>
-            )}
+            {organizationToDelete.member_count &&
+              organizationToDelete.member_count > 0 && (
+                <div className="mt-4 rounded-md bg-warning-50 p-3 text-sm text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+                  ⚠️ Esta organización tiene {organizationToDelete.member_count}{" "}
+                  {organizationToDelete.member_count === 1
+                    ? "miembro"
+                    : "miembros"}
+                  . Los usuarios seguirán existiendo pero perderán su asociación
+                  con esta organización.
+                </div>
+              )}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={handleDeleteCancel}

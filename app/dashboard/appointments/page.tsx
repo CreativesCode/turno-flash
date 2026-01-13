@@ -644,8 +644,8 @@ Por favor confirma tu asistencia respondiendo:
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-background">
-          <div className="text-center">
+        <div className="flex min-h-screen w-full items-center justify-center bg-background">
+          <div className="flex flex-col items-center justify-center text-center">
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
             <p className="text-sm text-foreground-muted">Cargando turnos...</p>
           </div>
@@ -1431,7 +1431,7 @@ Por favor confirma tu asistencia respondiendo:
       {/* Detail Modal */}
       {showDetailModal && selectedAppointment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
+          <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl border border-border">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-foreground">
                 Detalles del Turno
@@ -1441,7 +1441,7 @@ Por favor confirma tu asistencia respondiendo:
                   setShowDetailModal(false);
                   setSelectedAppointment(null);
                 }}
-                className="rounded-md p-1 hover:bg-subtle"
+                className="rounded-md p-1 text-foreground-muted hover:bg-muted hover:text-foreground transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1459,7 +1459,7 @@ Por favor confirma tu asistencia respondiendo:
             </div>
 
             {/* Client Info */}
-            <div className="mb-4 p-4 rounded-lg bg-muted">
+            <div className="mb-4 p-4 rounded-lg bg-muted border border-border">
               <h3 className="text-sm font-medium text-foreground-muted mb-2">
                 Cliente
               </h3>
@@ -1475,7 +1475,7 @@ Por favor confirma tu asistencia respondiendo:
 
             {/* Service Info */}
             <div className="mb-4 grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-muted">
+              <div className="p-4 rounded-lg bg-muted border border-border">
                 <h3 className="text-sm font-medium text-foreground-muted mb-2">
                   Servicio
                 </h3>
@@ -1484,7 +1484,7 @@ Por favor confirma tu asistencia respondiendo:
                 </p>
               </div>
               {selectedAppointment.staff_first_name && (
-                <div className="p-4 rounded-lg bg-muted">
+                <div className="p-4 rounded-lg bg-muted border border-border">
                   <h3 className="text-sm font-medium text-foreground-muted mb-2">
                     Profesional
                   </h3>
@@ -1498,7 +1498,7 @@ Por favor confirma tu asistencia respondiendo:
 
             {/* Date and Time */}
             <div className="mb-4 grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-muted">
+              <div className="p-4 rounded-lg bg-muted border border-border">
                 <h3 className="text-sm font-medium text-foreground-muted mb-2">
                   Fecha
                 </h3>
@@ -1513,7 +1513,7 @@ Por favor confirma tu asistencia respondiendo:
                   })}
                 </p>
               </div>
-              <div className="p-4 rounded-lg bg-muted">
+              <div className="p-4 rounded-lg bg-muted border border-border">
                 <h3 className="text-sm font-medium text-foreground-muted mb-2">
                   Horario
                 </h3>
@@ -1531,7 +1531,7 @@ Por favor confirma tu asistencia respondiendo:
                 <h3 className="text-sm font-medium text-foreground-muted mb-1">
                   Notas
                 </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm text-foreground-muted">
                   {selectedAppointment.notes}
                 </p>
               </div>
@@ -1626,8 +1626,8 @@ Por favor confirma tu asistencia respondiendo:
                   </div>
 
                   {/* Secondary Actions */}
-                  <div className="space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                    <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    <h4 className="text-xs font-medium text-foreground-muted">
                       Otras acciones
                     </h4>
                     <div className="flex flex-wrap gap-2">

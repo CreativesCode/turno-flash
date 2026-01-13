@@ -250,10 +250,10 @@ export default function NewOrganizationPage() {
   if (checkingAuth || !profile || profile.role !== "admin") {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-background px-4">
-          <div className="text-center">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
-            <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="flex min-h-screen w-full items-center justify-center bg-background px-4">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
+            <p className="text-sm text-foreground-muted">
               {checkingAuth
                 ? "Verificando permisos..."
                 : "No tienes permisos para crear organizaciones"}

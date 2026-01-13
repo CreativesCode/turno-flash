@@ -260,8 +260,8 @@ export default function ServicesPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-background">
-          <div className="text-center">
+        <div className="flex min-h-screen w-full items-center justify-center bg-background">
+          <div className="flex flex-col items-center justify-center text-center">
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
             <p className="text-sm text-foreground-muted">
               Cargando servicios...
