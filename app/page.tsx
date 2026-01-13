@@ -2,7 +2,7 @@ import { getAbsoluteUrl } from "@/utils/metadata";
 import type { Metadata } from "next";
 import HomePageClient from "./home-client";
 
-const ogImageUrl = getAbsoluteUrl("/opengraph-image.png");
+const ogImageUrl = getAbsoluteUrl("/opengraph-image.jpg");
 
 export const metadata: Metadata = {
   title: "Inicio",

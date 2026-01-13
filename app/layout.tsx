@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 // Generar URLs absolutas para metadata (requerido por WhatsApp)
 const siteUrl = getSiteUrl();
-const ogImageUrl = getAbsoluteUrl("/opengraph-image.png");
+const ogImageUrl = getAbsoluteUrl("/opengraph-image.jpg");
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: "Turno Flash - Sistema de Reservas",
-        type: "image/png",
+        type: "image/jpeg",
       },
     ],
   },
@@ -111,7 +111,7 @@ export default function RootLayout({
         {/* Meta tags adicionales para WhatsApp - URLs absolutas explícitas */}
         <meta property="og:image" content={ogImageUrl} />
         <meta property="og:image:secure_url" content={ogImageUrl} />
-        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta

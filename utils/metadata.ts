@@ -8,21 +8,21 @@ const getBaseUrl = (): string => {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL;
   }
-  
+
   // En desarrollo, detectar automáticamente
   if (process.env.NODE_ENV === "development") {
-    return process.env.VERCEL_URL 
+    return process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000";
   }
-  
+
   // Fallback a dominio de producción
   return "https://turnoflash.com";
 };
 
 /**
  * Genera una URL absoluta para recursos estáticos
- * @param path Ruta relativa del recurso (ej: "/opengraph-image.png")
+ * @param path Ruta relativa del recurso (ej: "/opengraph-image.jpg")
  * @returns URL absoluta completa
  */
 export function getAbsoluteUrl(path: string): string {
