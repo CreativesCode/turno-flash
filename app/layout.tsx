@@ -1,4 +1,5 @@
 import { ThemeProviderWrapper } from "@/components/ThemeProviderWrapper";
+import { getAbsoluteUrl, getSiteUrl } from "@/utils/metadata";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -13,16 +14,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Generar URLs absolutas para metadata (requerido por WhatsApp)
+const siteUrl = getSiteUrl();
+const ogImageUrl = getAbsoluteUrl("/opengraph-image.png");
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://turnoflash.com"
-  ),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Turno Flash - Sistema de Reservas Inteligente",
     template: "%s | Turno Flash",
   },
   description:
-    "Sistema de reservas móvil-first para negocios. Gestiona turnos, clientes y servicios desde cualquier dispositivo. Optimizado para salones, barberías, clínicas y talleres.",
+    "Sistema de reservas inteligente para negocios. Gestiona turnos, clientes y servicios desde cualquier dispositivo. Optimizado para salones, barberías, clínicas y talleres.",
   keywords: [
     "sistema de reservas",
     "gestión de turnos",
@@ -53,17 +56,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_ES",
-    url: "/",
+    url: getAbsoluteUrl("/"),
     siteName: "Turno Flash",
     title: "Turno Flash - Sistema de Reservas Inteligente",
     description:
       "Gestiona tus turnos desde cualquier lugar. Sistema de reservas optimizado para móvil, ideal para salones, barberías, clínicas y talleres.",
     images: [
       {
-        url: "/opengraph-image.png",
+        url: ogImageUrl,
         width: 1200,
         height: 630,
         alt: "Turno Flash - Sistema de Reservas",
+        type: "image/png",
       },
     ],
   },
@@ -72,7 +76,7 @@ export const metadata: Metadata = {
     title: "Turno Flash - Sistema de Reservas Inteligente",
     description:
       "Gestiona tus turnos desde cualquier lugar. Optimizado para móvil, bajo consumo de datos.",
-    images: ["/opengraph-image.png"],
+    images: [ogImageUrl],
   },
   robots: {
     index: true,
@@ -104,6 +108,16 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        {/* Meta tags adicionales para WhatsApp - URLs absolutas explícitas */}
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:secure_url" content={ogImageUrl} />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta
+          property="og:image:alt"
+          content="Turno Flash - Sistema de Reservas"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

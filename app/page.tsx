@@ -1,5 +1,8 @@
+import { getAbsoluteUrl } from "@/utils/metadata";
 import type { Metadata } from "next";
 import HomePageClient from "./home-client";
+
+const ogImageUrl = getAbsoluteUrl("/opengraph-image.png");
 
 export const metadata: Metadata = {
   title: "Inicio",
@@ -20,13 +23,14 @@ export const metadata: Metadata = {
     description:
       "Sistema de reservas móvil-first para negocios. Optimizado para salones, barberías, clínicas y talleres.",
     type: "website",
-    url: "/",
+    url: getAbsoluteUrl("/"),
     images: [
       {
-        url: "/opengraph-image.png",
+        url: ogImageUrl,
         width: 1200,
         height: 630,
         alt: "Turno Flash - Sistema de Reservas",
+        type: "image/png",
       },
     ],
   },
@@ -35,7 +39,7 @@ export const metadata: Metadata = {
     title: "Turno Flash - Sistema de Reservas Inteligente",
     description:
       "Gestiona tus turnos desde cualquier lugar. Optimizado para móvil, bajo consumo de datos.",
-    images: ["/opengraph-image.png"],
+    images: [ogImageUrl],
   },
 };
 
