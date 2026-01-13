@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/ensure-platforms.js",
+    "build:next": "next build",
     "start": "next start",
     "lint": "next lint",
     "cap:ensure:android": "node scripts/ensure-platform.js android",
     "cap:ensure:ios": "node scripts/ensure-platform.js ios",
     "cap:sync": "npm run build && npx cap sync",
-    "cap:sync:android": "npm run cap:ensure:android && npm run build && npx cap sync android",
-    "cap:sync:ios": "npm run cap:ensure:ios && npm run build && npx cap sync ios",
+    "cap:sync:android": "npm run cap:ensure:android && npm run build:next && npx cap sync android",
+    "cap:sync:ios": "npm run cap:ensure:ios && npm run build:next && npx cap sync ios",
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android"
   },
