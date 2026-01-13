@@ -14,8 +14,35 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Turno Flash",
-  description: "Sistema de reservas móvil-first para negocios",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://turnoflash.com"
+  ),
+  title: {
+    default: "Turno Flash - Sistema de Reservas Inteligente",
+    template: "%s | Turno Flash",
+  },
+  description:
+    "Sistema de reservas móvil-first para negocios. Gestiona turnos, clientes y servicios desde cualquier dispositivo. Optimizado para salones, barberías, clínicas y talleres.",
+  keywords: [
+    "sistema de reservas",
+    "gestión de turnos",
+    "agenda online",
+    "reservas móvil",
+    "turnos para negocios",
+    "salones de belleza",
+    "barberías",
+    "clínicas",
+    "talleres",
+    "app de citas",
+  ],
+  authors: [{ name: "Turno Flash" }],
+  creator: "Turno Flash",
+  publisher: "Turno Flash",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   viewport: {
     width: "device-width",
     initialScale: 1,
@@ -23,6 +50,47 @@ export const metadata: Metadata = {
     userScalable: false,
     viewportFit: "cover", // Importante para safe areas en iOS
   },
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    url: "/",
+    siteName: "Turno Flash",
+    title: "Turno Flash - Sistema de Reservas Inteligente",
+    description:
+      "Gestiona tus turnos desde cualquier lugar. Sistema de reservas optimizado para móvil, ideal para salones, barberías, clínicas y talleres.",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Turno Flash - Sistema de Reservas",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Turno Flash - Sistema de Reservas Inteligente",
+    description:
+      "Gestiona tus turnos desde cualquier lugar. Optimizado para móvil, bajo consumo de datos.",
+    images: ["/opengraph-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
+  category: "business",
 };
 
 export default function RootLayout({

@@ -1,6 +1,7 @@
 "use client";
 
 import { DayCalendar, WeekCalendar } from "@/components/calendar";
+import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -656,6 +657,10 @@ Por favor confirma tu asistencia respondiendo:
 
   return (
     <ProtectedRoute>
+      <PageMetadata
+        title="Turnos"
+        description="Gestiona tus turnos y citas. Visualiza tu calendario, crea nuevas citas, confirma o cancela reservas existentes."
+      />
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}

@@ -1,5 +1,6 @@
 "use client";
 
+import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { AppointmentWithDetails } from "@/types/appointments";
@@ -235,6 +236,10 @@ Por favor confirma tu asistencia respondiendo:
 
   return (
     <ProtectedRoute>
+      <PageMetadata
+        title="Recordatorios"
+        description="Envía recordatorios de turnos a tus clientes por WhatsApp. Gestiona notificaciones automáticas para mejorar la asistencia a las citas."
+      />
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}

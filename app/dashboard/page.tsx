@@ -4,6 +4,7 @@ import {
   LicenseNotification,
   LicenseNotificationBanner,
 } from "@/components/license-notification";
+import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { LicenseStatusResult } from "@/types/organization";
@@ -126,6 +127,10 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
+      <PageMetadata
+        title="Panel de Control"
+        description="Accede a tu panel de control de Turno Flash. Gestiona turnos, clientes, servicios y profesionales desde un solo lugar."
+      />
       <div className="min-h-screen bg-background">
         {/* Banner de notificación de licencia en la parte superior */}
         {licenseStatus && shouldShowLicenseNotification(licenseStatus) && (

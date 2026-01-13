@@ -1,5 +1,6 @@
 "use client";
 
+import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { UserProfile, UserRole } from "@/types/auth";
@@ -304,6 +305,10 @@ export default function UsersManagementPage() {
 
   return (
     <ProtectedRoute>
+      <PageMetadata
+        title="Usuarios"
+        description="Gestiona los usuarios del sistema. Administra roles, permisos, invitaciones y acceso de usuarios."
+      />
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}

@@ -1,5 +1,6 @@
 "use client";
 
+import { PageMetadata } from "@/components/page-metadata";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
 import { ArrowLeft, Eye, EyeOff, Zap } from "lucide-react";
@@ -46,6 +47,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMetadata
+        title="Iniciar Sesión"
+        description="Inicia sesión en Turno Flash para acceder a tu panel de control y gestionar tus turnos, clientes y servicios."
+      />
       {/* Navigation */}
       <nav className="border-b border-border bg-surface/80 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

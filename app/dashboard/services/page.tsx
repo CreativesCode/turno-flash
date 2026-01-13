@@ -1,5 +1,6 @@
 "use client";
 
+import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { Service, ServiceFormData } from "@/types/appointments";
@@ -274,6 +275,10 @@ export default function ServicesPage() {
 
   return (
     <ProtectedRoute>
+      <PageMetadata
+        title="Servicios"
+        description="Gestiona los servicios que ofreces. Configura duración, precios, tiempos de buffer y disponibilidad de cada servicio."
+      />
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}

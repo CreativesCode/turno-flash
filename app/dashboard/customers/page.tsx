@@ -1,5 +1,6 @@
 "use client";
 
+import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { Customer, CustomerFormData } from "@/types/appointments";
@@ -236,6 +237,10 @@ export default function CustomersPage() {
 
   return (
     <ProtectedRoute>
+      <PageMetadata
+        title="Clientes"
+        description="Gestiona tu base de clientes. Agrega, edita y administra la información de tus clientes, incluyendo contacto y notas importantes."
+      />
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}

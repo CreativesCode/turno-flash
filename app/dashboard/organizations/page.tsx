@@ -1,5 +1,6 @@
 "use client";
 
+import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { UserProfile } from "@/types/auth";
@@ -163,6 +164,10 @@ export default function OrganizationsPage() {
 
   return (
     <ProtectedRoute>
+      <PageMetadata
+        title="Organizaciones"
+        description="Gestiona las organizaciones del sistema. Administra información, licencias y miembros de cada organización."
+      />
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}

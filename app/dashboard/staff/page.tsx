@@ -1,5 +1,6 @@
 "use client";
 
+import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { StaffMember, StaffMemberFormData } from "@/types/appointments";
@@ -289,6 +290,10 @@ export default function StaffPage() {
 
   return (
     <ProtectedRoute>
+      <PageMetadata
+        title="Profesionales"
+        description="Gestiona tu equipo de profesionales. Administra staff members, sus horarios de disponibilidad y los servicios que pueden ofrecer."
+      />
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
