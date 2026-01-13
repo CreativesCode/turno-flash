@@ -2,7 +2,10 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+
+// Timeout para verificación de auth (10 segundos)
+const AUTH_CHECK_TIMEOUT_MS = 10000;
 
 export default function InvitePage() {
   const [email, setEmail] = useState("");
@@ -11,34 +14,59 @@ export default function InvitePage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
+
+  // Memoizar el cliente de Supabase para evitar re-renders infinitos
+  const supabase = useMemo(() => createClient(), []);
+
+  // Ref para evitar verificación múltiple
+  const hasChecked = useRef(false);
 
   useEffect(() => {
+    // Evitar verificación múltiple
+    if (hasChecked.current) return;
+    hasChecked.current = true;
+
     // Verificar que el usuario esté autenticado y sea admin
     const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
+      // Timeout de seguridad
+      const timeoutId = setTimeout(() => {
+        console.warn("Auth check timeout in invite page");
         router.push("/login");
-        return;
+      }, AUTH_CHECK_TIMEOUT_MS);
+
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError || !session) {
+          clearTimeout(timeoutId);
+          router.push("/login");
+          return;
+        }
+
+        // Obtener el rol del usuario desde la base de datos
+        const { data: userData, error: profileError } = await supabase
+          .from("user_profiles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .single();
+
+        clearTimeout(timeoutId);
+
+        if (profileError || !userData || userData.role !== "admin") {
+          // Si no es admin, redirigir al dashboard
+          router.push("/dashboard");
+          return;
+        }
+
+        setUserRole(userData.role);
+      } catch (err) {
+        clearTimeout(timeoutId);
+        console.error("Error checking auth:", err);
+        router.push("/login");
       }
-
-      // Obtener el rol del usuario desde la base de datos
-      const { data: userData } = await supabase
-        .from("user_profiles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (!userData || userData.role !== "admin") {
-        // Si no es admin, redirigir al dashboard
-        router.push("/dashboard");
-        return;
-      }
-
-      setUserRole(userData.role);
     };
 
     checkAuth();

@@ -5,12 +5,15 @@ import { useAuth } from "@/contexts/auth-context";
 import { UserProfile, UserRole } from "@/types/auth";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 export default function UsersManagementPage() {
   const { profile, refreshProfile, signOut } = useAuth();
   const router = useRouter();
-  const supabase = createClient();
+
+  // Memoizar el cliente de Supabase para evitar re-renders infinitos
+  const supabase = useMemo(() => createClient(), []);
+
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -25,6 +28,30 @@ export default function UsersManagementPage() {
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
+  // Función para cargar usuarios (memoizada para evitar re-renders)
+  const loadUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data, error: fetchError } = await supabase
+        .from("user_profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (fetchError) {
+        setError("Error al cargar usuarios: " + fetchError.message);
+        console.error(fetchError);
+      } else {
+        setUsers(data || []);
+        setError(null);
+      }
+    } catch (err) {
+      setError("Error inesperado al cargar usuarios");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase]);
+
   // Verificar que el usuario sea admin
   useEffect(() => {
     if (profile && profile.role !== "admin") {
@@ -37,30 +64,7 @@ export default function UsersManagementPage() {
     if (profile?.role === "admin") {
       loadUsers();
     }
-  }, [profile]);
-
-  const loadUsers = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        setError("Error al cargar usuarios: " + error.message);
-        console.error(error);
-      } else {
-        setUsers(data || []);
-        setError(null);
-      }
-    } catch (err) {
-      setError("Error inesperado al cargar usuarios");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [profile, loadUsers]);
 
   const handleRoleChange = async (userId: string, newRole: UserRole) => {
     try {

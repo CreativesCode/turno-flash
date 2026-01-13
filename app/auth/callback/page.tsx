@@ -1,12 +1,18 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+// Timeout para el callback de autenticación (30 segundos)
+const CALLBACK_TIMEOUT_MS = 30000;
 
 export default function AuthCallbackPage() {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState("Procesando autenticación...");
   const hasProcessed = useRef(false);
+
+  // Memoizar el cliente de Supabase
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -14,7 +20,13 @@ export default function AuthCallbackPage() {
       if (hasProcessed.current) return;
       hasProcessed.current = true;
 
-      const supabase = createClient();
+      // Timeout de seguridad
+      const timeoutId = setTimeout(() => {
+        console.warn("Auth callback timeout reached");
+        setError(
+          "La autenticación está tardando demasiado. Por favor, intenta nuevamente."
+        );
+      }, CALLBACK_TIMEOUT_MS);
 
       try {
         // Obtener parámetros de la URL
@@ -54,6 +66,7 @@ export default function AuthCallbackPage() {
           });
 
           if (sessionError) {
+            clearTimeout(timeoutId);
             console.error("Error setting session:", sessionError);
             setError(sessionError.message);
             return;
@@ -69,6 +82,7 @@ export default function AuthCallbackPage() {
             await supabase.auth.exchangeCodeForSession(code);
 
           if (exchangeError) {
+            clearTimeout(timeoutId);
             console.error("Error exchanging code:", exchangeError);
             // Si el error es de PKCE, dar instrucciones más claras
             if (
@@ -88,10 +102,13 @@ export default function AuthCallbackPage() {
         }
 
         if (!session) {
+          clearTimeout(timeoutId);
           setError("No se encontraron parámetros de autenticación válidos");
           return;
         }
 
+        // Limpiar timeout - autenticación exitosa
+        clearTimeout(timeoutId);
         console.log("Session established for:", session.user.email);
 
         // Si es un magic link de invitación, redirigir a configurar contraseña
@@ -109,13 +126,14 @@ export default function AuthCallbackPage() {
         console.log("Redirecting to dashboard");
         window.location.href = "/dashboard";
       } catch (err) {
+        clearTimeout(timeoutId);
         console.error("Error in callback:", err);
         setError("Error al procesar la autenticación");
       }
     };
 
     handleCallback();
-  }, []);
+  }, [supabase]);
 
   if (error) {
     return (

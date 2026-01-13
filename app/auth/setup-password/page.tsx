@@ -1,7 +1,10 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+
+// Timeout para verificación de sesión (10 segundos)
+const SESSION_CHECK_TIMEOUT_MS = 10000;
 
 export default function SetupPasswordPage() {
   const [password, setPassword] = useState("");
@@ -12,29 +15,52 @@ export default function SetupPasswordPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const hasChecked = useRef(false);
 
+  // Memoizar el cliente de Supabase
+  const supabase = useMemo(() => createClient(), []);
+
   useEffect(() => {
     // Verificar que el usuario tenga una sesión activa
     const checkSession = async () => {
       if (hasChecked.current) return;
       hasChecked.current = true;
 
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        // Si no hay sesión, redirigir al login
+      // Timeout de seguridad
+      const timeoutId = setTimeout(() => {
+        console.warn("Session check timeout - redirecting to login");
         window.location.href = "/login";
-        return;
-      }
+      }, SESSION_CHECK_TIMEOUT_MS);
 
-      setUserEmail(session.user.email || null);
-      setCheckingSession(false);
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        clearTimeout(timeoutId);
+
+        if (sessionError) {
+          console.error("Error checking session:", sessionError);
+          window.location.href = "/login";
+          return;
+        }
+
+        if (!session) {
+          // Si no hay sesión, redirigir al login
+          window.location.href = "/login";
+          return;
+        }
+
+        setUserEmail(session.user.email || null);
+        setCheckingSession(false);
+      } catch (err) {
+        clearTimeout(timeoutId);
+        console.error("Error in session check:", err);
+        window.location.href = "/login";
+      }
     };
 
     checkSession();
-  }, []);
+  }, [supabase]);
 
   const handleSetupPassword = async (e: FormEvent) => {
     e.preventDefault();
@@ -56,9 +82,7 @@ export default function SetupPasswordPage() {
     }
 
     try {
-      const supabase = createClient();
-
-      // Actualizar la contraseña del usuario
+      // Actualizar la contraseña del usuario (usando el cliente memoizado)
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
       });

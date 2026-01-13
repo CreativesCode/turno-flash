@@ -2,7 +2,11 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
+
+// Timeout máximo para la verificación de ruta protegida (15 segundos)
+// Este es un fallback adicional al timeout del AuthContext
+const PROTECTED_ROUTE_TIMEOUT_MS = 15000;
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -26,15 +30,43 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [timedOut, setTimedOut] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Timeout de seguridad para evitar quedarse colgado indefinidamente
+  useEffect(() => {
+    if (loading && !timedOut) {
+      timeoutRef.current = setTimeout(() => {
+        console.warn("ProtectedRoute: verification timeout reached");
+        setTimedOut(true);
+      }, PROTECTED_ROUTE_TIMEOUT_MS);
+    }
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [loading, timedOut]);
+
+  // Limpiar timeout cuando loading termine
+  useEffect(() => {
+    if (!loading && timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, [loading]);
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Si no está loading Y no hay usuario, O si hubo timeout, redirigir
+    if ((!loading && !user) || (timedOut && !user)) {
       router.push(redirectTo);
     }
-  }, [user, loading, router, redirectTo]);
+  }, [user, loading, router, redirectTo, timedOut]);
 
-  // Mostrar loading mientras verifica auth
-  if (loading) {
+  // Mostrar loading mientras verifica auth (solo si no ha expirado el timeout)
+  if (loading && !timedOut) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
         <div className="text-center">
@@ -45,6 +77,12 @@ export function ProtectedRoute({
         </div>
       </div>
     );
+  }
+
+  // Si hubo timeout y hay usuario, mostrar el contenido de todas formas
+  // (el perfil podría no estar cargado completamente pero al menos tiene sesión)
+  if (timedOut && user) {
+    return <>{children}</>;
   }
 
   // No mostrar nada si no está autenticado (mientras redirige)

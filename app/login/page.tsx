@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -10,7 +10,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
+
+  // Memoizar el cliente de Supabase para evitar re-renders
+  const supabase = useMemo(() => createClient(), []);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();

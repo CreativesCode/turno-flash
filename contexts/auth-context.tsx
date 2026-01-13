@@ -9,8 +9,13 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
+  useRef,
   useState,
 } from "react";
+
+// Timeout máximo para la verificación inicial de autenticación (10 segundos)
+const AUTH_TIMEOUT_MS = 10000;
 
 interface AuthContextType {
   user: User | null;
@@ -34,7 +39,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+
+  // Memoizar el cliente de Supabase para evitar crear una nueva instancia en cada render
+  const supabase = useMemo(() => createClient(), []);
+
+  // Ref para evitar inicialización múltiple
+  const isInitialized = useRef(false);
+  // Ref para el timeout de seguridad
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadUserProfile = useCallback(
     async (authUser: User) => {
@@ -73,6 +85,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error("Error loading user profile:", err);
         setProfile(null);
       } finally {
+        // Limpiar timeout si existe
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
         setLoading(false);
       }
     },
@@ -80,20 +97,68 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   useEffect(() => {
-    // Obtener sesión inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        loadUserProfile(session.user);
-      } else {
+    // Evitar inicialización múltiple (React Strict Mode ejecuta efectos dos veces)
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+
+    // Establecer un timeout de seguridad para evitar quedarse colgado indefinidamente
+    timeoutRef.current = setTimeout(() => {
+      console.warn("Auth timeout reached - forcing loading to false");
+      setLoading(false);
+    }, AUTH_TIMEOUT_MS);
+
+    // Función async para la inicialización
+    const initAuth = async () => {
+      try {
+        // Obtener sesión inicial
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("Error getting session:", error);
+          // Limpiar timeout y terminar loading
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+          }
+          setLoading(false);
+          return;
+        }
+
+        if (session?.user) {
+          setUser(session.user);
+          await loadUserProfile(session.user);
+        } else {
+          // Limpiar timeout y terminar loading
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+          }
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Error in auth initialization:", err);
+        // Limpiar timeout y terminar loading en caso de error
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
         setLoading(false);
       }
-    });
+    };
+
+    initAuth();
 
     // Escuchar cambios en la autenticación
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Ignorar el evento INITIAL_SESSION ya que lo manejamos manualmente arriba
+      if (event === "INITIAL_SESSION") return;
+
+      console.log("Auth state changed:", event);
       setUser(session?.user ?? null);
 
       if (session?.user) {
@@ -106,31 +171,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return () => {
       subscription.unsubscribe();
+      // Limpiar timeout al desmontar
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
-  }, [supabase.auth, loadUserProfile]);
+  }, [supabase, loadUserProfile]);
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
-  }
+  }, [supabase]);
 
-  async function refreshProfile() {
+  const refreshProfile = useCallback(async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
       await loadUserProfile(user);
     }
-  }
+  }, [supabase, loadUserProfile]);
 
-  const value: AuthContextType = {
-    user,
-    profile,
-    loading,
-    signOut,
-    refreshProfile,
-  };
+  const value: AuthContextType = useMemo(
+    () => ({
+      user,
+      profile,
+      loading,
+      signOut,
+      refreshProfile,
+    }),
+    [user, profile, loading, signOut, refreshProfile]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
