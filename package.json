@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "cap:ensure:android": "node scripts/ensure-platform.js android",
+    "cap:ensure:ios": "node scripts/ensure-platform.js ios",
     "cap:sync": "npm run build && npx cap sync",
+    "cap:sync:android": "npm run cap:ensure:android && npm run build && npx cap sync android",
+    "cap:sync:ios": "npm run cap:ensure:ios && npm run build && npx cap sync ios",
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android"
   },
