@@ -14,13 +14,18 @@
     "cap:sync:android": "npm run cap:ensure:android && npm run build:next && npx cap sync android",
     "cap:sync:ios": "npm run cap:ensure:ios && npm run build:next && npx cap sync ios",
     "cap:ios": "npx cap open ios",
-    "cap:android": "npx cap open android"
+    "cap:android": "npx cap open android",
+    "mobile:dev": "npm run build:next && npx cap sync && npm run dev",
+    "mobile:build": "npm run build:next && npx cap sync",
+    "mobile:build:ios": "npm run cap:sync:ios && npm run cap:ios",
+    "mobile:build:android": "npm run cap:sync:android && npm run cap:android"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
     "@capacitor/cli": "^8.0.0",
     "@capacitor/core": "^8.0.0",
     "@capacitor/ios": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
     "@hookform/resolvers": "^5.2.2",
     "@supabase/supabase-js": "^2.90.1",
     "date-fns": "^4.1.0",

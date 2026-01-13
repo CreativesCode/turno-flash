@@ -2,24 +2,23 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
+import { useCapacitor } from "@/hooks/useCapacitor";
 import {
   Bell,
   Building2,
   Calendar,
   Home,
   LogOut,
-  Menu,
   Moon,
   Package,
   Sun,
   UserCog,
   UserPlus,
   Users,
-  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 interface NavItem {
   name: string;
@@ -29,12 +28,17 @@ interface NavItem {
   requiresOrg?: boolean; // Requiere organización
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
+  const { isMobile } = useCapacitor();
 
   // Navigation items with permissions
   const navItems: NavItem[] = useMemo(
@@ -132,35 +136,35 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed left-4 top-4 z-50 rounded-md bg-surface p-2 shadow-md lg:hidden"
-      >
-        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </button>
-
       {/* Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-surface shadow-lg transition-transform duration-200 lg:translate-x-0 ${
+        className={`fixed left-0 top-0 bottom-0 z-40 w-64 transform bg-surface shadow-lg transition-transform duration-300 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={
+          isMobile
+            ? {
+                top: "calc(env(safe-area-inset-top, 0px) + 3.5rem)",
+                paddingBottom: "env(safe-area-inset-bottom, 0px)",
+              }
+            : undefined
+        }
       >
         <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-16 items-center justify-center border-b border-border">
+          {/* Logo - Solo visible en desktop */}
+          <div className="hidden lg:flex h-16 items-center justify-center border-b border-border">
             <Link
               href="/dashboard"
               className="text-xl font-bold text-info"
-              onClick={() => setIsOpen(false)}
+              onClick={onClose}
             >
               🗓️ TurnoFlash
             </Link>
@@ -181,13 +185,13 @@ export function Sidebar() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4">
+          <nav className="flex-1 overflow-y-auto p-4 pb-safe">
             <ul className="space-y-1">
               {filteredNavItems.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    onClick={() => setIsOpen(false)}
+                    onClick={onClose}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       isActive(item.href)
                         ? "bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-200"
