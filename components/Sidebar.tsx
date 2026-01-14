@@ -5,6 +5,7 @@ import { useTheme } from "@/contexts/theme-context";
 import { useCapacitor } from "@/hooks/useCapacitor";
 import { createClient } from "@/utils/supabase/client";
 import {
+  AlertTriangle,
   Bell,
   Building2,
   Calendar,
@@ -100,6 +101,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         name: "Invitar",
         href: "/dashboard/invite",
         icon: <UserPlus className="h-5 w-5" />,
+        roles: ["admin", "owner"],
+      },
+      {
+        name: "Errores",
+        href: "/dashboard/errors",
+        icon: <AlertTriangle className="h-5 w-5" />,
         roles: ["admin", "owner"],
       },
     ],

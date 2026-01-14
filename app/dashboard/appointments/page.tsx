@@ -7,13 +7,13 @@ import { useAuth } from "@/contexts/auth-context";
 import {
   useAppointmentsQuery,
   useCreateAppointment,
-  useUpdateAppointmentStatus,
-  useSendReminder,
-  useCustomersQuery,
   useCreateCustomer,
+  useCustomersQuery,
+  useSendReminder,
   useServicesQuery,
   useStaffQuery,
   useToast,
+  useUpdateAppointmentStatus,
 } from "@/hooks";
 import { AppointmentService } from "@/services";
 import {
@@ -123,10 +123,9 @@ export default function AppointmentsPage() {
     endDate: getDateRange.end,
   });
 
-  const {
-    customers,
-    loading: customersLoading,
-  } = useCustomersQuery({ isActive: true });
+  const { customers, loading: customersLoading } = useCustomersQuery({
+    isActive: true,
+  });
 
   const { services, loading: servicesLoading } = useServicesQuery({
     isActive: true,
@@ -287,7 +286,16 @@ export default function AppointmentsPage() {
     const loadingToast = toast.loading("Creando cliente...");
 
     try {
-      const customer = await createCustomerMutation.mutateAsync(newCustomerData);
+      const customer = await createCustomerMutation.mutateAsync(
+        newCustomerData
+      );
+
+      if (!customer || !customer.id) {
+        throw new Error(
+          "No se pudo crear el cliente. El cliente retornado es inválido."
+        );
+      }
+
       console.log("✅ Cliente creado exitosamente:", customer.id);
 
       // Select the new customer
@@ -307,7 +315,10 @@ export default function AppointmentsPage() {
       });
       setShowNewCustomerForm(false);
       toast.dismiss(loadingToast);
-      toast.success("Cliente creado", `${newCustomerData.first_name} ${newCustomerData.last_name} ha sido agregado`);
+      toast.success(
+        "Cliente creado",
+        `${newCustomerData.first_name} ${newCustomerData.last_name} ha sido agregado`
+      );
     } catch (error) {
       console.error("❌ Error al crear cliente:", error);
       toast.dismiss(loadingToast);
@@ -343,7 +354,10 @@ export default function AppointmentsPage() {
       }
 
       toast.dismiss(loadingToast);
-      toast.success("Recordatorio enviado", `Se envió a ${appointment.customer_first_name}`);
+      toast.success(
+        "Recordatorio enviado",
+        `Se envió a ${appointment.customer_first_name}`
+      );
 
       // Update the selected appointment in the modal
       if (selectedAppointment?.id === appointment.id) {
@@ -367,7 +381,12 @@ export default function AppointmentsPage() {
 
   // Update appointment status using hook
   const updateStatus = async (appointmentId: string, newStatus: string) => {
-    console.log("🔵 Actualizando estado del turno:", appointmentId, "->", newStatus);
+    console.log(
+      "🔵 Actualizando estado del turno:",
+      appointmentId,
+      "->",
+      newStatus
+    );
     const loadingToast = toast.loading("Actualizando estado...");
 
     try {
@@ -378,7 +397,10 @@ export default function AppointmentsPage() {
 
       console.log("✅ Estado actualizado exitosamente");
       toast.dismiss(loadingToast);
-      toast.success("Estado actualizado", "El estado del turno ha sido actualizado");
+      toast.success(
+        "Estado actualizado",
+        "El estado del turno ha sido actualizado"
+      );
 
       // Update the selected appointment in the modal
       if (selectedAppointment?.id === appointmentId) {
@@ -397,7 +419,6 @@ export default function AppointmentsPage() {
       } else {
         toast.error("Error inesperado", "No se pudo actualizar el estado");
       }
-      console.error("Error updating status:", err);
       setError("Error al actualizar estado");
     }
   };
@@ -525,7 +546,6 @@ export default function AppointmentsPage() {
               {error}
             </div>
           )}
-
 
           {/* Filters */}
           <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1245,11 +1265,15 @@ export default function AppointmentsPage() {
                 <button
                   type="submit"
                   disabled={
-                    createAppointmentMutation.isPending || customers.length === 0 || services.length === 0
+                    createAppointmentMutation.isPending ||
+                    customers.length === 0 ||
+                    services.length === 0
                   }
                   className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {createAppointmentMutation.isPending ? "Guardando..." : "Crear Turno"}
+                  {createAppointmentMutation.isPending
+                    ? "Guardando..."
+                    : "Crear Turno"}
                 </button>
               </div>
             </form>

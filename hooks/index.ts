@@ -67,6 +67,16 @@ export {
   useUpdateStaffMember,
 } from "./useStaff.query";
 
+// Error logs hooks (React Query powered)
+export {
+  useErrorLogsQuery,
+  useErrorStatsQuery,
+  useResolveError,
+  useUnresolveError,
+  type ErrorLog,
+  type ErrorLogsQueryParams,
+} from "./useErrorLogs.query";
+
 // Other hooks
 export { useAuth } from "./use-auth";
 export { useCapacitor } from "./useCapacitor";
