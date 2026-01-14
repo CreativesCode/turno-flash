@@ -77,6 +77,13 @@ export {
   type ErrorLogsQueryParams,
 } from "./useErrorLogs.query";
 
+// Normalized data hook
+export {
+  useNormalizedData,
+  type UseNormalizedDataOptions,
+  type UseNormalizedDataReturn,
+} from "./useNormalizedData";
+
 // Other hooks
 export { useAuth } from "./use-auth";
 export { useCapacitor } from "./useCapacitor";

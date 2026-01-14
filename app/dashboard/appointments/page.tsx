@@ -5,13 +5,10 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import {
-  useAppointmentsQuery,
   useCreateAppointment,
   useCreateCustomer,
-  useCustomersQuery,
+  useNormalizedData,
   useSendReminder,
-  useServicesQuery,
-  useStaffQuery,
   useToast,
   useUpdateAppointmentStatus,
 } from "@/hooks";
@@ -113,28 +110,29 @@ export default function AppointmentsPage() {
     };
   }, [selectedDate, view]);
 
-  // 🎉 Use React Query hooks for all data!
-  const {
-    appointments,
-    loading: appointmentsLoading,
-    error: appointmentsError,
-  } = useAppointmentsQuery({
-    startDate: getDateRange.start,
-    endDate: getDateRange.end,
+  // 🎉 Use Normalized Data Hook for consistent, deduplicated state!
+  const normalizedData = useNormalizedData({
+    appointmentFilters: {
+      startDate: getDateRange.start,
+      endDate: getDateRange.end,
+    },
+    customerFilters: {
+      isActive: true,
+    },
+    serviceFilters: {
+      isActive: true,
+    },
+    staffFilters: {
+      isActive: true,
+      isBookable: true,
+    },
   });
 
-  const { customers, loading: customersLoading } = useCustomersQuery({
-    isActive: true,
-  });
-
-  const { services, loading: servicesLoading } = useServicesQuery({
-    isActive: true,
-  });
-
-  const { staff: staffMembers, loading: staffLoading } = useStaffQuery({
-    isActive: true,
-    isBookable: true,
-  });
+  // Extract data from normalized state (backward compatible)
+  const appointments = normalizedData.appointments;
+  const customers = normalizedData.customers;
+  const services = normalizedData.services;
+  const staffMembers = normalizedData.staff;
 
   const createAppointmentMutation = useCreateAppointment();
   const updateAppointmentStatusMutation = useUpdateAppointmentStatus();
@@ -142,11 +140,10 @@ export default function AppointmentsPage() {
   const createCustomerMutation = useCreateCustomer();
 
   // Combined loading state
-  const loading =
-    appointmentsLoading || customersLoading || servicesLoading || staffLoading;
+  const loading = normalizedData.loading;
 
   // Combine hook errors with local errors
-  const error = appointmentsError || localError;
+  const error = normalizedData.error || localError;
 
   // Helper to set error (local error takes precedence)
   const setError = (errorMsg: string | null) => {
