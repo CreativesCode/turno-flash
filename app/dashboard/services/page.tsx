@@ -3,7 +3,14 @@
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
-import { useServices } from "@/hooks";
+import {
+  useServicesQuery,
+  useCreateService,
+  useUpdateService,
+  useDeactivateService,
+  useReactivateService,
+  useToast,
+} from "@/hooks";
 import { Service, ServiceFormData } from "@/types/appointments";
 import {
   Clock,
@@ -24,26 +31,26 @@ export default function ServicesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
+  const toast = useToast();
 
   // Check if user can manage services (only owner and admin)
   const canManageServices = useMemo(() => {
     return profile?.role === "admin" || profile?.role === "owner";
   }, [profile]);
 
-  // 🎉 Use the new useServices hook!
+  // 🎉 Use the new React Query hooks!
   const {
     services: filteredServices,
     loading,
     error,
-    createService,
-    updateService,
-    deactivateService,
-    reactivateService,
-  } = useServices({
+  } = useServicesQuery({
     isActive: true,
   });
+
+  const createServiceMutation = useCreateService();
+  const updateServiceMutation = useUpdateService();
+  const deactivateServiceMutation = useDeactivateService();
+  const reactivateServiceMutation = useReactivateService();
 
   // Filter services manually (hook doesn't support search yet)
   const searchedServices = useMemo(() => {
@@ -126,28 +133,47 @@ export default function ServicesPage() {
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
 
-    setSaving(true);
-    setSuccess(null);
+    console.log("🔵 Guardando servicio...", formData);
+    const loadingToast = toast.loading(
+      editingService ? "Actualizando servicio..." : "Creando servicio..."
+    );
 
     try {
-      const result = editingService
-        ? await updateService(editingService.id, formData)
-        : await createService(formData);
-
-      if (result.success) {
-        setSuccess(
-          editingService
-            ? "Servicio actualizado exitosamente"
-            : "Servicio creado exitosamente"
+      if (editingService) {
+        console.log("🔵 Actualizando servicio existente:", editingService.id);
+        await updateServiceMutation.mutateAsync({
+          serviceId: editingService.id,
+          data: formData,
+        });
+        console.log("✅ Servicio actualizado exitosamente");
+        toast.dismiss(loadingToast);
+        toast.success(
+          "Servicio actualizado",
+          `"${formData.name}" ha sido actualizado`
         );
-        setShowModal(false);
-        resetForm();
-        setTimeout(() => setSuccess(null), 3000);
       } else {
-        alert(`Error: ${result.error}`);
+        console.log("🔵 Creando nuevo servicio");
+        await createServiceMutation.mutateAsync(formData);
+        console.log("✅ Servicio creado exitosamente");
+        toast.dismiss(loadingToast);
+        toast.success("Servicio creado", `"${formData.name}" está ahora disponible`);
       }
-    } finally {
-      setSaving(false);
+
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      console.error("❌ Error al guardar servicio:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        if (error.message.includes("Validación fallida")) {
+          toast.validationError(error.message);
+        } else {
+          toast.error("Error al guardar servicio", error.message);
+        }
+      } else {
+        toast.error("Error inesperado", "No se pudo guardar el servicio");
+      }
     }
   };
 
@@ -159,24 +185,52 @@ export default function ServicesPage() {
       return;
     }
 
-    const result = await deactivateService(service.id);
+    console.log("🔵 Desactivando servicio:", service.id);
+    const loadingToast = toast.loading("Desactivando servicio...");
 
-    if (result.success) {
-      setSuccess("Servicio desactivado exitosamente");
-      setTimeout(() => setSuccess(null), 3000);
-    } else {
-      alert(`Error: ${result.error}`);
+    try {
+      await deactivateServiceMutation.mutateAsync(service.id);
+      console.log("✅ Servicio desactivado exitosamente");
+      toast.dismiss(loadingToast);
+      toast.success("Servicio desactivado", `"${service.name}" ha sido desactivado`);
+    } catch (error) {
+      console.error("❌ Error al desactivar servicio:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        toast.error("Error al desactivar servicio", error.message);
+      } else {
+        toast.error("Error inesperado", "No se pudo desactivar el servicio");
+      }
     }
   };
 
   // Toggle active status
   const toggleActive = async (service: Service) => {
-    const result = service.is_active
-      ? await deactivateService(service.id)
-      : await reactivateService(service.id);
+    console.log("🔵 Cambiando estado del servicio:", service.id, service.is_active ? "desactivar" : "activar");
+    const loadingToast = toast.loading(service.is_active ? "Desactivando..." : "Activando...");
 
-    if (!result.success) {
-      alert(`Error: ${result.error}`);
+    try {
+      if (service.is_active) {
+        await deactivateServiceMutation.mutateAsync(service.id);
+        console.log("✅ Servicio desactivado");
+        toast.dismiss(loadingToast);
+        toast.success("Servicio desactivado", `"${service.name}" ha sido desactivado`);
+      } else {
+        await reactivateServiceMutation.mutateAsync(service.id);
+        console.log("✅ Servicio activado");
+        toast.dismiss(loadingToast);
+        toast.success("Servicio activado", `"${service.name}" ha sido activado`);
+      }
+    } catch (error) {
+      console.error("❌ Error al cambiar estado del servicio:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        toast.error("Error", error.message);
+      } else {
+        toast.error("Error inesperado", "No se pudo cambiar el estado del servicio");
+      }
     }
   };
 
@@ -226,12 +280,6 @@ export default function ServicesPage() {
           {error && (
             <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
-              {success}
             </div>
           )}
 
@@ -575,17 +623,21 @@ export default function ServicesPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  disabled={saving}
+                  disabled={createServiceMutation.isPending || updateServiceMutation.isPending}
                   className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={createServiceMutation.isPending || updateServiceMutation.isPending}
                   className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {saving ? "Guardando..." : "Guardar"}
+                  {(createServiceMutation.isPending || updateServiceMutation.isPending)
+                    ? "Guardando..."
+                    : editingService
+                    ? "Guardar Cambios"
+                    : "Crear Servicio"}
                 </button>
               </div>
             </form>

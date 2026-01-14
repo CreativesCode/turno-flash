@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/auth-context";
+import { customerFormSchema, customerUpdateSchema } from "@/schemas";
 import { CustomerService } from "@/services/customers.service";
 import { Customer, CustomerFormData } from "@/types/appointments";
 import {
@@ -7,6 +8,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { ZodError } from "zod";
 
 /**
  * Filters for customers query
@@ -74,7 +76,7 @@ export function useCustomers(
 }
 
 /**
- * Hook for creating customers with automatic cache invalidation
+ * Hook for creating customers with Zod validation and automatic cache invalidation
  */
 export function useCreateCustomer() {
   const queryClient = useQueryClient();
@@ -86,17 +88,32 @@ export function useCreateCustomer() {
         throw new Error("No se encontró la información de la organización");
       }
 
-      const result = await CustomerService.create(
-        data,
-        profile.organization_id,
-        profile.user_id
-      );
+      // Validate data with Zod schema
+      try {
+        const validatedData = customerFormSchema.parse(data);
 
-      if (!result.success) {
-        throw new Error(result.error || "Error al crear el cliente");
+        const result = await CustomerService.create(
+          validatedData,
+          profile.organization_id,
+          profile.user_id
+        );
+
+        if (!result.success) {
+          throw new Error(result.error || "Error al crear el cliente");
+        }
+
+        return result.customer;
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          throw new Error(
+            `Validación fallida: ${
+              firstError.message
+            } (campo: ${firstError.path.join(".")})`
+          );
+        }
+        throw error;
       }
-
-      return result.customer;
     },
     onSuccess: () => {
       // Invalidate and refetch customers queries
@@ -107,7 +124,7 @@ export function useCreateCustomer() {
 }
 
 /**
- * Hook for updating customers
+ * Hook for updating customers with Zod validation
  */
 export function useUpdateCustomer() {
   const queryClient = useQueryClient();
@@ -125,17 +142,32 @@ export function useUpdateCustomer() {
         throw new Error("No se encontró la información de la organización");
       }
 
-      const result = await CustomerService.update(
-        customerId,
-        data,
-        profile.organization_id
-      );
+      // Validate data with Zod schema (partial update)
+      try {
+        const validatedData = customerUpdateSchema.parse(data);
 
-      if (!result.success) {
-        throw new Error(result.error || "Error al actualizar el cliente");
+        const result = await CustomerService.update(
+          customerId,
+          validatedData,
+          profile.organization_id
+        );
+
+        if (!result.success) {
+          throw new Error(result.error || "Error al actualizar el cliente");
+        }
+
+        return result.customer;
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          throw new Error(
+            `Validación fallida: ${
+              firstError.message
+            } (campo: ${firstError.path.join(".")})`
+          );
+        }
+        throw error;
       }
-
-      return result.customer;
     },
     onSuccess: (_, variables) => {
       // Invalidate customers queries

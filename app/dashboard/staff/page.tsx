@@ -3,7 +3,14 @@
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
-import { useStaff } from "@/hooks";
+import {
+  useStaffQuery,
+  useCreateStaffMember,
+  useUpdateStaffMember,
+  useDeactivateStaffMember,
+  useReactivateStaffMember,
+  useToast,
+} from "@/hooks";
 import { StaffMember, StaffMemberFormData } from "@/types/appointments";
 import {
   Edit,
@@ -24,26 +31,26 @@ export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
+  const toast = useToast();
 
   // Check if user can manage staff (only owner and admin)
   const canManageStaff = useMemo(() => {
     return profile?.role === "admin" || profile?.role === "owner";
   }, [profile]);
 
-  // 🎉 Use the new useStaff hook!
+  // 🎉 Use the new React Query hooks!
   const {
     staff: staffMembers,
     loading,
     error,
-    createStaffMember,
-    updateStaffMember,
-    deactivateStaffMember,
-    reactivateStaffMember,
-  } = useStaff({
+  } = useStaffQuery({
     isActive: true,
   });
+
+  const createStaffMutation = useCreateStaffMember();
+  const updateStaffMutation = useUpdateStaffMember();
+  const deactivateStaffMutation = useDeactivateStaffMember();
+  const reactivateStaffMutation = useReactivateStaffMember();
 
   // Form data
   const [formData, setFormData] = useState<StaffMemberFormData>({
@@ -125,35 +132,57 @@ export default function StaffPage() {
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
 
-    setSaving(true);
-    setSuccess(null);
+    const dataToSave: StaffMemberFormData = {
+      ...formData,
+      specialties: formData.specialties?.length
+        ? formData.specialties
+        : undefined,
+    };
+
+    console.log("🔵 Guardando personal...", dataToSave);
+    const loadingToast = toast.loading(
+      editingStaff ? "Actualizando personal..." : "Creando personal..."
+    );
 
     try {
-      const dataToSave: StaffMemberFormData = {
-        ...formData,
-        specialties: formData.specialties?.length
-          ? formData.specialties
-          : undefined,
-      };
-
-      const result = editingStaff
-        ? await updateStaffMember(editingStaff.id, dataToSave)
-        : await createStaffMember(dataToSave);
-
-      if (result.success) {
-        setSuccess(
-          editingStaff
-            ? "Profesional actualizado exitosamente"
-            : "Profesional creado exitosamente"
+      if (editingStaff) {
+        console.log("🔵 Actualizando personal existente:", editingStaff.id);
+        await updateStaffMutation.mutateAsync({
+          staffId: editingStaff.id,
+          data: dataToSave,
+        });
+        console.log("✅ Personal actualizado exitosamente");
+        toast.dismiss(loadingToast);
+        toast.success(
+          "Personal actualizado",
+          `${dataToSave.first_name} ${dataToSave.last_name} ha sido actualizado`
         );
-        setShowModal(false);
-        resetForm();
-        setTimeout(() => setSuccess(null), 3000);
       } else {
-        alert(`Error: ${result.error}`);
+        console.log("🔵 Creando nuevo personal");
+        await createStaffMutation.mutateAsync(dataToSave);
+        console.log("✅ Personal creado exitosamente");
+        toast.dismiss(loadingToast);
+        toast.success(
+          "Personal creado",
+          `${dataToSave.first_name} ${dataToSave.last_name} ha sido agregado`
+        );
       }
-    } finally {
-      setSaving(false);
+
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      console.error("❌ Error al guardar personal:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        if (error.message.includes("Validación fallida")) {
+          toast.validationError(error.message);
+        } else {
+          toast.error("Error al guardar personal", error.message);
+        }
+      } else {
+        toast.error("Error inesperado", "No se pudo guardar el personal");
+      }
     }
   };
 
@@ -167,24 +196,55 @@ export default function StaffPage() {
       return;
     }
 
-    const result = await deactivateStaffMember(staff.id);
+    console.log("🔵 Desactivando personal:", staff.id);
+    const loadingToast = toast.loading("Desactivando personal...");
 
-    if (result.success) {
-      setSuccess("Profesional desactivado exitosamente");
-      setTimeout(() => setSuccess(null), 3000);
-    } else {
-      alert(`Error: ${result.error}`);
+    try {
+      await deactivateStaffMutation.mutateAsync(staff.id);
+      console.log("✅ Personal desactivado exitosamente");
+      toast.dismiss(loadingToast);
+      toast.success(
+        "Personal desactivado",
+        `${staff.first_name} ${staff.last_name} ha sido desactivado`
+      );
+    } catch (error) {
+      console.error("❌ Error al desactivar personal:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        toast.error("Error al desactivar personal", error.message);
+      } else {
+        toast.error("Error inesperado", "No se pudo desactivar el personal");
+      }
     }
   };
 
   // Toggle active status
   const toggleActive = async (staff: StaffMember) => {
-    const result = staff.is_active
-      ? await deactivateStaffMember(staff.id)
-      : await reactivateStaffMember(staff.id);
+    console.log("🔵 Cambiando estado del personal:", staff.id, staff.is_active ? "desactivar" : "activar");
+    const loadingToast = toast.loading(staff.is_active ? "Desactivando..." : "Activando...");
 
-    if (!result.success) {
-      alert(`Error: ${result.error}`);
+    try {
+      if (staff.is_active) {
+        await deactivateStaffMutation.mutateAsync(staff.id);
+        console.log("✅ Personal desactivado");
+        toast.dismiss(loadingToast);
+        toast.success("Personal desactivado", `${staff.first_name} ${staff.last_name} ha sido desactivado`);
+      } else {
+        await reactivateStaffMutation.mutateAsync(staff.id);
+        console.log("✅ Personal activado");
+        toast.dismiss(loadingToast);
+        toast.success("Personal activado", `${staff.first_name} ${staff.last_name} ha sido activado`);
+      }
+    } catch (error) {
+      console.error("❌ Error al cambiar estado del personal:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        toast.error("Error", error.message);
+      } else {
+        toast.error("Error inesperado", "No se pudo cambiar el estado del personal");
+      }
     }
   };
 
@@ -248,11 +308,6 @@ export default function StaffPage() {
             </div>
           )}
 
-          {success && (
-            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
-              {success}
-            </div>
-          )}
 
           {/* Search */}
           <div className="mb-6">
@@ -618,17 +673,21 @@ export default function StaffPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  disabled={saving}
+                  disabled={createStaffMutation.isPending || updateStaffMutation.isPending}
                   className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={createStaffMutation.isPending || updateStaffMutation.isPending}
                   className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {saving ? "Guardando..." : "Guardar"}
+                  {(createStaffMutation.isPending || updateStaffMutation.isPending)
+                    ? "Guardando..."
+                    : editingStaff
+                    ? "Guardar Cambios"
+                    : "Crear Personal"}
                 </button>
               </div>
             </form>

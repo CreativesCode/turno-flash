@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/auth-context";
+import { serviceFormSchema, serviceUpdateSchema } from "@/schemas";
 import { ServiceService } from "@/services/services.service";
 import { Service, ServiceFormData } from "@/types/appointments";
 import {
@@ -7,6 +8,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { ZodError } from "zod";
 
 /**
  * Filters for services query
@@ -74,7 +76,7 @@ export function useServices(
 }
 
 /**
- * Hook for creating services with automatic cache invalidation
+ * Hook for creating services with Zod validation and automatic cache invalidation
  */
 export function useCreateService() {
   const queryClient = useQueryClient();
@@ -86,13 +88,31 @@ export function useCreateService() {
         throw new Error("No se encontró la información de la organización");
       }
 
-      const result = await ServiceService.create(data, profile.organization_id);
+      // Validate data with Zod schema
+      try {
+        const validatedData = serviceFormSchema.parse(data);
 
-      if (!result.success) {
-        throw new Error(result.error || "Error al crear el servicio");
+        const result = await ServiceService.create(
+          validatedData,
+          profile.organization_id
+        );
+
+        if (!result.success) {
+          throw new Error(result.error || "Error al crear el servicio");
+        }
+
+        return result.service;
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          throw new Error(
+            `Validación fallida: ${
+              firstError.message
+            } (campo: ${firstError.path.join(".")})`
+          );
+        }
+        throw error;
       }
-
-      return result.service;
     },
     onSuccess: () => {
       // Invalidate and refetch services queries
@@ -103,7 +123,7 @@ export function useCreateService() {
 }
 
 /**
- * Hook for updating services
+ * Hook for updating services with Zod validation
  */
 export function useUpdateService() {
   const queryClient = useQueryClient();
@@ -121,17 +141,32 @@ export function useUpdateService() {
         throw new Error("No se encontró la información de la organización");
       }
 
-      const result = await ServiceService.update(
-        serviceId,
-        data,
-        profile.organization_id
-      );
+      // Validate data with Zod schema (partial update)
+      try {
+        const validatedData = serviceUpdateSchema.parse(data);
 
-      if (!result.success) {
-        throw new Error(result.error || "Error al actualizar el servicio");
+        const result = await ServiceService.update(
+          serviceId,
+          validatedData,
+          profile.organization_id
+        );
+
+        if (!result.success) {
+          throw new Error(result.error || "Error al actualizar el servicio");
+        }
+
+        return result.service;
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          throw new Error(
+            `Validación fallida: ${
+              firstError.message
+            } (campo: ${firstError.path.join(".")})`
+          );
+        }
+        throw error;
       }
-
-      return result.service;
     },
     onSuccess: (_, variables) => {
       // Invalidate services queries

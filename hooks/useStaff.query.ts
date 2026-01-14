@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/auth-context";
+import { staffFormSchema, staffUpdateSchema } from "@/schemas";
 import { StaffService } from "@/services/staff.service";
 import { StaffMember, StaffMemberFormData } from "@/types/appointments";
 import {
@@ -7,6 +8,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { ZodError } from "zod";
 
 /**
  * Filters for staff query
@@ -74,7 +76,7 @@ export function useStaff(
 }
 
 /**
- * Hook for creating staff members with automatic cache invalidation
+ * Hook for creating staff members with Zod validation and automatic cache invalidation
  */
 export function useCreateStaffMember() {
   const queryClient = useQueryClient();
@@ -86,15 +88,33 @@ export function useCreateStaffMember() {
         throw new Error("No se encontró la información de la organización");
       }
 
-      const result = await StaffService.create(data, profile.organization_id);
+      // Validate data with Zod schema
+      try {
+        const validatedData = staffFormSchema.parse(data);
 
-      if (!result.success) {
-        throw new Error(
-          result.error || "Error al crear el miembro del personal"
+        const result = await StaffService.create(
+          validatedData,
+          profile.organization_id
         );
-      }
 
-      return result.staff;
+        if (!result.success) {
+          throw new Error(
+            result.error || "Error al crear el miembro del personal"
+          );
+        }
+
+        return result.staff;
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          throw new Error(
+            `Validación fallida: ${
+              firstError.message
+            } (campo: ${firstError.path.join(".")})`
+          );
+        }
+        throw error;
+      }
     },
     onSuccess: () => {
       // Invalidate and refetch staff queries
@@ -105,7 +125,7 @@ export function useCreateStaffMember() {
 }
 
 /**
- * Hook for updating staff members
+ * Hook for updating staff members with Zod validation
  */
 export function useUpdateStaffMember() {
   const queryClient = useQueryClient();
@@ -123,19 +143,34 @@ export function useUpdateStaffMember() {
         throw new Error("No se encontró la información de la organización");
       }
 
-      const result = await StaffService.update(
-        staffId,
-        data,
-        profile.organization_id
-      );
+      // Validate data with Zod schema (partial update)
+      try {
+        const validatedData = staffUpdateSchema.parse(data);
 
-      if (!result.success) {
-        throw new Error(
-          result.error || "Error al actualizar el miembro del personal"
+        const result = await StaffService.update(
+          staffId,
+          validatedData,
+          profile.organization_id
         );
-      }
 
-      return result.staff;
+        if (!result.success) {
+          throw new Error(
+            result.error || "Error al actualizar el miembro del personal"
+          );
+        }
+
+        return result.staff;
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          throw new Error(
+            `Validación fallida: ${
+              firstError.message
+            } (campo: ${firstError.path.join(".")})`
+          );
+        }
+        throw error;
+      }
     },
     onSuccess: (_, variables) => {
       // Invalidate staff queries

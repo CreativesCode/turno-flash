@@ -4,7 +4,17 @@ import { DayCalendar, WeekCalendar } from "@/components/calendar";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
-import { useAppointments, useCustomers, useServices, useStaff } from "@/hooks";
+import {
+  useAppointmentsQuery,
+  useCreateAppointment,
+  useUpdateAppointmentStatus,
+  useSendReminder,
+  useCustomersQuery,
+  useCreateCustomer,
+  useServicesQuery,
+  useStaffQuery,
+  useToast,
+} from "@/hooks";
 import { AppointmentService } from "@/services";
 import {
   AppointmentFormData,
@@ -49,10 +59,8 @@ export default function AppointmentsPage() {
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentWithDetails | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [savingCustomer, setSavingCustomer] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const toast = useToast();
 
   // New customer form data
   const [newCustomerData, setNewCustomerData] = useState<CustomerFormData>({
@@ -105,15 +113,12 @@ export default function AppointmentsPage() {
     };
   }, [selectedDate, view]);
 
-  // 🎉 Use hooks for all data!
+  // 🎉 Use React Query hooks for all data!
   const {
     appointments,
     loading: appointmentsLoading,
     error: appointmentsError,
-    createAppointment,
-    updateStatus: updateAppointmentStatus,
-    sendReminder,
-  } = useAppointments({
+  } = useAppointmentsQuery({
     startDate: getDateRange.start,
     endDate: getDateRange.end,
   });
@@ -121,17 +126,21 @@ export default function AppointmentsPage() {
   const {
     customers,
     loading: customersLoading,
-    createCustomer,
-  } = useCustomers({ isActive: true });
+  } = useCustomersQuery({ isActive: true });
 
-  const { services, loading: servicesLoading } = useServices({
+  const { services, loading: servicesLoading } = useServicesQuery({
     isActive: true,
   });
 
-  const { staff: staffMembers, loading: staffLoading } = useStaff({
+  const { staff: staffMembers, loading: staffLoading } = useStaffQuery({
     isActive: true,
     isBookable: true,
   });
+
+  const createAppointmentMutation = useCreateAppointment();
+  const updateAppointmentStatusMutation = useUpdateAppointmentStatus();
+  const sendReminderMutation = useSendReminder();
+  const createCustomerMutation = useCreateCustomer();
 
   // Combined loading state
   const loading =
@@ -242,122 +251,152 @@ export default function AppointmentsPage() {
     e.preventDefault();
 
     if (!canManageAppointments) {
-      setError("No tienes permisos para crear turnos");
+      toast.error("Sin permisos", "No tienes permisos para crear turnos");
       return;
     }
 
-    setSaving(true);
-    setSuccess(null);
+    console.log("🔵 Guardando turno...", formData);
+    const loadingToast = toast.loading("Creando turno...");
 
     try {
-      const result = await createAppointment(formData);
+      await createAppointmentMutation.mutateAsync(formData);
+      console.log("✅ Turno creado exitosamente");
+      toast.dismiss(loadingToast);
+      toast.success("Turno creado", "El turno ha sido agendado correctamente");
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      console.error("❌ Error al crear turno:", error);
+      toast.dismiss(loadingToast);
 
-      if (result.success) {
-        setSuccess("Turno creado exitosamente");
-        setShowModal(false);
-        resetForm();
-        setTimeout(() => setSuccess(null), 3000);
+      if (error instanceof Error) {
+        if (error.message.includes("Validación fallida")) {
+          toast.validationError(error.message);
+        } else {
+          toast.error("Error al crear turno", error.message);
+        }
       } else {
-        setError(result.error || "Error al crear turno");
+        toast.error("Error inesperado", "No se pudo crear el turno");
       }
-    } finally {
-      setSaving(false);
     }
   };
 
   // Create customer quickly using hook
   const handleCreateCustomer = async () => {
-    setSavingCustomer(true);
+    console.log("🔵 Creando cliente rápido...", newCustomerData);
+    const loadingToast = toast.loading("Creando cliente...");
 
     try {
-      const result = await createCustomer(newCustomerData);
+      const customer = await createCustomerMutation.mutateAsync(newCustomerData);
+      console.log("✅ Cliente creado exitosamente:", customer.id);
 
-      if (result.success) {
-        // Select the new customer
-        if (result.customer) {
-          setFormData((prev) => ({
-            ...prev,
-            customer_id: result.customer!.id,
-          }));
+      // Select the new customer
+      setFormData((prev) => ({
+        ...prev,
+        customer_id: customer.id,
+      }));
+
+      // Reset form and close
+      setNewCustomerData({
+        first_name: "",
+        last_name: "",
+        phone: "",
+        email: "",
+        notes: "",
+        is_active: true,
+      });
+      setShowNewCustomerForm(false);
+      toast.dismiss(loadingToast);
+      toast.success("Cliente creado", `${newCustomerData.first_name} ${newCustomerData.last_name} ha sido agregado`);
+    } catch (error) {
+      console.error("❌ Error al crear cliente:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        if (error.message.includes("Validación fallida")) {
+          toast.validationError(error.message);
+        } else {
+          toast.error("Error al crear cliente", error.message);
         }
-
-        // Reset form and close
-        setNewCustomerData({
-          first_name: "",
-          last_name: "",
-          phone: "",
-          email: "",
-          notes: "",
-          is_active: true,
-        });
-        setShowNewCustomerForm(false);
-        setSuccess("Cliente creado exitosamente");
-        setTimeout(() => setSuccess(null), 2000);
       } else {
-        setError(result.error || "Error al crear cliente");
+        toast.error("Error inesperado", "No se pudo crear el cliente");
       }
-    } finally {
-      setSavingCustomer(false);
     }
   };
 
   // Send reminder for an appointment using hook
   const handleSendReminder = async (appointment: AppointmentWithDetails) => {
+    console.log("🔵 Enviando recordatorio para turno:", appointment.id);
+    const loadingToast = toast.loading("Enviando recordatorio...");
+
     try {
-      const result = await sendReminder(appointment.id, "whatsapp");
+      const result = await sendReminderMutation.mutateAsync({
+        appointmentId: appointment.id,
+        method: "whatsapp",
+      });
 
-      if (result.success) {
-        // Open WhatsApp if URL is available
-        if (result.whatsappUrl) {
-          window.open(result.whatsappUrl, "_blank");
-        }
+      console.log("✅ Recordatorio enviado exitosamente");
 
-        setSuccess(`Recordatorio enviado a ${appointment.customer_first_name}`);
-
-        // Update the selected appointment in the modal
-        if (selectedAppointment?.id === appointment.id) {
-          const updatedAppointment = {
-            ...selectedAppointment,
-            status: "reminded",
-          };
-          setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
-        }
-
-        setTimeout(() => setSuccess(null), 3000);
-      } else {
-        setError(result.error || "Error al enviar recordatorio");
+      // Open WhatsApp if URL is available
+      if (result.whatsappUrl) {
+        window.open(result.whatsappUrl, "_blank");
       }
-    } catch (err) {
-      console.error("Error sending reminder:", err);
-      setError("Error al enviar recordatorio");
+
+      toast.dismiss(loadingToast);
+      toast.success("Recordatorio enviado", `Se envió a ${appointment.customer_first_name}`);
+
+      // Update the selected appointment in the modal
+      if (selectedAppointment?.id === appointment.id) {
+        const updatedAppointment = {
+          ...selectedAppointment,
+          status: "reminded",
+        };
+        setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
+      }
+    } catch (error) {
+      console.error("❌ Error al enviar recordatorio:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        toast.error("Error al enviar recordatorio", error.message);
+      } else {
+        toast.error("Error inesperado", "No se pudo enviar el recordatorio");
+      }
     }
   };
 
   // Update appointment status using hook
   const updateStatus = async (appointmentId: string, newStatus: string) => {
+    console.log("🔵 Actualizando estado del turno:", appointmentId, "->", newStatus);
+    const loadingToast = toast.loading("Actualizando estado...");
+
     try {
-      const result = await updateAppointmentStatus(
+      await updateAppointmentStatusMutation.mutateAsync({
         appointmentId,
-        newStatus as AppointmentWithDetails["status"]
-      );
+        newStatus: newStatus as AppointmentWithDetails["status"],
+      });
 
-      if (result.success) {
-        setSuccess("Estado actualizado");
+      console.log("✅ Estado actualizado exitosamente");
+      toast.dismiss(loadingToast);
+      toast.success("Estado actualizado", "El estado del turno ha sido actualizado");
 
-        // Update the selected appointment in the modal
-        if (selectedAppointment?.id === appointmentId) {
-          const updatedAppointment = {
-            ...selectedAppointment,
-            status: newStatus,
-          };
-          setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
-        }
-
-        setTimeout(() => setSuccess(null), 2000);
-      } else {
-        setError(result.error || "Error al actualizar estado");
+      // Update the selected appointment in the modal
+      if (selectedAppointment?.id === appointmentId) {
+        const updatedAppointment = {
+          ...selectedAppointment,
+          status: newStatus,
+        };
+        setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
       }
-    } catch (err) {
+    } catch (error) {
+      console.error("❌ Error al actualizar estado:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        toast.error("Error al actualizar estado", error.message);
+      } else {
+        toast.error("Error inesperado", "No se pudo actualizar el estado");
+      }
       console.error("Error updating status:", err);
       setError("Error al actualizar estado");
     }
@@ -487,11 +526,6 @@ export default function AppointmentsPage() {
             </div>
           )}
 
-          {success && (
-            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
-              {success}
-            </div>
-          )}
 
           {/* Filters */}
           <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1048,17 +1082,17 @@ export default function AppointmentsPage() {
                         <button
                           type="button"
                           onClick={handleCreateCustomer}
-                          disabled={savingCustomer}
+                          disabled={createCustomerMutation.isPending}
                           className="flex-1 rounded-md bg-secondary-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-secondary-600 disabled:opacity-50"
                         >
-                          {savingCustomer
+                          {createCustomerMutation.isPending
                             ? "Creando..."
                             : "Crear y Seleccionar"}
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowNewCustomerForm(false)}
-                          disabled={savingCustomer}
+                          disabled={createCustomerMutation.isPending}
                           className="rounded-md bg-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-subtle disabled:opacity-50"
                         >
                           Cancelar
@@ -1203,7 +1237,7 @@ export default function AppointmentsPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  disabled={saving}
+                  disabled={createAppointmentMutation.isPending}
                   className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
@@ -1211,11 +1245,11 @@ export default function AppointmentsPage() {
                 <button
                   type="submit"
                   disabled={
-                    saving || customers.length === 0 || services.length === 0
+                    createAppointmentMutation.isPending || customers.length === 0 || services.length === 0
                   }
                   className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {saving ? "Guardando..." : "Crear Turno"}
+                  {createAppointmentMutation.isPending ? "Guardando..." : "Crear Turno"}
                 </button>
               </div>
             </form>

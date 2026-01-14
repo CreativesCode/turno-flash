@@ -1,4 +1,10 @@
 import { useAuth } from "@/contexts/auth-context";
+import {
+  appointmentFormSchema,
+  appointmentUpdateStatusSchema,
+  checkAvailabilitySchema,
+  sendReminderSchema,
+} from "@/schemas";
 import { AppointmentService } from "@/services/appointments.service";
 import {
   AppointmentFormData,
@@ -12,6 +18,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
+import { ZodError } from "zod";
 
 /**
  * Filters for appointments query
@@ -132,7 +139,7 @@ export function useAppointments(
 }
 
 /**
- * Hook for creating appointments with optimistic updates
+ * Hook for creating appointments with optimistic updates and Zod validation
  */
 export function useCreateAppointment() {
   const queryClient = useQueryClient();
@@ -144,17 +151,32 @@ export function useCreateAppointment() {
         throw new Error("No se encontró la información de la organización");
       }
 
-      const result = await AppointmentService.create(
-        data,
-        profile.organization_id,
-        profile.user_id
-      );
+      // Validate data with Zod schema
+      try {
+        const validatedData = appointmentFormSchema.parse(data);
 
-      if (!result.success) {
-        throw new Error(result.error || "Error al crear el turno");
+        const result = await AppointmentService.create(
+          validatedData,
+          profile.organization_id,
+          profile.user_id
+        );
+
+        if (!result.success) {
+          throw new Error(result.error || "Error al crear el turno");
+        }
+
+        return result.appointment;
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          throw new Error(
+            `Validación fallida: ${
+              firstError.message
+            } (campo: ${firstError.path.join(".")})`
+          );
+        }
+        throw error;
       }
-
-      return result.appointment;
     },
     onSuccess: () => {
       // Invalidate and refetch appointments queries
@@ -165,7 +187,7 @@ export function useCreateAppointment() {
 }
 
 /**
- * Hook for updating appointment status
+ * Hook for updating appointment status with Zod validation
  */
 export function useUpdateAppointmentStatus() {
   const queryClient = useQueryClient();
@@ -185,19 +207,38 @@ export function useUpdateAppointmentStatus() {
         throw new Error("No se encontró la información de la organización");
       }
 
-      const result = await AppointmentService.updateStatus(
-        appointmentId,
-        newStatus,
-        profile.organization_id,
-        profile?.user_id,
-        reason
-      );
+      // Validate data with Zod schema
+      try {
+        const validatedData = appointmentUpdateStatusSchema.parse({
+          appointmentId,
+          newStatus,
+          reason,
+        });
 
-      if (!result.success) {
-        throw new Error(result.error || "Error al actualizar el estado");
+        const result = await AppointmentService.updateStatus(
+          validatedData.appointmentId,
+          validatedData.newStatus,
+          profile.organization_id,
+          profile?.user_id,
+          validatedData.reason
+        );
+
+        if (!result.success) {
+          throw new Error(result.error || "Error al actualizar el estado");
+        }
+
+        return result;
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          throw new Error(
+            `Validación fallida: ${
+              firstError.message
+            } (campo: ${firstError.path.join(".")})`
+          );
+        }
+        throw error;
       }
-
-      return result;
     },
     onSuccess: () => {
       // Invalidate appointments queries
@@ -248,7 +289,7 @@ export function useDeleteAppointment() {
 }
 
 /**
- * Hook for sending appointment reminders
+ * Hook for sending appointment reminders with Zod validation
  */
 export function useSendReminder() {
   const queryClient = useQueryClient();
@@ -266,18 +307,36 @@ export function useSendReminder() {
         throw new Error("No se encontró la información de la organización");
       }
 
-      const result = await AppointmentService.sendReminder(
-        appointmentId,
-        profile.organization_id,
-        profile.user_id,
-        method
-      );
+      // Validate data with Zod schema
+      try {
+        const validatedData = sendReminderSchema.parse({
+          appointmentId,
+          method,
+        });
 
-      if (!result.success) {
-        throw new Error(result.error || "Error al enviar el recordatorio");
+        const result = await AppointmentService.sendReminder(
+          validatedData.appointmentId,
+          profile.organization_id,
+          profile.user_id,
+          validatedData.method
+        );
+
+        if (!result.success) {
+          throw new Error(result.error || "Error al enviar el recordatorio");
+        }
+
+        return result;
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          throw new Error(
+            `Validación fallida: ${
+              firstError.message
+            } (campo: ${firstError.path.join(".")})`
+          );
+        }
+        throw error;
       }
-
-      return result;
     },
     onSuccess: () => {
       // Invalidate appointments queries to update reminder status
@@ -288,7 +347,7 @@ export function useSendReminder() {
 }
 
 /**
- * Hook for checking availability
+ * Hook for checking availability with Zod validation
  * Returns a function that can be called to check availability
  */
 export function useCheckAvailability() {
@@ -309,14 +368,34 @@ export function useCheckAvailability() {
         };
       }
 
-      return await AppointmentService.checkAvailability(
-        date,
-        startTime,
-        endTime,
-        staffId,
-        profile.organization_id,
-        excludeAppointmentId
-      );
+      // Validate data with Zod schema
+      try {
+        const validatedData = checkAvailabilitySchema.parse({
+          date,
+          startTime,
+          endTime,
+          staffId,
+          excludeAppointmentId,
+        });
+
+        return await AppointmentService.checkAvailability(
+          validatedData.date,
+          validatedData.startTime,
+          validatedData.endTime,
+          validatedData.staffId,
+          profile.organization_id,
+          validatedData.excludeAppointmentId
+        );
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const firstError = error.issues[0];
+          return {
+            available: false,
+            reason: `Validación fallida: ${firstError.message}`,
+          };
+        }
+        throw error;
+      }
     },
     [profile?.organization_id]
   );

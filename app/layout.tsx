@@ -1,8 +1,9 @@
 import { ThemeProviderWrapper } from "@/components/ThemeProviderWrapper";
 import { QueryProvider } from "@/contexts/query-client-provider";
 import { getAbsoluteUrl, getSiteUrl } from "@/utils/metadata";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -46,13 +47,6 @@ export const metadata: Metadata = {
     email: false,
     address: false,
     telephone: false,
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover", // Importante para safe areas en iOS
   },
   openGraph: {
     type: "website",
@@ -98,6 +92,14 @@ export const metadata: Metadata = {
   category: "business",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover", // Importante para safe areas en iOS
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -124,7 +126,22 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+          <ThemeProviderWrapper>
+            {children}
+            <Toaster
+              position="top-right"
+              richColors
+              closeButton
+              duration={4000}
+              expand={true}
+              visibleToasts={5}
+              toastOptions={{
+                style: {
+                  zIndex: 9999,
+                },
+              }}
+            />
+          </ThemeProviderWrapper>
         </QueryProvider>
       </body>
     </html>

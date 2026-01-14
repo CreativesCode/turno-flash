@@ -2,7 +2,13 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { useCustomers } from "@/hooks";
+import {
+  useCreateCustomer,
+  useCustomersQuery,
+  useDeactivateCustomer,
+  useToast,
+  useUpdateCustomer,
+} from "@/hooks";
 import { Customer, CustomerFormData } from "@/types/appointments";
 import {
   Calendar,
@@ -22,21 +28,21 @@ export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
+  const toast = useToast();
 
-  // 🎉 Use the new useCustomers hook!
+  // 🎉 Use the new React Query hooks!
   const {
     customers: filteredCustomers,
     loading,
     error,
-    createCustomer,
-    updateCustomer,
-    deactivateCustomer,
-  } = useCustomers({
+  } = useCustomersQuery({
     search: searchTerm,
     isActive: true,
   });
+
+  const createCustomerMutation = useCreateCustomer();
+  const updateCustomerMutation = useUpdateCustomer();
+  const deactivateCustomerMutation = useDeactivateCustomer();
 
   // Form data
   const [formData, setFormData] = useState<CustomerFormData>({
@@ -91,28 +97,50 @@ export default function CustomersPage() {
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
 
-    setSaving(true);
-    setSuccess(null);
+    console.log("🔵 Guardando cliente...", formData);
+    const loadingToast = toast.loading(
+      editingCustomer ? "Actualizando cliente..." : "Creando cliente..."
+    );
 
     try {
-      const result = editingCustomer
-        ? await updateCustomer(editingCustomer.id, formData)
-        : await createCustomer(formData);
-
-      if (result.success) {
-        setSuccess(
-          editingCustomer
-            ? "Cliente actualizado exitosamente"
-            : "Cliente creado exitosamente"
+      if (editingCustomer) {
+        console.log("🔵 Actualizando cliente existente:", editingCustomer.id);
+        await updateCustomerMutation.mutateAsync({
+          customerId: editingCustomer.id,
+          data: formData,
+        });
+        console.log("✅ Cliente actualizado exitosamente");
+        toast.dismiss(loadingToast);
+        toast.success(
+          "Cliente actualizado",
+          `${formData.first_name} ${formData.last_name} ha sido actualizado`
         );
-        setShowModal(false);
-        resetForm();
-        setTimeout(() => setSuccess(null), 3000);
       } else {
-        alert(`Error: ${result.error}`);
+        console.log("🔵 Creando nuevo cliente");
+        await createCustomerMutation.mutateAsync(formData);
+        console.log("✅ Cliente creado exitosamente");
+        toast.dismiss(loadingToast);
+        toast.success(
+          "Cliente creado",
+          `${formData.first_name} ${formData.last_name} ha sido agregado`
+        );
       }
-    } finally {
-      setSaving(false);
+
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      console.error("❌ Error al guardar cliente:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        if (error.message.includes("Validación fallida")) {
+          toast.validationError(error.message);
+        } else {
+          toast.error("Error al guardar cliente", error.message);
+        }
+      } else {
+        toast.error("Error inesperado", "No se pudo guardar el cliente");
+      }
     }
   };
 
@@ -126,13 +154,26 @@ export default function CustomersPage() {
       return;
     }
 
-    const result = await deactivateCustomer(customer.id);
+    console.log("🔵 Desactivando cliente:", customer.id);
+    const loadingToast = toast.loading("Desactivando cliente...");
 
-    if (result.success) {
-      setSuccess("Cliente desactivado exitosamente");
-      setTimeout(() => setSuccess(null), 3000);
-    } else {
-      alert(`Error: ${result.error}`);
+    try {
+      await deactivateCustomerMutation.mutateAsync(customer.id);
+      console.log("✅ Cliente desactivado exitosamente");
+      toast.dismiss(loadingToast);
+      toast.success(
+        "Cliente desactivado",
+        `${customer.first_name} ${customer.last_name} ha sido desactivado`
+      );
+    } catch (error) {
+      console.error("❌ Error al desactivar cliente:", error);
+      toast.dismiss(loadingToast);
+
+      if (error instanceof Error) {
+        toast.error("Error al desactivar cliente", error.message);
+      } else {
+        toast.error("Error inesperado", "No se pudo desactivar el cliente");
+      }
     }
   };
 
@@ -180,12 +221,6 @@ export default function CustomersPage() {
           {error && (
             <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
-              {success}
             </div>
           )}
 
@@ -440,17 +475,28 @@ export default function CustomersPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  disabled={saving}
+                  disabled={
+                    createCustomerMutation.isPending ||
+                    updateCustomerMutation.isPending
+                  }
                   className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={
+                    createCustomerMutation.isPending ||
+                    updateCustomerMutation.isPending
+                  }
                   className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {saving ? "Guardando..." : "Guardar"}
+                  {createCustomerMutation.isPending ||
+                  updateCustomerMutation.isPending
+                    ? "Guardando..."
+                    : editingCustomer
+                    ? "Guardar Cambios"
+                    : "Crear Cliente"}
                 </button>
               </div>
             </form>

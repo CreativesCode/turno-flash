@@ -3,6 +3,7 @@
 import { LicenseNotification } from "@/components/license-notification";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
+import { useToast } from "@/hooks";
 import { UserProfile } from "@/types/auth";
 import { OrganizationWithLicenseStatus } from "@/types/organization";
 import { createClient } from "@/utils/supabase/client";
@@ -34,7 +35,7 @@ function OrganizationDetailsContent() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const toast = useToast();
 
   // Estados para agregar usuario
   const [availableUsers, setAvailableUsers] = useState<UserProfile[]>([]);
@@ -172,9 +173,10 @@ function OrganizationDetailsContent() {
     e.preventDefault();
     if (!organizationId) return;
 
+    console.log("🔵 Guardando organización...", editData);
     setSaving(true);
     setError(null);
-    setSuccess(null);
+    const loadingToast = toast.loading("Actualizando organización...");
 
     try {
       // Validar fechas de licencia si se proporcionan
@@ -183,9 +185,8 @@ function OrganizationDetailsContent() {
         const endDate = new Date(editData.license_end_date);
 
         if (endDate <= startDate) {
-          setError(
-            "La fecha de fin de licencia debe ser posterior a la fecha de inicio"
-          );
+          toast.dismiss(loadingToast);
+          toast.error("Error de validación", "La fecha de fin de licencia debe ser posterior a la fecha de inicio");
           setSaving(false);
           return;
         }
@@ -220,16 +221,21 @@ function OrganizationDetailsContent() {
         .eq("id", organizationId);
 
       if (updateError) {
+        console.error("❌ Error al actualizar organización:", updateError);
+        toast.dismiss(loadingToast);
+        toast.error("Error al actualizar", updateError.message);
         setError("Error al actualizar: " + updateError.message);
-        console.error(updateError);
       } else {
-        setSuccess("Organizaci?n actualizada exitosamente");
+        console.log("✅ Organización actualizada exitosamente");
+        toast.dismiss(loadingToast);
+        toast.success("Organización actualizada", "Los cambios se han guardado correctamente");
         setIsEditing(false);
         await loadOrganization();
-        setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
-      console.error("Error updating organization:", err);
+      console.error("❌ Error inesperado al actualizar organización:", err);
+      toast.dismiss(loadingToast);
+      toast.error("Error inesperado", "No se pudo actualizar la organización");
       setError("Error inesperado al actualizar");
     } finally {
       setSaving(false);
@@ -392,11 +398,6 @@ function OrganizationDetailsContent() {
             </div>
           )}
 
-          {success && (
-            <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
-              {success}
-            </div>
-          )}
 
           {/* Notificaci?n de licencia (si aplica) */}
           {!isEditing &&
