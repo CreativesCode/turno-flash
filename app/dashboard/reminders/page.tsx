@@ -384,7 +384,7 @@ Por favor confirma tu asistencia respondiendo:
               {appointments.map((appointment) => (
                 <div
                   key={appointment.id}
-                  className="rounded-lg bg-surface p-6 shadow-sm dark:bg-zinc-900"
+                  className="rounded-lg border border-border bg-surface p-6 shadow-sm"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -400,7 +400,7 @@ Por favor confirma tu asistencia respondiendo:
                           </h3>
                           <a
                             href={`tel:${appointment.customer_phone}`}
-                            className="mt-1 flex items-center gap-2 text-sm text-blue-600 hover:underline dark:text-blue-400"
+                            className="mt-1 flex items-center gap-2 text-sm text-info-600 hover:underline dark:text-info-400"
                           >
                             <Phone className="h-4 w-4" />
                             {appointment.customer_phone}
@@ -417,16 +417,16 @@ Por favor confirma tu asistencia respondiendo:
                         </div>
 
                         <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-zinc-400" />
-                          <span className="text-zinc-700 dark:text-zinc-300">
+                          <Calendar className="h-4 w-4 text-foreground-muted" />
+                          <span className="text-foreground-muted">
                             {appointment.service_name}
                           </span>
                         </div>
 
                         {appointment.staff_first_name && (
                           <div className="flex items-center gap-2 text-sm">
-                            <User className="h-4 w-4 text-zinc-400" />
-                            <span className="text-zinc-700 dark:text-zinc-300">
+                            <User className="h-4 w-4 text-foreground-muted" />
+                            <span className="text-foreground-muted">
                               {appointment.staff_first_name}
                             </span>
                           </div>
@@ -438,10 +438,10 @@ Por favor confirma tu asistencia respondiendo:
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-medium ${
                           appointment.status === "confirmed"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                            ? "bg-green-100 text-green-800"
                             : appointment.status === "reminded"
-                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
-                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
                         {appointment.status === "confirmed"
