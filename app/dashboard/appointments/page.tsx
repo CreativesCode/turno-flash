@@ -47,7 +47,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 type AppointmentView = "list" | "day" | "week";
 type FilterStatus = typeof FILTER_STATUS[keyof typeof FILTER_STATUS] | "all";
@@ -62,6 +63,9 @@ export default function AppointmentsPage() {
   const [filterDate, setFilterDate] = useState<string>(getLocalDateString());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [view, setView] = useState<AppointmentView>("day");
+
+  // Ref for virtualized list container
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -205,6 +209,14 @@ export default function AppointmentsPage() {
 
     return filtered;
   }, [appointments, filterStatus, debouncedSearch]);
+
+  // Virtualizer for appointments list
+  const virtualizer = useVirtualizer({
+    count: filteredAppointments.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 200, // altura estimada de cada card + gap (180px card + 20px gap)
+    overscan: 5, // renderizar 5 items extra arriba/abajo
+  });
 
   // Calculate service end time using AppointmentService
   const calculateEndTime = (startTime: string, serviceId: string) => {
@@ -703,179 +715,206 @@ export default function AppointmentsPage() {
                     )}
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {filteredAppointments.map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold"
-                              style={{
-                                backgroundColor: appointment.staff_first_name
-                                  ? "#3B82F6"
-                                  : "#6B7280",
-                              }}
-                            >
-                              {appointment.customer_first_name[0]}
-                              {appointment.customer_last_name[0]}
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-foreground">
-                                {appointment.customer_first_name}{" "}
-                                {appointment.customer_last_name}
-                              </h3>
-                              <div className="mt-1 flex items-center gap-2 text-sm text-foreground-muted">
-                                <Phone className="h-4 w-4" />
-                                {appointment.customer_phone}
+                <div
+                  ref={parentRef}
+                  className="scrollbar-discreet h-[600px] overflow-auto pr-2"
+                  style={{ contain: "strict" }}
+                >
+                  <div
+                    style={{
+                      height: `${virtualizer.getTotalSize()}px`,
+                      width: "100%",
+                      position: "relative",
+                      paddingTop: "16px",
+                    }}
+                  >
+                    {virtualizer.getVirtualItems().map((virtualRow) => {
+                      const appointment = filteredAppointments[virtualRow.index];
+                      return (
+                        <div
+                          key={virtualRow.key}
+                          data-index={virtualRow.index}
+                          ref={virtualizer.measureElement}
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            transform: `translateY(${virtualRow.start}px)`,
+                            paddingBottom: "16px",
+                          }}
+                        >
+                          <div className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold"
+                                    style={{
+                                      backgroundColor: appointment.staff_first_name
+                                        ? "#3B82F6"
+                                        : "#6B7280",
+                                    }}
+                                  >
+                                    {appointment.customer_first_name[0]}
+                                    {appointment.customer_last_name[0]}
+                                  </div>
+                                  <div>
+                                    <h3 className="text-lg font-semibold text-foreground">
+                                      {appointment.customer_first_name}{" "}
+                                      {appointment.customer_last_name}
+                                    </h3>
+                                    <div className="mt-1 flex items-center gap-2 text-sm text-foreground-muted">
+                                      <Phone className="h-4 w-4" />
+                                      {appointment.customer_phone}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Calendar className="h-4 w-4 text-foreground-muted" />
+                                    <span className="text-foreground-muted">
+                                      {formatDateShort(appointment.appointment_date)}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Clock className="h-4 w-4 text-foreground-muted" />
+                                    <span className="text-foreground-muted">
+                                      {appointment.start_time} -{" "}
+                                      {appointment.end_time}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Package className="h-4 w-4 text-zinc-400" />
+                                    <span className="text-foreground-muted">
+                                      {appointment.service_name}
+                                    </span>
+                                  </div>
+
+                                  {appointment.staff_first_name && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <User className="h-4 w-4 text-foreground-muted" />
+                                      <span className="text-foreground-muted">
+                                        {appointment.staff_first_name}{" "}
+                                        {appointment.staff_last_name}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {appointment.notes && (
+                                  <p className="mt-3 text-sm text-foreground-muted">
+                                    {appointment.notes}
+                                  </p>
+                                )}
                               </div>
-                            </div>
-                          </div>
 
-                          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                            <div className="flex items-center gap-2 text-sm">
-                              <Calendar className="h-4 w-4 text-foreground-muted" />
-                              <span className="text-foreground-muted">
-                                {formatDateShort(appointment.appointment_date)}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-sm">
-                              <Clock className="h-4 w-4 text-foreground-muted" />
-                              <span className="text-foreground-muted">
-                                {appointment.start_time} -{" "}
-                                {appointment.end_time}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-sm">
-                              <Package className="h-4 w-4 text-zinc-400" />
-                              <span className="text-foreground-muted">
-                                {appointment.service_name}
-                              </span>
-                            </div>
-
-                            {appointment.staff_first_name && (
-                              <div className="flex items-center gap-2 text-sm">
-                                <User className="h-4 w-4 text-foreground-muted" />
-                                <span className="text-foreground-muted">
-                                  {appointment.staff_first_name}{" "}
-                                  {appointment.staff_last_name}
+                              <div className="ml-4 flex flex-col items-end gap-2">
+                                <span
+                                  className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(
+                                    appointment.status
+                                  )}`}
+                                >
+                                  {getStatusLabel(appointment.status)}
                                 </span>
+
+                                {canManageAppointments &&
+                                  appointment.status !== APPOINTMENT_STATUS.COMPLETED &&
+                                  appointment.status !== APPOINTMENT_STATUS.CANCELLED &&
+                                  appointment.status !== APPOINTMENT_STATUS.NO_SHOW && (
+                                    <div className="flex gap-1">
+                                      {/* Show next logical step */}
+                                      {appointment.status === APPOINTMENT_STATUS.PENDING && (
+                                        <button
+                                          onClick={() =>
+                                            updateStatus(appointment.id, APPOINTMENT_STATUS.CONFIRMED)
+                                          }
+                                          className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
+                                        >
+                                          Confirmar
+                                        </button>
+                                      )}
+                                      {(appointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                                        appointment.status === APPOINTMENT_STATUS.REMINDED) && (
+                                        <button
+                                          onClick={() =>
+                                            updateStatus(
+                                              appointment.id,
+                                              APPOINTMENT_STATUS.CLIENT_CONFIRMED
+                                            )
+                                          }
+                                          className="rounded-md bg-teal-50 px-2 py-1 text-xs font-medium text-teal-700 transition-colors hover:bg-teal-100 dark:bg-teal-900/20 dark:text-teal-400"
+                                        >
+                                          Cliente Confirmó
+                                        </button>
+                                      )}
+                                      {(appointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                                        appointment.status === APPOINTMENT_STATUS.REMINDED ||
+                                        appointment.status ===
+                                          APPOINTMENT_STATUS.CLIENT_CONFIRMED) && (
+                                        <button
+                                          onClick={() =>
+                                            updateStatus(appointment.id, APPOINTMENT_STATUS.CHECKED_IN)
+                                          }
+                                          className="rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400"
+                                        >
+                                          Check-in
+                                        </button>
+                                      )}
+                                      {(appointment.status === APPOINTMENT_STATUS.CHECKED_IN ||
+                                        appointment.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED ||
+                                        appointment.status === APPOINTMENT_STATUS.CONFIRMED) && (
+                                        <button
+                                          onClick={() =>
+                                            updateStatus(
+                                              appointment.id,
+                                              APPOINTMENT_STATUS.IN_PROGRESS
+                                            )
+                                          }
+                                          className="rounded-md bg-info-50 px-2 py-1 text-xs font-medium text-info-700 transition-colors hover:bg-info-100 dark:bg-info-900/20 dark:text-info-400"
+                                        >
+                                          Iniciar
+                                        </button>
+                                      )}
+                                      {appointment.status === APPOINTMENT_STATUS.IN_PROGRESS && (
+                                        <button
+                                          onClick={() =>
+                                            updateStatus(appointment.id, APPOINTMENT_STATUS.COMPLETED)
+                                          }
+                                          className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
+                                        >
+                                          Completar
+                                        </button>
+                                      )}
+                                      {/* Always show these */}
+                                      <button
+                                        onClick={() =>
+                                          updateStatus(appointment.id, APPOINTMENT_STATUS.NO_SHOW)
+                                        }
+                                        className="rounded-md bg-warning-50 px-2 py-1 text-xs font-medium text-warning-700 transition-colors hover:bg-warning-100 dark:bg-warning-900/20 dark:text-warning-400"
+                                      >
+                                        No vino
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          updateStatus(appointment.id, APPOINTMENT_STATUS.CANCELLED)
+                                        }
+                                        className="rounded-md bg-danger-50 px-2 py-1 text-xs font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400"
+                                      >
+                                        Cancelar
+                                      </button>
+                                    </div>
+                                  )}
                               </div>
-                            )}
+                            </div>
                           </div>
-
-                          {appointment.notes && (
-                            <p className="mt-3 text-sm text-foreground-muted">
-                              {appointment.notes}
-                            </p>
-                          )}
                         </div>
-
-                        <div className="ml-4 flex flex-col items-end gap-2">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(
-                              appointment.status
-                            )}`}
-                          >
-                            {getStatusLabel(appointment.status)}
-                          </span>
-
-                          {canManageAppointments &&
-                            appointment.status !== APPOINTMENT_STATUS.COMPLETED &&
-                            appointment.status !== APPOINTMENT_STATUS.CANCELLED &&
-                            appointment.status !== APPOINTMENT_STATUS.NO_SHOW && (
-                              <div className="flex gap-1">
-                                {/* Show next logical step */}
-                                {appointment.status === APPOINTMENT_STATUS.PENDING && (
-                                  <button
-                                    onClick={() =>
-                                      updateStatus(appointment.id, APPOINTMENT_STATUS.CONFIRMED)
-                                    }
-                                    className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
-                                  >
-                                    Confirmar
-                                  </button>
-                                )}
-                                {(appointment.status === APPOINTMENT_STATUS.CONFIRMED ||
-                                  appointment.status === APPOINTMENT_STATUS.REMINDED) && (
-                                  <button
-                                    onClick={() =>
-                                      updateStatus(
-                                        appointment.id,
-                                        APPOINTMENT_STATUS.CLIENT_CONFIRMED
-                                      )
-                                    }
-                                    className="rounded-md bg-teal-50 px-2 py-1 text-xs font-medium text-teal-700 transition-colors hover:bg-teal-100 dark:bg-teal-900/20 dark:text-teal-400"
-                                  >
-                                    Cliente Confirmó
-                                  </button>
-                                )}
-                                {(appointment.status === APPOINTMENT_STATUS.CONFIRMED ||
-                                  appointment.status === APPOINTMENT_STATUS.REMINDED ||
-                                  appointment.status ===
-                                    APPOINTMENT_STATUS.CLIENT_CONFIRMED) && (
-                                  <button
-                                    onClick={() =>
-                                      updateStatus(appointment.id, APPOINTMENT_STATUS.CHECKED_IN)
-                                    }
-                                    className="rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400"
-                                  >
-                                    Check-in
-                                  </button>
-                                )}
-                                {(appointment.status === APPOINTMENT_STATUS.CHECKED_IN ||
-                                  appointment.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED ||
-                                  appointment.status === APPOINTMENT_STATUS.CONFIRMED) && (
-                                  <button
-                                    onClick={() =>
-                                      updateStatus(
-                                        appointment.id,
-                                        APPOINTMENT_STATUS.IN_PROGRESS
-                                      )
-                                    }
-                                    className="rounded-md bg-info-50 px-2 py-1 text-xs font-medium text-info-700 transition-colors hover:bg-info-100 dark:bg-info-900/20 dark:text-info-400"
-                                  >
-                                    Iniciar
-                                  </button>
-                                )}
-                                {appointment.status === APPOINTMENT_STATUS.IN_PROGRESS && (
-                                  <button
-                                    onClick={() =>
-                                      updateStatus(appointment.id, APPOINTMENT_STATUS.COMPLETED)
-                                    }
-                                    className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
-                                  >
-                                    Completar
-                                  </button>
-                                )}
-                                {/* Always show these */}
-                                <button
-                                  onClick={() =>
-                                    updateStatus(appointment.id, APPOINTMENT_STATUS.NO_SHOW)
-                                  }
-                                  className="rounded-md bg-warning-50 px-2 py-1 text-xs font-medium text-warning-700 transition-colors hover:bg-warning-100 dark:bg-warning-900/20 dark:text-warning-400"
-                                >
-                                  No vino
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    updateStatus(appointment.id, APPOINTMENT_STATUS.CANCELLED)
-                                  }
-                                  className="rounded-md bg-danger-50 px-2 py-1 text-xs font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400"
-                                >
-                                  Cancelar
-                                </button>
-                              </div>
-                            )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -966,7 +1005,7 @@ export default function AppointmentsPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-surface p-6 shadow-xl">
+          <div className="scrollbar-discreet max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-surface p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-foreground">Nuevo Turno</h2>
               <button
@@ -1293,7 +1332,7 @@ export default function AppointmentsPage() {
       {/* Detail Modal */}
       {showDetailModal && selectedAppointment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg bg-surface p-6 shadow-xl border border-border">
+          <div className="scrollbar-discreet w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg bg-surface p-6 shadow-xl border border-border">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-foreground">
                 Detalles del Turno

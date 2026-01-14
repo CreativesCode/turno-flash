@@ -4,13 +4,14 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
   useCreateCustomer,
-  useDebounce,
   useDeactivateCustomer,
+  useDebounce,
   useInfiniteCustomers,
   useToast,
   useUpdateCustomer,
 } from "@/hooks";
 import { Customer, CustomerFormData } from "@/types/appointments";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   Calendar,
   Edit,
@@ -23,7 +24,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
 
 export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,6 +32,9 @@ export default function CustomersPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const toast = useToast();
+
+  // Ref for virtualized list container
+  const parentRef = useRef<HTMLDivElement>(null);
 
   // 🎉 Use infinite pagination for better performance!
   // ⚡ Debounced search: Only triggers query 300ms after user stops typing
@@ -53,6 +57,14 @@ export default function CustomersPage() {
   const filteredCustomers = useMemo(() => {
     return data?.pages.flat() || [];
   }, [data]);
+
+  // Virtualizer for customers list
+  const virtualizer = useVirtualizer({
+    count: filteredCustomers.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 300, // altura estimada de cada card + gap (280px card + 20px gap)
+    overscan: 5, // renderizar 5 items extra arriba/abajo
+  });
 
   const error = queryError?.message || null;
 
@@ -277,84 +289,111 @@ export default function CustomersPage() {
               )}
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredCustomers.map((customer) => (
-                <div
-                  key={customer.id}
-                  className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {customer.first_name} {customer.last_name}
-                      </h3>
-                      {customer.tags && customer.tags.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {customer.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center gap-1 rounded-full bg-info-500 px-2 py-0.5 text-xs font-medium text-white dark:bg-info-900/20 dark:text-info-400"
-                            >
-                              <Tag className="h-3 w-3" />
-                              {tag}
+            <div
+              ref={parentRef}
+              className="scrollbar-discreet h-[600px] overflow-auto pr-2"
+              style={{ contain: "strict" }}
+            >
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: "100%",
+                  position: "relative",
+                  paddingTop: "16px",
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const customer = filteredCustomers[virtualRow.index];
+                  return (
+                    <div
+                      key={virtualRow.key}
+                      data-index={virtualRow.index}
+                      ref={virtualizer.measureElement}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        transform: `translateY(${virtualRow.start}px)`,
+                        paddingBottom: "16px",
+                      }}
+                    >
+                      <div className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-foreground">
+                              {customer.first_name} {customer.last_name}
+                            </h3>
+                            {customer.tags && customer.tags.length > 0 && (
+                              <div className="mt-1 flex flex-wrap gap-1">
+                                {customer.tags.map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className="inline-flex items-center gap-1 rounded-full bg-info-500 px-2 py-0.5 text-xs font-medium text-white dark:bg-info-900/20 dark:text-info-400"
+                                  >
+                                    <Tag className="h-3 w-3" />
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          {!customer.is_active && (
+                            <span className="rounded-full bg-danger-100 px-2 py-0.5 text-xs font-medium text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+                              Inactivo
                             </span>
-                          ))}
+                          )}
                         </div>
-                      )}
-                    </div>
-                    {!customer.is_active && (
-                      <span className="rounded-full bg-danger-100 px-2 py-0.5 text-xs font-medium text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
-                        Inactivo
-                      </span>
-                    )}
-                  </div>
 
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                      <Phone className="h-4 w-4" />
-                      <span>{customer.phone}</span>
-                    </div>
-                    {customer.email && (
-                      <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                        <Mail className="h-4 w-4" />
-                        <span className="truncate">{customer.email}</span>
+                        <div className="mt-4 space-y-2">
+                          <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                            <Phone className="h-4 w-4" />
+                            <span>{customer.phone}</span>
+                          </div>
+                          {customer.email && (
+                            <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                              <Mail className="h-4 w-4" />
+                              <span className="truncate">{customer.email}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                            <Calendar className="h-4 w-4" />
+                            <span>
+                              {customer.total_appointments ?? 0} turnos
+                              {customer.missed_appointments != null &&
+                              customer.missed_appointments > 0
+                                ? ` (${customer.missed_appointments} ausencias)`
+                                : ""}
+                            </span>
+                          </div>
+                        </div>
+
+                        {customer.notes && (
+                          <p className="mt-3 text-sm text-foreground-muted line-clamp-2">
+                            {customer.notes}
+                          </p>
+                        )}
+
+                        <div className="mt-4 flex gap-2">
+                          <button
+                            onClick={() => handleEdit(customer)}
+                            className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                          >
+                            <Edit className="h-4 w-4" />
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleDelete(customer)}
+                            className="flex items-center justify-center gap-2 rounded-md bg-danger-50 px-3 py-2 text-sm font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400 dark:hover:bg-danger-900/30"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                    )}
-                    <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                      <Calendar className="h-4 w-4" />
-                      <span>
-                        {customer.total_appointments ?? 0} turnos
-                        {customer.missed_appointments != null &&
-                        customer.missed_appointments > 0
-                          ? ` (${customer.missed_appointments} ausencias)`
-                          : ""}
-                      </span>
                     </div>
-                  </div>
-
-                  {customer.notes && (
-                    <p className="mt-3 text-sm text-foreground-muted line-clamp-2">
-                      {customer.notes}
-                    </p>
-                  )}
-
-                  <div className="mt-4 flex gap-2">
-                    <button
-                      onClick={() => handleEdit(customer)}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(customer)}
-                      className="flex items-center justify-center gap-2 rounded-md bg-danger-50 px-3 py-2 text-sm font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400 dark:hover:bg-danger-900/30"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  );
+                })}
+              </div>
             </div>
           )}
 
