@@ -8,7 +8,7 @@ import {
 import { AppointmentWithDetails } from "@/types/appointments";
 import { getLocalDateString, isToday } from "@/utils/date";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 
 interface DayCalendarProps {
   date: Date;
@@ -20,7 +20,7 @@ interface DayCalendarProps {
   endHour?: number;
 }
 
-export function DayCalendar({
+export const DayCalendar = React.memo(function DayCalendar({
   date,
   appointments,
   onDateChange,
@@ -63,22 +63,22 @@ export function DayCalendar({
   // Get status color (using helper from constants)
   const getStatusColor = getStatusCalendarColor;
 
-  // Navigation
-  const goToPrevDay = () => {
+  // Navigation - memoized callbacks
+  const goToPrevDay = useCallback(() => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() - 1);
     onDateChange(newDate);
-  };
+  }, [date, onDateChange]);
 
-  const goToNextDay = () => {
+  const goToNextDay = useCallback(() => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + 1);
     onDateChange(newDate);
-  };
+  }, [date, onDateChange]);
 
-  const goToToday = () => {
+  const goToToday = useCallback(() => {
     onDateChange(new Date());
-  };
+  }, [onDateChange]);
 
   // Format date
   const formatDate = (d: Date) => {
@@ -211,7 +211,23 @@ export function DayCalendar({
       </div>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison function for React.memo
+  return (
+    prevProps.date.getTime() === nextProps.date.getTime() &&
+    prevProps.appointments.length === nextProps.appointments.length &&
+    prevProps.appointments.every(
+      (apt, idx) =>
+        apt.id === nextProps.appointments[idx]?.id &&
+        apt.status === nextProps.appointments[idx]?.status
+    ) &&
+    prevProps.startHour === nextProps.startHour &&
+    prevProps.endHour === nextProps.endHour &&
+    prevProps.onDateChange === nextProps.onDateChange &&
+    prevProps.onAppointmentClick === nextProps.onAppointmentClick &&
+    prevProps.onTimeSlotClick === nextProps.onTimeSlotClick
+  );
+});
 
 // Current Time Indicator Component
 function CurrentTimeIndicator({ startHour }: { startHour: number }) {

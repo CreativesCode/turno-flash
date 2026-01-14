@@ -1,6 +1,6 @@
 "use client";
 
-import { HTMLAttributes } from "react";
+import React, { HTMLAttributes } from "react";
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?:
@@ -13,7 +13,7 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
     | "muted";
 }
 
-export function Badge({
+export const Badge = React.memo(function Badge({
   variant = "muted",
   className = "",
   children,
@@ -45,4 +45,4 @@ export function Badge({
       {children}
     </span>
   );
-}
+});

@@ -48,7 +48,13 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { FormEvent, useMemo, useRef, useState } from "react";
+import React, {
+  FormEvent,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 // Lazy load calendario completo - solo se carga cuando se necesita
 const DayCalendar = dynamic(
@@ -75,6 +81,198 @@ const WeekCalendar = dynamic(
 
 type AppointmentView = "list" | "day" | "week";
 type FilterStatus = (typeof FILTER_STATUS)[keyof typeof FILTER_STATUS] | "all";
+
+// Memoized AppointmentCard component
+interface AppointmentCardProps {
+  appointment: AppointmentWithDetails;
+  canManageAppointments: boolean;
+  onUpdateStatus: (id: string, status: string) => void;
+}
+
+const AppointmentCard = React.memo(
+  function AppointmentCard({
+    appointment,
+    canManageAppointments,
+    onUpdateStatus,
+  }: AppointmentCardProps) {
+    const handleStatusUpdate = useCallback(
+      (status: string) => {
+        onUpdateStatus(appointment.id, status);
+      },
+      [appointment.id, onUpdateStatus]
+    );
+
+    return (
+      <div className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <div
+                className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold"
+                style={{
+                  backgroundColor: appointment.staff_first_name
+                    ? "#3B82F6"
+                    : "#6B7280",
+                }}
+              >
+                {appointment.customer_first_name[0]}
+                {appointment.customer_last_name[0]}
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  {appointment.customer_first_name}{" "}
+                  {appointment.customer_last_name}
+                </h3>
+                <div className="mt-1 flex items-center gap-2 text-sm text-foreground-muted">
+                  <Phone className="h-4 w-4" />
+                  {appointment.customer_phone}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4 text-foreground-muted" />
+                <span className="text-foreground-muted">
+                  {formatDateShort(appointment.appointment_date)}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4 text-foreground-muted" />
+                <span className="text-foreground-muted">
+                  {appointment.start_time} - {appointment.end_time}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm">
+                <Package className="h-4 w-4 text-zinc-400" />
+                <span className="text-foreground-muted">
+                  {appointment.service_name}
+                </span>
+              </div>
+
+              {appointment.staff_first_name && (
+                <div className="flex items-center gap-2 text-sm">
+                  <User className="h-4 w-4 text-foreground-muted" />
+                  <span className="text-foreground-muted">
+                    {appointment.staff_first_name} {appointment.staff_last_name}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {appointment.notes && (
+              <p className="mt-3 text-sm text-foreground-muted">
+                {appointment.notes}
+              </p>
+            )}
+          </div>
+
+          <div className="ml-4 flex flex-col items-end gap-2">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusBadgeColor(
+                appointment.status
+              )}`}
+            >
+              {getStatusLabel(appointment.status)}
+            </span>
+
+            {canManageAppointments &&
+              appointment.status !== APPOINTMENT_STATUS.COMPLETED &&
+              appointment.status !== APPOINTMENT_STATUS.CANCELLED &&
+              appointment.status !== APPOINTMENT_STATUS.NO_SHOW && (
+                <div className="flex gap-1">
+                  {appointment.status === APPOINTMENT_STATUS.PENDING && (
+                    <button
+                      onClick={() =>
+                        handleStatusUpdate(APPOINTMENT_STATUS.CONFIRMED)
+                      }
+                      className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
+                    >
+                      Confirmar
+                    </button>
+                  )}
+                  {(appointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                    appointment.status === APPOINTMENT_STATUS.REMINDED) && (
+                    <button
+                      onClick={() =>
+                        handleStatusUpdate(APPOINTMENT_STATUS.CLIENT_CONFIRMED)
+                      }
+                      className="rounded-md bg-teal-50 px-2 py-1 text-xs font-medium text-teal-700 transition-colors hover:bg-teal-100 dark:bg-teal-900/20 dark:text-teal-400"
+                    >
+                      Cliente Confirmó
+                    </button>
+                  )}
+                  {(appointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                    appointment.status === APPOINTMENT_STATUS.REMINDED ||
+                    appointment.status ===
+                      APPOINTMENT_STATUS.CLIENT_CONFIRMED) && (
+                    <button
+                      onClick={() =>
+                        handleStatusUpdate(APPOINTMENT_STATUS.CHECKED_IN)
+                      }
+                      className="rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400"
+                    >
+                      Check-in
+                    </button>
+                  )}
+                  {(appointment.status === APPOINTMENT_STATUS.CHECKED_IN ||
+                    appointment.status ===
+                      APPOINTMENT_STATUS.CLIENT_CONFIRMED ||
+                    appointment.status === APPOINTMENT_STATUS.CONFIRMED) && (
+                    <button
+                      onClick={() =>
+                        handleStatusUpdate(APPOINTMENT_STATUS.IN_PROGRESS)
+                      }
+                      className="rounded-md bg-info-50 px-2 py-1 text-xs font-medium text-info-700 transition-colors hover:bg-info-100 dark:bg-info-900/20 dark:text-info-400"
+                    >
+                      Iniciar
+                    </button>
+                  )}
+                  {appointment.status === APPOINTMENT_STATUS.IN_PROGRESS && (
+                    <button
+                      onClick={() =>
+                        handleStatusUpdate(APPOINTMENT_STATUS.COMPLETED)
+                      }
+                      className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
+                    >
+                      Completar
+                    </button>
+                  )}
+                  <button
+                    onClick={() =>
+                      handleStatusUpdate(APPOINTMENT_STATUS.NO_SHOW)
+                    }
+                    className="rounded-md bg-warning-50 px-2 py-1 text-xs font-medium text-warning-700 transition-colors hover:bg-warning-100 dark:bg-warning-900/20 dark:text-warning-400"
+                  >
+                    No vino
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleStatusUpdate(APPOINTMENT_STATUS.CANCELLED)
+                    }
+                    className="rounded-md bg-danger-50 px-2 py-1 text-xs font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
+          </div>
+        </div>
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison for React.memo
+    return (
+      prevProps.appointment.id === nextProps.appointment.id &&
+      prevProps.appointment.status === nextProps.appointment.status &&
+      prevProps.canManageAppointments === nextProps.canManageAppointments &&
+      prevProps.onUpdateStatus === nextProps.onUpdateStatus
+    );
+  }
+);
 
 export default function AppointmentsPage() {
   const { profile } = useAuth();
@@ -242,40 +440,49 @@ export default function AppointmentsPage() {
     overscan: 5, // renderizar 5 items extra arriba/abajo
   });
 
-  // Calculate service end time using AppointmentService
-  const calculateEndTime = (startTime: string, serviceId: string) => {
-    const service = services.find((s) => s.id === serviceId);
-    if (!service) return startTime;
+  // Calculate service end time using AppointmentService - memoized
+  const calculateEndTime = useCallback(
+    (startTime: string, serviceId: string) => {
+      const service = services.find((s) => s.id === serviceId);
+      if (!service) return startTime;
 
-    return AppointmentService.calculateEndTime(startTime, service);
-  };
+      return AppointmentService.calculateEndTime(startTime, service);
+    },
+    [services]
+  );
 
-  // Handle service change
-  const handleServiceChange = (serviceId: string) => {
-    const selectedService = services.find((s) => s.id === serviceId);
-    const newStatus = selectedService?.requires_approval
-      ? APPOINTMENT_STATUS.PENDING
-      : APPOINTMENT_STATUS.CONFIRMED;
+  // Handle service change - memoized callback
+  const handleServiceChange = useCallback(
+    (serviceId: string) => {
+      const selectedService = services.find((s) => s.id === serviceId);
+      const newStatus = selectedService?.requires_approval
+        ? APPOINTMENT_STATUS.PENDING
+        : APPOINTMENT_STATUS.CONFIRMED;
 
-    setFormData((prev) => ({
-      ...prev,
-      service_id: serviceId,
-      end_time: calculateEndTime(prev.start_time, serviceId),
-      status: newStatus,
-    }));
-  };
+      setFormData((prev) => ({
+        ...prev,
+        service_id: serviceId,
+        end_time: calculateEndTime(prev.start_time, serviceId),
+        status: newStatus,
+      }));
+    },
+    [services, calculateEndTime]
+  );
 
-  // Handle start time change
-  const handleStartTimeChange = (startTime: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      start_time: startTime,
-      end_time: calculateEndTime(startTime, prev.service_id),
-    }));
-  };
+  // Handle start time change - memoized callback
+  const handleStartTimeChange = useCallback(
+    (startTime: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        start_time: startTime,
+        end_time: calculateEndTime(startTime, prev.service_id),
+      }));
+    },
+    [calculateEndTime]
+  );
 
-  // Reset form
-  const resetForm = () => {
+  // Reset form - memoized callback
+  const resetForm = useCallback(() => {
     setFormData({
       customer_id: "",
       service_id: "",
@@ -296,55 +503,67 @@ export default function AppointmentsPage() {
       notes: "",
       is_active: true,
     });
-  };
+  }, []);
 
-  // Open modal for creating
-  const handleCreate = () => {
+  // Open modal for creating - memoized callback
+  const handleCreate = useCallback(() => {
     if (!canManageAppointments) {
       setError("No tienes permisos para crear turnos");
       return;
     }
     resetForm();
     setShowModal(true);
-  };
+  }, [canManageAppointments, resetForm]);
 
-  // Save appointment using hook
-  const handleSave = async (e: FormEvent) => {
-    e.preventDefault();
+  // Save appointment using hook - memoized callback
+  const handleSave = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
 
-    if (!canManageAppointments) {
-      toast.error("Sin permisos", "No tienes permisos para crear turnos");
-      return;
-    }
-
-    console.log("🔵 Guardando turno...", formData);
-    const loadingToast = toast.loading("Creando turno...");
-
-    try {
-      await createAppointmentMutation.mutateAsync(formData);
-      console.log("✅ Turno creado exitosamente");
-      toast.dismiss(loadingToast);
-      toast.success("Turno creado", "El turno ha sido agendado correctamente");
-      setShowModal(false);
-      resetForm();
-    } catch (error) {
-      console.error("❌ Error al crear turno:", error);
-      toast.dismiss(loadingToast);
-
-      if (error instanceof Error) {
-        if (error.message.includes("Validación fallida")) {
-          toast.validationError(error.message);
-        } else {
-          toast.error("Error al crear turno", error.message);
-        }
-      } else {
-        toast.error("Error inesperado", "No se pudo crear el turno");
+      if (!canManageAppointments) {
+        toast.error("Sin permisos", "No tienes permisos para crear turnos");
+        return;
       }
-    }
-  };
 
-  // Create customer quickly using hook
-  const handleCreateCustomer = async () => {
+      console.log("🔵 Guardando turno...", formData);
+      const loadingToast = toast.loading("Creando turno...");
+
+      try {
+        await createAppointmentMutation.mutateAsync(formData);
+        console.log("✅ Turno creado exitosamente");
+        toast.dismiss(loadingToast);
+        toast.success(
+          "Turno creado",
+          "El turno ha sido agendado correctamente"
+        );
+        setShowModal(false);
+        resetForm();
+      } catch (error) {
+        console.error("❌ Error al crear turno:", error);
+        toast.dismiss(loadingToast);
+
+        if (error instanceof Error) {
+          if (error.message.includes("Validación fallida")) {
+            toast.validationError(error.message);
+          } else {
+            toast.error("Error al crear turno", error.message);
+          }
+        } else {
+          toast.error("Error inesperado", "No se pudo crear el turno");
+        }
+      }
+    },
+    [
+      canManageAppointments,
+      formData,
+      createAppointmentMutation,
+      toast,
+      resetForm,
+    ]
+  );
+
+  // Create customer quickly using hook - memoized callback
+  const handleCreateCustomer = useCallback(async () => {
     console.log("🔵 Creando cliente rápido...", newCustomerData);
     const loadingToast = toast.loading("Creando cliente...");
 
@@ -396,105 +615,171 @@ export default function AppointmentsPage() {
         toast.error("Error inesperado", "No se pudo crear el cliente");
       }
     }
-  };
+  }, [newCustomerData, createCustomerMutation, toast]);
 
-  // Send reminder for an appointment using hook
-  const handleSendReminder = async (appointment: AppointmentWithDetails) => {
-    console.log("🔵 Enviando recordatorio para turno:", appointment.id);
-    const loadingToast = toast.loading("Enviando recordatorio...");
+  // Send reminder for an appointment using hook - memoized callback
+  const handleSendReminder = useCallback(
+    async (appointment: AppointmentWithDetails) => {
+      console.log("🔵 Enviando recordatorio para turno:", appointment.id);
+      const loadingToast = toast.loading("Enviando recordatorio...");
 
-    try {
-      const result = await sendReminderMutation.mutateAsync({
-        appointmentId: appointment.id,
-        method: "whatsapp",
-      });
+      try {
+        const result = await sendReminderMutation.mutateAsync({
+          appointmentId: appointment.id,
+          method: "whatsapp",
+        });
 
-      console.log("✅ Recordatorio enviado exitosamente");
+        console.log("✅ Recordatorio enviado exitosamente");
 
-      // Open WhatsApp if URL is available
-      if (result.whatsappUrl) {
-        window.open(result.whatsappUrl, "_blank");
+        // Open WhatsApp if URL is available
+        if (result.whatsappUrl) {
+          window.open(result.whatsappUrl, "_blank");
+        }
+
+        toast.dismiss(loadingToast);
+        toast.success(
+          "Recordatorio enviado",
+          `Se envió a ${appointment.customer_first_name}`
+        );
+
+        // Update the selected appointment in the modal
+        if (selectedAppointment?.id === appointment.id) {
+          const updatedAppointment = {
+            ...selectedAppointment,
+            status: "reminded",
+          };
+          setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
+        }
+      } catch (error) {
+        console.error("❌ Error al enviar recordatorio:", error);
+        toast.dismiss(loadingToast);
+
+        if (error instanceof Error) {
+          toast.error("Error al enviar recordatorio", error.message);
+        } else {
+          toast.error("Error inesperado", "No se pudo enviar el recordatorio");
+        }
       }
+    },
+    [sendReminderMutation, toast, selectedAppointment]
+  );
 
-      toast.dismiss(loadingToast);
-      toast.success(
-        "Recordatorio enviado",
-        `Se envió a ${appointment.customer_first_name}`
-      );
-
-      // Update the selected appointment in the modal
-      if (selectedAppointment?.id === appointment.id) {
-        const updatedAppointment = {
-          ...selectedAppointment,
-          status: "reminded",
-        };
-        setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
-      }
-    } catch (error) {
-      console.error("❌ Error al enviar recordatorio:", error);
-      toast.dismiss(loadingToast);
-
-      if (error instanceof Error) {
-        toast.error("Error al enviar recordatorio", error.message);
-      } else {
-        toast.error("Error inesperado", "No se pudo enviar el recordatorio");
-      }
-    }
-  };
-
-  // Update appointment status using hook
-  const updateStatus = async (appointmentId: string, newStatus: string) => {
-    console.log(
-      "🔵 Actualizando estado del turno:",
-      appointmentId,
-      "->",
-      newStatus
-    );
-
-    // Validate that newStatus is not null or empty
-    if (!newStatus) {
-      toast.error("Error", "El estado no puede estar vacío");
-      return;
-    }
-
-    const loadingToast = toast.loading("Actualizando estado...");
-
-    try {
-      await updateAppointmentStatusMutation.mutateAsync({
+  // Update appointment status using hook - memoized callback
+  const updateStatus = useCallback(
+    async (appointmentId: string, newStatus: string) => {
+      console.log(
+        "🔵 Actualizando estado del turno:",
         appointmentId,
-        newStatus: newStatus as AppointmentStatus,
-      });
-
-      console.log("✅ Estado actualizado exitosamente");
-      toast.dismiss(loadingToast);
-      toast.success(
-        "Estado actualizado",
-        "El estado del turno ha sido actualizado"
+        "->",
+        newStatus
       );
 
-      // Update the selected appointment in the modal
-      if (selectedAppointment?.id === appointmentId) {
-        const updatedAppointment = {
-          ...selectedAppointment,
-          status: newStatus,
-        };
-        setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
+      // Validate that newStatus is not null or empty
+      if (!newStatus) {
+        toast.error("Error", "El estado no puede estar vacío");
+        return;
       }
-    } catch (error) {
-      console.error("❌ Error al actualizar estado:", error);
-      toast.dismiss(loadingToast);
 
-      if (error instanceof Error) {
-        toast.error("Error al actualizar estado", error.message);
-      } else {
-        toast.error("Error inesperado", "No se pudo actualizar el estado");
+      const loadingToast = toast.loading("Actualizando estado...");
+
+      try {
+        await updateAppointmentStatusMutation.mutateAsync({
+          appointmentId,
+          newStatus: newStatus as AppointmentStatus,
+        });
+
+        console.log("✅ Estado actualizado exitosamente");
+        toast.dismiss(loadingToast);
+        toast.success(
+          "Estado actualizado",
+          "El estado del turno ha sido actualizado"
+        );
+
+        // Update the selected appointment in the modal
+        if (selectedAppointment?.id === appointmentId) {
+          const updatedAppointment = {
+            ...selectedAppointment,
+            status: newStatus,
+          };
+          setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
+        }
+      } catch (error) {
+        console.error("❌ Error al actualizar estado:", error);
+        toast.dismiss(loadingToast);
+
+        if (error instanceof Error) {
+          toast.error("Error al actualizar estado", error.message);
+        } else {
+          toast.error("Error inesperado", "No se pudo actualizar el estado");
+        }
+        setError("Error al actualizar estado");
       }
-      setError("Error al actualizar estado");
-    }
-  };
+    },
+    [updateAppointmentStatusMutation, toast, selectedAppointment]
+  );
 
   // Get status badge color (using helper from constants)
-  const getStatusColor = getStatusBadgeColor;
+
+  // Memoize stats calculations
+  const stats = useMemo(() => {
+    const confirmed = appointments.filter(
+      (a) =>
+        a.status === APPOINTMENT_STATUS.CONFIRMED ||
+        a.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED
+    ).length;
+    const completed = appointments.filter(
+      (a) => a.status === APPOINTMENT_STATUS.COMPLETED
+    ).length;
+    const cancelled = appointments.filter(
+      (a) =>
+        a.status === APPOINTMENT_STATUS.CANCELLED ||
+        a.status === APPOINTMENT_STATUS.NO_SHOW
+    ).length;
+
+    return {
+      total: appointments.length,
+      confirmed,
+      completed,
+      cancelled,
+    };
+  }, [appointments]);
+
+  // Memoized callbacks for calendar components
+  const handleAppointmentClick = useCallback((apt: AppointmentWithDetails) => {
+    setSelectedAppointment(apt);
+    setShowDetailModal(true);
+  }, []);
+
+  const handleDayTimeSlotClick = useCallback(
+    (time: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        appointment_date: getLocalDateString(selectedDate),
+        start_time: time,
+        end_time: calculateEndTime(time, prev.service_id),
+      }));
+      setShowModal(true);
+    },
+    [selectedDate, calculateEndTime]
+  );
+
+  const handleWeekTimeSlotClick = useCallback(
+    (date: string, time: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        appointment_date: date,
+        start_time: time,
+        end_time: calculateEndTime(time, prev.service_id),
+      }));
+      setShowModal(true);
+    },
+    [calculateEndTime]
+  );
+
+  const handleDayDateChange = useCallback((newDate: Date) => {
+    setSelectedDate(newDate);
+    setFilterDate(getLocalDateString(newDate));
+  }, []);
 
   if (!profile?.organization_id) {
     return (
@@ -652,7 +937,7 @@ export default function AppointmentsPage() {
                     Total {view === "week" ? "Semana" : "Día"}
                   </p>
                   <p className="mt-1 text-2xl font-bold text-foreground">
-                    {appointments.length}
+                    {stats.total}
                   </p>
                 </div>
                 <Calendar className="h-8 w-8 text-blue-500" />
@@ -664,13 +949,7 @@ export default function AppointmentsPage() {
                 <div>
                   <p className="text-sm text-foreground-muted">Confirmados</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">
-                    {
-                      appointments.filter(
-                        (a) =>
-                          a.status === APPOINTMENT_STATUS.CONFIRMED ||
-                          a.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED
-                      ).length
-                    }
+                    {stats.confirmed}
                   </p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-success" />
@@ -682,11 +961,7 @@ export default function AppointmentsPage() {
                 <div>
                   <p className="text-sm text-foreground-muted">Completados</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">
-                    {
-                      appointments.filter(
-                        (a) => a.status === APPOINTMENT_STATUS.COMPLETED
-                      ).length
-                    }
+                    {stats.completed}
                   </p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-blue-500" />
@@ -698,13 +973,7 @@ export default function AppointmentsPage() {
                 <div>
                   <p className="text-sm text-foreground-muted">Cancelados</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">
-                    {
-                      appointments.filter(
-                        (a) =>
-                          a.status === APPOINTMENT_STATUS.CANCELLED ||
-                          a.status === APPOINTMENT_STATUS.NO_SHOW
-                      ).length
-                    }
+                    {stats.cancelled}
                   </p>
                 </div>
                 <XCircle className="h-8 w-8 text-red-500" />
@@ -771,203 +1040,11 @@ export default function AppointmentsPage() {
                             paddingBottom: "16px",
                           }}
                         >
-                          <div className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3">
-                                  <div
-                                    className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold"
-                                    style={{
-                                      backgroundColor:
-                                        appointment.staff_first_name
-                                          ? "#3B82F6"
-                                          : "#6B7280",
-                                    }}
-                                  >
-                                    {appointment.customer_first_name[0]}
-                                    {appointment.customer_last_name[0]}
-                                  </div>
-                                  <div>
-                                    <h3 className="text-lg font-semibold text-foreground">
-                                      {appointment.customer_first_name}{" "}
-                                      {appointment.customer_last_name}
-                                    </h3>
-                                    <div className="mt-1 flex items-center gap-2 text-sm text-foreground-muted">
-                                      <Phone className="h-4 w-4" />
-                                      {appointment.customer_phone}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Calendar className="h-4 w-4 text-foreground-muted" />
-                                    <span className="text-foreground-muted">
-                                      {formatDateShort(
-                                        appointment.appointment_date
-                                      )}
-                                    </span>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Clock className="h-4 w-4 text-foreground-muted" />
-                                    <span className="text-foreground-muted">
-                                      {appointment.start_time} -{" "}
-                                      {appointment.end_time}
-                                    </span>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Package className="h-4 w-4 text-zinc-400" />
-                                    <span className="text-foreground-muted">
-                                      {appointment.service_name}
-                                    </span>
-                                  </div>
-
-                                  {appointment.staff_first_name && (
-                                    <div className="flex items-center gap-2 text-sm">
-                                      <User className="h-4 w-4 text-foreground-muted" />
-                                      <span className="text-foreground-muted">
-                                        {appointment.staff_first_name}{" "}
-                                        {appointment.staff_last_name}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {appointment.notes && (
-                                  <p className="mt-3 text-sm text-foreground-muted">
-                                    {appointment.notes}
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="ml-4 flex flex-col items-end gap-2">
-                                <span
-                                  className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(
-                                    appointment.status
-                                  )}`}
-                                >
-                                  {getStatusLabel(appointment.status)}
-                                </span>
-
-                                {canManageAppointments &&
-                                  appointment.status !==
-                                    APPOINTMENT_STATUS.COMPLETED &&
-                                  appointment.status !==
-                                    APPOINTMENT_STATUS.CANCELLED &&
-                                  appointment.status !==
-                                    APPOINTMENT_STATUS.NO_SHOW && (
-                                    <div className="flex gap-1">
-                                      {/* Show next logical step */}
-                                      {appointment.status ===
-                                        APPOINTMENT_STATUS.PENDING && (
-                                        <button
-                                          onClick={() =>
-                                            updateStatus(
-                                              appointment.id,
-                                              APPOINTMENT_STATUS.CONFIRMED
-                                            )
-                                          }
-                                          className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
-                                        >
-                                          Confirmar
-                                        </button>
-                                      )}
-                                      {(appointment.status ===
-                                        APPOINTMENT_STATUS.CONFIRMED ||
-                                        appointment.status ===
-                                          APPOINTMENT_STATUS.REMINDED) && (
-                                        <button
-                                          onClick={() =>
-                                            updateStatus(
-                                              appointment.id,
-                                              APPOINTMENT_STATUS.CLIENT_CONFIRMED
-                                            )
-                                          }
-                                          className="rounded-md bg-teal-50 px-2 py-1 text-xs font-medium text-teal-700 transition-colors hover:bg-teal-100 dark:bg-teal-900/20 dark:text-teal-400"
-                                        >
-                                          Cliente Confirmó
-                                        </button>
-                                      )}
-                                      {(appointment.status ===
-                                        APPOINTMENT_STATUS.CONFIRMED ||
-                                        appointment.status ===
-                                          APPOINTMENT_STATUS.REMINDED ||
-                                        appointment.status ===
-                                          APPOINTMENT_STATUS.CLIENT_CONFIRMED) && (
-                                        <button
-                                          onClick={() =>
-                                            updateStatus(
-                                              appointment.id,
-                                              APPOINTMENT_STATUS.CHECKED_IN
-                                            )
-                                          }
-                                          className="rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400"
-                                        >
-                                          Check-in
-                                        </button>
-                                      )}
-                                      {(appointment.status ===
-                                        APPOINTMENT_STATUS.CHECKED_IN ||
-                                        appointment.status ===
-                                          APPOINTMENT_STATUS.CLIENT_CONFIRMED ||
-                                        appointment.status ===
-                                          APPOINTMENT_STATUS.CONFIRMED) && (
-                                        <button
-                                          onClick={() =>
-                                            updateStatus(
-                                              appointment.id,
-                                              APPOINTMENT_STATUS.IN_PROGRESS
-                                            )
-                                          }
-                                          className="rounded-md bg-info-50 px-2 py-1 text-xs font-medium text-info-700 transition-colors hover:bg-info-100 dark:bg-info-900/20 dark:text-info-400"
-                                        >
-                                          Iniciar
-                                        </button>
-                                      )}
-                                      {appointment.status ===
-                                        APPOINTMENT_STATUS.IN_PROGRESS && (
-                                        <button
-                                          onClick={() =>
-                                            updateStatus(
-                                              appointment.id,
-                                              APPOINTMENT_STATUS.COMPLETED
-                                            )
-                                          }
-                                          className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
-                                        >
-                                          Completar
-                                        </button>
-                                      )}
-                                      {/* Always show these */}
-                                      <button
-                                        onClick={() =>
-                                          updateStatus(
-                                            appointment.id,
-                                            APPOINTMENT_STATUS.NO_SHOW
-                                          )
-                                        }
-                                        className="rounded-md bg-warning-50 px-2 py-1 text-xs font-medium text-warning-700 transition-colors hover:bg-warning-100 dark:bg-warning-900/20 dark:text-warning-400"
-                                      >
-                                        No vino
-                                      </button>
-                                      <button
-                                        onClick={() =>
-                                          updateStatus(
-                                            appointment.id,
-                                            APPOINTMENT_STATUS.CANCELLED
-                                          )
-                                        }
-                                        className="rounded-md bg-danger-50 px-2 py-1 text-xs font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400"
-                                      >
-                                        Cancelar
-                                      </button>
-                                    </div>
-                                  )}
-                              </div>
-                            </div>
-                          </div>
+                          <AppointmentCard
+                            appointment={appointment}
+                            canManageAppointments={canManageAppointments}
+                            onUpdateStatus={updateStatus}
+                          />
                         </div>
                       );
                     })}
@@ -1007,26 +1084,10 @@ export default function AppointmentsPage() {
             <DayCalendar
               date={selectedDate}
               appointments={filteredAppointments}
-              onDateChange={(newDate) => {
-                setSelectedDate(newDate);
-                setFilterDate(getLocalDateString(newDate));
-              }}
-              onAppointmentClick={(apt) => {
-                setSelectedAppointment(apt);
-                setShowDetailModal(true);
-              }}
+              onDateChange={handleDayDateChange}
+              onAppointmentClick={handleAppointmentClick}
               onTimeSlotClick={
-                canManageAppointments
-                  ? (time) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        appointment_date: getLocalDateString(selectedDate),
-                        start_time: time,
-                        end_time: calculateEndTime(time, prev.service_id),
-                      }));
-                      setShowModal(true);
-                    }
-                  : undefined
+                canManageAppointments ? handleDayTimeSlotClick : undefined
               }
             />
           )}
@@ -1037,22 +1098,9 @@ export default function AppointmentsPage() {
               date={selectedDate}
               appointments={appointments}
               onDateChange={setSelectedDate}
-              onAppointmentClick={(apt) => {
-                setSelectedAppointment(apt);
-                setShowDetailModal(true);
-              }}
+              onAppointmentClick={handleAppointmentClick}
               onTimeSlotClick={
-                canManageAppointments
-                  ? (date, time) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        appointment_date: date,
-                        start_time: time,
-                        end_time: calculateEndTime(time, prev.service_id),
-                      }));
-                      setShowModal(true);
-                    }
-                  : undefined
+                canManageAppointments ? handleWeekTimeSlotClick : undefined
               }
             />
           )}
@@ -1408,7 +1456,7 @@ export default function AppointmentsPage() {
             {/* Status Badge */}
             <div className="mb-4">
               <span
-                className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusColor(
+                className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusBadgeColor(
                   selectedAppointment.status
                 )}`}
               >

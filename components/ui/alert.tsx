@@ -1,12 +1,12 @@
 "use client";
 
-import { HTMLAttributes } from "react";
+import React, { HTMLAttributes } from "react";
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   variant?: "success" | "danger" | "warning" | "info";
 }
 
-export function Alert({
+export const Alert = React.memo(function Alert({
   variant = "info",
   className = "",
   children,
@@ -32,4 +32,4 @@ export function Alert({
       {children}
     </div>
   );
-}
+});

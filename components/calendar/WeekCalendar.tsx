@@ -8,7 +8,7 @@ import {
 import { AppointmentWithDetails } from "@/types/appointments";
 import { getLocalDateString, getStartOfWeek, getWeekDays } from "@/utils/date";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 
 interface WeekCalendarProps {
   date: Date;
@@ -20,7 +20,7 @@ interface WeekCalendarProps {
   endHour?: number;
 }
 
-export function WeekCalendar({
+export const WeekCalendar = React.memo(function WeekCalendar({
   date,
   appointments,
   onDateChange,
@@ -76,22 +76,22 @@ export function WeekCalendar({
   // Get status color (using helper from constants)
   const getStatusColor = getStatusCalendarColor;
 
-  // Navigation
-  const goToPrevWeek = () => {
+  // Navigation - memoized callbacks
+  const goToPrevWeek = useCallback(() => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() - 7);
     onDateChange(newDate);
-  };
+  }, [date, onDateChange]);
 
-  const goToNextWeek = () => {
+  const goToNextWeek = useCallback(() => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + 7);
     onDateChange(newDate);
-  };
+  }, [date, onDateChange]);
 
-  const goToToday = () => {
+  const goToToday = useCallback(() => {
     onDateChange(new Date());
-  };
+  }, [onDateChange]);
 
   // Format header
   const formatWeekRange = () => {
@@ -264,4 +264,20 @@ export function WeekCalendar({
       </div>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison function for React.memo
+  return (
+    prevProps.date.getTime() === nextProps.date.getTime() &&
+    prevProps.appointments.length === nextProps.appointments.length &&
+    prevProps.appointments.every(
+      (apt, idx) =>
+        apt.id === nextProps.appointments[idx]?.id &&
+        apt.status === nextProps.appointments[idx]?.status
+    ) &&
+    prevProps.startHour === nextProps.startHour &&
+    prevProps.endHour === nextProps.endHour &&
+    prevProps.onDateChange === nextProps.onDateChange &&
+    prevProps.onAppointmentClick === nextProps.onAppointmentClick &&
+    prevProps.onTimeSlotClick === nextProps.onTimeSlotClick
+  );
+});
