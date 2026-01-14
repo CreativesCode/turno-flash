@@ -1,4 +1,5 @@
 import { ThemeProviderWrapper } from "@/components/ThemeProviderWrapper";
+import { QueryProvider } from "@/contexts/query-client-provider";
 import { getAbsoluteUrl, getSiteUrl } from "@/utils/metadata";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -122,7 +123,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+        <QueryProvider>
+          <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+        </QueryProvider>
       </body>
     </html>
   );

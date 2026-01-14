@@ -1,23 +1,73 @@
 /**
- * Custom Hooks for TurnoFlash
- * Centralized export point for all custom hooks
+ * Hooks Index
+ * Centralized exports for all application hooks
  */
 
-// Authentication hooks
-export { useAuth } from "@/contexts/auth-context";
+// Appointment hooks (React Query powered)
+// Export the wrapper version as default for backward compatibility
+export { useAppointments, type AppointmentFilters } from "./useAppointments";
 
-// Resource management hooks
-export { useAppointments } from "./useAppointments";
-export { useCustomers } from "./useCustomers";
-export { useServices } from "./useServices";
-export { useStaff } from "./useStaff";
+// Export individual React Query hooks for new code
+export {
+  appointmentKeys,
+  useAppointmentStatistics,
+  useAppointments as useAppointmentsQuery,
+  useCheckAvailability,
+  useCreateAppointment,
+  useDeleteAppointment,
+  useSendReminder,
+  useUpdateAppointmentStatus,
+} from "./useAppointments.query";
 
-// Utility hooks
+// Customer hooks (React Query powered)
+// Export the wrapper version as default for backward compatibility
+export { useCustomers, type CustomerFilters } from "./useCustomers";
+
+// Export individual React Query hooks for new code
+export {
+  customerKeys,
+  useCreateCustomer,
+  useCustomerById,
+  useCustomerStatistics,
+  useCustomers as useCustomersQuery,
+  useDeactivateCustomer,
+  useReactivateCustomer,
+  useUpdateCustomer,
+} from "./useCustomers.query";
+
+// Service hooks (React Query powered)
+// Export the wrapper version as default for backward compatibility
+export { useServices, type ServiceFilters } from "./useServices";
+
+// Export individual React Query hooks for new code
+export {
+  serviceKeys,
+  useCreateService,
+  useDeactivateService,
+  useReactivateService,
+  useReorderServices,
+  useServiceById,
+  useServices as useServicesQuery,
+  useUpdateService,
+} from "./useServices.query";
+
+// Staff hooks (React Query powered)
+// Export the wrapper version as default for backward compatibility
+export { useStaff, type StaffFilters } from "./useStaff";
+
+// Export individual React Query hooks for new code
+export {
+  staffKeys,
+  useCreateStaffMember,
+  useDeactivateStaffMember,
+  useReactivateStaffMember,
+  useReorderStaff,
+  useStaffById,
+  useStaff as useStaffQuery,
+  useUpdateStaffMember,
+} from "./useStaff.query";
+
+// Other hooks
+export { useAuth } from "./use-auth";
 export { useCapacitor } from "./useCapacitor";
 export { useLicense } from "./useLicense";
-
-// Type exports
-export type { AppointmentFilters } from "./useAppointments";
-export type { CustomerFilters } from "./useCustomers";
-export type { ServiceFilters } from "./useServices";
-export type { StaffFilters } from "./useStaff";

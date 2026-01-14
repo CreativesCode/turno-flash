@@ -1,11 +1,28 @@
+/**
+ * DEPRECATED: This file is kept for backward compatibility.
+ * Please use the new React Query hooks from './useAppointments.query.ts' instead.
+ *
+ * Migration guide:
+ * - useAppointments() -> useAppointments() (same API with React Query)
+ * - createAppointment() -> useCreateAppointment().mutate()
+ * - updateStatus() -> useUpdateAppointmentStatus().mutate()
+ * - deleteAppointment() -> useDeleteAppointment().mutate()
+ * - sendReminder() -> useSendReminder().mutate()
+ * - checkAvailability() -> useCheckAvailability()
+ * - getStatistics() -> useAppointmentStatistics()
+ */
+
 import { useAuth } from "@/contexts/auth-context";
-import { AppointmentService } from "@/services/appointments.service";
+import { AppointmentFormData, AppointmentStatus } from "@/types/appointments";
+import { useCallback } from "react";
 import {
-  AppointmentFormData,
-  AppointmentStatus,
-  AppointmentWithDetails,
-} from "@/types/appointments";
-import { useCallback, useEffect, useMemo, useState } from "react";
+  useAppointments as useAppointmentsQuery,
+  useCheckAvailability as useCheckAvailabilityQuery,
+  useCreateAppointment as useCreateAppointmentMutation,
+  useDeleteAppointment as useDeleteAppointmentMutation,
+  useSendReminder as useSendReminderMutation,
+  useUpdateAppointmentStatus as useUpdateAppointmentStatusMutation,
+} from "./useAppointments.query";
 
 /**
  * Filters for appointments query
@@ -21,86 +38,27 @@ export interface AppointmentFilters {
 
 /**
  * Custom hook for managing appointments
- * Provides CRUD operations and state management for appointments
+ * NOW POWERED BY REACT QUERY! 🚀
+ *
+ * This hook now uses React Query under the hood for:
+ * - Automatic caching
+ * - Smart refetching
+ * - Optimistic updates
+ * - Better performance
+ *
+ * The API remains the same for backward compatibility.
  */
 export function useAppointments(filters?: AppointmentFilters) {
   const { profile } = useAuth();
-  const [appointments, setAppointments] = useState<AppointmentWithDetails[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Serialize status array for stable comparison (prevents infinite loops)
-  // Compare by content, not by reference to avoid infinite re-renders
-  const statusKey = useMemo(() => {
-    if (!filters?.status || filters.status.length === 0) return "";
-    return JSON.stringify([...filters.status].sort());
-    // We intentionally use join() to compare by content, not array reference
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters?.status?.join(",") ?? ""]);
-
-  /**
-   * Load appointments from the service
-   */
-  const loadAppointments = useCallback(async () => {
-    if (!profile?.organization_id) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Default to current month if no dates provided
-      const today = new Date();
-      const startDate =
-        filters?.startDate ||
-        new Date(today.getFullYear(), today.getMonth(), 1)
-          .toISOString()
-          .split("T")[0];
-      const endDate =
-        filters?.endDate ||
-        new Date(today.getFullYear(), today.getMonth() + 1, 0)
-          .toISOString()
-          .split("T")[0];
-
-      const result = await AppointmentService.getByDateRange(
-        profile.organization_id,
-        startDate,
-        endDate,
-        {
-          staffId: filters?.staffId,
-          serviceId: filters?.serviceId,
-          customerId: filters?.customerId,
-          status: filters?.status,
-        }
-      );
-
-      if (result.success && result.appointments) {
-        setAppointments(result.appointments);
-      } else {
-        setError(result.error || "Error al cargar los turnos");
-      }
-    } catch (err) {
-      console.error("Error loading appointments:", err);
-      setError("Error inesperado al cargar los turnos");
-    } finally {
-      setLoading(false);
-    }
-    // Note: We use statusKey (serialized) instead of filters?.status to compare by content, not reference
-    // This prevents infinite loops when array reference changes but content is the same
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    profile?.organization_id,
-    filters?.startDate,
-    filters?.endDate,
-    filters?.staffId,
-    filters?.serviceId,
-    filters?.customerId,
-    statusKey, // Serialized status array for stable comparison
-  ]);
+  // Use React Query hooks
+  const { appointments, loading, error, refetch } =
+    useAppointmentsQuery(filters);
+  const createMutation = useCreateAppointmentMutation();
+  const updateStatusMutation = useUpdateAppointmentStatusMutation();
+  const deleteMutation = useDeleteAppointmentMutation();
+  const sendReminderMutation = useSendReminderMutation();
+  const checkAvailabilityFn = useCheckAvailabilityQuery();
 
   /**
    * Create a new appointment
@@ -114,20 +72,17 @@ export function useAppointments(filters?: AppointmentFilters) {
         };
       }
 
-      const result = await AppointmentService.create(
-        data,
-        profile.organization_id,
-        profile.user_id
-      );
-
-      if (result.success) {
-        // Reload appointments to get the updated list
-        await loadAppointments();
+      try {
+        await createMutation.mutateAsync(data);
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : "Error al crear el turno",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, profile?.user_id, loadAppointments]
+    [profile?.organization_id, profile?.user_id, createMutation]
   );
 
   /**
@@ -146,22 +101,24 @@ export function useAppointments(filters?: AppointmentFilters) {
         };
       }
 
-      const result = await AppointmentService.updateStatus(
-        appointmentId,
-        newStatus,
-        profile.organization_id,
-        profile?.user_id,
-        reason
-      );
-
-      if (result.success) {
-        // Reload appointments to get the updated list
-        await loadAppointments();
+      try {
+        await updateStatusMutation.mutateAsync({
+          appointmentId,
+          newStatus,
+          reason,
+        });
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Error al actualizar el estado",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, profile?.user_id, loadAppointments]
+    [profile?.organization_id, updateStatusMutation]
   );
 
   /**
@@ -176,21 +133,18 @@ export function useAppointments(filters?: AppointmentFilters) {
         };
       }
 
-      const result = await AppointmentService.delete(
-        appointmentId,
-        profile.organization_id,
-        profile.user_id,
-        reason
-      );
-
-      if (result.success) {
-        // Reload appointments to get the updated list
-        await loadAppointments();
+      try {
+        await deleteMutation.mutateAsync({ appointmentId, reason });
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error ? err.message : "Error al eliminar el turno",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, profile?.user_id, loadAppointments]
+    [profile?.organization_id, profile?.user_id, deleteMutation]
   );
 
   /**
@@ -208,21 +162,23 @@ export function useAppointments(filters?: AppointmentFilters) {
         };
       }
 
-      const result = await AppointmentService.sendReminder(
-        appointmentId,
-        profile.organization_id,
-        profile.user_id,
-        method
-      );
-
-      if (result.success) {
-        // Reload appointments to get the updated status
-        await loadAppointments();
+      try {
+        const result = await sendReminderMutation.mutateAsync({
+          appointmentId,
+          method,
+        });
+        return { success: true, whatsappUrl: result.whatsappUrl };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Error al enviar el recordatorio",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, profile?.user_id, loadAppointments]
+    [profile?.organization_id, profile?.user_id, sendReminderMutation]
   );
 
   /**
@@ -236,30 +192,28 @@ export function useAppointments(filters?: AppointmentFilters) {
       staffId: string,
       excludeAppointmentId?: string
     ) => {
-      if (!profile?.organization_id) {
-        return {
-          available: false,
-          reason: "No se encontró la información de la organización",
-        };
-      }
-
-      return await AppointmentService.checkAvailability(
+      return await checkAvailabilityFn(
         date,
         startTime,
         endTime,
         staffId,
-        profile.organization_id,
         excludeAppointmentId
       );
     },
-    [profile?.organization_id]
+    [checkAvailabilityFn]
   );
 
   /**
    * Get appointment statistics
+   * NOTE: This is now handled by useAppointmentStatistics hook
+   * This wrapper is kept for backward compatibility
    */
   const getStatistics = useCallback(
     async (startDate: string, endDate: string) => {
+      console.warn(
+        "getStatistics is deprecated. Use useAppointmentStatistics hook instead."
+      );
+
       if (!profile?.organization_id) {
         return {
           success: false,
@@ -267,6 +221,10 @@ export function useAppointments(filters?: AppointmentFilters) {
         };
       }
 
+      // Import dynamically to avoid circular dependencies
+      const { AppointmentService } = await import(
+        "@/services/appointments.service"
+      );
       return await AppointmentService.getStatistics(
         profile.organization_id,
         startDate,
@@ -280,13 +238,8 @@ export function useAppointments(filters?: AppointmentFilters) {
    * Refresh appointments data
    */
   const refresh = useCallback(() => {
-    return loadAppointments();
-  }, [loadAppointments]);
-
-  // Auto-load on mount and when filters change
-  useEffect(() => {
-    loadAppointments();
-  }, [loadAppointments]);
+    return refetch();
+  }, [refetch]);
 
   return {
     appointments,

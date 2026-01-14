@@ -1,56 +1,53 @@
-import { useAuth } from "@/contexts/auth-context";
-import { CustomerService } from "@/services/customers.service";
-import { Customer, CustomerFormData } from "@/types/appointments";
-import { useCallback, useEffect, useState } from "react";
-
 /**
- * Filters for customers query
+ * DEPRECATED: This file is kept for backward compatibility.
+ * Please use the new React Query hooks from './useCustomers.query.ts' instead.
+ *
+ * Migration guide:
+ * - useCustomers() -> useCustomers() (same API with React Query)
+ * - createCustomer() -> useCreateCustomer().mutate()
+ * - updateCustomer() -> useUpdateCustomer().mutate()
+ * - deactivateCustomer() -> useDeactivateCustomer().mutate()
+ * - reactivateCustomer() -> useReactivateCustomer().mutate()
+ * - getCustomerById() -> useCustomerById(customerId)
+ * - getCustomerStatistics() -> useCustomerStatistics(customerId)
  */
-export interface CustomerFilters {
-  isActive?: boolean;
-  search?: string;
-}
+
+import { useAuth } from "@/contexts/auth-context";
+import { CustomerFormData } from "@/types/appointments";
+import { useCallback } from "react";
+import {
+  useCreateCustomer as useCreateCustomerMutation,
+  useCustomers as useCustomersQuery,
+  useDeactivateCustomer as useDeactivateCustomerMutation,
+  useReactivateCustomer as useReactivateCustomerMutation,
+  useUpdateCustomer as useUpdateCustomerMutation,
+  type CustomerFilters,
+} from "./useCustomers.query";
+
+// Re-export CustomerFilters for backward compatibility
+export type { CustomerFilters };
 
 /**
  * Custom hook for managing customers
- * Provides CRUD operations and state management for customers
+ * NOW POWERED BY REACT QUERY! 🚀
+ *
+ * This hook now uses React Query under the hood for:
+ * - Automatic caching
+ * - Smart refetching
+ * - Optimistic updates
+ * - Better performance
+ *
+ * The API remains the same for backward compatibility.
  */
 export function useCustomers(filters?: CustomerFilters) {
   const { profile } = useAuth();
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Load customers from the service
-   */
-  const loadCustomers = useCallback(async () => {
-    if (!profile?.organization_id) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const result = await CustomerService.getAll(profile.organization_id, {
-        isActive: filters?.isActive,
-        search: filters?.search,
-      });
-
-      if (result.success && result.customers) {
-        setCustomers(result.customers);
-      } else {
-        setError(result.error || "Error al cargar los clientes");
-      }
-    } catch (err) {
-      console.error("Error loading customers:", err);
-      setError("Error inesperado al cargar los clientes");
-    } finally {
-      setLoading(false);
-    }
-  }, [profile?.organization_id, filters?.isActive, filters?.search]);
+  // Use React Query hooks
+  const { customers, loading, error, refetch } = useCustomersQuery(filters);
+  const createMutation = useCreateCustomerMutation();
+  const updateMutation = useUpdateCustomerMutation();
+  const deactivateMutation = useDeactivateCustomerMutation();
+  const reactivateMutation = useReactivateCustomerMutation();
 
   /**
    * Create a new customer
@@ -64,20 +61,18 @@ export function useCustomers(filters?: CustomerFilters) {
         };
       }
 
-      const result = await CustomerService.create(
-        data,
-        profile.organization_id,
-        profile.user_id
-      );
-
-      if (result.success) {
-        // Reload customers to get the updated list
-        await loadCustomers();
+      try {
+        const customer = await createMutation.mutateAsync(data);
+        return { success: true, customer };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error ? err.message : "Error al crear el cliente",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, profile?.user_id, loadCustomers]
+    [profile?.organization_id, profile?.user_id, createMutation]
   );
 
   /**
@@ -92,20 +87,20 @@ export function useCustomers(filters?: CustomerFilters) {
         };
       }
 
-      const result = await CustomerService.update(
-        customerId,
-        data,
-        profile.organization_id
-      );
-
-      if (result.success) {
-        // Reload customers to get the updated list
-        await loadCustomers();
+      try {
+        await updateMutation.mutateAsync({ customerId, data });
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Error al actualizar el cliente",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, loadCustomers]
+    [profile?.organization_id, updateMutation]
   );
 
   /**
@@ -120,19 +115,20 @@ export function useCustomers(filters?: CustomerFilters) {
         };
       }
 
-      const result = await CustomerService.deactivate(
-        customerId,
-        profile.organization_id
-      );
-
-      if (result.success) {
-        // Reload customers to get the updated list
-        await loadCustomers();
+      try {
+        await deactivateMutation.mutateAsync(customerId);
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Error al desactivar el cliente",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, loadCustomers]
+    [profile?.organization_id, deactivateMutation]
   );
 
   /**
@@ -147,26 +143,33 @@ export function useCustomers(filters?: CustomerFilters) {
         };
       }
 
-      const result = await CustomerService.reactivate(
-        customerId,
-        profile.organization_id
-      );
-
-      if (result.success) {
-        // Reload customers to get the updated list
-        await loadCustomers();
+      try {
+        await reactivateMutation.mutateAsync(customerId);
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Error al reactivar el cliente",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, loadCustomers]
+    [profile?.organization_id, reactivateMutation]
   );
 
   /**
    * Get a single customer by ID
+   * NOTE: This is now handled by useCustomerById hook
+   * This wrapper is kept for backward compatibility
    */
   const getCustomerById = useCallback(
     async (customerId: string) => {
+      console.warn(
+        "getCustomerById is deprecated. Use useCustomerById hook instead."
+      );
+
       if (!profile?.organization_id) {
         return {
           success: false,
@@ -174,6 +177,8 @@ export function useCustomers(filters?: CustomerFilters) {
         };
       }
 
+      // Import dynamically to avoid circular dependencies
+      const { CustomerService } = await import("@/services/customers.service");
       return await CustomerService.getById(customerId, profile.organization_id);
     },
     [profile?.organization_id]
@@ -181,9 +186,15 @@ export function useCustomers(filters?: CustomerFilters) {
 
   /**
    * Get customer statistics
+   * NOTE: This is now handled by useCustomerStatistics hook
+   * This wrapper is kept for backward compatibility
    */
   const getCustomerStatistics = useCallback(
     async (customerId: string) => {
+      console.warn(
+        "getCustomerStatistics is deprecated. Use useCustomerStatistics hook instead."
+      );
+
       if (!profile?.organization_id) {
         return {
           success: false,
@@ -191,6 +202,8 @@ export function useCustomers(filters?: CustomerFilters) {
         };
       }
 
+      // Import dynamically to avoid circular dependencies
+      const { CustomerService } = await import("@/services/customers.service");
       return await CustomerService.getStatistics(
         customerId,
         profile.organization_id
@@ -203,13 +216,8 @@ export function useCustomers(filters?: CustomerFilters) {
    * Refresh customers data
    */
   const refresh = useCallback(() => {
-    return loadCustomers();
-  }, [loadCustomers]);
-
-  // Auto-load on mount and when filters change
-  useEffect(() => {
-    loadCustomers();
-  }, [loadCustomers]);
+    return refetch();
+  }, [refetch]);
 
   return {
     customers,

@@ -1,63 +1,55 @@
-import { useAuth } from "@/contexts/auth-context";
-import { ServiceService } from "@/services/services.service";
-import { Service, ServiceFormData } from "@/types/appointments";
-import { useCallback, useEffect, useState } from "react";
-
 /**
- * Filters for services query
+ * DEPRECATED: This file is kept for backward compatibility.
+ * Please use the new React Query hooks from './useServices.query.ts' instead.
+ *
+ * Migration guide:
+ * - useServices() -> useServices() (same API with React Query)
+ * - createService() -> useCreateService().mutate()
+ * - updateService() -> useUpdateService().mutate()
+ * - deactivateService() -> useDeactivateService().mutate()
+ * - reactivateService() -> useReactivateService().mutate()
+ * - getServiceById() -> useServiceById(serviceId)
+ * - reorderServices() -> useReorderServices().mutate()
  */
-export interface ServiceFilters {
-  isActive?: boolean;
-  categoryId?: string;
-  availableForOnlineBooking?: boolean;
-}
+
+import { useAuth } from "@/contexts/auth-context";
+import { ServiceFormData } from "@/types/appointments";
+import { useCallback } from "react";
+import {
+  useCreateService as useCreateServiceMutation,
+  useDeactivateService as useDeactivateServiceMutation,
+  useReactivateService as useReactivateServiceMutation,
+  useReorderServices as useReorderServicesMutation,
+  useServices as useServicesQuery,
+  useUpdateService as useUpdateServiceMutation,
+  type ServiceFilters,
+} from "./useServices.query";
+
+// Re-export ServiceFilters for backward compatibility
+export type { ServiceFilters };
 
 /**
  * Custom hook for managing services
- * Provides CRUD operations and state management for services
+ * NOW POWERED BY REACT QUERY! 🚀
+ *
+ * This hook now uses React Query under the hood for:
+ * - Automatic caching
+ * - Smart refetching
+ * - Optimistic updates
+ * - Better performance
+ *
+ * The API remains the same for backward compatibility.
  */
 export function useServices(filters?: ServiceFilters) {
   const { profile } = useAuth();
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Load services from the service layer
-   */
-  const loadServices = useCallback(async () => {
-    if (!profile?.organization_id) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const result = await ServiceService.getAll(profile.organization_id, {
-        isActive: filters?.isActive,
-        categoryId: filters?.categoryId,
-        availableForOnlineBooking: filters?.availableForOnlineBooking,
-      });
-
-      if (result.success && result.services) {
-        setServices(result.services);
-      } else {
-        setError(result.error || "Error al cargar los servicios");
-      }
-    } catch (err) {
-      console.error("Error loading services:", err);
-      setError("Error inesperado al cargar los servicios");
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    profile?.organization_id,
-    filters?.isActive,
-    filters?.categoryId,
-    filters?.availableForOnlineBooking,
-  ]);
+  // Use React Query hooks
+  const { services, loading, error, refetch } = useServicesQuery(filters);
+  const createMutation = useCreateServiceMutation();
+  const updateMutation = useUpdateServiceMutation();
+  const deactivateMutation = useDeactivateServiceMutation();
+  const reactivateMutation = useReactivateServiceMutation();
+  const reorderMutation = useReorderServicesMutation();
 
   /**
    * Create a new service
@@ -71,16 +63,18 @@ export function useServices(filters?: ServiceFilters) {
         };
       }
 
-      const result = await ServiceService.create(data, profile.organization_id);
-
-      if (result.success) {
-        // Reload services to get the updated list
-        await loadServices();
+      try {
+        await createMutation.mutateAsync(data);
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error ? err.message : "Error al crear el servicio",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, loadServices]
+    [profile?.organization_id, createMutation]
   );
 
   /**
@@ -95,20 +89,20 @@ export function useServices(filters?: ServiceFilters) {
         };
       }
 
-      const result = await ServiceService.update(
-        serviceId,
-        data,
-        profile.organization_id
-      );
-
-      if (result.success) {
-        // Reload services to get the updated list
-        await loadServices();
+      try {
+        await updateMutation.mutateAsync({ serviceId, data });
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Error al actualizar el servicio",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, loadServices]
+    [profile?.organization_id, updateMutation]
   );
 
   /**
@@ -123,19 +117,20 @@ export function useServices(filters?: ServiceFilters) {
         };
       }
 
-      const result = await ServiceService.deactivate(
-        serviceId,
-        profile.organization_id
-      );
-
-      if (result.success) {
-        // Reload services to get the updated list
-        await loadServices();
+      try {
+        await deactivateMutation.mutateAsync(serviceId);
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Error al desactivar el servicio",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, loadServices]
+    [profile?.organization_id, deactivateMutation]
   );
 
   /**
@@ -150,26 +145,33 @@ export function useServices(filters?: ServiceFilters) {
         };
       }
 
-      const result = await ServiceService.reactivate(
-        serviceId,
-        profile.organization_id
-      );
-
-      if (result.success) {
-        // Reload services to get the updated list
-        await loadServices();
+      try {
+        await reactivateMutation.mutateAsync(serviceId);
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Error al reactivar el servicio",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, loadServices]
+    [profile?.organization_id, reactivateMutation]
   );
 
   /**
    * Get a single service by ID
+   * NOTE: This is now handled by useServiceById hook
+   * This wrapper is kept for backward compatibility
    */
   const getServiceById = useCallback(
     async (serviceId: string) => {
+      console.warn(
+        "getServiceById is deprecated. Use useServiceById hook instead."
+      );
+
       if (!profile?.organization_id) {
         return {
           success: false,
@@ -177,6 +179,8 @@ export function useServices(filters?: ServiceFilters) {
         };
       }
 
+      // Import dynamically to avoid circular dependencies
+      const { ServiceService } = await import("@/services/services.service");
       return await ServiceService.getById(serviceId, profile.organization_id);
     },
     [profile?.organization_id]
@@ -194,32 +198,28 @@ export function useServices(filters?: ServiceFilters) {
         };
       }
 
-      const result = await ServiceService.reorder(
-        serviceIds,
-        profile.organization_id
-      );
-
-      if (result.success) {
-        // Reload services to get the updated order
-        await loadServices();
+      try {
+        await reorderMutation.mutateAsync(serviceIds);
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Error al reordenar los servicios",
+        };
       }
-
-      return result;
     },
-    [profile?.organization_id, loadServices]
+    [profile?.organization_id, reorderMutation]
   );
 
   /**
    * Refresh services data
    */
   const refresh = useCallback(() => {
-    return loadServices();
-  }, [loadServices]);
-
-  // Auto-load on mount and when filters change
-  useEffect(() => {
-    loadServices();
-  }, [loadServices]);
+    return refetch();
+  }, [refetch]);
 
   return {
     services,
