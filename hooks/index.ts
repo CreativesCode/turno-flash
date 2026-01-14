@@ -15,6 +15,7 @@ export {
   useCheckAvailability,
   useCreateAppointment,
   useDeleteAppointment,
+  useInfiniteAppointments,
   useSendReminder,
   useUpdateAppointmentStatus,
 } from "./useAppointments.query";
@@ -31,6 +32,7 @@ export {
   useCustomerStatistics,
   useCustomers as useCustomersQuery,
   useDeactivateCustomer,
+  useInfiniteCustomers,
   useReactivateCustomer,
   useUpdateCustomer,
 } from "./useCustomers.query";

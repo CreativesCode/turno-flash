@@ -275,6 +275,59 @@ export class ServiceService {
   }
 
   /**
+   * Get paginated services for an organization
+   */
+  static async getAllPaginated(
+    organizationId: string,
+    offset: number = 0,
+    limit: number = 50,
+    filters?: {
+      isActive?: boolean;
+      categoryId?: string;
+      availableForOnlineBooking?: boolean;
+    }
+  ): Promise<Service[]> {
+    try {
+      const supabase = createClient();
+
+      let query = supabase
+        .from("services")
+        .select("*")
+        .eq("organization_id", organizationId)
+        .order("sort_order")
+        .range(offset, offset + limit - 1);
+
+      // Apply filters
+      if (filters?.isActive !== undefined) {
+        query = query.eq("is_active", filters.isActive);
+      }
+
+      if (filters?.categoryId) {
+        query = query.eq("category_id", filters.categoryId);
+      }
+
+      if (filters?.availableForOnlineBooking !== undefined) {
+        query = query.eq(
+          "available_for_online_booking",
+          filters.availableForOnlineBooking
+        );
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching paginated services:", error);
+        throw new Error("Error al cargar los servicios");
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error("Unexpected error fetching paginated services:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get a single service by ID
    */
   static async getById(

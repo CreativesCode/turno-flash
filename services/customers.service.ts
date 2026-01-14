@@ -252,6 +252,54 @@ export class CustomerService {
   }
 
   /**
+   * Get paginated customers for an organization
+   */
+  static async getAllPaginated(
+    organizationId: string,
+    offset: number = 0,
+    limit: number = 50,
+    filters?: {
+      isActive?: boolean;
+      search?: string;
+    }
+  ): Promise<Customer[]> {
+    try {
+      const supabase = createClient();
+
+      let query = supabase
+        .from("customers")
+        .select("*")
+        .eq("organization_id", organizationId)
+        .order("first_name")
+        .range(offset, offset + limit - 1);
+
+      // Apply filters
+      if (filters?.isActive !== undefined) {
+        query = query.eq("is_active", filters.isActive);
+      }
+
+      if (filters?.search) {
+        const searchTerm = filters.search.toLowerCase();
+        query = query.or(
+          `first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`
+        );
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching paginated customers:", error);
+        throw new Error("Error al cargar los clientes");
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error("Unexpected error fetching paginated customers:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get a single customer by ID
    */
   static async getById(

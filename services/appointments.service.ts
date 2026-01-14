@@ -469,6 +469,71 @@ export class AppointmentService {
   }
 
   /**
+   * Get paginated appointments for a date range
+   */
+  static async getAllPaginated(
+    organizationId: string,
+    offset: number = 0,
+    limit: number = 50,
+    startDate?: string,
+    endDate?: string,
+    filters?: {
+      staffId?: string;
+      serviceId?: string;
+      customerId?: string;
+      status?: AppointmentStatus[];
+    }
+  ): Promise<AppointmentWithDetails[]> {
+    try {
+      const supabase = createClient();
+
+      let query = supabase
+        .from("appointments_with_details")
+        .select("*")
+        .eq("organization_id", organizationId)
+        .order("appointment_date", { ascending: true })
+        .order("start_time", { ascending: true })
+        .range(offset, offset + limit - 1);
+
+      // Apply date filters if provided
+      if (startDate) {
+        query = query.gte("appointment_date", startDate);
+      }
+      if (endDate) {
+        query = query.lte("appointment_date", endDate);
+      }
+
+      // Apply filters
+      if (filters?.staffId) {
+        query = query.eq("staff_id", filters.staffId);
+      }
+      if (filters?.serviceId) {
+        query = query.eq("service_id", filters.serviceId);
+      }
+      if (filters?.customerId) {
+        query = query.eq("customer_id", filters.customerId);
+      }
+      if (filters?.status && filters.status.length > 0) {
+        query = query.in("status", filters.status);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching paginated appointments:", error);
+        throw new Error("Error al cargar los turnos");
+      }
+
+      return (data || []).map((apt: any) =>
+        this.mapToAppointmentWithDetails(apt)
+      );
+    } catch (error) {
+      console.error("Unexpected error fetching paginated appointments:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Delete an appointment
    */
   static async delete(

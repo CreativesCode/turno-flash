@@ -4,8 +4,8 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
   useCreateCustomer,
-  useCustomersQuery,
   useDeactivateCustomer,
+  useInfiniteCustomers,
   useToast,
   useUpdateCustomer,
 } from "@/hooks";
@@ -22,7 +22,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,15 +30,28 @@ export default function CustomersPage() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const toast = useToast();
 
-  // 🎉 Use the new React Query hooks!
+  // 🎉 Use infinite pagination for better performance!
   const {
-    customers: filteredCustomers,
-    loading,
-    error,
-  } = useCustomersQuery({
-    search: searchTerm,
-    isActive: true,
-  });
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: loading,
+    error: queryError,
+  } = useInfiniteCustomers(
+    {
+      search: searchTerm,
+      isActive: true,
+    },
+    50 // pageSize
+  );
+
+  // Flatten all pages into a single array
+  const filteredCustomers = useMemo(() => {
+    return data?.pages.flat() || [];
+  }, [data]);
+
+  const error = queryError?.message || null;
 
   const createCustomerMutation = useCreateCustomer();
   const updateCustomerMutation = useUpdateCustomer();
@@ -239,7 +252,7 @@ export default function CustomersPage() {
           </div>
 
           {/* Customers Grid */}
-          {filteredCustomers.length === 0 ? (
+          {filteredCustomers.length === 0 && !loading ? (
             <div className="rounded-lg bg-surface p-12 text-center shadow-sm">
               <User className="mx-auto h-12 w-12 text-zinc-400" />
               <h3 className="mt-4 text-lg font-semibold text-foreground">
@@ -339,6 +352,31 @@ export default function CustomersPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Load More Button */}
+          {hasNextPage && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="flex items-center gap-2 rounded-md bg-secondary-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-secondary-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    Cargando...
+                  </>
+                ) : (
+                  <>
+                    Cargar más clientes
+                    <span className="text-xs opacity-75">
+                      ({filteredCustomers.length} cargados)
+                    </span>
+                  </>
+                )}
+              </button>
             </div>
           )}
         </div>

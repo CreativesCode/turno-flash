@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/auth-context";
 import {
   useCreateAppointment,
   useCreateCustomer,
+  useInfiniteAppointments,
   useNormalizedData,
   useSendReminder,
   useToast,
@@ -119,12 +120,30 @@ export default function AppointmentsPage() {
     };
   }, [selectedDate, view]);
 
-  // 🎉 Use Normalized Data Hook for consistent, deduplicated state!
-  const normalizedData = useNormalizedData({
-    appointmentFilters: {
+  // 🎉 Use Infinite Pagination for appointments (better performance!)
+  const {
+    data: appointmentsData,
+    fetchNextPage: fetchNextAppointmentsPage,
+    hasNextPage: hasNextAppointmentsPage,
+    isFetchingNextPage: isFetchingNextAppointmentsPage,
+    isLoading: appointmentsLoading,
+    error: appointmentsError,
+  } = useInfiniteAppointments(
+    {
       startDate: getDateRange.start,
       endDate: getDateRange.end,
     },
+    50 // pageSize
+  );
+
+  // Flatten all appointment pages into a single array
+  const appointments = useMemo(() => {
+    return appointmentsData?.pages.flat() || [];
+  }, [appointmentsData]);
+
+  // Use Normalized Data Hook for customers, services, and staff (smaller datasets)
+  const normalizedData = useNormalizedData({
+    includeAppointments: false, // We're using infinite query for appointments
     customerFilters: {
       isActive: true,
     },
@@ -137,8 +156,7 @@ export default function AppointmentsPage() {
     },
   });
 
-  // Extract data from normalized state (backward compatible)
-  const appointments = normalizedData.appointments;
+  // Extract data from normalized state
   const customers = normalizedData.customers;
   const services = normalizedData.services;
   const staffMembers = normalizedData.staff;
@@ -149,10 +167,10 @@ export default function AppointmentsPage() {
   const createCustomerMutation = useCreateCustomer();
 
   // Combined loading state
-  const loading = normalizedData.loading;
+  const loading = appointmentsLoading || normalizedData.loading;
 
   // Combine hook errors with local errors
-  const error = normalizedData.error || localError;
+  const error = appointmentsError?.message || normalizedData.error || localError;
 
   // Helper to set error (local error takes precedence)
   const setError = (errorMsg: string | null) => {
@@ -656,7 +674,7 @@ export default function AppointmentsPage() {
           {/* Appointments List */}
           {view === "list" && (
             <>
-              {filteredAppointments.length === 0 ? (
+              {filteredAppointments.length === 0 && !loading ? (
                 <div className="rounded-lg bg-surface p-12 text-center shadow-sm">
                   <Calendar className="mx-auto h-12 w-12 text-foreground-muted" />
                   <h3 className="mt-4 text-lg font-semibold text-foreground">
@@ -855,6 +873,31 @@ export default function AppointmentsPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* Load More Button */}
+              {hasNextAppointmentsPage && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={() => fetchNextAppointmentsPage()}
+                    disabled={isFetchingNextAppointmentsPage}
+                    className="flex items-center gap-2 rounded-md bg-secondary-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-secondary-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
+                  >
+                    {isFetchingNextAppointmentsPage ? (
+                      <>
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        Cargando...
+                      </>
+                    ) : (
+                      <>
+                        Cargar más turnos
+                        <span className="text-xs opacity-75">
+                          ({filteredAppointments.length} cargados)
+                        </span>
+                      </>
+                    )}
+                  </button>
                 </div>
               )}
             </>

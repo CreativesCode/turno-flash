@@ -273,6 +273,59 @@ export class StaffService {
   }
 
   /**
+   * Get paginated staff members for an organization
+   */
+  static async getAllPaginated(
+    organizationId: string,
+    offset: number = 0,
+    limit: number = 50,
+    filters?: {
+      isActive?: boolean;
+      isBookable?: boolean;
+      acceptsOnlineBookings?: boolean;
+    }
+  ): Promise<StaffMember[]> {
+    try {
+      const supabase = createClient();
+
+      let query = supabase
+        .from("staff_members")
+        .select("*")
+        .eq("organization_id", organizationId)
+        .order("sort_order")
+        .range(offset, offset + limit - 1);
+
+      // Apply filters
+      if (filters?.isActive !== undefined) {
+        query = query.eq("is_active", filters.isActive);
+      }
+
+      if (filters?.isBookable !== undefined) {
+        query = query.eq("is_bookable", filters.isBookable);
+      }
+
+      if (filters?.acceptsOnlineBookings !== undefined) {
+        query = query.eq(
+          "accepts_online_bookings",
+          filters.acceptsOnlineBookings
+        );
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching paginated staff members:", error);
+        throw new Error("Error al cargar los miembros del staff");
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error("Unexpected error fetching paginated staff members:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get a single staff member by ID
    */
   static async getById(

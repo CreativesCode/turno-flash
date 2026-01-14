@@ -14,6 +14,7 @@ import {
 } from "@/types/appointments";
 import {
   UseQueryOptions,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -575,5 +576,82 @@ export function useAppointmentStatistics(startDate: string, endDate: string) {
     },
     enabled: !!profile?.organization_id,
     staleTime: 1000 * 60 * 5, // 5 minutos - statistics change less frequently
+  });
+}
+
+/**
+ * Hook for infinite pagination of appointments
+ * Uses useInfiniteQuery for efficient pagination with React Query
+ */
+export function useInfiniteAppointments(
+  filters?: AppointmentFilters,
+  pageSize: number = 50,
+  options?: Omit<
+    Parameters<typeof useInfiniteQuery<AppointmentWithDetails[], Error>>[0],
+    "queryKey" | "queryFn" | "getNextPageParam"
+  >
+) {
+  const { profile } = useAuth();
+
+  // Default to current month if no dates provided
+  const today = new Date();
+  const defaultStartDate = new Date(today.getFullYear(), today.getMonth(), 1)
+    .toISOString()
+    .split("T")[0];
+  const defaultEndDate = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+    .toISOString()
+    .split("T")[0];
+
+  const startDate = filters?.startDate || defaultStartDate;
+  const endDate = filters?.endDate || defaultEndDate;
+
+  const filtersWithDates = useMemo(
+    () => ({
+      ...filters,
+      startDate,
+      endDate,
+    }),
+    [filters, startDate, endDate]
+  );
+
+  return useInfiniteQuery({
+    queryKey: [
+      ...appointmentKeys.list(
+        profile?.organization_id || "",
+        filtersWithDates
+      ),
+      "infinite",
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!profile?.organization_id) {
+        return [];
+      }
+
+      return await AppointmentService.getAllPaginated(
+        profile.organization_id,
+        pageParam as number,
+        pageSize,
+        startDate,
+        endDate,
+        {
+          staffId: filters?.staffId,
+          serviceId: filters?.serviceId,
+          customerId: filters?.customerId,
+          status: filters?.status,
+        }
+      );
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      // If last page has fewer items than pageSize, we've reached the end
+      if (lastPage.length < pageSize) {
+        return undefined;
+      }
+      // Return the next offset
+      return allPages.length * pageSize;
+    },
+    initialPageParam: 0,
+    enabled: !!profile?.organization_id,
+    staleTime: 1000 * 60, // 1 minuto
+    ...options,
   });
 }

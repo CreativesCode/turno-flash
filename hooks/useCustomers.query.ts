@@ -4,6 +4,7 @@ import { CustomerService } from "@/services/customers.service";
 import { Customer, CustomerFormData } from "@/types/appointments";
 import {
   UseQueryOptions,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -361,5 +362,54 @@ export function useCustomerStatistics(customerId: string) {
     },
     enabled: !!profile?.organization_id && !!customerId,
     staleTime: 1000 * 60 * 5, // 5 minutos - statistics change less frequently
+  });
+}
+
+/**
+ * Hook for infinite pagination of customers
+ * Uses useInfiniteQuery for efficient pagination with React Query
+ */
+export function useInfiniteCustomers(
+  filters?: CustomerFilters,
+  pageSize: number = 50,
+  options?: Omit<
+    Parameters<typeof useInfiniteQuery<Customer[], Error>>[0],
+    "queryKey" | "queryFn" | "getNextPageParam"
+  >
+) {
+  const { profile } = useAuth();
+
+  return useInfiniteQuery({
+    queryKey: [
+      ...customerKeys.list(profile?.organization_id || "", filters),
+      "infinite",
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!profile?.organization_id) {
+        return [];
+      }
+
+      return await CustomerService.getAllPaginated(
+        profile.organization_id,
+        pageParam as number,
+        pageSize,
+        {
+          isActive: filters?.isActive,
+          search: filters?.search,
+        }
+      );
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      // If last page has fewer items than pageSize, we've reached the end
+      if (lastPage.length < pageSize) {
+        return undefined;
+      }
+      // Return the next offset
+      return allPages.length * pageSize;
+    },
+    initialPageParam: 0,
+    enabled: !!profile?.organization_id,
+    staleTime: 1000 * 60, // 1 minuto
+    ...options,
   });
 }
