@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  APPOINTMENT_STATUS,
+  BUSINESS_HOURS,
+  getStatusCalendarColor,
+} from "@/config/constants";
 import { AppointmentWithDetails } from "@/types/appointments";
 import { getLocalDateString, isToday } from "@/utils/date";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
@@ -21,8 +26,8 @@ export function DayCalendar({
   onDateChange,
   onAppointmentClick,
   onTimeSlotClick,
-  startHour = 8,
-  endHour = 20,
+  startHour = BUSINESS_HOURS.START_HOUR,
+  endHour = BUSINESS_HOURS.END_HOUR,
 }: DayCalendarProps) {
   // Generate time slots
   const timeSlots = useMemo(() => {
@@ -55,29 +60,8 @@ export function DayCalendar({
     return { top: `${top}px`, height: `${height}px` };
   };
 
-  // Get status color
-  const getStatusColor = (status: string | null) => {
-    if (!status) {
-      return "bg-muted border-muted";
-    }
-    switch (status) {
-      case "confirmed":
-      case "client_confirmed":
-        return "bg-success-600 border-success-700";
-      case "pending":
-        return "bg-warning-600 border-warning-700";
-      case "completed":
-        return "bg-info-600 border-info-700";
-      case "cancelled":
-      case "no_show":
-        return "bg-danger-600 border-danger-700";
-      case "checked_in":
-      case "in_progress":
-        return "bg-primary-600 border-primary-700";
-      default:
-        return "bg-foreground-muted border-border text-white";
-    }
-  };
+  // Get status color (using helper from constants)
+  const getStatusColor = getStatusCalendarColor;
 
   // Navigation
   const goToPrevDay = () => {
@@ -235,7 +219,7 @@ function CurrentTimeIndicator({ startHour }: { startHour: number }) {
   const currentHour = now.getHours();
   const currentMinutes = now.getMinutes();
 
-  if (currentHour < startHour || currentHour > 20) return null;
+  if (currentHour < startHour || currentHour > BUSINESS_HOURS.END_HOUR) return null;
 
   const minutesSinceStart = (currentHour - startHour) * 60 + currentMinutes;
   const top = (minutesSinceStart / 30) * 48;

@@ -1,3 +1,4 @@
+import { APPOINTMENT_STATUS } from "@/config/constants";
 import { useAuth } from "@/contexts/auth-context";
 import {
   appointmentFormSchema,
@@ -401,7 +402,7 @@ export function useDeleteAppointment() {
           if (!old) return old;
           return old.map((appointment) =>
             appointment.id === appointmentId
-              ? { ...appointment, status: "cancelled" as AppointmentStatus }
+              ? { ...appointment, status: APPOINTMENT_STATUS.CANCELLED as AppointmentStatus }
               : appointment
           );
         }

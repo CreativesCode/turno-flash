@@ -1,3 +1,4 @@
+import { APPOINTMENT_STATUS } from "@/config/constants";
 import {
   AppointmentFormData,
   AppointmentStatus,
@@ -79,40 +80,40 @@ export class AppointmentService {
   ): boolean {
     const allowedTransitions: Record<AppointmentStatus, AppointmentStatus[]> = {
       pending: [
-        "confirmed",
-        "cancelled",
-        "no_show",
-        "checked_in",
-        "in_progress",
-        "completed",
+        APPOINTMENT_STATUS.CONFIRMED,
+        APPOINTMENT_STATUS.CANCELLED,
+        APPOINTMENT_STATUS.NO_SHOW,
+        APPOINTMENT_STATUS.CHECKED_IN,
+        APPOINTMENT_STATUS.IN_PROGRESS,
+        APPOINTMENT_STATUS.COMPLETED,
       ],
       confirmed: [
-        "reminded",
-        "client_confirmed",
-        "checked_in",
-        "in_progress",
-        "completed",
-        "cancelled",
-        "no_show",
+        APPOINTMENT_STATUS.REMINDED,
+        APPOINTMENT_STATUS.CLIENT_CONFIRMED,
+        APPOINTMENT_STATUS.CHECKED_IN,
+        APPOINTMENT_STATUS.IN_PROGRESS,
+        APPOINTMENT_STATUS.COMPLETED,
+        APPOINTMENT_STATUS.CANCELLED,
+        APPOINTMENT_STATUS.NO_SHOW,
       ],
       reminded: [
-        "client_confirmed",
-        "checked_in",
-        "in_progress",
-        "completed",
-        "cancelled",
-        "no_show",
+        APPOINTMENT_STATUS.CLIENT_CONFIRMED,
+        APPOINTMENT_STATUS.CHECKED_IN,
+        APPOINTMENT_STATUS.IN_PROGRESS,
+        APPOINTMENT_STATUS.COMPLETED,
+        APPOINTMENT_STATUS.CANCELLED,
+        APPOINTMENT_STATUS.NO_SHOW,
       ],
       client_confirmed: [
-        "checked_in",
-        "in_progress",
-        "completed",
-        "cancelled",
-        "no_show",
+        APPOINTMENT_STATUS.CHECKED_IN,
+        APPOINTMENT_STATUS.IN_PROGRESS,
+        APPOINTMENT_STATUS.COMPLETED,
+        APPOINTMENT_STATUS.CANCELLED,
+        APPOINTMENT_STATUS.NO_SHOW,
       ],
-      checked_in: ["in_progress", "completed", "cancelled", "no_show"],
-      in_progress: ["completed", "cancelled"],
-      completed: ["rescheduled"], // Only allow rescheduling from completed
+      checked_in: [APPOINTMENT_STATUS.IN_PROGRESS, APPOINTMENT_STATUS.COMPLETED, APPOINTMENT_STATUS.CANCELLED, APPOINTMENT_STATUS.NO_SHOW],
+      in_progress: [APPOINTMENT_STATUS.COMPLETED, APPOINTMENT_STATUS.CANCELLED],
+      completed: [APPOINTMENT_STATUS.RESCHEDULED], // Only allow rescheduling from completed
       cancelled: [],
       no_show: [],
       rescheduled: [],
@@ -197,8 +198,8 @@ export class AppointmentService {
 
       // Determine final status based on service requirements
       const finalStatus = service.requires_approval
-        ? "pending"
-        : data.status || "confirmed";
+        ? APPOINTMENT_STATUS.PENDING
+        : data.status || APPOINTMENT_STATUS.CONFIRMED;
 
       // Create appointment
       const { data: appointment, error: insertError } = await supabase
@@ -281,19 +282,19 @@ export class AppointmentService {
       };
 
       // Add metadata based on status
-      if (newStatus === "cancelled") {
+      if (newStatus === APPOINTMENT_STATUS.CANCELLED) {
         updateData.cancelled_at = getTimestamp();
         updateData.cancelled_by = userId;
         if (reason) {
           updateData.cancellation_reason = reason;
         }
-      } else if (newStatus === "client_confirmed") {
+      } else if (newStatus === APPOINTMENT_STATUS.CLIENT_CONFIRMED) {
         updateData.client_confirmed_at = getTimestamp();
-      } else if (newStatus === "reminded") {
+      } else if (newStatus === APPOINTMENT_STATUS.REMINDED) {
         updateData.reminder_sent_at = getTimestamp();
-      } else if (newStatus === "in_progress") {
+      } else if (newStatus === APPOINTMENT_STATUS.IN_PROGRESS) {
         updateData.actual_start_time = getTimestamp();
-      } else if (newStatus === "completed") {
+      } else if (newStatus === APPOINTMENT_STATUS.COMPLETED) {
         if (!appointment.actual_start_time) {
           updateData.actual_start_time = getTimestamp();
         }
@@ -346,12 +347,12 @@ export class AppointmentService {
         .eq("staff_id", staffId)
         .eq("appointment_date", date)
         .in("status", [
-          "pending",
-          "confirmed",
-          "reminded",
-          "client_confirmed",
-          "checked_in",
-          "in_progress",
+          APPOINTMENT_STATUS.PENDING,
+          APPOINTMENT_STATUS.CONFIRMED,
+          APPOINTMENT_STATUS.REMINDED,
+          APPOINTMENT_STATUS.CLIENT_CONFIRMED,
+          APPOINTMENT_STATUS.CHECKED_IN,
+          APPOINTMENT_STATUS.IN_PROGRESS,
         ]);
 
       if (excludeAppointmentId) {
@@ -480,7 +481,7 @@ export class AppointmentService {
       // For audit purposes, we don't delete, we cancel instead
       return await this.updateStatus(
         appointmentId,
-        "cancelled",
+        APPOINTMENT_STATUS.CANCELLED,
         organizationId,
         userId,
         reason
@@ -556,7 +557,7 @@ export class AppointmentService {
       // Update appointment status to reminded
       await this.updateStatus(
         appointmentId,
-        "reminded",
+        APPOINTMENT_STATUS.REMINDED,
         organizationId,
         userId
       );
@@ -665,12 +666,12 @@ Por favor confirma tu asistencia respondiendo:
       const stats = {
         total: appointments.length,
         confirmed: appointments.filter(
-          (a) => a.status === "confirmed" || a.status === "client_confirmed"
+          (a) => a.status === APPOINTMENT_STATUS.CONFIRMED || a.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED
         ).length,
-        pending: appointments.filter((a) => a.status === "pending").length,
-        completed: appointments.filter((a) => a.status === "completed").length,
-        cancelled: appointments.filter((a) => a.status === "cancelled").length,
-        noShow: appointments.filter((a) => a.status === "no_show").length,
+        pending: appointments.filter((a) => a.status === APPOINTMENT_STATUS.PENDING).length,
+        completed: appointments.filter((a) => a.status === APPOINTMENT_STATUS.COMPLETED).length,
+        cancelled: appointments.filter((a) => a.status === APPOINTMENT_STATUS.CANCELLED).length,
+        noShow: appointments.filter((a) => a.status === APPOINTMENT_STATUS.NO_SHOW).length,
       };
 
       return { success: true, stats };

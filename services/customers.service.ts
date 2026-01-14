@@ -1,3 +1,4 @@
+import { APPOINTMENT_STATUS } from "@/config/constants";
 import { Customer, CustomerFormData } from "@/types/appointments";
 import { createClient } from "@/utils/supabase/client";
 
@@ -405,9 +406,9 @@ export class CustomerService {
         .eq("organization_id", organizationId);
 
       const completedAppointments =
-        appointments?.filter((a) => a.status === "completed").length || 0;
+        appointments?.filter((a) => a.status === APPOINTMENT_STATUS.COMPLETED).length || 0;
       const cancelledAppointments =
-        appointments?.filter((a) => a.status === "cancelled").length || 0;
+        appointments?.filter((a) => a.status === APPOINTMENT_STATUS.CANCELLED).length || 0;
 
       return {
         success: true,

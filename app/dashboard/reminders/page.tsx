@@ -2,6 +2,11 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
+import {
+  APPOINTMENT_STATUS,
+  STATUS_COLORS,
+  getStatusLabelSimple,
+} from "@/config/constants";
 import { useAuth } from "@/contexts/auth-context";
 import { useAppointments } from "@/hooks";
 import {
@@ -25,7 +30,10 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 // Constant status array to prevent re-creation on each render
-const REMINDER_STATUSES: AppointmentStatus[] = ["confirmed", "pending"];
+const REMINDER_STATUSES: AppointmentStatus[] = [
+  APPOINTMENT_STATUS.CONFIRMED,
+  APPOINTMENT_STATUS.PENDING,
+];
 
 export default function RemindersPage() {
   const { profile } = useAuth();
@@ -76,7 +84,7 @@ export default function RemindersPage() {
   const appointments = useMemo(() => {
     return allAppointments.filter(
       (apt: AppointmentWithDetails) =>
-        apt.status === "confirmed" || apt.status === "pending"
+        apt.status === APPOINTMENT_STATUS.CONFIRMED || apt.status === APPOINTMENT_STATUS.PENDING
     );
   }, [allAppointments]);
 
@@ -271,7 +279,7 @@ export default function RemindersPage() {
                   <p className="mt-1 text-2xl font-bold text-foreground">
                     {
                       appointments.filter(
-                        (a: AppointmentWithDetails) => a.status === "pending"
+                        (a: AppointmentWithDetails) => a.status === APPOINTMENT_STATUS.PENDING
                       ).length
                     }
                   </p>
@@ -287,7 +295,7 @@ export default function RemindersPage() {
                   <p className="mt-1 text-2xl font-bold text-foreground">
                     {
                       appointments.filter(
-                        (a: AppointmentWithDetails) => a.status === "confirmed"
+                        (a: AppointmentWithDetails) => a.status === APPOINTMENT_STATUS.CONFIRMED
                       ).length
                     }
                   </p>
@@ -384,18 +392,14 @@ export default function RemindersPage() {
                     <div className="ml-4 flex flex-col items-end gap-2">
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-medium ${
-                          appointment.status === "confirmed"
-                            ? "bg-green-100 text-green-800"
-                            : appointment.status === "reminded"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-yellow-100 text-yellow-800"
+                          appointment.status === APPOINTMENT_STATUS.CONFIRMED
+                            ? STATUS_COLORS.reminder[APPOINTMENT_STATUS.CONFIRMED]
+                            : appointment.status === APPOINTMENT_STATUS.REMINDED
+                            ? STATUS_COLORS.reminder[APPOINTMENT_STATUS.REMINDED]
+                            : STATUS_COLORS.reminder[APPOINTMENT_STATUS.PENDING]
                         }`}
                       >
-                        {appointment.status === "confirmed"
-                          ? "Confirmado"
-                          : appointment.status === "reminded"
-                          ? "Recordado"
-                          : "Pendiente"}
+                        {getStatusLabelSimple(appointment.status)}
                       </span>
 
                       {canSendReminders && (

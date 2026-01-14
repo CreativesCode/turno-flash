@@ -3,6 +3,14 @@
 import { DayCalendar, WeekCalendar } from "@/components/calendar";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
+import {
+  APPOINTMENT_STATUS,
+  APPOINTMENT_SOURCE,
+  BUSINESS_HOURS,
+  FILTER_STATUS,
+  getStatusBadgeColor,
+  getStatusLabel,
+} from "@/config/constants";
 import { useAuth } from "@/contexts/auth-context";
 import {
   useCreateAppointment,
@@ -40,7 +48,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 
 type AppointmentView = "list" | "day" | "week";
-type FilterStatus = "all" | "pending" | "confirmed" | "completed" | "cancelled";
+type FilterStatus = typeof FILTER_STATUS[keyof typeof FILTER_STATUS] | "all";
 
 export default function AppointmentsPage() {
   const { profile } = useAuth();
@@ -78,8 +86,8 @@ export default function AppointmentsPage() {
     appointment_date: getLocalDateString(),
     start_time: "09:00",
     end_time: "09:30",
-    status: "confirmed",
-    source: "admin",
+    status: APPOINTMENT_STATUS.CONFIRMED,
+    source: APPOINTMENT_SOURCE.ADMIN,
     notes: "",
   });
 
@@ -189,8 +197,8 @@ export default function AppointmentsPage() {
   const handleServiceChange = (serviceId: string) => {
     const selectedService = services.find((s) => s.id === serviceId);
     const newStatus = selectedService?.requires_approval
-      ? "pending"
-      : "confirmed";
+      ? APPOINTMENT_STATUS.PENDING
+      : APPOINTMENT_STATUS.CONFIRMED;
 
     setFormData((prev) => ({
       ...prev,
@@ -218,8 +226,8 @@ export default function AppointmentsPage() {
       appointment_date: getLocalDateString(),
       start_time: "09:00",
       end_time: "09:30",
-      status: "confirmed",
-      source: "admin",
+      status: APPOINTMENT_STATUS.CONFIRMED,
+      source: APPOINTMENT_SOURCE.ADMIN,
       notes: "",
     });
     setShowNewCustomerForm(false);
@@ -428,64 +436,8 @@ export default function AppointmentsPage() {
     }
   };
 
-  // Get status badge color
-  const getStatusColor = (status: string | null) => {
-    if (!status) {
-      return "bg-muted text-muted-foreground";
-    }
-    switch (status) {
-      case "confirmed":
-        return "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400";
-      case "client_confirmed":
-        return "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400";
-      case "pending":
-        return "bg-warning-100 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400";
-      case "reminded":
-        return "bg-secondary-100 text-secondary-800 dark:bg-secondary-900/20 dark:text-secondary-400";
-      case "completed":
-        return "bg-info-100 text-info-800 dark:bg-info-900/20 dark:text-info-400";
-      case "cancelled":
-        return "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400";
-      case "no_show":
-        return "bg-warning-100 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400";
-      case "checked_in":
-      case "in_progress":
-        return "bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400";
-      default:
-        return "bg-muted text-foreground-muted";
-    }
-  };
-
-  // Get status label
-  const getStatusLabel = (status: string | null) => {
-    if (!status) {
-      return "Sin estado";
-    }
-    switch (status) {
-      case "pending":
-        return "⏳ Pendiente";
-      case "confirmed":
-        return "✓ Confirmado";
-      case "reminded":
-        return "🔔 Recordado";
-      case "client_confirmed":
-        return "👤 Cliente Confirmó";
-      case "checked_in":
-        return "📍 Check-in";
-      case "in_progress":
-        return "🚀 En Progreso";
-      case "completed":
-        return "✅ Completado";
-      case "cancelled":
-        return "❌ Cancelado";
-      case "no_show":
-        return "⚠️ No Asistió";
-      case "rescheduled":
-        return "🔄 Reagendado";
-      default:
-        return status;
-    }
-  };
+  // Get status badge color (using helper from constants)
+  const getStatusColor = getStatusBadgeColor;
 
   if (!profile?.organization_id) {
     return (
@@ -587,10 +539,10 @@ export default function AppointmentsPage() {
               className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
             >
               <option value="all">Todos los estados</option>
-              <option value="pending">Pendientes</option>
-              <option value="confirmed">Confirmados</option>
-              <option value="completed">Completados</option>
-              <option value="cancelled">Cancelados</option>
+              <option value={FILTER_STATUS.PENDING}>Pendientes</option>
+              <option value={FILTER_STATUS.CONFIRMED}>Confirmados</option>
+              <option value={FILTER_STATUS.COMPLETED}>Completados</option>
+              <option value={FILTER_STATUS.CANCELLED}>Cancelados</option>
             </select>
 
             {/* View toggle */}
@@ -658,8 +610,8 @@ export default function AppointmentsPage() {
                     {
                       appointments.filter(
                         (a) =>
-                          a.status === "confirmed" ||
-                          a.status === "client_confirmed"
+                          a.status === APPOINTMENT_STATUS.CONFIRMED ||
+                          a.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED
                       ).length
                     }
                   </p>
@@ -674,7 +626,7 @@ export default function AppointmentsPage() {
                   <p className="text-sm text-foreground-muted">Completados</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">
                     {
-                      appointments.filter((a) => a.status === "completed")
+                      appointments.filter((a) => a.status === APPOINTMENT_STATUS.COMPLETED)
                         .length
                     }
                   </p>
@@ -691,7 +643,7 @@ export default function AppointmentsPage() {
                     {
                       appointments.filter(
                         (a) =>
-                          a.status === "cancelled" || a.status === "no_show"
+                          a.status === APPOINTMENT_STATUS.CANCELLED || a.status === APPOINTMENT_STATUS.NO_SHOW
                       ).length
                     }
                   </p>
@@ -813,28 +765,28 @@ export default function AppointmentsPage() {
                           </span>
 
                           {canManageAppointments &&
-                            appointment.status !== "completed" &&
-                            appointment.status !== "cancelled" &&
-                            appointment.status !== "no_show" && (
+                            appointment.status !== APPOINTMENT_STATUS.COMPLETED &&
+                            appointment.status !== APPOINTMENT_STATUS.CANCELLED &&
+                            appointment.status !== APPOINTMENT_STATUS.NO_SHOW && (
                               <div className="flex gap-1">
                                 {/* Show next logical step */}
-                                {appointment.status === "pending" && (
+                                {appointment.status === APPOINTMENT_STATUS.PENDING && (
                                   <button
                                     onClick={() =>
-                                      updateStatus(appointment.id, "confirmed")
+                                      updateStatus(appointment.id, APPOINTMENT_STATUS.CONFIRMED)
                                     }
                                     className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
                                   >
                                     Confirmar
                                   </button>
                                 )}
-                                {(appointment.status === "confirmed" ||
-                                  appointment.status === "reminded") && (
+                                {(appointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                                  appointment.status === APPOINTMENT_STATUS.REMINDED) && (
                                   <button
                                     onClick={() =>
                                       updateStatus(
                                         appointment.id,
-                                        "client_confirmed"
+                                        APPOINTMENT_STATUS.CLIENT_CONFIRMED
                                       )
                                     }
                                     className="rounded-md bg-teal-50 px-2 py-1 text-xs font-medium text-teal-700 transition-colors hover:bg-teal-100 dark:bg-teal-900/20 dark:text-teal-400"
@@ -842,27 +794,27 @@ export default function AppointmentsPage() {
                                     Cliente Confirmó
                                   </button>
                                 )}
-                                {(appointment.status === "confirmed" ||
-                                  appointment.status === "reminded" ||
+                                {(appointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                                  appointment.status === APPOINTMENT_STATUS.REMINDED ||
                                   appointment.status ===
-                                    "client_confirmed") && (
+                                    APPOINTMENT_STATUS.CLIENT_CONFIRMED) && (
                                   <button
                                     onClick={() =>
-                                      updateStatus(appointment.id, "checked_in")
+                                      updateStatus(appointment.id, APPOINTMENT_STATUS.CHECKED_IN)
                                     }
                                     className="rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400"
                                   >
                                     Check-in
                                   </button>
                                 )}
-                                {(appointment.status === "checked_in" ||
-                                  appointment.status === "client_confirmed" ||
-                                  appointment.status === "confirmed") && (
+                                {(appointment.status === APPOINTMENT_STATUS.CHECKED_IN ||
+                                  appointment.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED ||
+                                  appointment.status === APPOINTMENT_STATUS.CONFIRMED) && (
                                   <button
                                     onClick={() =>
                                       updateStatus(
                                         appointment.id,
-                                        "in_progress"
+                                        APPOINTMENT_STATUS.IN_PROGRESS
                                       )
                                     }
                                     className="rounded-md bg-info-50 px-2 py-1 text-xs font-medium text-info-700 transition-colors hover:bg-info-100 dark:bg-info-900/20 dark:text-info-400"
@@ -870,10 +822,10 @@ export default function AppointmentsPage() {
                                     Iniciar
                                   </button>
                                 )}
-                                {appointment.status === "in_progress" && (
+                                {appointment.status === APPOINTMENT_STATUS.IN_PROGRESS && (
                                   <button
                                     onClick={() =>
-                                      updateStatus(appointment.id, "completed")
+                                      updateStatus(appointment.id, APPOINTMENT_STATUS.COMPLETED)
                                     }
                                     className="rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 transition-colors hover:bg-success-100 dark:bg-success-900/20 dark:text-success-400"
                                   >
@@ -883,7 +835,7 @@ export default function AppointmentsPage() {
                                 {/* Always show these */}
                                 <button
                                   onClick={() =>
-                                    updateStatus(appointment.id, "no_show")
+                                    updateStatus(appointment.id, APPOINTMENT_STATUS.NO_SHOW)
                                   }
                                   className="rounded-md bg-warning-50 px-2 py-1 text-xs font-medium text-warning-700 transition-colors hover:bg-warning-100 dark:bg-warning-900/20 dark:text-warning-400"
                                 >
@@ -891,7 +843,7 @@ export default function AppointmentsPage() {
                                 </button>
                                 <button
                                   onClick={() =>
-                                    updateStatus(appointment.id, "cancelled")
+                                    updateStatus(appointment.id, APPOINTMENT_STATUS.CANCELLED)
                                   }
                                   className="rounded-md bg-danger-50 px-2 py-1 text-xs font-medium text-danger-700 transition-colors hover:bg-danger-100 dark:bg-danger-900/20 dark:text-danger-400"
                                 >
@@ -1397,9 +1349,9 @@ export default function AppointmentsPage() {
 
             {/* Actions */}
             {canManageAppointments &&
-              selectedAppointment.status !== "completed" &&
-              selectedAppointment.status !== "cancelled" &&
-              selectedAppointment.status !== "no_show" && (
+              selectedAppointment.status !== APPOINTMENT_STATUS.COMPLETED &&
+              selectedAppointment.status !== APPOINTMENT_STATUS.CANCELLED &&
+              selectedAppointment.status !== APPOINTMENT_STATUS.NO_SHOW && (
                 <div className="mt-6 space-y-3">
                   <h3 className="text-sm font-medium text-foreground mb-2">
                     Cambiar Estado
@@ -1408,10 +1360,10 @@ export default function AppointmentsPage() {
                   {/* Primary Actions */}
                   <div className="grid grid-cols-2 gap-2">
                     {/* Confirmar */}
-                    {selectedAppointment.status === "pending" && (
+                    {selectedAppointment.status === APPOINTMENT_STATUS.PENDING && (
                       <button
                         onClick={() => {
-                          updateStatus(selectedAppointment.id, "confirmed");
+                          updateStatus(selectedAppointment.id, APPOINTMENT_STATUS.CONFIRMED);
                           setShowDetailModal(false);
                         }}
                         className="rounded-md bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700"
@@ -1421,14 +1373,14 @@ export default function AppointmentsPage() {
                     )}
 
                     {/* Cliente Confirmó */}
-                    {(selectedAppointment.status === "pending" ||
-                      selectedAppointment.status === "confirmed" ||
-                      selectedAppointment.status === "reminded") && (
+                    {(selectedAppointment.status === APPOINTMENT_STATUS.PENDING ||
+                      selectedAppointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                      selectedAppointment.status === APPOINTMENT_STATUS.REMINDED) && (
                       <button
                         onClick={() => {
                           updateStatus(
                             selectedAppointment.id,
-                            "client_confirmed"
+                            APPOINTMENT_STATUS.CLIENT_CONFIRMED
                           );
                           setShowDetailModal(false);
                         }}
@@ -1439,13 +1391,13 @@ export default function AppointmentsPage() {
                     )}
 
                     {/* Check-in */}
-                    {(selectedAppointment.status === "pending" ||
-                      selectedAppointment.status === "confirmed" ||
-                      selectedAppointment.status === "reminded" ||
-                      selectedAppointment.status === "client_confirmed") && (
+                    {(selectedAppointment.status === APPOINTMENT_STATUS.PENDING ||
+                      selectedAppointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                      selectedAppointment.status === APPOINTMENT_STATUS.REMINDED ||
+                      selectedAppointment.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED) && (
                       <button
                         onClick={() => {
-                          updateStatus(selectedAppointment.id, "checked_in");
+                          updateStatus(selectedAppointment.id, APPOINTMENT_STATUS.CHECKED_IN);
                           setShowDetailModal(false);
                         }}
                         className="rounded-md bg-purple-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-purple-700"
@@ -1455,14 +1407,14 @@ export default function AppointmentsPage() {
                     )}
 
                     {/* Iniciar Servicio */}
-                    {(selectedAppointment.status === "pending" ||
-                      selectedAppointment.status === "confirmed" ||
-                      selectedAppointment.status === "reminded" ||
-                      selectedAppointment.status === "client_confirmed" ||
-                      selectedAppointment.status === "checked_in") && (
+                    {(selectedAppointment.status === APPOINTMENT_STATUS.PENDING ||
+                      selectedAppointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                      selectedAppointment.status === APPOINTMENT_STATUS.REMINDED ||
+                      selectedAppointment.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED ||
+                      selectedAppointment.status === APPOINTMENT_STATUS.CHECKED_IN) && (
                       <button
                         onClick={() => {
-                          updateStatus(selectedAppointment.id, "in_progress");
+                          updateStatus(selectedAppointment.id, APPOINTMENT_STATUS.IN_PROGRESS);
                           setShowDetailModal(false);
                         }}
                         className="rounded-md bg-info px-4 py-2.5 text-sm font-medium text-info-foreground hover:bg-info-700"
@@ -1474,7 +1426,7 @@ export default function AppointmentsPage() {
                     {/* Completar */}
                     <button
                       onClick={() => {
-                        updateStatus(selectedAppointment.id, "completed");
+                        updateStatus(selectedAppointment.id, APPOINTMENT_STATUS.COMPLETED);
                         setShowDetailModal(false);
                       }}
                       className="rounded-md bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700"
@@ -1490,10 +1442,10 @@ export default function AppointmentsPage() {
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {/* Enviar Recordatorio */}
-                      {(selectedAppointment.status === "pending" ||
-                        selectedAppointment.status === "confirmed" ||
-                        selectedAppointment.status === "reminded" ||
-                        selectedAppointment.status === "client_confirmed") && (
+                      {(selectedAppointment.status === APPOINTMENT_STATUS.PENDING ||
+                        selectedAppointment.status === APPOINTMENT_STATUS.CONFIRMED ||
+                        selectedAppointment.status === APPOINTMENT_STATUS.REMINDED ||
+                        selectedAppointment.status === APPOINTMENT_STATUS.CLIENT_CONFIRMED) && (
                         <button
                           onClick={() =>
                             handleSendReminder(selectedAppointment)
@@ -1508,7 +1460,7 @@ export default function AppointmentsPage() {
                       {/* No se presentó */}
                       <button
                         onClick={() => {
-                          updateStatus(selectedAppointment.id, "no_show");
+                          updateStatus(selectedAppointment.id, APPOINTMENT_STATUS.NO_SHOW);
                           setShowDetailModal(false);
                         }}
                         className="rounded-md bg-warning-100 px-4 py-2 text-sm font-medium text-warning-700 hover:bg-warning-200 dark:bg-warning-900/20 dark:text-warning-400"
@@ -1519,7 +1471,7 @@ export default function AppointmentsPage() {
                       {/* Cancelar */}
                       <button
                         onClick={() => {
-                          updateStatus(selectedAppointment.id, "cancelled");
+                          updateStatus(selectedAppointment.id, APPOINTMENT_STATUS.CANCELLED);
                           setShowDetailModal(false);
                         }}
                         className="rounded-md bg-red-100 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-200 dark:bg-red-900/20 dark:text-red-400"
