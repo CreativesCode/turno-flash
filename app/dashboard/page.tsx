@@ -27,12 +27,12 @@ export default function DashboardPage() {
   const [isBlocked, setIsBlocked] = useState(false);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
 
-  // Cargar estado de licencia y nombre de organización al montar el componente
+  // Cargar estado de licencia y nombre de organizaciรณn al montar el componente
   useEffect(() => {
     const loadLicenseStatus = async () => {
       try {
-        // Solo verificar licencia si el usuario tiene una organización
-        // Los admins sin organización no necesitan verificar licencia
+        // Solo verificar licencia si el usuario tiene una organizaciรณn
+        // Los admins sin organizaciรณn no necesitan verificar licencia
         if (!profile?.organization_id && profile?.role !== "admin") {
           setLoadingLicense(false);
           return;
@@ -41,7 +41,7 @@ export default function DashboardPage() {
         const status = await getMyOrganizationLicenseStatus();
         setLicenseStatus(status);
 
-        // Verificar si el usuario está bloqueado
+        // Verificar si el usuario estรก bloqueado
         if (status && !canUseApplication(status)) {
           setIsBlocked(true);
         }
@@ -83,7 +83,7 @@ export default function DashboardPage() {
     }
   }, [profile, supabase]);
 
-  // Si está bloqueado por licencia expirada, mostrar pantalla de bloqueo
+  // Si estรก bloqueado por licencia expirada, mostrar pantalla de bloqueo
   if (isBlocked && profile?.role !== "admin") {
     return (
       <ProtectedRoute>
@@ -94,15 +94,15 @@ export default function DashboardPage() {
           <div className="flex min-h-screen items-center justify-center px-4">
             <div className="w-full max-w-md rounded-lg bg-surface p-8 text-center shadow-lg">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-danger-100 dark:bg-danger-900/20">
-                <span className="text-3xl">🚫</span>
+                <span className="text-3xl">๐��ซ</span>
               </div>
               <h1 className="mt-6 text-2xl font-bold text-foreground">
                 Acceso Bloqueado
               </h1>
               <p className="mt-4 text-sm text-foreground-muted">
-                La licencia de tu organización ha expirado. Por favor, contacta
+                La licencia de tu organizaciรณn ha expirado. Por favor, contacta
                 al administrador para renovarla y continuar usando la
-                aplicación.
+                aplicaciรณn.
               </p>
               {licenseStatus && (
                 <div className="mt-6">
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                 onClick={() => signOut().then(() => router.push("/login"))}
                 className="mt-6 w-full rounded-md bg-danger px-4 py-2 text-sm font-medium text-danger-foreground transition-colors hover:bg-danger-700 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2"
               >
-                Cerrar sesión
+                Cerrar sesiรณn
               </button>
             </div>
           </div>
@@ -132,7 +132,7 @@ export default function DashboardPage() {
         description="Accede a tu panel de control de Turno Flash. Gestiona turnos, clientes, servicios y profesionales desde un solo lugar."
       />
       <div className="min-h-screen bg-background">
-        {/* Banner de notificación de licencia en la parte superior */}
+        {/* Banner de notificaciรณn de licencia en la parte superior */}
         {licenseStatus && shouldShowLicenseNotification(licenseStatus) && (
           <LicenseNotificationBanner licenseStatus={licenseStatus} />
         )}
@@ -152,36 +152,12 @@ export default function DashboardPage() {
                   {profile.role === "admin"
                     ? "Administrador"
                     : profile.role === "owner"
-                    ? "Dueño"
+                    ? "Dueรฑo"
                     : "Staff"}
                 </span>
               )}
             </div>
             <div className="flex gap-3">
-              {/* Admin-only buttons */}
-              {profile?.role === "admin" && (
-                <>
-                  <button
-                    onClick={() => router.push("/dashboard/users")}
-                    className="rounded-md bg-primary-700 px-4 py-2 text-sm font-medium text-success-foreground transition-colors hover:bg-success-800 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2"
-                  >
-                    Gestión de usuarios
-                  </button>
-                  <button
-                    onClick={() => router.push("/dashboard/organizations")}
-                    className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                  >
-                    Gestión de organizaciones
-                  </button>
-                  <button
-                    onClick={() => router.push("/dashboard/invite")}
-                    className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                  >
-                    Invitar usuarios
-                  </button>
-                </>
-              )}
-
               {/* Owner-only button */}
               {profile?.role === "owner" && (
                 <button
@@ -210,6 +186,121 @@ export default function DashboardPage() {
                 <LicenseNotification licenseStatus={licenseStatus} />
               </div>
             )}
+
+          {/* Panel de administraciรณn - Solo para admins */}
+          {profile?.role === "admin" && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-foreground mb-4">
+                Administración
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
+                {/* Gestión de usuarios */}
+                <button
+                  onClick={() => router.push("/dashboard/users")}
+                  className="rounded-lg bg-gradient-to-br from-success-500 to-success-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-white">
+                        Gestión de usuarios
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-white">
+                        Administrar
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white/20 p-3">
+                      <svg
+                        className="h-6 w-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-green-100">
+                    Administrar usuarios del sistema
+                  </p>
+                </button>
+
+                {/* Gestión de organizaciones */}
+                <button
+                  onClick={() => router.push("/dashboard/organizations")}
+                  className="rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-white">
+                        Gestión de organizaciones
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-white">
+                        Administrar
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white/20 p-3">
+                      <svg
+                        className="h-6 w-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-white/80">
+                    Gestionar organizaciones y licencias
+                  </p>
+                </button>
+
+                {/* Invitar usuarios */}
+                <button
+                  onClick={() => router.push("/dashboard/invite")}
+                  className="rounded-lg bg-gradient-to-br from-secondary-500 to-secondary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-white">
+                        Invitar usuarios
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-white">
+                        Invitar
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white/20 p-3">
+                      <svg
+                        className="h-6 w-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-white/80">
+                    Enviar invitaciones a nuevos usuarios
+                  </p>
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg bg-surface p-6 shadow-sm">
@@ -274,7 +365,7 @@ export default function DashboardPage() {
                 {/* Turnos - Todos los roles con organización */}
                 <button
                   onClick={() => router.push("/dashboard/appointments")}
-                  className="rounded-lg bg-linear-to-br from-info-500 to-info-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-gradient-to-br from-info-500 to-info-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -299,7 +390,7 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-info-100">
+                  <p className="mt-2 text-xs text-white/80">
                     {profile?.role === "staff"
                       ? "Ver agenda de citas"
                       : "Ver y crear citas de clientes"}
@@ -309,13 +400,11 @@ export default function DashboardPage() {
                 {/* Clientes - Owner y Admin pueden gestionar, Staff solo ver */}
                 <button
                   onClick={() => router.push("/dashboard/customers")}
-                  className="rounded-lg bg-linear-to-br from-success-500 to-success-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-gradient-to-br from-success-500 to-success-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-success-100">
-                        Clientes
-                      </p>
+                      <p className="text-sm font-medium text-white">Clientes</p>
                       <p className="mt-2 text-2xl font-bold text-white">
                         {profile?.role === "staff" ? "Ver" : "Gestionar"}
                       </p>
@@ -336,7 +425,7 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-green-100">
+                  <p className="mt-2 text-xs text-white/80">
                     {profile?.role === "staff"
                       ? "Ver información de clientes"
                       : "Administrar base de clientes"}
@@ -347,11 +436,11 @@ export default function DashboardPage() {
                 {(profile?.role === "admin" || profile?.role === "owner") && (
                   <button
                     onClick={() => router.push("/dashboard/services")}
-                    className="rounded-lg bg-linear-to-br from-primary-700 to-primary-800 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                    className="rounded-lg bg-gradient-to-br from-primary-700 to-primary-800 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-primary-100">
+                        <p className="text-sm font-medium text-white">
                           Servicios
                         </p>
                         <p className="mt-2 text-2xl font-bold text-white">
@@ -374,7 +463,7 @@ export default function DashboardPage() {
                         </svg>
                       </div>
                     </div>
-                    <p className="mt-2 text-xs text-primary-100">
+                    <p className="mt-2 text-xs text-white/80">
                       Configurar servicios ofrecidos
                     </p>
                   </button>
@@ -384,11 +473,11 @@ export default function DashboardPage() {
                 {(profile?.role === "admin" || profile?.role === "owner") && (
                   <button
                     onClick={() => router.push("/dashboard/staff")}
-                    className="rounded-lg bg-linear-to-br from-warning-500 to-warning-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                    className="rounded-lg bg-gradient-to-br from-warning-500 to-warning-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-warning-100">
+                        <p className="text-sm font-medium text-white">
                           Profesionales
                         </p>
                         <p className="mt-2 text-2xl font-bold text-white">
@@ -411,7 +500,7 @@ export default function DashboardPage() {
                         </svg>
                       </div>
                     </div>
-                    <p className="mt-2 text-xs text-warning-100">
+                    <p className="mt-2 text-xs text-white/80">
                       Administrar equipo de trabajo
                     </p>
                   </button>
@@ -420,11 +509,11 @@ export default function DashboardPage() {
                 {/* Recordatorios - Todos los roles */}
                 <button
                   onClick={() => router.push("/dashboard/reminders")}
-                  className="rounded-lg bg-linear-to-br from-secondary-500 to-secondary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-gradient-to-br from-secondary-500 to-secondary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-pink-100">
+                      <p className="text-sm font-medium text-white">
                         Recordatorios
                       </p>
                       <p className="mt-2 text-2xl font-bold text-white">
@@ -447,7 +536,7 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-secondary-100">
+                  <p className="mt-2 text-xs text-white/80">
                     Enviar recordatorios por WhatsApp
                   </p>
                 </button>

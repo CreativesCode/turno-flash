@@ -190,20 +190,20 @@ export default function OrganizationsPage() {
               <h1 className="text-3xl font-bold text-foreground">
                 Gestión de Organizaciones
               </h1>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-foreground-muted">
                 Administra las organizaciones del sistema
               </p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => router.push("/dashboard/organizations/new")}
-                className="rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
+                className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
               >
                 Crear organización
               </button>
               <button
                 onClick={() => router.push("/dashboard")}
-                className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2"
               >
                 Volver al dashboard
               </button>
@@ -224,11 +224,11 @@ export default function OrganizationsPage() {
           )}
 
           {/* Lista de organizaciones */}
-          <div className="rounded-lg bg-white shadow-sm dark:bg-zinc-900">
+          <div className="rounded-lg bg-surface border border-border shadow-sm">
             {loading ? (
               <div className="flex items-center justify-center p-12">
                 <div className="flex flex-col items-center justify-center text-center">
-                  <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
+                  <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
                   <p className="text-sm text-foreground-muted">
                     Cargando organizaciones...
                   </p>
@@ -236,7 +236,7 @@ export default function OrganizationsPage() {
               </div>
             ) : organizations.length === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-zinc-600 dark:text-zinc-400">
+                <p className="text-foreground-muted">
                   No hay organizaciones en el sistema
                 </p>
               </div>
@@ -245,50 +245,47 @@ export default function OrganizationsPage() {
                 <table className="min-w-full divide-y divide-border">
                   <thead className="bg-muted">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Nombre
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Slug
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Dueño
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Miembros
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Estado
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Licencia
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Zona horaria
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Fecha de creación
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Acciones
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border bg-surface">
                     {organizations.map((org) => (
-                      <tr
-                        key={org.id}
-                        className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-                      >
+                      <tr key={org.id} className="hover:bg-muted/50">
                         <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground">
                           {org.name}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900 dark:text-zinc-50">
-                          <code className="rounded bg-muted px-2 py-1 text-xs">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
+                          <code className="rounded bg-muted px-2 py-1 text-xs text-foreground">
                             {org.slug}
                           </code>
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900 dark:text-zinc-50">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
                           {org.owner ? (
                             <div>
                               <div className="font-medium">
@@ -299,11 +296,13 @@ export default function OrganizationsPage() {
                               </div>
                             </div>
                           ) : (
-                            <span className="text-zinc-400">Sin dueño</span>
+                            <span className="text-foreground-muted">
+                              Sin dueño
+                            </span>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900 dark:text-zinc-50">
-                          <span className="inline-flex items-center rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-medium text-info-800 dark:bg-info-900/20 dark:text-info-400">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
+                          <span className="inline-flex items-center rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-medium text-info-800">
                             {org.member_count || 0}
                           </span>
                         </td>
@@ -311,8 +310,8 @@ export default function OrganizationsPage() {
                           <span
                             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                               org.is_active
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                                : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
                             }`}
                           >
                             {org.is_active ? "Activa" : "Inactiva"}
@@ -323,11 +322,11 @@ export default function OrganizationsPage() {
                             <span
                               className={`inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                 org.license_status === "active"
-                                  ? "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400"
+                                  ? "bg-success-100 text-success-800"
                                   : org.license_status === "grace_period"
-                                  ? "bg-warning-100 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400"
+                                  ? "bg-warning-100 text-warning-800"
                                   : org.license_status === "expired"
-                                  ? "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400"
+                                  ? "bg-danger-100 text-danger-800"
                                   : "bg-muted text-foreground-muted"
                               }`}
                             >
@@ -340,7 +339,7 @@ export default function OrganizationsPage() {
                                 : "Sin licencia"}
                             </span>
                             {org.days_remaining !== null && (
-                              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                              <span className="text-xs text-foreground-muted">
                                 {org.days_remaining > 0
                                   ? `${org.days_remaining} días restantes`
                                   : `Expirada hace ${Math.abs(
@@ -349,7 +348,7 @@ export default function OrganizationsPage() {
                               </span>
                             )}
                             {org.license_start_date && org.license_end_date && (
-                              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                              <span className="text-xs text-foreground-muted">
                                 {new Date(
                                   org.license_end_date
                                 ).toLocaleDateString("es-ES")}
@@ -406,13 +405,13 @@ export default function OrganizationsPage() {
       {/* Modal de confirmación de eliminación */}
       {organizationToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+          <div className="w-full max-w-md rounded-lg bg-surface border border-border p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-foreground">
               Confirmar eliminación
             </h3>
             <p className="mt-4 text-sm text-foreground-muted">
               ¿Estás seguro de que deseas eliminar la organización{" "}
-              <span className="font-medium text-black dark:text-zinc-50">
+              <span className="font-medium text-foreground">
                 {organizationToDelete.name}
               </span>
               ? Esta acción no se puede deshacer.
@@ -432,7 +431,7 @@ export default function OrganizationsPage() {
               <button
                 onClick={handleDeleteCancel}
                 disabled={deleting === organizationToDelete.id}
-                className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancelar
               </button>

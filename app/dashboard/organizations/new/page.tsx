@@ -254,7 +254,7 @@ export default function NewOrganizationPage() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background px-4">
           <div className="flex flex-col items-center justify-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
             <p className="text-sm text-foreground-muted">
               {checkingAuth
                 ? "Verificando permisos..."
@@ -272,7 +272,7 @@ export default function NewOrganizationPage() {
         <div className="border-b border-border bg-surface">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-black dark:text-zinc-50">
+              <h1 className="text-2xl font-bold text-foreground">
                 Crear nueva organización
               </h1>
               <button
@@ -286,7 +286,7 @@ export default function NewOrganizationPage() {
         </div>
 
         <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="rounded-lg bg-white p-8 shadow-sm dark:bg-zinc-900">
+          <div className="rounded-lg bg-surface border border-border p-8 shadow-sm">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-foreground">
                 Información de la organización
@@ -335,7 +335,7 @@ export default function NewOrganizationPage() {
                   <button
                     type="button"
                     onClick={generateSlug}
-                    className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-xs text-info-600 hover:text-info-700 dark:text-info-400 dark:hover:text-info-300"
                   >
                     Generar desde nombre
                   </button>
@@ -425,11 +425,11 @@ export default function NewOrganizationPage() {
               </div>
 
               {/* Sección de Licencia */}
-              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              <div className="rounded-lg border border-border bg-muted/30 p-4">
+                <h3 className="text-sm font-semibold text-foreground">
                   Configuración de Licencia
                 </h3>
-                <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                <p className="mt-1 text-xs text-foreground-muted">
                   Define el período de vigencia de la licencia para esta
                   organización. Si se deja vacío, la organización tendrá acceso
                   sin límite de tiempo.
@@ -483,7 +483,7 @@ export default function NewOrganizationPage() {
                   </div>
                 </div>
 
-                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="mt-2 text-xs text-foreground-muted">
                   Nota: Si la licencia expira, la organización tendrá un período
                   de gracia de 7 días (configurable) para continuar usando la
                   aplicación con notificaciones de renovación.
@@ -491,21 +491,21 @@ export default function NewOrganizationPage() {
               </div>
 
               {/* Dueño de la organización */}
-              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              <div className="rounded-lg border border-border bg-muted/30 p-4">
+                <h3 className="text-sm font-semibold text-foreground">
                   Dueño de la organización *
                 </h3>
-                <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                <p className="mt-1 text-xs text-foreground-muted">
                   Selecciona un usuario staff existente sin organización
                 </p>
 
                 <div className="mt-4">
                   {loadingUsers ? (
-                    <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                    <div className="text-sm text-foreground-muted">
                       Cargando usuarios...
                     </div>
                   ) : users.length === 0 ? (
-                    <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                    <div className="text-sm text-foreground-muted">
                       No hay usuarios staff disponibles sin organización.
                       Primero debes invitar usuarios desde la sección de
                       invitaciones.
@@ -535,13 +535,13 @@ export default function NewOrganizationPage() {
               </div>
 
               {error && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                <div className="rounded-md bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                <div className="rounded-md bg-success-50 p-3 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
                   {success}
                 </div>
               )}
@@ -558,18 +558,18 @@ export default function NewOrganizationPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading ? "Creando..." : "Crear organización"}
                 </button>
               </div>
             </form>
 
-            <div className="mt-8 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <div className="mt-8 border-t border-border pt-6">
+              <h3 className="text-sm font-semibold text-foreground">
                 Información importante
               </h3>
-              <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-foreground-muted">
                 <li>
                   El slug debe ser único y se usará para identificar la
                   organización en URLs

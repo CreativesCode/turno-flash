@@ -278,11 +278,10 @@ export default function UsersManagementPage() {
 
   const getRoleBadgeColor = (role: UserRole) => {
     const colors: Record<UserRole, string> = {
-      admin: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
-      owner: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
-      staff: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
-      special:
-        "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400",
+      admin: "bg-red-100 text-red-800",
+      owner: "bg-blue-100 text-blue-800",
+      staff: "bg-gray-100 text-gray-800",
+      special: "bg-purple-100 text-purple-800",
     };
     return colors[role];
   };
@@ -323,7 +322,7 @@ export default function UsersManagementPage() {
             </div>
             <button
               onClick={() => router.push("/dashboard")}
-              className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle"
+              className="rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
             >
               Volver al dashboard
             </button>
@@ -343,27 +342,15 @@ export default function UsersManagementPage() {
           )}
 
           {/* Formulario de Invitación */}
-          <div className="mb-8 rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
+          <div className="mb-8 rounded-lg bg-surface p-6 shadow-sm border border-border">
             <div className="mb-4">
               <h2 className="text-xl font-semibold text-foreground">
                 Invitar nuevo usuario
               </h2>
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="mt-2 text-sm text-foreground-muted">
                 El usuario recibirá un correo con un enlace para configurar su
                 contraseña y acceder a la plataforma.
               </p>
-              <div className="mt-3 rounded-md bg-info-50 p-3 text-xs text-info-800 dark:bg-info-900/20 dark:text-info-400">
-                <strong>Nota:</strong> Si ves un error 404, la Edge Function no
-                está desplegada. Puedes invitar usuarios desde el{" "}
-                <a
-                  href="https://supabase.com/dashboard/project/gotetvnmnlrsfhsnounn/auth/users"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:no-underline"
-                >
-                  Dashboard de Supabase → Authentication → Users → Invite
-                </a>
-              </div>
             </div>
 
             <form onSubmit={handleInvite} className="space-y-4">
@@ -371,7 +358,7 @@ export default function UsersManagementPage() {
                 <div className="flex-1">
                   <label
                     htmlFor="invite-email"
-                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                    className="block text-sm font-medium text-foreground"
                   >
                     Correo electrónico
                   </label>
@@ -391,7 +378,7 @@ export default function UsersManagementPage() {
                   <button
                     type="submit"
                     disabled={inviteLoading}
-                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {inviteLoading ? "Enviando..." : "Enviar invitación"}
                   </button>
@@ -413,7 +400,7 @@ export default function UsersManagementPage() {
           </div>
 
           {/* Tabla de usuarios */}
-          <div className="rounded-lg bg-white shadow-sm dark:bg-zinc-900">
+          <div className="rounded-lg bg-surface shadow-sm border border-border">
             {loading ? (
               <div className="flex items-center justify-center p-12">
                 <div className="flex flex-col items-center justify-center text-center">
@@ -425,7 +412,7 @@ export default function UsersManagementPage() {
               </div>
             ) : users.length === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-zinc-600 dark:text-zinc-400">
+                <p className="text-foreground-muted">
                   No hay usuarios en el sistema
                 </p>
               </div>
@@ -434,25 +421,25 @@ export default function UsersManagementPage() {
                 <table className="min-w-full divide-y divide-border">
                   <thead className="bg-muted">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Nombre
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Rol Actual
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Estado
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Cambiar Rol
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Fecha de registro
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
                         Acciones
                       </th>
                     </tr>
@@ -460,10 +447,10 @@ export default function UsersManagementPage() {
                   <tbody className="divide-y divide-border bg-surface">
                     {users.map((user) => (
                       <tr key={user.id} className="hover:bg-muted">
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900 dark:text-zinc-50">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
                           {user.email}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900 dark:text-zinc-50">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
                           {user.full_name || (
                             <span className="text-foreground-muted">
                               Sin nombre
@@ -483,8 +470,8 @@ export default function UsersManagementPage() {
                           <span
                             className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
                               user.is_active
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                                : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
                             }`}
                           >
                             {user.is_active ? "Activo" : "Inactivo"}
@@ -508,7 +495,7 @@ export default function UsersManagementPage() {
                             <option value="special">Especial</option>
                           </select>
                           {updating === user.id && (
-                            <span className="ml-2 text-xs text-zinc-500">
+                            <span className="ml-2 text-xs text-foreground-muted">
                               Actualizando...
                             </span>
                           )}
@@ -543,43 +530,43 @@ export default function UsersManagementPage() {
           </div>
 
           {/* Información adicional */}
-          <div className="mt-6 rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
-            <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+          <div className="mt-6 rounded-lg bg-surface p-6 shadow-sm border border-border">
+            <h2 className="text-lg font-semibold text-foreground">
               Roles disponibles
             </h2>
             <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                <dt className="text-sm font-medium text-foreground-muted">
                   Administrador
                 </dt>
-                <dd className="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+                <dd className="mt-1 text-sm text-foreground">
                   Acceso total al sistema. Puede gestionar usuarios,
                   organizaciones y todas las funcionalidades.
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                <dt className="text-sm font-medium text-foreground-muted">
                   Dueño
                 </dt>
-                <dd className="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+                <dd className="mt-1 text-sm text-foreground">
                   Gestiona su organización, servicios y reservas. No puede
                   gestionar usuarios.
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                <dt className="text-sm font-medium text-foreground-muted">
                   Empleado
                 </dt>
-                <dd className="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+                <dd className="mt-1 text-sm text-foreground">
                   Puede ver y gestionar reservas. Acceso limitado a funciones
                   administrativas.
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                <dt className="text-sm font-medium text-foreground-muted">
                   Especial
                 </dt>
-                <dd className="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+                <dd className="mt-1 text-sm text-foreground">
                   Usuario con permisos especiales personalizables. Similar a
                   empleado por defecto.
                 </dd>
@@ -592,13 +579,13 @@ export default function UsersManagementPage() {
       {/* Modal de confirmación de eliminación */}
       {userToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+          <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl border border-border">
+            <h3 className="text-lg font-semibold text-foreground">
               Confirmar eliminación
             </h3>
             <p className="mt-4 text-sm text-foreground-muted">
               ¿Estás seguro de que deseas eliminar al usuario{" "}
-              <span className="font-medium text-black dark:text-zinc-50">
+              <span className="font-medium text-foreground">
                 {userToDelete.email}
               </span>
               ? Esta acción no se puede deshacer.
