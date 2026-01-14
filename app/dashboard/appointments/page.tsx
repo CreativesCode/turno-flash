@@ -5,6 +5,12 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import {
+  AppointmentService,
+  CustomerService,
+  ServiceService,
+  StaffService,
+} from "@/services";
+import {
   AppointmentFormData,
   AppointmentWithDetails,
   Customer,
@@ -12,12 +18,7 @@ import {
   Service,
   StaffMember,
 } from "@/types/appointments";
-import {
-  formatDateShort,
-  getLocalDateString,
-  getTimestamp,
-} from "@/utils/date";
-import { createClient } from "@/utils/supabase/client";
+import { formatDateShort, getLocalDateString } from "@/utils/date";
 import {
   AlertCircle,
   Calendar,
@@ -43,7 +44,6 @@ type FilterStatus = "all" | "pending" | "confirmed" | "completed" | "cancelled";
 export default function AppointmentsPage() {
   const { profile } = useAuth();
   const router = useRouter();
-  const supabase = useMemo(() => createClient(), []);
 
   const [appointments, setAppointments] = useState<AppointmentWithDetails[]>(
     []
@@ -120,7 +120,7 @@ export default function AppointmentsPage() {
     };
   }, [selectedDate, view]);
 
-  // Load all data
+  // Load all data using service layer
   const loadData = useCallback(async () => {
     if (!profile?.organization_id) return;
 
@@ -130,64 +130,53 @@ export default function AppointmentsPage() {
 
       const { start, end } = getDateRange();
 
-      // Load appointments
-      const { data: appointmentsData, error: appointmentsError } =
-        await supabase
-          .from("appointments_with_details")
-          .select("*")
-          .eq("organization_id", profile.organization_id)
-          .gte("appointment_date", start)
-          .lte("appointment_date", end)
-          .order("appointment_date", { ascending: true })
-          .order("start_time", { ascending: true });
+      // Load appointments using AppointmentService
+      const appointmentsResult = await AppointmentService.getByDateRange(
+        profile.organization_id,
+        start,
+        end
+      );
 
-      if (appointmentsError) {
-        console.error("Error loading appointments:", appointmentsError);
+      if (appointmentsResult.success && appointmentsResult.appointments) {
+        setAppointments(appointmentsResult.appointments);
       } else {
-        setAppointments(appointmentsData || []);
+        console.error("Error loading appointments:", appointmentsResult.error);
       }
 
-      // Load customers
-      const { data: customersData, error: customersError } = await supabase
-        .from("customers")
-        .select("*")
-        .eq("organization_id", profile.organization_id)
-        .eq("is_active", true)
-        .order("first_name");
+      // Load customers using CustomerService
+      const customersResult = await CustomerService.getAll(
+        profile.organization_id,
+        { isActive: true }
+      );
 
-      if (customersError) {
-        console.error("Error loading customers:", customersError);
+      if (customersResult.success && customersResult.customers) {
+        setCustomers(customersResult.customers);
       } else {
-        setCustomers(customersData || []);
+        console.error("Error loading customers:", customersResult.error);
       }
 
-      // Load services
-      const { data: servicesData, error: servicesError } = await supabase
-        .from("services")
-        .select("*")
-        .eq("organization_id", profile.organization_id)
-        .eq("is_active", true)
-        .order("sort_order");
+      // Load services using ServiceService
+      const servicesResult = await ServiceService.getAll(
+        profile.organization_id,
+        { isActive: true }
+      );
 
-      if (servicesError) {
-        console.error("Error loading services:", servicesError);
+      if (servicesResult.success && servicesResult.services) {
+        setServices(servicesResult.services);
       } else {
-        setServices(servicesData || []);
+        console.error("Error loading services:", servicesResult.error);
       }
 
-      // Load staff
-      const { data: staffData, error: staffError } = await supabase
-        .from("staff_members")
-        .select("*")
-        .eq("organization_id", profile.organization_id)
-        .eq("is_active", true)
-        .eq("is_bookable", true)
-        .order("sort_order");
+      // Load staff using StaffService
+      const staffResult = await StaffService.getAll(profile.organization_id, {
+        isActive: true,
+        isBookable: true,
+      });
 
-      if (staffError) {
-        console.error("Error loading staff:", staffError);
+      if (staffResult.success && staffResult.staff) {
+        setStaffMembers(staffResult.staff);
       } else {
-        setStaffMembers(staffData || []);
+        console.error("Error loading staff:", staffResult.error);
       }
     } catch (err) {
       console.error("Error loading data:", err);
@@ -195,7 +184,7 @@ export default function AppointmentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id, supabase, getDateRange]);
+  }, [profile?.organization_id, getDateRange]);
 
   useEffect(() => {
     loadData();
@@ -227,23 +216,12 @@ export default function AppointmentsPage() {
     return filtered;
   }, [appointments, filterStatus, searchTerm]);
 
-  // Calculate service end time
+  // Calculate service end time using AppointmentService
   const calculateEndTime = (startTime: string, serviceId: string) => {
     const service = services.find((s) => s.id === serviceId);
     if (!service) return startTime;
 
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const totalMinutes =
-      hours * 60 +
-      minutes +
-      service.duration_minutes +
-      service.buffer_time_minutes;
-    const endHours = Math.floor(totalMinutes / 60);
-    const endMinutes = totalMinutes % 60;
-
-    return `${endHours.toString().padStart(2, "0")}:${endMinutes
-      .toString()
-      .padStart(2, "0")}`;
+    return AppointmentService.calculateEndTime(startTime, service);
   };
 
   // Handle service change
@@ -304,11 +282,11 @@ export default function AppointmentsPage() {
     setShowModal(true);
   };
 
-  // Save appointment
+  // Save appointment using AppointmentService
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!profile?.organization_id) {
+    if (!profile?.organization_id || !profile?.user_id) {
       setError("No se encontró la organización");
       return;
     }
@@ -323,41 +301,14 @@ export default function AppointmentsPage() {
     setSuccess(null);
 
     try {
-      // Validate that customer exists
-      if (!formData.customer_id) {
-        setError("Debes seleccionar un cliente");
-        setSaving(false);
-        return;
-      }
-
-      // Validate that service exists
-      if (!formData.service_id) {
-        setError("Debes seleccionar un servicio");
-        setSaving(false);
-        return;
-      }
-
-      // Check if service requires approval and set status accordingly
-      const selectedService = services.find(
-        (s) => s.id === formData.service_id
+      const result = await AppointmentService.create(
+        formData,
+        profile.organization_id,
+        profile.user_id
       );
-      const finalStatus = selectedService?.requires_approval
-        ? "pending"
-        : formData.status;
 
-      // Create appointment
-      const { error: insertError } = await supabase
-        .from("appointments")
-        .insert({
-          ...formData,
-          status: finalStatus,
-          organization_id: profile.organization_id,
-          created_by: profile.user_id,
-        });
-
-      if (insertError) {
-        setError("Error al crear turno: " + insertError.message);
-        console.error(insertError);
+      if (!result.success) {
+        setError(result.error || "Error al crear turno");
         return;
       }
 
@@ -375,9 +326,9 @@ export default function AppointmentsPage() {
     }
   };
 
-  // Create customer quickly
+  // Create customer quickly using CustomerService
   const handleCreateCustomer = async () => {
-    if (!profile?.organization_id) {
+    if (!profile?.organization_id || !profile?.user_id) {
       setError("No se encontró la organización");
       return;
     }
@@ -386,31 +337,14 @@ export default function AppointmentsPage() {
     setError(null);
 
     try {
-      // Validate required fields
-      if (
-        !newCustomerData.first_name ||
-        !newCustomerData.last_name ||
-        !newCustomerData.phone
-      ) {
-        setError("Nombre, apellido y teléfono son requeridos");
-        setSavingCustomer(false);
-        return;
-      }
+      const result = await CustomerService.create(
+        newCustomerData,
+        profile.organization_id,
+        profile.user_id
+      );
 
-      // Create customer
-      const { data: newCustomer, error: insertError } = await supabase
-        .from("customers")
-        .insert({
-          ...newCustomerData,
-          organization_id: profile.organization_id,
-          created_by: profile.user_id,
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        setError("Error al crear cliente: " + insertError.message);
-        console.error(insertError);
+      if (!result.success) {
+        setError(result.error || "Error al crear cliente");
         setSavingCustomer(false);
         return;
       }
@@ -419,10 +353,10 @@ export default function AppointmentsPage() {
       await loadData();
 
       // Select the new customer
-      if (newCustomer) {
+      if (result.customer) {
         setFormData((prev) => ({
           ...prev,
-          customer_id: newCustomer.id,
+          customer_id: result.customer!.id,
         }));
       }
 
@@ -446,75 +380,32 @@ export default function AppointmentsPage() {
     }
   };
 
-  // Generate WhatsApp message for reminder
-  const generateReminderMessage = (appointment: AppointmentWithDetails) => {
-    const formattedDate = formatDateShort(appointment.appointment_date, {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
-
-    return `🗓️ *Recordatorio de Turno*
-
-Hola ${appointment.customer_first_name}! 👋
-
-Te recordamos que tienes un turno programado:
-
-📅 *Fecha:* ${formattedDate}
-⏰ *Hora:* ${appointment.start_time}
-💇 *Servicio:* ${appointment.service_name}
-${
-  appointment.staff_first_name
-    ? `👤 *Con:* ${appointment.staff_first_name}`
-    : ""
-}
-
-Por favor confirma tu asistencia respondiendo:
-✅ *SÍ* - Confirmo mi turno
-❌ *NO* - No podré asistir
-
-¡Te esperamos! 🙌`;
-  };
-
-  // Send reminder for an appointment
+  // Send reminder for an appointment using AppointmentService
   const handleSendReminder = async (appointment: AppointmentWithDetails) => {
+    if (!profile?.organization_id || !profile?.user_id) {
+      setError("No se encontró la información del usuario");
+      return;
+    }
+
     try {
       setError(null);
 
-      // Log the reminder
-      const { error: logError } = await supabase.from("reminder_logs").insert({
-        appointment_id: appointment.id,
-        reminder_type: "manual",
-        method: "whatsapp",
-        status: "sent",
-        sent_at: getTimestamp(),
-        sent_by: profile?.user_id,
-      });
+      const result = await AppointmentService.sendReminder(
+        appointment.id,
+        profile.organization_id,
+        profile.user_id,
+        "whatsapp"
+      );
 
-      if (logError) {
-        console.error("Error logging reminder:", logError);
-      }
-
-      // Update appointment status to reminded
-      const { error: updateError } = await supabase
-        .from("appointments")
-        .update({ status: "reminded" })
-        .eq("id", appointment.id);
-
-      if (updateError) {
-        setError("Error al actualizar estado: " + updateError.message);
+      if (!result.success) {
+        setError(result.error || "Error al enviar recordatorio");
         return;
       }
 
-      // Generate WhatsApp message
-      const message = generateReminderMessage(appointment);
-      const phone = appointment.customer_phone.replace(/[^0-9]/g, "");
-      const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
-        message
-      )}`;
-
-      // Open WhatsApp
-      window.open(whatsappUrl, "_blank");
+      // Open WhatsApp if URL is available
+      if (result.whatsappUrl) {
+        window.open(result.whatsappUrl, "_blank");
+      }
 
       setSuccess(`Recordatorio enviado a ${appointment.customer_first_name}`);
       await loadData();
@@ -535,16 +426,23 @@ Por favor confirma tu asistencia respondiendo:
     }
   };
 
-  // Update appointment status
+  // Update appointment status using AppointmentService
   const updateStatus = async (appointmentId: string, newStatus: string) => {
-    try {
-      const { error: updateError } = await supabase
-        .from("appointments")
-        .update({ status: newStatus })
-        .eq("id", appointmentId);
+    if (!profile?.organization_id || !profile?.user_id) {
+      setError("No se encontró la información del usuario");
+      return;
+    }
 
-      if (updateError) {
-        setError("Error al actualizar estado: " + updateError.message);
+    try {
+      const result = await AppointmentService.updateStatus(
+        appointmentId,
+        newStatus as AppointmentWithDetails["status"],
+        profile.organization_id,
+        profile.user_id
+      );
+
+      if (!result.success) {
+        setError(result.error || "Error al actualizar estado");
         return;
       }
 
