@@ -13,6 +13,24 @@ import { createClient } from "@/utils/supabase/client";
  */
 export class AppointmentService {
   /**
+   * Map database view data to AppointmentWithDetails
+   */
+  private static mapToAppointmentWithDetails(
+    data: any
+  ): AppointmentWithDetails {
+    return {
+      ...data,
+      customer_first_name: data.customer_first_name || "",
+      customer_last_name: data.customer_last_name || "",
+      customer_phone: data.customer_phone || "",
+      service_name: data.service_name || "",
+      duration_minutes: data.duration_minutes || 0,
+      organization_name: data.organization_name || "",
+      organization_timezone: data.organization_timezone || "UTC",
+    } as AppointmentWithDetails;
+  }
+
+  /**
    * Validate appointment form data
    */
   private static validateAppointmentData(data: AppointmentFormData): {
@@ -436,7 +454,9 @@ export class AppointmentService {
 
       return {
         success: true,
-        appointments: data || [],
+        appointments: (data || []).map((apt: any) =>
+          this.mapToAppointmentWithDetails(apt)
+        ),
       };
     } catch (error) {
       console.error("Unexpected error fetching appointments:", error);
@@ -483,7 +503,7 @@ export class AppointmentService {
       hours * 60 +
       minutes +
       service.duration_minutes +
-      service.buffer_time_minutes;
+      (service.buffer_time_minutes ?? 0);
     const endHours = Math.floor(totalMinutes / 60);
     const endMinutes = totalMinutes % 60;
 
@@ -541,10 +561,18 @@ export class AppointmentService {
         userId
       );
 
+      const mappedAppointment = this.mapToAppointmentWithDetails(appointment);
+
       // Generate WhatsApp URL if method is whatsapp
       if (method === "whatsapp") {
-        const message = this.generateReminderMessage(appointment);
-        const phone = appointment.customer_phone.replace(/[^0-9]/g, "");
+        if (!mappedAppointment.customer_phone) {
+          return {
+            success: false,
+            error: "El cliente no tiene número de teléfono registrado",
+          };
+        }
+        const message = this.generateReminderMessage(mappedAppointment);
+        const phone = mappedAppointment.customer_phone.replace(/[^0-9]/g, "");
         const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
           message
         )}`;

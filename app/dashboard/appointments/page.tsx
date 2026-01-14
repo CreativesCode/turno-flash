@@ -15,6 +15,7 @@ import {
 import { AppointmentService } from "@/services";
 import {
   AppointmentFormData,
+  AppointmentStatus,
   AppointmentWithDetails,
   CustomerFormData,
 } from "@/types/appointments";
@@ -384,12 +385,19 @@ export default function AppointmentsPage() {
       "->",
       newStatus
     );
+
+    // Validate that newStatus is not null or empty
+    if (!newStatus) {
+      toast.error("Error", "El estado no puede estar vacío");
+      return;
+    }
+
     const loadingToast = toast.loading("Actualizando estado...");
 
     try {
       await updateAppointmentStatusMutation.mutateAsync({
         appointmentId,
-        newStatus: newStatus as AppointmentWithDetails["status"],
+        newStatus: newStatus as AppointmentStatus,
       });
 
       console.log("✅ Estado actualizado exitosamente");
@@ -421,7 +429,10 @@ export default function AppointmentsPage() {
   };
 
   // Get status badge color
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
+    if (!status) {
+      return "bg-muted text-muted-foreground";
+    }
     switch (status) {
       case "confirmed":
         return "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400";
@@ -446,7 +457,10 @@ export default function AppointmentsPage() {
   };
 
   // Get status label
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string | null) => {
+    if (!status) {
+      return "Sin estado";
+    }
     switch (status) {
       case "pending":
         return "⏳ Pendiente";

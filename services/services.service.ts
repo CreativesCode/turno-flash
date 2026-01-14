@@ -88,7 +88,9 @@ export class ServiceService {
         .limit(1)
         .single();
 
-      const nextSortOrder = maxSortOrder ? maxSortOrder.sort_order + 1 : 0;
+      const nextSortOrder = maxSortOrder && maxSortOrder.sort_order != null
+        ? maxSortOrder.sort_order + 1
+        : 0;
 
       // Create service
       const { data: service, error: insertError } = await supabase

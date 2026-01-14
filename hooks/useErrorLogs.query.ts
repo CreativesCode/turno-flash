@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface ErrorLog {
   id: string;
@@ -31,12 +31,7 @@ export interface ErrorLogsQueryParams {
  * Hook para obtener logs de errores
  */
 export function useErrorLogsQuery(params: ErrorLogsQueryParams = {}) {
-  const {
-    resolved,
-    days = 7,
-    limit = 50,
-    search,
-  } = params;
+  const { resolved, days = 7, limit = 50, search } = params;
 
   return useQuery({
     queryKey: ["error_logs", resolved, days, limit, search],
@@ -87,7 +82,7 @@ export function useErrorStatsQuery(days: number = 7) {
       const supabase = createClient();
 
       const { data, error } = await supabase.rpc("get_error_stats", {
-        p_organization_id: null, // null = todas las organizaciones
+        p_organization_id: undefined, // undefined = todas las organizaciones
         p_days: days,
       });
 
@@ -95,14 +90,16 @@ export function useErrorStatsQuery(days: number = 7) {
         throw new Error(`Error loading error stats: ${error.message}`);
       }
 
-      return data?.[0] || {
-        total_errors: 0,
-        unresolved_errors: 0,
-        resolved_errors: 0,
-        unique_errors: 0,
-        most_common_error: null,
-        errors_today: 0,
-      };
+      return (
+        data?.[0] || {
+          total_errors: 0,
+          unresolved_errors: 0,
+          resolved_errors: 0,
+          unique_errors: 0,
+          most_common_error: null,
+          errors_today: 0,
+        }
+      );
     },
     staleTime: 60000, // 1 minuto
   });

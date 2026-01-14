@@ -4,12 +4,12 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import {
-  useStaffQuery,
   useCreateStaffMember,
-  useUpdateStaffMember,
   useDeactivateStaffMember,
   useReactivateStaffMember,
+  useStaffQuery,
   useToast,
+  useUpdateStaffMember,
 } from "@/hooks";
 import { StaffMember, StaffMemberFormData } from "@/types/appointments";
 import {
@@ -113,16 +113,16 @@ export default function StaffPage() {
     setFormData({
       first_name: staff.first_name,
       last_name: staff.last_name,
-      nickname: staff.nickname || "",
-      email: staff.email || "",
-      phone: staff.phone || "",
-      color: staff.color,
-      bio: staff.bio || "",
-      specialties: staff.specialties || [],
-      is_active: staff.is_active,
-      is_bookable: staff.is_bookable,
-      accepts_online_bookings: staff.accepts_online_bookings,
-      sort_order: staff.sort_order,
+      nickname: staff.nickname || undefined,
+      email: staff.email || undefined,
+      phone: staff.phone || undefined,
+      color: staff.color || undefined,
+      bio: staff.bio || undefined,
+      specialties: staff.specialties || undefined,
+      is_active: staff.is_active ?? undefined,
+      is_bookable: staff.is_bookable ?? undefined,
+      accepts_online_bookings: staff.accepts_online_bookings ?? undefined,
+      sort_order: staff.sort_order ?? undefined,
     });
     setEditingStaff(staff);
     setShowModal(true);
@@ -221,20 +221,32 @@ export default function StaffPage() {
 
   // Toggle active status
   const toggleActive = async (staff: StaffMember) => {
-    console.log("🔵 Cambiando estado del personal:", staff.id, staff.is_active ? "desactivar" : "activar");
-    const loadingToast = toast.loading(staff.is_active ? "Desactivando..." : "Activando...");
+    console.log(
+      "🔵 Cambiando estado del personal:",
+      staff.id,
+      staff.is_active ? "desactivar" : "activar"
+    );
+    const loadingToast = toast.loading(
+      staff.is_active ? "Desactivando..." : "Activando..."
+    );
 
     try {
       if (staff.is_active) {
         await deactivateStaffMutation.mutateAsync(staff.id);
         console.log("✅ Personal desactivado");
         toast.dismiss(loadingToast);
-        toast.success("Personal desactivado", `${staff.first_name} ${staff.last_name} ha sido desactivado`);
+        toast.success(
+          "Personal desactivado",
+          `${staff.first_name} ${staff.last_name} ha sido desactivado`
+        );
       } else {
         await reactivateStaffMutation.mutateAsync(staff.id);
         console.log("✅ Personal activado");
         toast.dismiss(loadingToast);
-        toast.success("Personal activado", `${staff.first_name} ${staff.last_name} ha sido activado`);
+        toast.success(
+          "Personal activado",
+          `${staff.first_name} ${staff.last_name} ha sido activado`
+        );
       }
     } catch (error) {
       console.error("❌ Error al cambiar estado del personal:", error);
@@ -243,7 +255,10 @@ export default function StaffPage() {
       if (error instanceof Error) {
         toast.error("Error", error.message);
       } else {
-        toast.error("Error inesperado", "No se pudo cambiar el estado del personal");
+        toast.error(
+          "Error inesperado",
+          "No se pudo cambiar el estado del personal"
+        );
       }
     }
   };
@@ -308,7 +323,6 @@ export default function StaffPage() {
             </div>
           )}
 
-
           {/* Search */}
           <div className="mb-6">
             <div className="relative">
@@ -358,7 +372,7 @@ export default function StaffPage() {
                     <div className="flex items-start gap-3">
                       <div
                         className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold"
-                        style={{ backgroundColor: staff.color }}
+                        style={{ backgroundColor: staff.color || "#3B82F6" }}
                       >
                         {staff.first_name[0]}
                         {staff.last_name[0]}
@@ -673,17 +687,24 @@ export default function StaffPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  disabled={createStaffMutation.isPending || updateStaffMutation.isPending}
+                  disabled={
+                    createStaffMutation.isPending ||
+                    updateStaffMutation.isPending
+                  }
                   className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={createStaffMutation.isPending || updateStaffMutation.isPending}
+                  disabled={
+                    createStaffMutation.isPending ||
+                    updateStaffMutation.isPending
+                  }
                   className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {(createStaffMutation.isPending || updateStaffMutation.isPending)
+                  {createStaffMutation.isPending ||
+                  updateStaffMutation.isPending
                     ? "Guardando..."
                     : editingStaff
                     ? "Guardar Cambios"

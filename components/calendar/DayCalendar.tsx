@@ -56,7 +56,10 @@ export function DayCalendar({
   };
 
   // Get status color
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
+    if (!status) {
+      return "bg-muted border-muted";
+    }
     switch (status) {
       case "confirmed":
       case "client_confirmed":

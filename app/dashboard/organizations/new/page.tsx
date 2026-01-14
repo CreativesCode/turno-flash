@@ -3,7 +3,10 @@
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { UserProfile } from "@/types/auth";
-import { CreateOrganizationParams } from "@/types/organization";
+import {
+  CreateOrganizationParams,
+  CreateOrganizationResult,
+} from "@/types/organization";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import {
@@ -189,15 +192,14 @@ export default function NewOrganizationPage() {
         return;
       }
 
-      if (!data || !data.success) {
+      const result = data as CreateOrganizationResult | null;
+      if (!result || !result.success) {
         setError("Error al crear la organización. Intenta nuevamente.");
         setLoading(false);
         return;
       }
 
-      const selectedUser = users.find(
-        (u) => u.user_id === formData.selected_user_id
-      );
+      const selectedUser = users.find((u) => u.user_id === result.user_id);
 
       setSuccess(
         `Organización "${formData.org_name}" creada exitosamente. El usuario ${selectedUser?.email} ha sido asignado como dueño.`

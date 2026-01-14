@@ -195,7 +195,7 @@ export function denormalizeAppointment(
     staff_last_name: staff?.last_name || null,
     staff_nickname: staff?.nickname || null,
     organization_name: "", // Not available in normalized state
-    organization_timezone: appointment.timezone,
+    organization_timezone: appointment.timezone || "UTC",
   };
 }
 

@@ -1,22 +1,9 @@
 // Tipos para organizaciones
+import { Database } from "./database.types";
 
-export type LicenseStatus =
-  | "active"
-  | "grace_period"
-  | "expired"
-  | "no_license";
-
-export interface Organization {
-  id: string;
-  name: string;
-  timezone: string;
-  slug: string;
-  whatsapp_phone: string | null;
-  license_start_date: string | null;
-  license_end_date: string | null;
-  is_active: boolean;
-  created_at: string;
-}
+// Tipos generados desde Supabase
+export type LicenseStatus = Database["public"]["Enums"]["license_status"];
+export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 
 export interface OrganizationWithLicenseStatus extends Organization {
   license_status: LicenseStatus;

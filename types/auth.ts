@@ -1,18 +1,9 @@
 // Tipos para autenticación y roles de usuario
+import { Database } from "./database.types";
 
-export type UserRole = "admin" | "owner" | "staff" | "special";
-
-export interface UserProfile {
-  id: string;
-  user_id: string;
-  email: string;
-  full_name: string | null;
-  role: UserRole;
-  organization_id: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// Tipos generados desde Supabase
+export type UserRole = Database["public"]["Enums"]["user_role"];
+export type UserProfile = Database["public"]["Tables"]["user_profiles"]["Row"];
 
 export interface AuthUser {
   id: string;

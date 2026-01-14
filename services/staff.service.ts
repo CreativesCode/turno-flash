@@ -91,7 +91,10 @@ export class StaffService {
         .limit(1)
         .single();
 
-      const nextSortOrder = maxSortOrder ? maxSortOrder.sort_order + 1 : 0;
+      const nextSortOrder =
+        maxSortOrder && maxSortOrder.sort_order != null
+          ? maxSortOrder.sort_order + 1
+          : 0;
 
       // Create staff member
       const { data: staff, error: insertError } = await supabase

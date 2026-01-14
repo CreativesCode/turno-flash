@@ -4,12 +4,12 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import {
-  useServicesQuery,
   useCreateService,
-  useUpdateService,
   useDeactivateService,
   useReactivateService,
+  useServicesQuery,
   useToast,
+  useUpdateService,
 } from "@/hooks";
 import { Service, ServiceFormData } from "@/types/appointments";
 import {
@@ -112,18 +112,19 @@ export default function ServicesPage() {
   const handleEdit = (service: Service) => {
     setFormData({
       name: service.name,
-      description: service.description || "",
+      description: service.description || undefined,
       duration_minutes: service.duration_minutes,
-      buffer_time_minutes: service.buffer_time_minutes,
-      price: service.price,
-      currency: service.currency,
-      color: service.color,
-      is_active: service.is_active,
-      requires_approval: service.requires_approval,
-      max_advance_booking_days: service.max_advance_booking_days,
-      min_advance_booking_hours: service.min_advance_booking_hours,
-      available_for_online_booking: service.available_for_online_booking,
-      sort_order: service.sort_order,
+      buffer_time_minutes: service.buffer_time_minutes ?? undefined,
+      price: service.price ?? undefined,
+      currency: service.currency || undefined,
+      color: service.color || undefined,
+      is_active: service.is_active ?? undefined,
+      requires_approval: service.requires_approval ?? undefined,
+      max_advance_booking_days: service.max_advance_booking_days ?? undefined,
+      min_advance_booking_hours: service.min_advance_booking_hours ?? undefined,
+      available_for_online_booking:
+        service.available_for_online_booking ?? undefined,
+      sort_order: service.sort_order ?? undefined,
     });
     setEditingService(service);
     setShowModal(true);
@@ -156,7 +157,10 @@ export default function ServicesPage() {
         await createServiceMutation.mutateAsync(formData);
         console.log("✅ Servicio creado exitosamente");
         toast.dismiss(loadingToast);
-        toast.success("Servicio creado", `"${formData.name}" está ahora disponible`);
+        toast.success(
+          "Servicio creado",
+          `"${formData.name}" está ahora disponible`
+        );
       }
 
       setShowModal(false);
@@ -192,7 +196,10 @@ export default function ServicesPage() {
       await deactivateServiceMutation.mutateAsync(service.id);
       console.log("✅ Servicio desactivado exitosamente");
       toast.dismiss(loadingToast);
-      toast.success("Servicio desactivado", `"${service.name}" ha sido desactivado`);
+      toast.success(
+        "Servicio desactivado",
+        `"${service.name}" ha sido desactivado`
+      );
     } catch (error) {
       console.error("❌ Error al desactivar servicio:", error);
       toast.dismiss(loadingToast);
@@ -207,20 +214,32 @@ export default function ServicesPage() {
 
   // Toggle active status
   const toggleActive = async (service: Service) => {
-    console.log("🔵 Cambiando estado del servicio:", service.id, service.is_active ? "desactivar" : "activar");
-    const loadingToast = toast.loading(service.is_active ? "Desactivando..." : "Activando...");
+    console.log(
+      "🔵 Cambiando estado del servicio:",
+      service.id,
+      service.is_active ? "desactivar" : "activar"
+    );
+    const loadingToast = toast.loading(
+      service.is_active ? "Desactivando..." : "Activando..."
+    );
 
     try {
       if (service.is_active) {
         await deactivateServiceMutation.mutateAsync(service.id);
         console.log("✅ Servicio desactivado");
         toast.dismiss(loadingToast);
-        toast.success("Servicio desactivado", `"${service.name}" ha sido desactivado`);
+        toast.success(
+          "Servicio desactivado",
+          `"${service.name}" ha sido desactivado`
+        );
       } else {
         await reactivateServiceMutation.mutateAsync(service.id);
         console.log("✅ Servicio activado");
         toast.dismiss(loadingToast);
-        toast.success("Servicio activado", `"${service.name}" ha sido activado`);
+        toast.success(
+          "Servicio activado",
+          `"${service.name}" ha sido activado`
+        );
       }
     } catch (error) {
       console.error("❌ Error al cambiar estado del servicio:", error);
@@ -229,7 +248,10 @@ export default function ServicesPage() {
       if (error instanceof Error) {
         toast.error("Error", error.message);
       } else {
-        toast.error("Error inesperado", "No se pudo cambiar el estado del servicio");
+        toast.error(
+          "Error inesperado",
+          "No se pudo cambiar el estado del servicio"
+        );
       }
     }
   };
@@ -332,7 +354,7 @@ export default function ServicesPage() {
                     <div className="flex items-start gap-3">
                       <div
                         className="h-10 w-10 rounded-lg"
-                        style={{ backgroundColor: service.color }}
+                        style={{ backgroundColor: service.color || "#3B82F6" }}
                       />
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold text-foreground">
@@ -358,7 +380,8 @@ export default function ServicesPage() {
                       <Clock className="h-4 w-4" />
                       <span>
                         {service.duration_minutes} min
-                        {service.buffer_time_minutes > 0 &&
+                        {service.buffer_time_minutes != null &&
+                          service.buffer_time_minutes > 0 &&
                           ` (+${service.buffer_time_minutes} min buffer)`}
                       </span>
                     </div>
@@ -623,17 +646,24 @@ export default function ServicesPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  disabled={createServiceMutation.isPending || updateServiceMutation.isPending}
+                  disabled={
+                    createServiceMutation.isPending ||
+                    updateServiceMutation.isPending
+                  }
                   className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={createServiceMutation.isPending || updateServiceMutation.isPending}
+                  disabled={
+                    createServiceMutation.isPending ||
+                    updateServiceMutation.isPending
+                  }
                   className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {(createServiceMutation.isPending || updateServiceMutation.isPending)
+                  {createServiceMutation.isPending ||
+                  updateServiceMutation.isPending
                     ? "Guardando..."
                     : editingService
                     ? "Guardar Cambios"

@@ -48,8 +48,14 @@ export default function OrganizationsPage() {
       }
 
       // Para cada organización, cargar el owner y el conteo de miembros
+      const validOrgs = (orgsData || []).filter((org) => org.id != null);
+
       const organizationsWithOwners = await Promise.all(
-        (orgsData || []).map(async (org) => {
+        validOrgs.map(async (org) => {
+          if (!org.id) {
+            throw new Error("Organization ID is null");
+          }
+
           // Buscar el owner (usuario con role='owner' y organization_id=org.id)
           const { data: ownerData } = await supabase
             .from("user_profiles")
@@ -66,9 +72,17 @@ export default function OrganizationsPage() {
 
           return {
             ...org,
+            id: org.id,
+            name: org.name || "",
+            slug: org.slug || "",
+            timezone: org.timezone || "",
+            created_at: org.created_at || new Date().toISOString(),
+            license_status: org.license_status || "no_license",
+            license_message: org.license_message || "",
+            is_usable: org.is_usable ?? false,
             owner: ownerData || null,
             member_count: count || 0,
-          };
+          } as OrganizationWithOwner;
         })
       );
 

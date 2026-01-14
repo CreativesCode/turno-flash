@@ -99,6 +99,15 @@ function OrganizationDetailsContent() {
 
       const orgWithDetails: OrganizationDetails = {
         ...orgData,
+        id: orgData.id || "",
+        name: orgData.name || "",
+        slug: orgData.slug || "",
+        timezone: orgData.timezone || "",
+        created_at: orgData.created_at || new Date().toISOString(),
+        is_active: orgData.is_active ?? true,
+        license_status: orgData.license_status || "no_license",
+        license_message: orgData.license_message || "",
+        is_usable: orgData.is_usable ?? false,
         owner: ownerData || null,
         members: membersData || [],
       };
@@ -107,11 +116,11 @@ function OrganizationDetailsContent() {
 
       // Inicializar datos de edici?n
       setEditData({
-        name: orgData.name,
-        slug: orgData.slug,
-        timezone: orgData.timezone,
+        name: orgData.name || "",
+        slug: orgData.slug || "",
+        timezone: orgData.timezone || "",
         whatsapp_phone: orgData.whatsapp_phone || "",
-        is_active: orgData.is_active,
+        is_active: orgData.is_active ?? true,
         license_start_date: orgData.license_start_date
           ? new Date(orgData.license_start_date).toISOString().slice(0, 16)
           : "",
@@ -186,7 +195,10 @@ function OrganizationDetailsContent() {
 
         if (endDate <= startDate) {
           toast.dismiss(loadingToast);
-          toast.error("Error de validación", "La fecha de fin de licencia debe ser posterior a la fecha de inicio");
+          toast.error(
+            "Error de validación",
+            "La fecha de fin de licencia debe ser posterior a la fecha de inicio"
+          );
           setSaving(false);
           return;
         }
@@ -228,7 +240,10 @@ function OrganizationDetailsContent() {
       } else {
         console.log("✅ Organización actualizada exitosamente");
         toast.dismiss(loadingToast);
-        toast.success("Organización actualizada", "Los cambios se han guardado correctamente");
+        toast.success(
+          "Organización actualizada",
+          "Los cambios se han guardado correctamente"
+        );
         setIsEditing(false);
         await loadOrganization();
       }
@@ -397,7 +412,6 @@ function OrganizationDetailsContent() {
               {error}
             </div>
           )}
-
 
           {/* Notificaci?n de licencia (si aplica) */}
           {!isEditing &&

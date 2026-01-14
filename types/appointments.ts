@@ -1,68 +1,22 @@
 // Types for the TurnoFlash Appointment System
+import { Database } from "./database.types";
 
+// Tipos generados desde Supabase - Enums
 export type AppointmentStatus =
-  | "pending"
-  | "confirmed"
-  | "reminded"
-  | "client_confirmed"
-  | "checked_in"
-  | "in_progress"
-  | "completed"
-  | "cancelled"
-  | "no_show"
-  | "rescheduled";
-
+  Database["public"]["Enums"]["appointment_status"];
 export type AppointmentSource =
-  | "web"
-  | "whatsapp"
-  | "phone"
-  | "walk_in"
-  | "admin";
-
-export type ReminderMethod = "whatsapp" | "sms" | "email" | "call" | "push";
-
+  Database["public"]["Enums"]["appointment_source"];
+export type ReminderMethod = Database["public"]["Enums"]["reminder_method"];
 export type ScheduleExceptionType =
-  | "time_off"
-  | "holiday"
-  | "special_hours"
-  | "blocked";
+  Database["public"]["Enums"]["schedule_exception_type"];
+export type TimeOffType = Database["public"]["Enums"]["time_off_type"];
+export type RequestStatus = Database["public"]["Enums"]["request_status"];
+export type ProficiencyLevel = Database["public"]["Enums"]["proficiency_level"];
+export type WaitlistStatus = Database["public"]["Enums"]["waitlist_status"];
 
-export type TimeOffType =
-  | "vacation"
-  | "sick_leave"
-  | "personal"
-  | "unpaid"
-  | "other";
-
-export type RequestStatus =
-  | "pending"
-  | "approved"
-  | "rejected"
-  | "cancelled"
-  | "expired";
-
-export type ProficiencyLevel = "junior" | "intermediate" | "senior" | "expert";
-
-export type WaitlistStatus =
-  | "active"
-  | "notified"
-  | "booked"
-  | "expired"
-  | "cancelled";
-
-// Service Category
-export interface ServiceCategory {
-  id: string;
-  organization_id: string;
-  name: string;
-  description: string | null;
-  icon: string | null;
-  color: string;
-  sort_order: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// Service Category - Tipos generados desde Supabase
+export type ServiceCategory =
+  Database["public"]["Tables"]["service_categories"]["Row"];
 
 export interface ServiceCategoryFormData {
   name: string;
@@ -73,28 +27,8 @@ export interface ServiceCategoryFormData {
   is_active?: boolean;
 }
 
-// Service
-export interface Service {
-  id: string;
-  organization_id: string;
-  category_id: string | null;
-  name: string;
-  description: string | null;
-  duration_minutes: number;
-  buffer_time_minutes: number;
-  price: number | null;
-  currency: string;
-  color: string;
-  is_active: boolean;
-  requires_approval: boolean;
-  max_advance_booking_days: number;
-  min_advance_booking_hours: number;
-  available_for_online_booking: boolean;
-  image_url: string | null;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
+// Service - Tipos generados desde Supabase
+export type Service = Database["public"]["Tables"]["services"]["Row"];
 
 export interface ServiceFormData {
   category_id?: string | null;
@@ -118,27 +52,8 @@ export interface ServiceWithCategory extends Service {
   category?: ServiceCategory | null;
 }
 
-// Staff Member
-export interface StaffMember {
-  id: string;
-  organization_id: string;
-  user_id: string | null;
-  first_name: string;
-  last_name: string;
-  nickname: string | null;
-  email: string | null;
-  phone: string | null;
-  photo_url: string | null;
-  color: string;
-  bio: string | null;
-  specialties: string[] | null;
-  is_active: boolean;
-  is_bookable: boolean;
-  accepts_online_bookings: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
+// Staff Member - Tipos generados desde Supabase
+export type StaffMember = Database["public"]["Tables"]["staff_members"]["Row"];
 
 export interface StaffMemberFormData {
   user_id?: string | null;
@@ -157,28 +72,13 @@ export interface StaffMemberFormData {
   sort_order?: number;
 }
 
-// Staff Service (relation)
-export interface StaffService {
-  id: string;
-  staff_id: string;
-  service_id: string;
-  proficiency_level: ProficiencyLevel;
-  created_at: string;
-}
+// Staff Service (relation) - Tipos generados desde Supabase
+export type StaffService =
+  Database["public"]["Tables"]["staff_services"]["Row"];
 
-// Staff Availability
-export interface StaffAvailability {
-  id: string;
-  staff_id: string;
-  day_of_week: number; // 0=Sunday, 6=Saturday
-  start_time: string; // HH:MM format
-  end_time: string; // HH:MM format
-  is_available: boolean;
-  effective_from: string | null;
-  effective_until: string | null;
-  created_at: string;
-  updated_at: string;
-}
+// Staff Availability - Tipos generados desde Supabase
+export type StaffAvailability =
+  Database["public"]["Tables"]["staff_availability"]["Row"];
 
 export interface StaffAvailabilityFormData {
   day_of_week: number;
@@ -189,20 +89,9 @@ export interface StaffAvailabilityFormData {
   effective_until?: string | null;
 }
 
-// Staff Exception
-export interface StaffException {
-  id: string;
-  staff_id: string | null;
-  organization_id: string;
-  exception_type: ScheduleExceptionType;
-  start_datetime: string;
-  end_datetime: string;
-  title: string;
-  description: string | null;
-  is_recurring: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// Staff Exception - Tipos generados desde Supabase
+export type StaffException =
+  Database["public"]["Tables"]["staff_exceptions"]["Row"];
 
 export interface StaffExceptionFormData {
   staff_id?: string | null;
@@ -214,30 +103,8 @@ export interface StaffExceptionFormData {
   is_recurring?: boolean;
 }
 
-// Customer
-export interface Customer {
-  id: string;
-  organization_id: string;
-  first_name: string;
-  last_name: string;
-  email: string | null;
-  phone: string;
-  phone_country_code: string;
-  whatsapp_number: string | null;
-  date_of_birth: string | null;
-  gender: string | null;
-  notes: string | null;
-  tags: string[] | null;
-  photo_url: string | null;
-  preferred_staff_id: string | null;
-  is_active: boolean;
-  total_appointments: number;
-  missed_appointments: number;
-  last_appointment_date: string | null;
-  created_at: string;
-  updated_at: string;
-  created_by: string | null;
-}
+// Customer - Tipos generados desde Supabase
+export type Customer = Database["public"]["Tables"]["customers"]["Row"];
 
 export interface CustomerFormData {
   first_name: string;
@@ -259,40 +126,8 @@ export interface CustomerWithPreferredStaff extends Customer {
   preferred_staff?: StaffMember | null;
 }
 
-// Appointment
-export interface Appointment {
-  id: string;
-  organization_id: string;
-  appointment_number: string | null;
-  customer_id: string;
-  service_id: string;
-  staff_id: string | null;
-  appointment_date: string; // DATE
-  start_time: string; // TIME
-  end_time: string; // TIME
-  timezone: string;
-  actual_start_time: string | null;
-  actual_end_time: string | null;
-  status: AppointmentStatus;
-  source: AppointmentSource;
-  confirmation_sent_at: string | null;
-  reminder_sent_at: string | null;
-  client_confirmed_at: string | null;
-  reminder_method: ReminderMethod | null;
-  notes: string | null;
-  internal_notes: string | null;
-  cancellation_reason: string | null;
-  cancelled_by: string | null;
-  cancelled_at: string | null;
-  price_charged: number | null;
-  was_paid: boolean;
-  payment_method: string | null;
-  rating: number | null;
-  feedback: string | null;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-}
+// Appointment - Tipos generados desde Supabase
+export type Appointment = Database["public"]["Tables"]["appointments"]["Row"];
 
 export interface AppointmentFormData {
   customer_id: string;
@@ -325,28 +160,9 @@ export interface AppointmentWithDetails extends Appointment {
   organization_timezone: string;
 }
 
-// Appointment Request
-export interface AppointmentRequest {
-  id: string;
-  organization_id: string;
-  customer_name: string;
-  customer_phone: string;
-  customer_email: string | null;
-  service_id: string;
-  preferred_staff_id: string | null;
-  preferred_date: string;
-  preferred_time: string;
-  alternative_dates: Record<string, unknown> | null;
-  notes: string | null;
-  status: RequestStatus;
-  source: string;
-  approved_by: string | null;
-  approved_at: string | null;
-  appointment_id: string | null;
-  rejection_reason: string | null;
-  created_at: string;
-  expires_at: string | null;
-}
+// Appointment Request - Tipos generados desde Supabase
+export type AppointmentRequest =
+  Database["public"]["Tables"]["appointment_requests"]["Row"];
 
 export interface AppointmentRequestFormData {
   customer_name: string;
@@ -361,29 +177,9 @@ export interface AppointmentRequestFormData {
   source: string;
 }
 
-// Business Settings
-export interface BusinessSettings {
-  id: string;
-  organization_id: string;
-  business_hours_config: Record<string, unknown> | null;
-  slot_duration_minutes: number;
-  allow_online_booking: boolean;
-  require_approval: boolean;
-  max_advance_booking_days: number;
-  min_advance_booking_hours: number;
-  allow_same_day_booking: boolean;
-  cancellation_policy_hours: number;
-  enable_waitlist: boolean;
-  enable_reminders: boolean;
-  reminder_settings: Record<string, unknown> | null;
-  booking_page_url: string | null;
-  booking_page_enabled: boolean;
-  whatsapp_integration_enabled: boolean;
-  whatsapp_bot_number: string | null;
-  default_appointment_color: string;
-  created_at: string;
-  updated_at: string;
-}
+// Business Settings - Tipos generados desde Supabase
+export type BusinessSettings =
+  Database["public"]["Tables"]["business_settings"]["Row"];
 
 export interface BusinessSettingsFormData {
   business_hours_config?: Record<string, unknown>;
@@ -404,66 +200,18 @@ export interface BusinessSettingsFormData {
   default_appointment_color?: string;
 }
 
-// Waitlist
-export interface Waitlist {
-  id: string;
-  organization_id: string;
-  customer_id: string;
-  service_id: string;
-  preferred_staff_id: string | null;
-  preferred_date: string;
-  preferred_time: string | null;
-  flexible_dates: boolean;
-  flexible_times: boolean;
-  notes: string | null;
-  status: WaitlistStatus;
-  priority: number;
-  notified_at: string | null;
-  expires_at: string | null;
-  created_at: string;
-}
+// Waitlist - Tipos generados desde Supabase
+export type Waitlist = Database["public"]["Tables"]["waitlist"]["Row"];
 
-// Customer History
-export interface CustomerHistory {
-  id: string;
-  customer_id: string;
-  appointment_id: string | null;
-  event_type: string;
-  description: string;
-  metadata: Record<string, unknown> | null;
-  created_by: string | null;
-  created_at: string;
-}
+// Customer History - Tipos generados desde Supabase
+export type CustomerHistory =
+  Database["public"]["Tables"]["customer_history"]["Row"];
 
-// Notification
-export interface Notification {
-  id: string;
-  user_id: string;
-  organization_id: string;
-  type: string;
-  title: string;
-  message: string;
-  appointment_id: string | null;
-  customer_id: string | null;
-  is_read: boolean;
-  read_at: string | null;
-  action_url: string | null;
-  created_at: string;
-}
+// Notification - Tipos generados desde Supabase
+export type Notification = Database["public"]["Tables"]["notifications"]["Row"];
 
-// Reminder Log
-export interface ReminderLog {
-  id: string;
-  appointment_id: string;
-  reminder_type: string;
-  method: ReminderMethod;
-  message_content: string | null;
-  sent_at: string;
-  delivered_at: string | null;
-  read_at: string | null;
-  status: string;
-  error_message: string | null;
-}
+// Reminder Log - Tipos generados desde Supabase
+export type ReminderLog = Database["public"]["Tables"]["reminder_logs"]["Row"];
 
 // Utility types for forms and components
 export interface TimeSlot {

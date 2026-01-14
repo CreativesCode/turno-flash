@@ -83,11 +83,11 @@ export default function CustomersPage() {
       first_name: customer.first_name,
       last_name: customer.last_name,
       phone: customer.phone,
-      phone_country_code: customer.phone_country_code,
+      phone_country_code: customer.phone_country_code || undefined,
       email: customer.email || "",
       whatsapp_number: customer.whatsapp_number || "",
       notes: customer.notes || "",
-      is_active: customer.is_active,
+      is_active: customer.is_active ?? true,
     });
     setEditingCustomer(customer);
     setShowModal(true);
@@ -307,9 +307,11 @@ export default function CustomersPage() {
                     <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                       <Calendar className="h-4 w-4" />
                       <span>
-                        {customer.total_appointments} turnos{" "}
-                        {customer.missed_appointments > 0 &&
-                          `(${customer.missed_appointments} ausencias)`}
+                        {customer.total_appointments ?? 0} turnos
+                        {customer.missed_appointments != null &&
+                        customer.missed_appointments > 0
+                          ? ` (${customer.missed_appointments} ausencias)`
+                          : ""}
                       </span>
                     </div>
                   </div>
