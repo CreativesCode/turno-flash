@@ -4,6 +4,7 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
   useCreateCustomer,
+  useDebounce,
   useDeactivateCustomer,
   useInfiniteCustomers,
   useToast,
@@ -26,11 +27,13 @@ import { FormEvent, useMemo, useState } from "react";
 
 export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const toast = useToast();
 
   // 🎉 Use infinite pagination for better performance!
+  // ⚡ Debounced search: Only triggers query 300ms after user stops typing
   const {
     data,
     fetchNextPage,
@@ -40,7 +43,7 @@ export default function CustomersPage() {
     error: queryError,
   } = useInfiniteCustomers(
     {
-      search: searchTerm,
+      search: debouncedSearch,
       isActive: true,
     },
     50 // pageSize

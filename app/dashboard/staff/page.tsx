@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import {
   useCreateStaffMember,
+  useDebounce,
   useDeactivateStaffMember,
   useReactivateStaffMember,
   useStaffQuery,
@@ -29,6 +30,7 @@ import { FormEvent, useMemo, useState } from "react";
 export default function StaffPage() {
   const { profile } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [showModal, setShowModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
   const toast = useToast();
@@ -69,10 +71,11 @@ export default function StaffPage() {
   });
 
   // Filter staff by search term (temporary - until hook supports search)
+  // ⚡ Debounced search: Reduces unnecessary filtering operations
   const filteredStaff = useMemo(() => {
-    if (!searchTerm) return staffMembers;
+    if (!debouncedSearch) return staffMembers;
 
-    const term = searchTerm.toLowerCase();
+    const term = debouncedSearch.toLowerCase();
     return staffMembers.filter(
       (staff) =>
         staff.first_name.toLowerCase().includes(term) ||
@@ -81,7 +84,7 @@ export default function StaffPage() {
         (staff.email && staff.email.toLowerCase().includes(term)) ||
         (staff.phone && staff.phone.includes(term))
     );
-  }, [staffMembers, searchTerm]);
+  }, [staffMembers, debouncedSearch]);
 
   // Reset form
   const resetForm = () => {

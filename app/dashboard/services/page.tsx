@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import {
   useCreateService,
+  useDebounce,
   useDeactivateService,
   useReactivateService,
   useServicesQuery,
@@ -29,6 +30,7 @@ import { FormEvent, useMemo, useState } from "react";
 export default function ServicesPage() {
   const { profile } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const toast = useToast();
@@ -53,17 +55,18 @@ export default function ServicesPage() {
   const reactivateServiceMutation = useReactivateService();
 
   // Filter services manually (hook doesn't support search yet)
+  // ⚡ Debounced search: Reduces unnecessary filtering operations
   const searchedServices = useMemo(() => {
-    if (!searchTerm) return filteredServices;
+    if (!debouncedSearch) return filteredServices;
 
-    const term = searchTerm.toLowerCase();
+    const term = debouncedSearch.toLowerCase();
     return filteredServices.filter(
       (service) =>
         service.name.toLowerCase().includes(term) ||
         (service.description &&
           service.description.toLowerCase().includes(term))
     );
-  }, [filteredServices, searchTerm]);
+  }, [filteredServices, debouncedSearch]);
 
   // Form data
   const [formData, setFormData] = useState<ServiceFormData>({

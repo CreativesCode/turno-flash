@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/auth-context";
 import {
   useCreateAppointment,
   useCreateCustomer,
+  useDebounce,
   useInfiniteAppointments,
   useNormalizedData,
   useSendReminder,
@@ -56,6 +57,7 @@ export default function AppointmentsPage() {
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [filterDate, setFilterDate] = useState<string>(getLocalDateString());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -178,6 +180,7 @@ export default function AppointmentsPage() {
   };
 
   // Filter appointments
+  // ⚡ Debounced search: Reduces unnecessary filtering operations
   const filteredAppointments = useMemo(() => {
     let filtered = appointments;
 
@@ -186,9 +189,9 @@ export default function AppointmentsPage() {
       filtered = filtered.filter((apt) => apt.status === filterStatus);
     }
 
-    // Filter by search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    // Filter by debounced search term
+    if (debouncedSearch) {
+      const term = debouncedSearch.toLowerCase();
       filtered = filtered.filter(
         (apt) =>
           apt.customer_first_name.toLowerCase().includes(term) ||
@@ -201,7 +204,7 @@ export default function AppointmentsPage() {
     }
 
     return filtered;
-  }, [appointments, filterStatus, searchTerm]);
+  }, [appointments, filterStatus, debouncedSearch]);
 
   // Calculate service end time using AppointmentService
   const calculateEndTime = (startTime: string, serviceId: string) => {

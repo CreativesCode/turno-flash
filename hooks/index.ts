@@ -89,5 +89,6 @@ export {
 // Other hooks
 export { useAuth } from "./use-auth";
 export { useCapacitor } from "./useCapacitor";
+export { useDebounce } from "./useDebounce";
 export { useLicense } from "./useLicense";
 export { toast, useToast } from "./useToast";
