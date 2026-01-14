@@ -210,6 +210,88 @@ export class CustomerService {
     try {
       const supabase = createClient();
 
+      // Si hay búsqueda, usar función full-text search optimizada
+      if (filters?.search && filters.search.trim().length > 0) {
+        // Function will be available after migration 012_performance_indexes.sql is executed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (supabase.rpc as any)(
+          "search_customers_fulltext",
+          {
+            p_organization_id: organizationId,
+            p_search_term: filters.search.trim(),
+            p_is_active: filters?.isActive ?? null,
+            p_limit: 1000, // Límite alto para obtener todos los resultados
+            p_offset: 0,
+          }
+        );
+
+        if (error) {
+          console.error(
+            "Error fetching customers with full-text search:",
+            error
+          );
+          // Fallback a búsqueda ILIKE si la función RPC falla
+          return this.getAllWithIlike(organizationId, filters);
+        }
+
+        return {
+          success: true,
+          customers: (data || []) as Customer[],
+        };
+      }
+
+      // Sin búsqueda, usar query normal
+      let query = supabase
+        .from("customers")
+        .select("*")
+        .eq("organization_id", organizationId)
+        .order("first_name");
+
+      // Apply filters
+      if (filters?.isActive !== undefined) {
+        query = query.eq("is_active", filters.isActive);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching customers:", error);
+        return {
+          success: false,
+          error: "Error al cargar los clientes",
+        };
+      }
+
+      return {
+        success: true,
+        customers: data || [],
+      };
+    } catch (error) {
+      console.error("Unexpected error fetching customers:", error);
+      return {
+        success: false,
+        error: "Error inesperado al cargar los clientes",
+      };
+    }
+  }
+
+  /**
+   * Fallback method using ILIKE search (used if RPC fails)
+   */
+  private static async getAllWithIlike(
+    organizationId: string,
+    filters?: {
+      isActive?: boolean;
+      search?: string;
+    }
+  ): Promise<{
+    success: boolean;
+    customers?: Customer[];
+    error?: string;
+  }> {
+    try {
+      const supabase = createClient();
+
       let query = supabase
         .from("customers")
         .select("*")
@@ -255,6 +337,80 @@ export class CustomerService {
    * Get paginated customers for an organization
    */
   static async getAllPaginated(
+    organizationId: string,
+    offset: number = 0,
+    limit: number = 50,
+    filters?: {
+      isActive?: boolean;
+      search?: string;
+    }
+  ): Promise<Customer[]> {
+    try {
+      const supabase = createClient();
+
+      // Si hay búsqueda, usar función full-text search optimizada
+      if (filters?.search && filters.search.trim().length > 0) {
+        // Function will be available after migration 012_performance_indexes.sql is executed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (supabase.rpc as any)(
+          "search_customers_fulltext",
+          {
+            p_organization_id: organizationId,
+            p_search_term: filters.search.trim(),
+            p_is_active: filters?.isActive ?? null,
+            p_limit: limit,
+            p_offset: offset,
+          }
+        );
+
+        if (error) {
+          console.error(
+            "Error fetching paginated customers with full-text search:",
+            error
+          );
+          // Fallback a búsqueda ILIKE si la función RPC falla
+          return this.getAllPaginatedWithIlike(
+            organizationId,
+            offset,
+            limit,
+            filters
+          );
+        }
+
+        return (data || []) as Customer[];
+      }
+
+      // Sin búsqueda, usar query normal
+      let query = supabase
+        .from("customers")
+        .select("*")
+        .eq("organization_id", organizationId)
+        .order("first_name")
+        .range(offset, offset + limit - 1);
+
+      // Apply filters
+      if (filters?.isActive !== undefined) {
+        query = query.eq("is_active", filters.isActive);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching paginated customers:", error);
+        throw new Error("Error al cargar los clientes");
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error("Unexpected error fetching paginated customers:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fallback method using ILIKE search for pagination (used if RPC fails)
+   */
+  private static async getAllPaginatedWithIlike(
     organizationId: string,
     offset: number = 0,
     limit: number = 50,
@@ -454,9 +610,11 @@ export class CustomerService {
         .eq("organization_id", organizationId);
 
       const completedAppointments =
-        appointments?.filter((a) => a.status === APPOINTMENT_STATUS.COMPLETED).length || 0;
+        appointments?.filter((a) => a.status === APPOINTMENT_STATUS.COMPLETED)
+          .length || 0;
       const cancelledAppointments =
-        appointments?.filter((a) => a.status === APPOINTMENT_STATUS.CANCELLED).length || 0;
+        appointments?.filter((a) => a.status === APPOINTMENT_STATUS.CANCELLED)
+          .length || 0;
 
       return {
         success: true,
