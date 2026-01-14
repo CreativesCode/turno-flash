@@ -12,6 +12,11 @@ import {
   Service,
   StaffMember,
 } from "@/types/appointments";
+import {
+  formatDateShort,
+  getLocalDateString,
+  getTimestamp,
+} from "@/utils/date";
 import { createClient } from "@/utils/supabase/client";
 import {
   AlertCircle,
@@ -50,9 +55,7 @@ export default function AppointmentsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
-  const [filterDate, setFilterDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
+  const [filterDate, setFilterDate] = useState<string>(getLocalDateString());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [view, setView] = useState<AppointmentView>("day");
 
@@ -81,7 +84,7 @@ export default function AppointmentsPage() {
     customer_id: "",
     service_id: "",
     staff_id: null,
-    appointment_date: new Date().toISOString().split("T")[0],
+    appointment_date: getLocalDateString(),
     start_time: "09:00",
     end_time: "09:30",
     status: "confirmed",
@@ -112,8 +115,8 @@ export default function AppointmentsPage() {
     }
 
     return {
-      start: start.toISOString().split("T")[0],
-      end: end.toISOString().split("T")[0],
+      start: getLocalDateString(start),
+      end: getLocalDateString(end),
     };
   }, [selectedDate, view]);
 
@@ -273,7 +276,7 @@ export default function AppointmentsPage() {
       customer_id: "",
       service_id: "",
       staff_id: null,
-      appointment_date: new Date().toISOString().split("T")[0],
+      appointment_date: getLocalDateString(),
       start_time: "09:00",
       end_time: "09:30",
       status: "confirmed",
@@ -445,8 +448,7 @@ export default function AppointmentsPage() {
 
   // Generate WhatsApp message for reminder
   const generateReminderMessage = (appointment: AppointmentWithDetails) => {
-    const date = new Date(appointment.appointment_date);
-    const formattedDate = date.toLocaleDateString("es-ES", {
+    const formattedDate = formatDateShort(appointment.appointment_date, {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -485,7 +487,7 @@ Por favor confirma tu asistencia respondiendo:
         reminder_type: "manual",
         method: "whatsapp",
         status: "sent",
-        sent_at: new Date().toISOString(),
+        sent_at: getTimestamp(),
         sent_by: profile?.user_id,
       });
 
@@ -903,13 +905,7 @@ Por favor confirma tu asistencia respondiendo:
                             <div className="flex items-center gap-2 text-sm">
                               <Calendar className="h-4 w-4 text-foreground-muted" />
                               <span className="text-foreground-muted">
-                                {new Date(
-                                  appointment.appointment_date
-                                ).toLocaleDateString("es-ES", {
-                                  weekday: "short",
-                                  day: "numeric",
-                                  month: "short",
-                                })}
+                                {formatDateShort(appointment.appointment_date)}
                               </span>
                             </div>
 
@@ -1058,7 +1054,7 @@ Por favor confirma tu asistencia respondiendo:
               appointments={filteredAppointments}
               onDateChange={(newDate) => {
                 setSelectedDate(newDate);
-                setFilterDate(newDate.toISOString().split("T")[0]);
+                setFilterDate(getLocalDateString(newDate));
               }}
               onAppointmentClick={(apt) => {
                 setSelectedAppointment(apt);
@@ -1069,9 +1065,7 @@ Por favor confirma tu asistencia respondiendo:
                   ? (time) => {
                       setFormData((prev) => ({
                         ...prev,
-                        appointment_date: selectedDate
-                          .toISOString()
-                          .split("T")[0],
+                        appointment_date: getLocalDateString(selectedDate),
                         start_time: time,
                         end_time: calculateEndTime(time, prev.service_id),
                       }));
@@ -1175,13 +1169,13 @@ Por favor confirma tu asistencia respondiendo:
                 {/* New Customer Form */}
                 {showNewCustomerForm && (
                   <div className="mt-4 rounded-lg border border-info-200 bg-info-50 p-4 dark:border-info-800 dark:bg-info-900/20">
-                    <h3 className="mb-3 text-sm font-semibold text-info-900 dark:text-info-100">
+                    <h3 className="mb-3 text-sm font-semibold text-foreground">
                       Nuevo Cliente
                     </h3>
                     <div className="space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                          <label className="block text-xs font-medium text-foreground">
                             Nombre *
                           </label>
                           <input
@@ -1198,7 +1192,7 @@ Por favor confirma tu asistencia respondiendo:
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                          <label className="block text-xs font-medium text-foreground">
                             Apellido *
                           </label>
                           <input
@@ -1219,7 +1213,7 @@ Por favor confirma tu asistencia respondiendo:
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                          <label className="block text-xs font-medium text-foreground">
                             Teléfono *
                           </label>
                           <input
@@ -1236,7 +1230,7 @@ Por favor confirma tu asistencia respondiendo:
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                          <label className="block text-xs font-medium text-foreground">
                             Email
                           </label>
                           <input
@@ -1259,7 +1253,7 @@ Por favor confirma tu asistencia respondiendo:
                           type="button"
                           onClick={handleCreateCustomer}
                           disabled={savingCustomer}
-                          className="flex-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                          className="flex-1 rounded-md bg-secondary-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-secondary-600 disabled:opacity-50"
                         >
                           {savingCustomer
                             ? "Creando..."
@@ -1269,7 +1263,7 @@ Por favor confirma tu asistencia respondiendo:
                           type="button"
                           onClick={() => setShowNewCustomerForm(false)}
                           disabled={savingCustomer}
-                          className="rounded-md bg-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-300 disabled:opacity-50 dark:bg-zinc-700 dark:text-zinc-300"
+                          className="rounded-md bg-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-subtle disabled:opacity-50"
                         >
                           Cancelar
                         </button>
@@ -1436,7 +1430,7 @@ Por favor confirma tu asistencia respondiendo:
       {/* Detail Modal */}
       {showDetailModal && selectedAppointment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl border border-border">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg bg-surface p-6 shadow-xl border border-border">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-foreground">
                 Detalles del Turno
@@ -1509,13 +1503,7 @@ Por favor confirma tu asistencia respondiendo:
                 </h3>
                 <p className="text-foreground font-medium flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-foreground-muted" />
-                  {new Date(
-                    selectedAppointment.appointment_date
-                  ).toLocaleDateString("es-ES", {
-                    weekday: "short",
-                    day: "numeric",
-                    month: "short",
-                  })}
+                  {formatDateShort(selectedAppointment.appointment_date)}
                 </p>
               </div>
               <div className="p-4 rounded-lg bg-muted border border-border">

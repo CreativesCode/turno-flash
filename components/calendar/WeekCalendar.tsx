@@ -1,6 +1,7 @@
 "use client";
 
 import { AppointmentWithDetails } from "@/types/appointments";
+import { getLocalDateString, getStartOfWeek, getWeekDays } from "@/utils/date";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useMemo } from "react";
 
@@ -23,26 +24,12 @@ export function WeekCalendar({
   startHour = 8,
   endHour = 20,
 }: WeekCalendarProps) {
-  // Get start of week (Monday)
-  const startOfWeek = useMemo(() => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff);
-    d.setHours(0, 0, 0, 0);
-    return d;
+  // Get start of week (Monday) and generate week days
+  const { startOfWeek, weekDays } = useMemo(() => {
+    const start = getStartOfWeek(date);
+    const days = getWeekDays(date);
+    return { startOfWeek: start, weekDays: days };
   }, [date]);
-
-  // Generate week days
-  const weekDays = useMemo(() => {
-    const days: Date[] = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(startOfWeek);
-      day.setDate(startOfWeek.getDate() + i);
-      days.push(day);
-    }
-    return days;
-  }, [startOfWeek]);
 
   // Generate time slots
   const timeSlots = useMemo(() => {
@@ -135,7 +122,7 @@ export function WeekCalendar({
     return `${startOfWeek.getDate()} ${startMonth} - ${endOfWeek.getDate()} ${endMonth} ${endOfWeek.getFullYear()}`;
   };
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
 
   return (
     <div className="rounded-lg bg-surface shadow-sm overflow-hidden">
@@ -170,10 +157,13 @@ export function WeekCalendar({
       </div>
 
       {/* Day Headers */}
-      <div className="grid grid-cols-8 border-b border-border">
-        <div className="w-16 border-r border-border" />
+      <div
+        className="grid border-b border-border"
+        style={{ gridTemplateColumns: "64px repeat(7, 1fr)" }}
+      >
+        <div className="border-r border-border" />
         {weekDays.map((day) => {
-          const dateStr = day.toISOString().split("T")[0];
+          const dateStr = getLocalDateString(day);
           const isCurrentDay = dateStr === today;
           const dayApts = appointmentsByDate.get(dateStr) || [];
 
@@ -208,9 +198,12 @@ export function WeekCalendar({
 
       {/* Calendar Grid */}
       <div className="max-h-[500px] overflow-y-auto">
-        <div className="grid grid-cols-8">
+        <div
+          className="grid"
+          style={{ gridTemplateColumns: "64px repeat(7, 1fr)" }}
+        >
           {/* Time Labels */}
-          <div className="w-16 border-r border-border">
+          <div className="border-r border-border">
             {timeSlots.map((time) => (
               <div
                 key={time}
@@ -223,7 +216,7 @@ export function WeekCalendar({
 
           {/* Day Columns */}
           {weekDays.map((day) => {
-            const dateStr = day.toISOString().split("T")[0];
+            const dateStr = getLocalDateString(day);
             const dayApts = appointmentsByDate.get(dateStr) || [];
             const isCurrentDay = dateStr === today;
 

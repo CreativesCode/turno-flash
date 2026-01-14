@@ -4,6 +4,12 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { AppointmentWithDetails } from "@/types/appointments";
+import {
+  addDays,
+  formatDateShort,
+  getLocalDateString,
+  getTimestamp,
+} from "@/utils/date";
 import { createClient } from "@/utils/supabase/client";
 import {
   AlertCircle,
@@ -54,9 +60,8 @@ export default function RemindersPage() {
       setError(null);
 
       // Calculate target date
-      const targetDate = new Date();
-      targetDate.setDate(targetDate.getDate() + filterDays);
-      const dateStr = targetDate.toISOString().split("T")[0];
+      const todayStr = getLocalDateString();
+      const dateStr = addDays(todayStr, filterDays);
 
       // Load appointments for the target date that haven't been reminded
       const { data, error: loadError } = await supabase
@@ -99,7 +104,7 @@ export default function RemindersPage() {
         reminder_type: "manual",
         method: "whatsapp", // or 'sms', 'email'
         status: "sent",
-        sent_at: new Date().toISOString(),
+        sent_at: getTimestamp(),
         sent_by: profile?.user_id,
       });
 
@@ -142,8 +147,7 @@ export default function RemindersPage() {
 
   // Generate WhatsApp message
   const generateWhatsAppMessage = (appointment: AppointmentWithDetails) => {
-    const date = new Date(appointment.appointment_date);
-    const formattedDate = date.toLocaleDateString("es-ES", {
+    const formattedDate = formatDateShort(appointment.appointment_date, {
       weekday: "long",
       day: "numeric",
       month: "long",

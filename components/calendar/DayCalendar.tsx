@@ -1,6 +1,7 @@
 "use client";
 
 import { AppointmentWithDetails } from "@/types/appointments";
+import { getLocalDateString, isToday } from "@/utils/date";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useMemo } from "react";
 
@@ -35,7 +36,7 @@ export function DayCalendar({
 
   // Filter appointments for the current day
   const dayAppointments = useMemo(() => {
-    const dateStr = date.toISOString().split("T")[0];
+    const dateStr = getLocalDateString(date);
     return appointments.filter((apt) => apt.appointment_date === dateStr);
   }, [appointments, date]);
 
@@ -102,9 +103,6 @@ export function DayCalendar({
     });
   };
 
-  const isToday =
-    date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0];
-
   return (
     <div className="rounded-lg bg-surface shadow-sm">
       {/* Header */}
@@ -125,7 +123,7 @@ export function DayCalendar({
           <button
             onClick={goToToday}
             className={`rounded-md px-3 py-1 text-sm font-medium ${
-              isToday
+              isToday(getLocalDateString(date))
                 ? "bg-info-100 text-info-700 dark:bg-info-900/30 dark:text-info-400"
                 : "bg-muted text-foreground hover:bg-subtle"
             }`}
@@ -218,7 +216,9 @@ export function DayCalendar({
             })}
 
             {/* Current Time Indicator */}
-            {isToday && <CurrentTimeIndicator startHour={startHour} />}
+            {isToday(getLocalDateString(date)) && (
+              <CurrentTimeIndicator startHour={startHour} />
+            )}
           </div>
         </div>
       </div>

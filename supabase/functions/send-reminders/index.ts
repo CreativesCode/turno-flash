@@ -161,6 +161,8 @@ Deno.serve(async (req) => {
 });
 
 // Helper functions
+// Note: Edge Functions run in UTC, and PostgreSQL DATE columns are timezone-agnostic
+// so using toISOString() here is appropriate for server-side date calculations
 function getTomorrowDate(): string {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
