@@ -4,19 +4,12 @@ import { DayCalendar, WeekCalendar } from "@/components/calendar";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
-import {
-  AppointmentService,
-  CustomerService,
-  ServiceService,
-  StaffService,
-} from "@/services";
+import { useAppointments, useCustomers, useServices, useStaff } from "@/hooks";
+import { AppointmentService } from "@/services";
 import {
   AppointmentFormData,
   AppointmentWithDetails,
-  Customer,
   CustomerFormData,
-  Service,
-  StaffMember,
 } from "@/types/appointments";
 import { formatDateShort, getLocalDateString } from "@/utils/date";
 import {
@@ -36,7 +29,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 type AppointmentView = "list" | "day" | "week";
 type FilterStatus = "all" | "pending" | "confirmed" | "completed" | "cancelled";
@@ -45,14 +38,6 @@ export default function AppointmentsPage() {
   const { profile } = useAuth();
   const router = useRouter();
 
-  const [appointments, setAppointments] = useState<AppointmentWithDetails[]>(
-    []
-  );
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
-  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
-
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [filterDate, setFilterDate] = useState<string>(getLocalDateString());
@@ -66,7 +51,7 @@ export default function AppointmentsPage() {
     useState<AppointmentWithDetails | null>(null);
   const [saving, setSaving] = useState(false);
   const [savingCustomer, setSavingCustomer] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   // New customer form data
@@ -102,7 +87,7 @@ export default function AppointmentsPage() {
   }, [profile]);
 
   // Calculate date range based on view
-  const getDateRange = useCallback(() => {
+  const getDateRange = useMemo(() => {
     const start = new Date(selectedDate);
     const end = new Date(selectedDate);
 
@@ -120,75 +105,45 @@ export default function AppointmentsPage() {
     };
   }, [selectedDate, view]);
 
-  // Load all data using service layer
-  const loadData = useCallback(async () => {
-    if (!profile?.organization_id) return;
+  // 🎉 Use hooks for all data!
+  const {
+    appointments,
+    loading: appointmentsLoading,
+    error: appointmentsError,
+    createAppointment,
+    updateStatus: updateAppointmentStatus,
+    sendReminder,
+  } = useAppointments({
+    startDate: getDateRange.start,
+    endDate: getDateRange.end,
+  });
 
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    customers,
+    loading: customersLoading,
+    createCustomer,
+  } = useCustomers({ isActive: true });
 
-      const { start, end } = getDateRange();
+  const { services, loading: servicesLoading } = useServices({
+    isActive: true,
+  });
 
-      // Load appointments using AppointmentService
-      const appointmentsResult = await AppointmentService.getByDateRange(
-        profile.organization_id,
-        start,
-        end
-      );
+  const { staff: staffMembers, loading: staffLoading } = useStaff({
+    isActive: true,
+    isBookable: true,
+  });
 
-      if (appointmentsResult.success && appointmentsResult.appointments) {
-        setAppointments(appointmentsResult.appointments);
-      } else {
-        console.error("Error loading appointments:", appointmentsResult.error);
-      }
+  // Combined loading state
+  const loading =
+    appointmentsLoading || customersLoading || servicesLoading || staffLoading;
 
-      // Load customers using CustomerService
-      const customersResult = await CustomerService.getAll(
-        profile.organization_id,
-        { isActive: true }
-      );
+  // Combine hook errors with local errors
+  const error = appointmentsError || localError;
 
-      if (customersResult.success && customersResult.customers) {
-        setCustomers(customersResult.customers);
-      } else {
-        console.error("Error loading customers:", customersResult.error);
-      }
-
-      // Load services using ServiceService
-      const servicesResult = await ServiceService.getAll(
-        profile.organization_id,
-        { isActive: true }
-      );
-
-      if (servicesResult.success && servicesResult.services) {
-        setServices(servicesResult.services);
-      } else {
-        console.error("Error loading services:", servicesResult.error);
-      }
-
-      // Load staff using StaffService
-      const staffResult = await StaffService.getAll(profile.organization_id, {
-        isActive: true,
-        isBookable: true,
-      });
-
-      if (staffResult.success && staffResult.staff) {
-        setStaffMembers(staffResult.staff);
-      } else {
-        console.error("Error loading staff:", staffResult.error);
-      }
-    } catch (err) {
-      console.error("Error loading data:", err);
-      setError("Error al cargar datos");
-    } finally {
-      setLoading(false);
-    }
-  }, [profile?.organization_id, getDateRange]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  // Helper to set error (local error takes precedence)
+  const setError = (errorMsg: string | null) => {
+    setLocalError(errorMsg);
+  };
 
   // Filter appointments
   const filteredAppointments = useMemo(() => {
@@ -282,14 +237,9 @@ export default function AppointmentsPage() {
     setShowModal(true);
   };
 
-  // Save appointment using AppointmentService
+  // Save appointment using hook
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
-
-    if (!profile?.organization_id || !profile?.user_id) {
-      setError("No se encontró la organización");
-      return;
-    }
 
     if (!canManageAppointments) {
       setError("No tienes permisos para crear turnos");
@@ -297,168 +247,116 @@ export default function AppointmentsPage() {
     }
 
     setSaving(true);
-    setError(null);
     setSuccess(null);
 
     try {
-      const result = await AppointmentService.create(
-        formData,
-        profile.organization_id,
-        profile.user_id
-      );
+      const result = await createAppointment(formData);
 
-      if (!result.success) {
+      if (result.success) {
+        setSuccess("Turno creado exitosamente");
+        setShowModal(false);
+        resetForm();
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
         setError(result.error || "Error al crear turno");
-        return;
       }
-
-      setSuccess("Turno creado exitosamente");
-      setShowModal(false);
-      resetForm();
-      await loadData();
-
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      console.error("Error saving appointment:", err);
-      setError("Error inesperado al guardar");
     } finally {
       setSaving(false);
     }
   };
 
-  // Create customer quickly using CustomerService
+  // Create customer quickly using hook
   const handleCreateCustomer = async () => {
-    if (!profile?.organization_id || !profile?.user_id) {
-      setError("No se encontró la organización");
-      return;
-    }
-
     setSavingCustomer(true);
-    setError(null);
 
     try {
-      const result = await CustomerService.create(
-        newCustomerData,
-        profile.organization_id,
-        profile.user_id
-      );
+      const result = await createCustomer(newCustomerData);
 
-      if (!result.success) {
+      if (result.success) {
+        // Select the new customer
+        if (result.customer) {
+          setFormData((prev) => ({
+            ...prev,
+            customer_id: result.customer!.id,
+          }));
+        }
+
+        // Reset form and close
+        setNewCustomerData({
+          first_name: "",
+          last_name: "",
+          phone: "",
+          email: "",
+          notes: "",
+          is_active: true,
+        });
+        setShowNewCustomerForm(false);
+        setSuccess("Cliente creado exitosamente");
+        setTimeout(() => setSuccess(null), 2000);
+      } else {
         setError(result.error || "Error al crear cliente");
-        setSavingCustomer(false);
-        return;
       }
-
-      // Reload customers list
-      await loadData();
-
-      // Select the new customer
-      if (result.customer) {
-        setFormData((prev) => ({
-          ...prev,
-          customer_id: result.customer!.id,
-        }));
-      }
-
-      // Reset form and close
-      setNewCustomerData({
-        first_name: "",
-        last_name: "",
-        phone: "",
-        email: "",
-        notes: "",
-        is_active: true,
-      });
-      setShowNewCustomerForm(false);
-      setSuccess("Cliente creado exitosamente");
-      setTimeout(() => setSuccess(null), 2000);
-    } catch (err) {
-      console.error("Error creating customer:", err);
-      setError("Error inesperado al crear cliente");
     } finally {
       setSavingCustomer(false);
     }
   };
 
-  // Send reminder for an appointment using AppointmentService
+  // Send reminder for an appointment using hook
   const handleSendReminder = async (appointment: AppointmentWithDetails) => {
-    if (!profile?.organization_id || !profile?.user_id) {
-      setError("No se encontró la información del usuario");
-      return;
-    }
-
     try {
-      setError(null);
+      const result = await sendReminder(appointment.id, "whatsapp");
 
-      const result = await AppointmentService.sendReminder(
-        appointment.id,
-        profile.organization_id,
-        profile.user_id,
-        "whatsapp"
-      );
+      if (result.success) {
+        // Open WhatsApp if URL is available
+        if (result.whatsappUrl) {
+          window.open(result.whatsappUrl, "_blank");
+        }
 
-      if (!result.success) {
+        setSuccess(`Recordatorio enviado a ${appointment.customer_first_name}`);
+
+        // Update the selected appointment in the modal
+        if (selectedAppointment?.id === appointment.id) {
+          const updatedAppointment = {
+            ...selectedAppointment,
+            status: "reminded",
+          };
+          setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
+        }
+
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
         setError(result.error || "Error al enviar recordatorio");
-        return;
       }
-
-      // Open WhatsApp if URL is available
-      if (result.whatsappUrl) {
-        window.open(result.whatsappUrl, "_blank");
-      }
-
-      setSuccess(`Recordatorio enviado a ${appointment.customer_first_name}`);
-      await loadData();
-
-      // Update the selected appointment in the modal
-      if (selectedAppointment?.id === appointment.id) {
-        const updatedAppointment = {
-          ...selectedAppointment,
-          status: "reminded",
-        };
-        setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
-      }
-
-      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error("Error sending reminder:", err);
       setError("Error al enviar recordatorio");
     }
   };
 
-  // Update appointment status using AppointmentService
+  // Update appointment status using hook
   const updateStatus = async (appointmentId: string, newStatus: string) => {
-    if (!profile?.organization_id || !profile?.user_id) {
-      setError("No se encontró la información del usuario");
-      return;
-    }
-
     try {
-      const result = await AppointmentService.updateStatus(
+      const result = await updateAppointmentStatus(
         appointmentId,
-        newStatus as AppointmentWithDetails["status"],
-        profile.organization_id,
-        profile.user_id
+        newStatus as AppointmentWithDetails["status"]
       );
 
-      if (!result.success) {
+      if (result.success) {
+        setSuccess("Estado actualizado");
+
+        // Update the selected appointment in the modal
+        if (selectedAppointment?.id === appointmentId) {
+          const updatedAppointment = {
+            ...selectedAppointment,
+            status: newStatus,
+          };
+          setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
+        }
+
+        setTimeout(() => setSuccess(null), 2000);
+      } else {
         setError(result.error || "Error al actualizar estado");
-        return;
       }
-
-      setSuccess("Estado actualizado");
-      await loadData();
-
-      // Update the selected appointment in the modal
-      if (selectedAppointment?.id === appointmentId) {
-        const updatedAppointment = {
-          ...selectedAppointment,
-          status: newStatus,
-        };
-        setSelectedAppointment(updatedAppointment as AppointmentWithDetails);
-      }
-
-      setTimeout(() => setSuccess(null), 2000);
     } catch (err) {
       console.error("Error updating status:", err);
       setError("Error al actualizar estado");

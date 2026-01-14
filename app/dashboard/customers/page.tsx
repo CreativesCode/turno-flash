@@ -2,9 +2,8 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { useAuth } from "@/contexts/auth-context";
+import { useCustomers } from "@/hooks";
 import { Customer, CustomerFormData } from "@/types/appointments";
-import { createClient } from "@/utils/supabase/client";
 import {
   Calendar,
   Edit,
@@ -17,20 +16,27 @@ import {
   User,
   X,
 } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 
 export default function CustomersPage() {
-  const { profile } = useAuth();
-  const supabase = useMemo(() => createClient(), []);
-
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // 🎉 Use the new useCustomers hook!
+  const {
+    customers: filteredCustomers,
+    loading,
+    error,
+    createCustomer,
+    updateCustomer,
+    deactivateCustomer,
+  } = useCustomers({
+    search: searchTerm,
+    isActive: true,
+  });
 
   // Form data
   const [formData, setFormData] = useState<CustomerFormData>({
@@ -43,53 +49,6 @@ export default function CustomersPage() {
     notes: "",
     is_active: true,
   });
-
-  // Load customers
-  const loadCustomers = useCallback(async () => {
-    if (!profile?.organization_id) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error: fetchError } = await supabase
-        .from("customers")
-        .select("*")
-        .eq("organization_id", profile.organization_id)
-        .order("created_at", { ascending: false });
-
-      if (fetchError) {
-        setError("Error al cargar clientes: " + fetchError.message);
-        console.error(fetchError);
-        return;
-      }
-
-      setCustomers(data || []);
-    } catch (err) {
-      console.error("Error loading customers:", err);
-      setError("Error inesperado al cargar clientes");
-    } finally {
-      setLoading(false);
-    }
-  }, [profile?.organization_id, supabase]);
-
-  useEffect(() => {
-    loadCustomers();
-  }, [loadCustomers]);
-
-  // Filter customers by search term
-  const filteredCustomers = useMemo(() => {
-    if (!searchTerm) return customers;
-
-    const term = searchTerm.toLowerCase();
-    return customers.filter(
-      (customer) =>
-        customer.first_name.toLowerCase().includes(term) ||
-        customer.last_name.toLowerCase().includes(term) ||
-        customer.phone.includes(term) ||
-        (customer.email && customer.email.toLowerCase().includes(term))
-    );
-  }, [customers, searchTerm]);
 
   // Reset form
   const resetForm = () => {
@@ -132,58 +91,26 @@ export default function CustomersPage() {
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!profile?.organization_id) {
-      setError("No se encontró la organización");
-      return;
-    }
-
     setSaving(true);
-    setError(null);
     setSuccess(null);
 
     try {
-      if (editingCustomer) {
-        // Update existing customer
-        const { error: updateError } = await supabase
-          .from("customers")
-          .update({
-            ...formData,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", editingCustomer.id);
+      const result = editingCustomer
+        ? await updateCustomer(editingCustomer.id, formData)
+        : await createCustomer(formData);
 
-        if (updateError) {
-          setError("Error al actualizar: " + updateError.message);
-          console.error(updateError);
-          return;
-        }
-
-        setSuccess("Cliente actualizado exitosamente");
+      if (result.success) {
+        setSuccess(
+          editingCustomer
+            ? "Cliente actualizado exitosamente"
+            : "Cliente creado exitosamente"
+        );
+        setShowModal(false);
+        resetForm();
+        setTimeout(() => setSuccess(null), 3000);
       } else {
-        // Create new customer
-        const { error: insertError } = await supabase.from("customers").insert({
-          ...formData,
-          organization_id: profile.organization_id,
-          created_by: profile.user_id,
-        });
-
-        if (insertError) {
-          setError("Error al crear: " + insertError.message);
-          console.error(insertError);
-          return;
-        }
-
-        setSuccess("Cliente creado exitosamente");
+        alert(`Error: ${result.error}`);
       }
-
-      setShowModal(false);
-      resetForm();
-      await loadCustomers();
-
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      console.error("Error saving customer:", err);
-      setError("Error inesperado al guardar");
     } finally {
       setSaving(false);
     }
@@ -193,30 +120,19 @@ export default function CustomersPage() {
   const handleDelete = async (customer: Customer) => {
     if (
       !confirm(
-        `¿Estás seguro de eliminar a ${customer.first_name} ${customer.last_name}?\n\nEsta acción no se puede deshacer.`
+        `¿Estás seguro de desactivar a ${customer.first_name} ${customer.last_name}?`
       )
     ) {
       return;
     }
 
-    try {
-      const { error: deleteError } = await supabase
-        .from("customers")
-        .delete()
-        .eq("id", customer.id);
+    const result = await deactivateCustomer(customer.id);
 
-      if (deleteError) {
-        setError("Error al eliminar: " + deleteError.message);
-        console.error(deleteError);
-        return;
-      }
-
-      setSuccess("Cliente eliminado exitosamente");
-      await loadCustomers();
+    if (result.success) {
+      setSuccess("Cliente desactivado exitosamente");
       setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      console.error("Error deleting customer:", err);
-      setError("Error inesperado al eliminar");
+    } else {
+      alert(`Error: ${result.error}`);
     }
   };
 

@@ -3,8 +3,8 @@
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
+import { useServices } from "@/hooks";
 import { Service, ServiceFormData } from "@/types/appointments";
-import { createClient } from "@/utils/supabase/client";
 import {
   Clock,
   DollarSign,
@@ -17,25 +17,46 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 export default function ServicesPage() {
   const { profile } = useAuth();
-  const supabase = useMemo(() => createClient(), []);
-
-  const [services, setServices] = useState<Service[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
 
   // Check if user can manage services (only owner and admin)
   const canManageServices = useMemo(() => {
     return profile?.role === "admin" || profile?.role === "owner";
   }, [profile]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [editingService, setEditingService] = useState<Service | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+
+  // 🎉 Use the new useServices hook!
+  const {
+    services: filteredServices,
+    loading,
+    error,
+    createService,
+    updateService,
+    deactivateService,
+    reactivateService,
+  } = useServices({
+    isActive: true,
+  });
+
+  // Filter services manually (hook doesn't support search yet)
+  const searchedServices = useMemo(() => {
+    if (!searchTerm) return filteredServices;
+
+    const term = searchTerm.toLowerCase();
+    return filteredServices.filter(
+      (service) =>
+        service.name.toLowerCase().includes(term) ||
+        (service.description &&
+          service.description.toLowerCase().includes(term))
+    );
+  }, [filteredServices, searchTerm]);
 
   // Form data
   const [formData, setFormData] = useState<ServiceFormData>({
@@ -53,52 +74,6 @@ export default function ServicesPage() {
     available_for_online_booking: true,
     sort_order: 0,
   });
-
-  // Load services
-  const loadServices = useCallback(async () => {
-    if (!profile?.organization_id) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error: fetchError } = await supabase
-        .from("services")
-        .select("*")
-        .eq("organization_id", profile.organization_id)
-        .order("sort_order", { ascending: true });
-
-      if (fetchError) {
-        setError("Error al cargar servicios: " + fetchError.message);
-        console.error(fetchError);
-        return;
-      }
-
-      setServices(data || []);
-    } catch (err) {
-      console.error("Error loading services:", err);
-      setError("Error inesperado al cargar servicios");
-    } finally {
-      setLoading(false);
-    }
-  }, [profile?.organization_id, supabase]);
-
-  useEffect(() => {
-    loadServices();
-  }, [loadServices]);
-
-  // Filter services by search term
-  const filteredServices = useMemo(() => {
-    if (!searchTerm) return services;
-
-    const term = searchTerm.toLowerCase();
-    return services.filter(
-      (service) =>
-        service.name.toLowerCase().includes(term) ||
-        (service.description &&
-          service.description.toLowerCase().includes(term))
-    );
-  }, [services, searchTerm]);
 
   // Reset form
   const resetForm = () => {
@@ -151,57 +126,26 @@ export default function ServicesPage() {
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!profile?.organization_id) {
-      setError("No se encontró la organización");
-      return;
-    }
-
     setSaving(true);
-    setError(null);
     setSuccess(null);
 
     try {
-      if (editingService) {
-        // Update existing service
-        const { error: updateError } = await supabase
-          .from("services")
-          .update({
-            ...formData,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", editingService.id);
+      const result = editingService
+        ? await updateService(editingService.id, formData)
+        : await createService(formData);
 
-        if (updateError) {
-          setError("Error al actualizar: " + updateError.message);
-          console.error(updateError);
-          return;
-        }
-
-        setSuccess("Servicio actualizado exitosamente");
+      if (result.success) {
+        setSuccess(
+          editingService
+            ? "Servicio actualizado exitosamente"
+            : "Servicio creado exitosamente"
+        );
+        setShowModal(false);
+        resetForm();
+        setTimeout(() => setSuccess(null), 3000);
       } else {
-        // Create new service
-        const { error: insertError } = await supabase.from("services").insert({
-          ...formData,
-          organization_id: profile.organization_id,
-        });
-
-        if (insertError) {
-          setError("Error al crear: " + insertError.message);
-          console.error(insertError);
-          return;
-        }
-
-        setSuccess("Servicio creado exitosamente");
+        alert(`Error: ${result.error}`);
       }
-
-      setShowModal(false);
-      resetForm();
-      await loadServices();
-
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      console.error("Error saving service:", err);
-      setError("Error inesperado al guardar");
     } finally {
       setSaving(false);
     }
@@ -210,51 +154,29 @@ export default function ServicesPage() {
   // Delete service
   const handleDelete = async (service: Service) => {
     if (
-      !confirm(
-        `¿Estás seguro de eliminar el servicio "${service.name}"?\n\nEsta acción no se puede deshacer.`
-      )
+      !confirm(`¿Estás seguro de desactivar el servicio "${service.name}"?`)
     ) {
       return;
     }
 
-    try {
-      const { error: deleteError } = await supabase
-        .from("services")
-        .delete()
-        .eq("id", service.id);
+    const result = await deactivateService(service.id);
 
-      if (deleteError) {
-        setError("Error al eliminar: " + deleteError.message);
-        console.error(deleteError);
-        return;
-      }
-
-      setSuccess("Servicio eliminado exitosamente");
-      await loadServices();
+    if (result.success) {
+      setSuccess("Servicio desactivado exitosamente");
       setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      console.error("Error deleting service:", err);
-      setError("Error inesperado al eliminar");
+    } else {
+      alert(`Error: ${result.error}`);
     }
   };
 
   // Toggle active status
   const toggleActive = async (service: Service) => {
-    try {
-      const { error: updateError } = await supabase
-        .from("services")
-        .update({ is_active: !service.is_active })
-        .eq("id", service.id);
+    const result = service.is_active
+      ? await deactivateService(service.id)
+      : await reactivateService(service.id);
 
-      if (updateError) {
-        setError("Error al actualizar: " + updateError.message);
-        return;
-      }
-
-      await loadServices();
-    } catch (err) {
-      console.error("Error toggling active:", err);
-      setError("Error inesperado");
+    if (!result.success) {
+      alert(`Error: ${result.error}`);
     }
   };
 
@@ -353,7 +275,7 @@ export default function ServicesPage() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredServices.map((service) => (
+              {searchedServices.map((service) => (
                 <div
                   key={service.id}
                   className="rounded-lg bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"

@@ -3,14 +3,12 @@
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
-import { AppointmentWithDetails } from "@/types/appointments";
+import { useAppointments } from "@/hooks";
 import {
-  addDays,
-  formatDateShort,
-  getLocalDateString,
-  getTimestamp,
-} from "@/utils/date";
-import { createClient } from "@/utils/supabase/client";
+  AppointmentStatus,
+  AppointmentWithDetails,
+} from "@/types/appointments";
+import { addDays } from "@/utils/date";
 import {
   AlertCircle,
   Bell,
@@ -24,19 +22,17 @@ import {
   User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+
+// Constant status array to prevent re-creation on each render
+const REMINDER_STATUSES: AppointmentStatus[] = ["confirmed", "pending"];
 
 export default function RemindersPage() {
   const { profile } = useAuth();
   const router = useRouter();
-  const supabase = useMemo(() => createClient(), []);
 
-  const [appointments, setAppointments] = useState<AppointmentWithDetails[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   // Filter options
@@ -51,46 +47,48 @@ export default function RemindersPage() {
     );
   }, [profile]);
 
-  // Load appointments that need reminders
-  const loadData = useCallback(async () => {
-    if (!profile?.organization_id) return;
+  // Calculate target date - memoize to prevent recreation on each render
+  const targetDate = useMemo(() => {
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0]; // YYYY-MM-DD format
+    return addDays(todayStr, filterDays);
+  }, [filterDays]);
 
-    try {
-      setLoading(true);
-      setError(null);
+  // Memoize filters to prevent infinite loops
+  const appointmentsFilters = useMemo(
+    () => ({
+      startDate: targetDate,
+      endDate: targetDate,
+      status: REMINDER_STATUSES,
+    }),
+    [targetDate]
+  );
 
-      // Calculate target date
-      const todayStr = getLocalDateString();
-      const dateStr = addDays(todayStr, filterDays);
+  // 🎉 Use the useAppointments hook!
+  const {
+    appointments: allAppointments,
+    loading,
+    error: appointmentsError,
+    sendReminder: sendReminderFromHook,
+  } = useAppointments(appointmentsFilters);
 
-      // Load appointments for the target date that haven't been reminded
-      const { data, error: loadError } = await supabase
-        .from("appointments_with_details")
-        .select("*")
-        .eq("organization_id", profile.organization_id)
-        .eq("appointment_date", dateStr)
-        .in("status", ["confirmed", "pending"])
-        .order("start_time", { ascending: true });
+  // Filter appointments that need reminders (exclude already reminded)
+  const appointments = useMemo(() => {
+    return allAppointments.filter(
+      (apt: AppointmentWithDetails) =>
+        apt.status === "confirmed" || apt.status === "pending"
+    );
+  }, [allAppointments]);
 
-      if (loadError) {
-        console.error("Error loading appointments:", loadError);
-        setError("Error al cargar turnos");
-      } else {
-        setAppointments(data || []);
-      }
-    } catch (err) {
-      console.error("Error loading data:", err);
-      setError("Error al cargar datos");
-    } finally {
-      setLoading(false);
-    }
-  }, [profile?.organization_id, supabase, filterDays]);
+  // Combine errors
+  const error = appointmentsError || localError;
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  // Helper to set error
+  const setError = (errorMsg: string | null) => {
+    setLocalError(errorMsg);
+  };
 
-  // Send reminder (manual)
+  // Send reminder using hook
   const sendReminder = async (appointment: AppointmentWithDetails) => {
     if (!canSendReminders) return;
 
@@ -98,81 +96,25 @@ export default function RemindersPage() {
     setError(null);
 
     try {
-      // Log the reminder
-      const { error: logError } = await supabase.from("reminder_logs").insert({
-        appointment_id: appointment.id,
-        reminder_type: "manual",
-        method: "whatsapp", // or 'sms', 'email'
-        status: "sent",
-        sent_at: getTimestamp(),
-        sent_by: profile?.user_id,
-      });
+      const result = await sendReminderFromHook(appointment.id, "whatsapp");
 
-      if (logError) {
-        console.error("Error logging reminder:", logError);
+      if (result.success) {
+        // Open WhatsApp if URL is available
+        if (result.whatsappUrl) {
+          window.open(result.whatsappUrl, "_blank");
+        }
+
+        setSuccess(`Recordatorio enviado a ${appointment.customer_first_name}`);
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        setError(result.error || "Error al enviar recordatorio");
       }
-
-      // Update appointment status to reminded
-      const { error: updateError } = await supabase
-        .from("appointments")
-        .update({ status: "reminded" })
-        .eq("id", appointment.id);
-
-      if (updateError) {
-        setError("Error al actualizar estado: " + updateError.message);
-        return;
-      }
-
-      // Generate WhatsApp message
-      const message = generateWhatsAppMessage(appointment);
-      const phone = appointment.customer_phone.replace(/[^0-9]/g, "");
-      const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
-        message
-      )}`;
-
-      // Open WhatsApp
-      window.open(whatsappUrl, "_blank");
-
-      setSuccess(`Recordatorio enviado a ${appointment.customer_first_name}`);
-      await loadData();
-
-      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error("Error sending reminder:", err);
       setError("Error al enviar recordatorio");
     } finally {
       setSending(null);
     }
-  };
-
-  // Generate WhatsApp message
-  const generateWhatsAppMessage = (appointment: AppointmentWithDetails) => {
-    const formattedDate = formatDateShort(appointment.appointment_date, {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
-
-    return `🗓️ *Recordatorio de Turno*
-
-Hola ${appointment.customer_first_name}! 👋
-
-Te recordamos que tienes un turno programado:
-
-📅 *Fecha:* ${formattedDate}
-⏰ *Hora:* ${appointment.start_time}
-💇 *Servicio:* ${appointment.service_name}
-${
-  appointment.staff_first_name
-    ? `👤 *Con:* ${appointment.staff_first_name}`
-    : ""
-}
-
-Por favor confirma tu asistencia respondiendo:
-✅ *SÍ* - Confirmo mi turno
-❌ *NO* - No podré asistir
-
-¡Te esperamos! 🙌`;
   };
 
   // Send reminder to all
@@ -327,7 +269,11 @@ Por favor confirma tu asistencia respondiendo:
                 <div>
                   <p className="text-sm text-foreground-muted">Pendientes</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">
-                    {appointments.filter((a) => a.status === "pending").length}
+                    {
+                      appointments.filter(
+                        (a: AppointmentWithDetails) => a.status === "pending"
+                      ).length
+                    }
                   </p>
                 </div>
                 <Bell className="h-8 w-8 text-warning-500" />
@@ -340,8 +286,9 @@ Por favor confirma tu asistencia respondiendo:
                   <p className="text-sm text-foreground-muted">Confirmados</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">
                     {
-                      appointments.filter((a) => a.status === "confirmed")
-                        .length
+                      appointments.filter(
+                        (a: AppointmentWithDetails) => a.status === "confirmed"
+                      ).length
                     }
                   </p>
                 </div>

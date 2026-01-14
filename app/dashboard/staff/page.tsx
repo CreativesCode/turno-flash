@@ -3,8 +3,8 @@
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
+import { useStaff } from "@/hooks";
 import { StaffMember, StaffMemberFormData } from "@/types/appointments";
-import { createClient } from "@/utils/supabase/client";
 import {
   Edit,
   Eye,
@@ -17,25 +17,33 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 export default function StaffPage() {
   const { profile } = useAuth();
-  const supabase = useMemo(() => createClient(), []);
-
-  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
 
   // Check if user can manage staff (only owner and admin)
   const canManageStaff = useMemo(() => {
     return profile?.role === "admin" || profile?.role === "owner";
   }, [profile]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+
+  // 🎉 Use the new useStaff hook!
+  const {
+    staff: staffMembers,
+    loading,
+    error,
+    createStaffMember,
+    updateStaffMember,
+    deactivateStaffMember,
+    reactivateStaffMember,
+  } = useStaff({
+    isActive: true,
+  });
 
   // Form data
   const [formData, setFormData] = useState<StaffMemberFormData>({
@@ -53,40 +61,7 @@ export default function StaffPage() {
     sort_order: 0,
   });
 
-  // Load staff members
-  const loadStaff = useCallback(async () => {
-    if (!profile?.organization_id) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error: fetchError } = await supabase
-        .from("staff_members")
-        .select("*")
-        .eq("organization_id", profile.organization_id)
-        .order("sort_order", { ascending: true });
-
-      if (fetchError) {
-        setError("Error al cargar staff: " + fetchError.message);
-        console.error(fetchError);
-        return;
-      }
-
-      setStaffMembers(data || []);
-    } catch (err) {
-      console.error("Error loading staff:", err);
-      setError("Error inesperado al cargar staff");
-    } finally {
-      setLoading(false);
-    }
-  }, [profile?.organization_id, supabase]);
-
-  useEffect(() => {
-    loadStaff();
-  }, [loadStaff]);
-
-  // Filter staff by search term
+  // Filter staff by search term (temporary - until hook supports search)
   const filteredStaff = useMemo(() => {
     if (!searchTerm) return staffMembers;
 
@@ -150,64 +125,33 @@ export default function StaffPage() {
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!profile?.organization_id) {
-      setError("No se encontró la organización");
-      return;
-    }
-
     setSaving(true);
-    setError(null);
     setSuccess(null);
 
     try {
-      const dataToSave = {
+      const dataToSave: StaffMemberFormData = {
         ...formData,
-        specialties: formData.specialties?.length ? formData.specialties : null,
+        specialties: formData.specialties?.length
+          ? formData.specialties
+          : undefined,
       };
 
-      if (editingStaff) {
-        // Update existing staff
-        const { error: updateError } = await supabase
-          .from("staff_members")
-          .update({
-            ...dataToSave,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", editingStaff.id);
+      const result = editingStaff
+        ? await updateStaffMember(editingStaff.id, dataToSave)
+        : await createStaffMember(dataToSave);
 
-        if (updateError) {
-          setError("Error al actualizar: " + updateError.message);
-          console.error(updateError);
-          return;
-        }
-
-        setSuccess("Profesional actualizado exitosamente");
+      if (result.success) {
+        setSuccess(
+          editingStaff
+            ? "Profesional actualizado exitosamente"
+            : "Profesional creado exitosamente"
+        );
+        setShowModal(false);
+        resetForm();
+        setTimeout(() => setSuccess(null), 3000);
       } else {
-        // Create new staff
-        const { error: insertError } = await supabase
-          .from("staff_members")
-          .insert({
-            ...dataToSave,
-            organization_id: profile.organization_id,
-          });
-
-        if (insertError) {
-          setError("Error al crear: " + insertError.message);
-          console.error(insertError);
-          return;
-        }
-
-        setSuccess("Profesional creado exitosamente");
+        alert(`Error: ${result.error}`);
       }
-
-      setShowModal(false);
-      resetForm();
-      await loadStaff();
-
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      console.error("Error saving staff:", err);
-      setError("Error inesperado al guardar");
     } finally {
       setSaving(false);
     }
@@ -217,50 +161,30 @@ export default function StaffPage() {
   const handleDelete = async (staff: StaffMember) => {
     if (
       !confirm(
-        `¿Estás seguro de eliminar a ${staff.first_name} ${staff.last_name}?\n\nEsta acción no se puede deshacer.`
+        `¿Estás seguro de desactivar a ${staff.first_name} ${staff.last_name}?`
       )
     ) {
       return;
     }
 
-    try {
-      const { error: deleteError } = await supabase
-        .from("staff_members")
-        .delete()
-        .eq("id", staff.id);
+    const result = await deactivateStaffMember(staff.id);
 
-      if (deleteError) {
-        setError("Error al eliminar: " + deleteError.message);
-        console.error(deleteError);
-        return;
-      }
-
-      setSuccess("Profesional eliminado exitosamente");
-      await loadStaff();
+    if (result.success) {
+      setSuccess("Profesional desactivado exitosamente");
       setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      console.error("Error deleting staff:", err);
-      setError("Error inesperado al eliminar");
+    } else {
+      alert(`Error: ${result.error}`);
     }
   };
 
   // Toggle active status
   const toggleActive = async (staff: StaffMember) => {
-    try {
-      const { error: updateError } = await supabase
-        .from("staff_members")
-        .update({ is_active: !staff.is_active })
-        .eq("id", staff.id);
+    const result = staff.is_active
+      ? await deactivateStaffMember(staff.id)
+      : await reactivateStaffMember(staff.id);
 
-      if (updateError) {
-        setError("Error al actualizar: " + updateError.message);
-        return;
-      }
-
-      await loadStaff();
-    } catch (err) {
-      console.error("Error toggling active:", err);
-      setError("Error inesperado");
+    if (!result.success) {
+      alert(`Error: ${result.error}`);
     }
   };
 
