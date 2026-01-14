@@ -134,9 +134,12 @@ export const Sidebar = React.memo(function Sidebar({ isOpen, onClose }: SidebarP
 
   // Cargar nombre de la organización
   useEffect(() => {
+    // Flag para controlar si el componente sigue montado
+    let isMounted = true;
+
     const loadOrganizationName = async () => {
       if (!profile?.organization_id) {
-        setOrganizationName(null);
+        if (isMounted) setOrganizationName(null);
         return;
       }
 
@@ -147,6 +150,9 @@ export const Sidebar = React.memo(function Sidebar({ isOpen, onClose }: SidebarP
           .eq("id", profile.organization_id)
           .single();
 
+        // Verificar si el componente sigue montado antes de actualizar estado
+        if (!isMounted) return;
+
         if (error) {
           console.error("Error loading organization name:", error);
           setOrganizationName(null);
@@ -154,6 +160,7 @@ export const Sidebar = React.memo(function Sidebar({ isOpen, onClose }: SidebarP
           setOrganizationName(data?.name || null);
         }
       } catch (error) {
+        if (!isMounted) return;
         console.error("Error loading organization name:", error);
         setOrganizationName(null);
       }
@@ -162,6 +169,11 @@ export const Sidebar = React.memo(function Sidebar({ isOpen, onClose }: SidebarP
     if (profile) {
       loadOrganizationName();
     }
+
+    // Cleanup: marcar como desmontado para evitar actualizaciones de estado
+    return () => {
+      isMounted = false;
+    };
   }, [profile, supabase]);
 
   const handleSignOut = async () => {

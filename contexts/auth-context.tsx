@@ -43,19 +43,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Memoizar el cliente de Supabase para evitar crear una nueva instancia en cada render
   const supabase = useMemo(() => createClient(), []);
 
-  // Ref para evitar inicialización múltiple
-  const isInitialized = useRef(false);
   // Ref para el timeout de seguridad
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Ref para controlar si el componente está montado (previene actualizaciones en componentes desmontados)
+  const isMountedRef = useRef(true);
 
   const loadUserProfile = useCallback(
-    async (authUser: User) => {
+    async (authUser: User, abortSignal?: AbortSignal) => {
       try {
+        // Verificar si la operación fue cancelada
+        if (abortSignal?.aborted) return;
+
         const { data: userProfile, error } = await supabase
           .from("user_profiles")
           .select("*")
           .eq("user_id", authUser.id)
           .single();
+
+        // Verificar de nuevo después de la llamada async
+        if (abortSignal?.aborted || !isMountedRef.current) return;
 
         if (error) {
           // PGRST116 significa que no se encontró ninguna fila (usuario nuevo sin perfil)
@@ -82,9 +88,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setProfile(userProfile);
         }
       } catch (err) {
+        if (!isMountedRef.current) return;
         console.error("Error loading user profile:", err);
         setProfile(null);
       } finally {
+        if (!isMountedRef.current) return;
         // Limpiar timeout si existe
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
@@ -97,24 +105,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   useEffect(() => {
-    // Evitar inicialización múltiple (React Strict Mode ejecuta efectos dos veces)
-    if (isInitialized.current) return;
-    isInitialized.current = true;
+    // Marcar como montado
+    isMountedRef.current = true;
+    
+    // Crear AbortController para cancelar operaciones si el componente se desmonta
+    const abortController = new AbortController();
 
     // Establecer un timeout de seguridad para evitar quedarse colgado indefinidamente
     timeoutRef.current = setTimeout(() => {
-      console.warn("Auth timeout reached - forcing loading to false");
-      setLoading(false);
+      if (isMountedRef.current) {
+        console.warn("Auth timeout reached - forcing loading to false");
+        setLoading(false);
+      }
     }, AUTH_TIMEOUT_MS);
 
     // Función async para la inicialización
     const initAuth = async () => {
       try {
+        // Verificar si fue cancelado
+        if (abortController.signal.aborted) return;
+
         // Obtener sesión inicial
         const {
           data: { session },
           error,
         } = await supabase.auth.getSession();
+
+        // Verificar de nuevo después de la llamada async
+        if (abortController.signal.aborted || !isMountedRef.current) return;
 
         if (error) {
           console.error("Error getting session:", error);
@@ -129,7 +147,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (session?.user) {
           setUser(session.user);
-          await loadUserProfile(session.user);
+          await loadUserProfile(session.user, abortController.signal);
         } else {
           // Limpiar timeout y terminar loading
           if (timeoutRef.current) {
@@ -139,6 +157,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setLoading(false);
         }
       } catch (err) {
+        if (!isMountedRef.current) return;
         console.error("Error in auth initialization:", err);
         // Limpiar timeout y terminar loading en caso de error
         if (timeoutRef.current) {
@@ -157,6 +176,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       // Ignorar el evento INITIAL_SESSION ya que lo manejamos manualmente arriba
       if (event === "INITIAL_SESSION") return;
+      
+      // No procesar si el componente fue desmontado
+      if (!isMountedRef.current) return;
 
       console.log("Auth state changed:", event);
       setUser(session?.user ?? null);
@@ -170,7 +192,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     return () => {
+      // Marcar como desmontado PRIMERO
+      isMountedRef.current = false;
+      
+      // Cancelar operaciones pendientes
+      abortController.abort();
+      
+      // Limpiar suscripción
       subscription.unsubscribe();
+      
       // Limpiar timeout al desmontar
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);

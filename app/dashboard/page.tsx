@@ -27,34 +27,41 @@ export default function DashboardPage() {
   const [isBlocked, setIsBlocked] = useState(false);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
 
-  // Cargar estado de licencia y nombre de organizaciรณn al montar el componente
+  // Cargar estado de licencia y nombre de organización al montar el componente
   useEffect(() => {
+    // Flag para controlar si el componente sigue montado
+    let isMounted = true;
+
     const loadLicenseStatus = async () => {
       try {
-        // Solo verificar licencia si el usuario tiene una organizaciรณn
-        // Los admins sin organizaciรณn no necesitan verificar licencia
+        // Solo verificar licencia si el usuario tiene una organización
+        // Los admins sin organización no necesitan verificar licencia
         if (!profile?.organization_id && profile?.role !== "admin") {
-          setLoadingLicense(false);
+          if (isMounted) setLoadingLicense(false);
           return;
         }
 
         const status = await getMyOrganizationLicenseStatus();
+
+        // Verificar si el componente sigue montado antes de actualizar estado
+        if (!isMounted) return;
+
         setLicenseStatus(status);
 
-        // Verificar si el usuario estรก bloqueado
+        // Verificar si el usuario está bloqueado
         if (status && !canUseApplication(status)) {
           setIsBlocked(true);
         }
       } catch (error) {
         console.error("Error loading license status:", error);
       } finally {
-        setLoadingLicense(false);
+        if (isMounted) setLoadingLicense(false);
       }
     };
 
     const loadOrganizationName = async () => {
       if (!profile?.organization_id) {
-        setOrganizationName(null);
+        if (isMounted) setOrganizationName(null);
         return;
       }
 
@@ -65,6 +72,9 @@ export default function DashboardPage() {
           .eq("id", profile.organization_id)
           .single();
 
+        // Verificar si el componente sigue montado antes de actualizar estado
+        if (!isMounted) return;
+
         if (error) {
           console.error("Error loading organization name:", error);
           setOrganizationName(null);
@@ -72,6 +82,7 @@ export default function DashboardPage() {
           setOrganizationName(data?.name || null);
         }
       } catch (error) {
+        if (!isMounted) return;
         console.error("Error loading organization name:", error);
         setOrganizationName(null);
       }
@@ -81,6 +92,11 @@ export default function DashboardPage() {
       loadLicenseStatus();
       loadOrganizationName();
     }
+
+    // Cleanup: marcar como desmontado para evitar actualizaciones de estado
+    return () => {
+      isMounted = false;
+    };
   }, [profile, supabase]);
 
   // Si estรก bloqueado por licencia expirada, mostrar pantalla de bloqueo

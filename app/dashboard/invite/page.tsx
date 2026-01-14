@@ -69,6 +69,22 @@ export default function InvitePage() {
         accessToken = refreshed.session.access_token;
       }
 
+      // Preparar el body de la petición
+      // Si el usuario es owner, debe incluir organization_id
+      const requestBody: {
+        email: string;
+        redirectTo: string;
+        organization_id?: string;
+      } = {
+        email,
+        redirectTo: `${window.location.origin}/auth/callback?type=invite`,
+      };
+
+      // Los owners deben enviar su organization_id para asignar el usuario invitado
+      if (profile?.role === "owner" && profile?.organization_id) {
+        requestBody.organization_id = profile.organization_id;
+      }
+
       const response = await fetch(`${supabaseUrl}/functions/v1/invite-user`, {
         method: "POST",
         headers: {
@@ -76,10 +92,7 @@ export default function InvitePage() {
           apikey: supabaseAnonKey,
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-          email,
-          redirectTo: `${window.location.origin}/auth/callback?type=invite`,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const contentType = response.headers.get("content-type") || "";
