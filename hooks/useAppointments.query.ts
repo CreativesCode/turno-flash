@@ -73,27 +73,13 @@ export function useAppointments(
   const startDate = filters?.startDate || defaultStartDate;
   const endDate = filters?.endDate || defaultEndDate;
 
-  // Serialize status array for stable query key (prevents refetch loops)
-  const statusKey = useMemo(() => {
-    if (!filters?.status || filters.status.length === 0) return "";
-    return JSON.stringify([...filters.status].sort());
-  }, [filters?.status?.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const filtersWithDates = useMemo(
     () => ({
       ...filters,
       startDate,
       endDate,
-      // Use statusKey in memo dependencies but keep original status in filters
     }),
-    [
-      filters?.staffId,
-      filters?.serviceId,
-      filters?.customerId,
-      startDate,
-      endDate,
-      statusKey, // Use serialized version for memo
-    ]
+    [filters, startDate, endDate]
   );
 
   const query = useQuery({
@@ -139,7 +125,7 @@ export function useAppointments(
 }
 
 /**
- * Hook for creating appointments with optimistic updates and Zod validation
+ * Hook for creating appointments with OPTIMISTIC UPDATES and Zod validation
  */
 export function useCreateAppointment() {
   const queryClient = useQueryClient();
@@ -178,8 +164,87 @@ export function useCreateAppointment() {
         throw error;
       }
     },
-    onSuccess: () => {
-      // Invalidate and refetch appointments queries
+    // OPTIMISTIC UPDATE: Add appointment to UI immediately
+    onMutate: async (newAppointment) => {
+      if (!profile?.organization_id || !profile?.user_id) return;
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: appointmentKeys.lists() });
+
+      // Snapshot previous values
+      const previousAppointments = queryClient.getQueriesData({
+        queryKey: appointmentKeys.lists(),
+      });
+
+      // Create temporary optimistic appointment with placeholder ID
+      // Using type assertion since this is a temporary optimistic object
+      const optimisticAppointment = {
+        id: `temp-${Date.now()}`,
+        organization_id: profile.organization_id,
+        customer_id: newAppointment.customer_id,
+        service_id: newAppointment.service_id,
+        staff_id: newAppointment.staff_id || null,
+        appointment_date: newAppointment.appointment_date,
+        start_time: newAppointment.start_time,
+        end_time: newAppointment.end_time,
+        status: newAppointment.status || "confirmed",
+        notes: newAppointment.notes || null,
+        internal_notes: newAppointment.internal_notes || null,
+        appointment_number: null,
+        confirmation_sent_at: null,
+        feedback: null,
+        payment_method: newAppointment.payment_method || null,
+        price_charged: newAppointment.price_charged || null,
+        rating: null,
+        reminder_method: null,
+        source: newAppointment.source || null,
+        was_paid: newAppointment.was_paid || false,
+        customer_first_name: "",
+        customer_last_name: "",
+        customer_phone: "",
+        service_name: "",
+        duration_minutes: 0,
+        organization_name: "",
+        organization_timezone: "UTC",
+        staff_first_name: null,
+        staff_last_name: null,
+        staff_nickname: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: profile.user_id,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        reminder_sent_at: null,
+        client_confirmed_at: null,
+        cancelled_at: null,
+        cancelled_by: null,
+        cancellation_reason: null,
+        actual_start_time: null,
+        actual_end_time: null,
+        service_price: null,
+        customer_email: null,
+      } as AppointmentWithDetails;
+
+      // Optimistically add to all appointment list queries
+      queryClient.setQueriesData(
+        { queryKey: appointmentKeys.lists() },
+        (old: AppointmentWithDetails[] | undefined) => {
+          if (!old) return [optimisticAppointment];
+          return [...old, optimisticAppointment];
+        }
+      );
+
+      return { previousAppointments };
+    },
+    // ROLLBACK on error
+    onError: (_error, _variables, context) => {
+      if (context?.previousAppointments) {
+        context.previousAppointments.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+    // Refetch to get real data from server
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },
@@ -187,7 +252,7 @@ export function useCreateAppointment() {
 }
 
 /**
- * Hook for updating appointment status with Zod validation
+ * Hook for updating appointment status with Zod validation and OPTIMISTIC UPDATES
  */
 export function useUpdateAppointmentStatus() {
   const queryClient = useQueryClient();
@@ -240,8 +305,45 @@ export function useUpdateAppointmentStatus() {
         throw error;
       }
     },
-    onSuccess: () => {
-      // Invalidate appointments queries
+    // OPTIMISTIC UPDATE: Update UI immediately before server response
+    onMutate: async ({ appointmentId, newStatus }) => {
+      if (!profile?.organization_id) return;
+
+      // Cancel outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: appointmentKeys.lists() });
+
+      // Snapshot previous values for rollback
+      const previousAppointments = queryClient.getQueriesData({
+        queryKey: appointmentKeys.lists(),
+      });
+
+      // Optimistically update all appointment list queries
+      queryClient.setQueriesData(
+        { queryKey: appointmentKeys.lists() },
+        (old: AppointmentWithDetails[] | undefined) => {
+          if (!old) return old;
+          return old.map((appointment) =>
+            appointment.id === appointmentId
+              ? { ...appointment, status: newStatus }
+              : appointment
+          );
+        }
+      );
+
+      // Return context with previous values for rollback
+      return { previousAppointments };
+    },
+    // ROLLBACK: Revert optimistic update on error
+    onError: (_error, _variables, context) => {
+      if (context?.previousAppointments) {
+        // Restore all previous query states
+        context.previousAppointments.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+    // Refetch from server to ensure consistency
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },
@@ -249,7 +351,7 @@ export function useUpdateAppointmentStatus() {
 }
 
 /**
- * Hook for deleting appointments (soft delete via cancellation)
+ * Hook for deleting appointments (soft delete via cancellation) with OPTIMISTIC UPDATES
  */
 export function useDeleteAppointment() {
   const queryClient = useQueryClient();
@@ -280,8 +382,43 @@ export function useDeleteAppointment() {
 
       return result;
     },
-    onSuccess: () => {
-      // Invalidate appointments queries
+    // OPTIMISTIC UPDATE: Mark as cancelled immediately
+    onMutate: async ({ appointmentId }) => {
+      if (!profile?.organization_id) return;
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: appointmentKeys.lists() });
+
+      // Snapshot previous values
+      const previousAppointments = queryClient.getQueriesData({
+        queryKey: appointmentKeys.lists(),
+      });
+
+      // Optimistically update status to "cancelled"
+      queryClient.setQueriesData(
+        { queryKey: appointmentKeys.lists() },
+        (old: AppointmentWithDetails[] | undefined) => {
+          if (!old) return old;
+          return old.map((appointment) =>
+            appointment.id === appointmentId
+              ? { ...appointment, status: "cancelled" as AppointmentStatus }
+              : appointment
+          );
+        }
+      );
+
+      return { previousAppointments };
+    },
+    // ROLLBACK on error
+    onError: (_error, _variables, context) => {
+      if (context?.previousAppointments) {
+        context.previousAppointments.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+    // Refetch to ensure consistency
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },
@@ -353,6 +490,11 @@ export function useSendReminder() {
 export function useCheckAvailability() {
   const { profile } = useAuth();
 
+  const organizationId = useMemo(
+    () => profile?.organization_id,
+    [profile?.organization_id]
+  );
+
   return useCallback(
     async (
       date: string,
@@ -361,7 +503,7 @@ export function useCheckAvailability() {
       staffId: string,
       excludeAppointmentId?: string
     ) => {
-      if (!profile?.organization_id) {
+      if (!organizationId) {
         return {
           available: false,
           reason: "No se encontró la información de la organización",
@@ -383,7 +525,7 @@ export function useCheckAvailability() {
           validatedData.startTime,
           validatedData.endTime,
           validatedData.staffId,
-          profile.organization_id,
+          organizationId,
           validatedData.excludeAppointmentId
         );
       } catch (error) {
@@ -397,7 +539,7 @@ export function useCheckAvailability() {
         throw error;
       }
     },
-    [profile?.organization_id]
+    [organizationId]
   );
 }
 

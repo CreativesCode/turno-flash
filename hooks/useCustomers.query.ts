@@ -124,7 +124,7 @@ export function useCreateCustomer() {
 }
 
 /**
- * Hook for updating customers with Zod validation
+ * Hook for updating customers with Zod validation and OPTIMISTIC UPDATES
  */
 export function useUpdateCustomer() {
   const queryClient = useQueryClient();
@@ -169,11 +169,66 @@ export function useUpdateCustomer() {
         throw error;
       }
     },
-    onSuccess: (_, variables) => {
-      // Invalidate customers queries
+    // OPTIMISTIC UPDATE: Update customer immediately
+    onMutate: async ({ customerId, data }) => {
+      if (!profile?.organization_id) return;
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: customerKeys.lists() });
+      await queryClient.cancelQueries({
+        queryKey: customerKeys.detail(profile.organization_id, customerId),
+      });
+
+      // Snapshot previous values
+      const previousCustomerLists = queryClient.getQueriesData({
+        queryKey: customerKeys.lists(),
+      });
+      const previousCustomerDetail = queryClient.getQueryData(
+        customerKeys.detail(profile.organization_id, customerId)
+      );
+
+      // Optimistically update all customer list queries
+      queryClient.setQueriesData(
+        { queryKey: customerKeys.lists() },
+        (old: Customer[] | undefined) => {
+          if (!old) return old;
+          return old.map((customer) =>
+            customer.id === customerId ? { ...customer, ...data } : customer
+          );
+        }
+      );
+
+      // Optimistically update detail query
+      queryClient.setQueryData(
+        customerKeys.detail(profile.organization_id, customerId),
+        (old: Customer | undefined) => {
+          if (!old) return old;
+          return { ...old, ...data };
+        }
+      );
+
+      return { previousCustomerLists, previousCustomerDetail };
+    },
+    // ROLLBACK on error
+    onError: (_error, variables, context) => {
+      if (!profile?.organization_id) return;
+
+      if (context?.previousCustomerLists) {
+        context.previousCustomerLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      if (context?.previousCustomerDetail) {
+        queryClient.setQueryData(
+          customerKeys.detail(profile.organization_id, variables.customerId),
+          context.previousCustomerDetail
+        );
+      }
+    },
+    // Refetch to ensure consistency
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
-      // Invalidate specific customer detail
       queryClient.invalidateQueries({
         queryKey: customerKeys.detail(
           profile?.organization_id || "",

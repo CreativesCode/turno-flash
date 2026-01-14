@@ -107,7 +107,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         name: "Errores",
         href: "/dashboard/errors",
         icon: <AlertTriangle className="h-5 w-5" />,
-        roles: ["admin", "owner"],
+        roles: ["admin"],
       },
     ],
     []

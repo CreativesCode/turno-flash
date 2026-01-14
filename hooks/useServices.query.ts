@@ -123,7 +123,7 @@ export function useCreateService() {
 }
 
 /**
- * Hook for updating services with Zod validation
+ * Hook for updating services with Zod validation and OPTIMISTIC UPDATES
  */
 export function useUpdateService() {
   const queryClient = useQueryClient();
@@ -168,11 +168,66 @@ export function useUpdateService() {
         throw error;
       }
     },
-    onSuccess: (_, variables) => {
-      // Invalidate services queries
+    // OPTIMISTIC UPDATE: Update service immediately
+    onMutate: async ({ serviceId, data }) => {
+      if (!profile?.organization_id) return;
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: serviceKeys.lists() });
+      await queryClient.cancelQueries({
+        queryKey: serviceKeys.detail(profile.organization_id, serviceId),
+      });
+
+      // Snapshot previous values
+      const previousServiceLists = queryClient.getQueriesData({
+        queryKey: serviceKeys.lists(),
+      });
+      const previousServiceDetail = queryClient.getQueryData(
+        serviceKeys.detail(profile.organization_id, serviceId)
+      );
+
+      // Optimistically update all service list queries
+      queryClient.setQueriesData(
+        { queryKey: serviceKeys.lists() },
+        (old: Service[] | undefined) => {
+          if (!old) return old;
+          return old.map((service) =>
+            service.id === serviceId ? { ...service, ...data } : service
+          );
+        }
+      );
+
+      // Optimistically update detail query
+      queryClient.setQueryData(
+        serviceKeys.detail(profile.organization_id, serviceId),
+        (old: Service | undefined) => {
+          if (!old) return old;
+          return { ...old, ...data };
+        }
+      );
+
+      return { previousServiceLists, previousServiceDetail };
+    },
+    // ROLLBACK on error
+    onError: (_error, variables, context) => {
+      if (!profile?.organization_id) return;
+
+      if (context?.previousServiceLists) {
+        context.previousServiceLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      if (context?.previousServiceDetail) {
+        queryClient.setQueryData(
+          serviceKeys.detail(profile.organization_id, variables.serviceId),
+          context.previousServiceDetail
+        );
+      }
+    },
+    // Refetch to ensure consistency
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: serviceKeys.lists() });
       queryClient.invalidateQueries({ queryKey: serviceKeys.all });
-      // Invalidate specific service detail
       queryClient.invalidateQueries({
         queryKey: serviceKeys.detail(
           profile?.organization_id || "",

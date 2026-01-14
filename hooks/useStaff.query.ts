@@ -125,7 +125,7 @@ export function useCreateStaffMember() {
 }
 
 /**
- * Hook for updating staff members with Zod validation
+ * Hook for updating staff members with Zod validation and OPTIMISTIC UPDATES
  */
 export function useUpdateStaffMember() {
   const queryClient = useQueryClient();
@@ -172,11 +172,66 @@ export function useUpdateStaffMember() {
         throw error;
       }
     },
-    onSuccess: (_, variables) => {
-      // Invalidate staff queries
+    // OPTIMISTIC UPDATE: Update staff member immediately
+    onMutate: async ({ staffId, data }) => {
+      if (!profile?.organization_id) return;
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: staffKeys.lists() });
+      await queryClient.cancelQueries({
+        queryKey: staffKeys.detail(profile.organization_id, staffId),
+      });
+
+      // Snapshot previous values
+      const previousStaffLists = queryClient.getQueriesData({
+        queryKey: staffKeys.lists(),
+      });
+      const previousStaffDetail = queryClient.getQueryData(
+        staffKeys.detail(profile.organization_id, staffId)
+      );
+
+      // Optimistically update all staff list queries
+      queryClient.setQueriesData(
+        { queryKey: staffKeys.lists() },
+        (old: StaffMember[] | undefined) => {
+          if (!old) return old;
+          return old.map((staff) =>
+            staff.id === staffId ? { ...staff, ...data } : staff
+          );
+        }
+      );
+
+      // Optimistically update detail query
+      queryClient.setQueryData(
+        staffKeys.detail(profile.organization_id, staffId),
+        (old: StaffMember | undefined) => {
+          if (!old) return old;
+          return { ...old, ...data };
+        }
+      );
+
+      return { previousStaffLists, previousStaffDetail };
+    },
+    // ROLLBACK on error
+    onError: (error, variables, context) => {
+      if (!profile?.organization_id) return;
+
+      if (context?.previousStaffLists) {
+        context.previousStaffLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      if (context?.previousStaffDetail) {
+        queryClient.setQueryData(
+          staffKeys.detail(profile.organization_id, variables.staffId),
+          context.previousStaffDetail
+        );
+      }
+    },
+    // Refetch to ensure consistency
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: staffKeys.lists() });
       queryClient.invalidateQueries({ queryKey: staffKeys.all });
-      // Invalidate specific staff detail
       queryClient.invalidateQueries({
         queryKey: staffKeys.detail(
           profile?.organization_id || "",
