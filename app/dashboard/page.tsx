@@ -154,7 +154,7 @@ export default function DashboardPage() {
         )}
 
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-2">
             <div>
               <h1 className="text-3xl font-bold text-foreground">
                 Panel de Control
@@ -168,28 +168,10 @@ export default function DashboardPage() {
                   {profile.role === "admin"
                     ? "Administrador"
                     : profile.role === "owner"
-                    ? "Dueรฑo"
+                    ? "Dueño"
                     : "Staff"}
                 </span>
               )}
-            </div>
-            <div className="flex gap-3">
-              {/* Owner-only button */}
-              {profile?.role === "owner" && (
-                <button
-                  onClick={() => router.push("/dashboard/invite")}
-                  className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
-                >
-                  Invitar usuarios
-                </button>
-              )}
-
-              <button
-                onClick={() => signOut().then(() => router.push("/login"))}
-                className="rounded-md bg-danger px-4 py-2 text-sm font-medium text-danger-foreground transition-colors hover:bg-danger-700 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2"
-              >
-                Cerrar sesión
-              </button>
             </div>
           </div>
 
@@ -213,7 +195,7 @@ export default function DashboardPage() {
                 {/* Gestión de usuarios */}
                 <button
                   onClick={() => router.push("/dashboard/users")}
-                  className="rounded-lg bg-gradient-to-br from-success-500 to-success-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-linear-to-br from-success-500 to-success-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -248,7 +230,7 @@ export default function DashboardPage() {
                 {/* Gestión de organizaciones */}
                 <button
                   onClick={() => router.push("/dashboard/organizations")}
-                  className="rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-linear-to-br from-primary-500 to-primary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -283,7 +265,7 @@ export default function DashboardPage() {
                 {/* Invitar usuarios */}
                 <button
                   onClick={() => router.push("/dashboard/invite")}
-                  className="rounded-lg bg-gradient-to-br from-secondary-500 to-secondary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-linear-to-br from-secondary-500 to-secondary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -381,7 +363,7 @@ export default function DashboardPage() {
                 {/* Turnos - Todos los roles con organización */}
                 <button
                   onClick={() => router.push("/dashboard/appointments")}
-                  className="rounded-lg bg-gradient-to-br from-info-500 to-info-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-linear-to-br from-info-500 to-info-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -416,7 +398,7 @@ export default function DashboardPage() {
                 {/* Clientes - Owner y Admin pueden gestionar, Staff solo ver */}
                 <button
                   onClick={() => router.push("/dashboard/customers")}
-                  className="rounded-lg bg-gradient-to-br from-success-500 to-success-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-linear-to-br from-success-500 to-success-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -452,7 +434,7 @@ export default function DashboardPage() {
                 {(profile?.role === "admin" || profile?.role === "owner") && (
                   <button
                     onClick={() => router.push("/dashboard/services")}
-                    className="rounded-lg bg-gradient-to-br from-primary-700 to-primary-800 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                    className="rounded-lg bg-linear-to-br from-primary-700 to-primary-800 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -489,7 +471,7 @@ export default function DashboardPage() {
                 {(profile?.role === "admin" || profile?.role === "owner") && (
                   <button
                     onClick={() => router.push("/dashboard/staff")}
-                    className="rounded-lg bg-gradient-to-br from-warning-500 to-warning-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                    className="rounded-lg bg-linear-to-br from-warning-500 to-warning-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -525,7 +507,7 @@ export default function DashboardPage() {
                 {/* Recordatorios - Todos los roles */}
                 <button
                   onClick={() => router.push("/dashboard/reminders")}
-                  className="rounded-lg bg-gradient-to-br from-secondary-500 to-secondary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
+                  className="rounded-lg bg-linear-to-br from-secondary-500 to-secondary-600 p-6 text-left shadow-sm transition-all hover:shadow-md hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -606,7 +588,7 @@ export default function DashboardPage() {
                     onClick={() => router.push("/dashboard/appointments")}
                     className="flex items-center gap-3 rounded-lg border border-border p-4 text-left transition-colors hover:bg-muted"
                   >
-                    <div className="rounded-lg bg-info-100 p-2 dark:bg-info-900/20">
+                    <div className="rounded-lg bg-info-100 p-2">
                       <svg
                         className="h-5 w-5 text-info-600 dark:text-info-400"
                         fill="none"
@@ -633,7 +615,7 @@ export default function DashboardPage() {
                     onClick={() => router.push("/dashboard/customers")}
                     className="flex items-center gap-3 rounded-lg border border-border p-4 text-left transition-colors hover:bg-muted"
                   >
-                    <div className="rounded-lg bg-green-100 p-2 dark:bg-green-900/20">
+                    <div className="rounded-lg bg-green-100 p-2">
                       <svg
                         className="h-5 w-5 text-green-600 dark:text-green-400"
                         fill="none"
@@ -662,7 +644,7 @@ export default function DashboardPage() {
                     onClick={() => router.push("/dashboard/appointments")}
                     className="flex items-center gap-3 rounded-lg border border-border p-4 text-left transition-colors hover:bg-muted"
                   >
-                    <div className="rounded-lg bg-primary-100 p-2 dark:bg-primary-900/20">
+                    <div className="rounded-lg bg-primary-100 p-2">
                       <svg
                         className="h-5 w-5 text-primary-600 dark:text-primary-400"
                         fill="none"

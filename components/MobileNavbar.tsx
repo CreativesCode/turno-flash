@@ -13,7 +13,7 @@ interface MobileNavbarProps {
  * Navbar móvil que respeta el safe area de la barra de estado
  * Se muestra solo en móvil y se oculta en desktop
  */
-export function MobileNavbar({ isOpen, onToggle, title }: MobileNavbarProps) {
+export function MobileNavbar({ isOpen, onToggle }: MobileNavbarProps) {
   const [safeAreaTop, setSafeAreaTop] = useState(0);
 
   useEffect(() => {
@@ -55,18 +55,14 @@ export function MobileNavbar({ isOpen, onToggle, title }: MobileNavbarProps) {
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
 
-        {/* Title/Logo */}
+        {/* Logo */}
         <div className="flex-1 flex items-center justify-center">
-          {title ? (
-            <h1 className="text-lg font-bold text-info">{title}</h1>
-          ) : (
-            <img
-              src="/images/logo_horizontal.svg"
-              alt="Turno Flash Logo"
-              className="h-8 w-auto"
-              style={{ maxWidth: 160 }}
-            />
-          )}
+          <img
+            src="/images/logo_horizontal.svg"
+            alt="Turno Flash Logo"
+            className="h-8 w-auto"
+            style={{ maxWidth: 160 }}
+          />
         </div>
 
         {/* Spacer para balance */}

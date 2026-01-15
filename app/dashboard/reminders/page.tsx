@@ -84,7 +84,8 @@ export default function RemindersPage() {
   const appointments = useMemo(() => {
     return allAppointments.filter(
       (apt: AppointmentWithDetails) =>
-        apt.status === APPOINTMENT_STATUS.CONFIRMED || apt.status === APPOINTMENT_STATUS.PENDING
+        apt.status === APPOINTMENT_STATUS.CONFIRMED ||
+        apt.status === APPOINTMENT_STATUS.PENDING
     );
   }, [allAppointments]);
 
@@ -197,7 +198,7 @@ export default function RemindersPage() {
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-2">
             <div>
               <h1 className="text-3xl font-bold text-foreground">
                 Recordatorios
@@ -228,7 +229,7 @@ export default function RemindersPage() {
           )}
 
           {/* Filters */}
-          <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-2">
             <div className="flex gap-2">
               {[0, 1, 2, 3].map((days) => (
                 <button
@@ -279,7 +280,8 @@ export default function RemindersPage() {
                   <p className="mt-1 text-2xl font-bold text-foreground">
                     {
                       appointments.filter(
-                        (a: AppointmentWithDetails) => a.status === APPOINTMENT_STATUS.PENDING
+                        (a: AppointmentWithDetails) =>
+                          a.status === APPOINTMENT_STATUS.PENDING
                       ).length
                     }
                   </p>
@@ -295,7 +297,8 @@ export default function RemindersPage() {
                   <p className="mt-1 text-2xl font-bold text-foreground">
                     {
                       appointments.filter(
-                        (a: AppointmentWithDetails) => a.status === APPOINTMENT_STATUS.CONFIRMED
+                        (a: AppointmentWithDetails) =>
+                          a.status === APPOINTMENT_STATUS.CONFIRMED
                       ).length
                     }
                   </p>
@@ -393,9 +396,13 @@ export default function RemindersPage() {
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-medium ${
                           appointment.status === APPOINTMENT_STATUS.CONFIRMED
-                            ? STATUS_COLORS.reminder[APPOINTMENT_STATUS.CONFIRMED]
+                            ? STATUS_COLORS.reminder[
+                                APPOINTMENT_STATUS.CONFIRMED
+                              ]
                             : appointment.status === APPOINTMENT_STATUS.REMINDED
-                            ? STATUS_COLORS.reminder[APPOINTMENT_STATUS.REMINDED]
+                            ? STATUS_COLORS.reminder[
+                                APPOINTMENT_STATUS.REMINDED
+                              ]
                             : STATUS_COLORS.reminder[APPOINTMENT_STATUS.PENDING]
                         }`}
                       >
