@@ -22,9 +22,7 @@ export function MobileNavbar({ isOpen, onToggle, title }: MobileNavbarProps) {
       // Obtener el valor de CSS variable si está disponible
       const root = document.documentElement;
       const computed = getComputedStyle(root);
-      const safeTop = computed
-        .getPropertyValue("--safe-area-inset-top")
-        .trim();
+      const safeTop = computed.getPropertyValue("--safe-area-inset-top").trim();
 
       if (safeTop && safeTop !== "0px") {
         setSafeAreaTop(parseInt(safeTop) || 0);
@@ -58,10 +56,17 @@ export function MobileNavbar({ isOpen, onToggle, title }: MobileNavbarProps) {
         </button>
 
         {/* Title/Logo */}
-        <div className="flex-1 text-center">
-          <h1 className="text-lg font-bold text-info">
-            {title || "🗓️ TurnoFlash"}
-          </h1>
+        <div className="flex-1 flex items-center justify-center">
+          {title ? (
+            <h1 className="text-lg font-bold text-info">{title}</h1>
+          ) : (
+            <img
+              src="/images/logo_horizontal.svg"
+              alt="Turno Flash Logo"
+              className="h-8 w-auto"
+              style={{ maxWidth: 160 }}
+            />
+          )}
         </div>
 
         {/* Spacer para balance */}

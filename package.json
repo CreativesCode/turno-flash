@@ -8,6 +8,7 @@
     "build:next": "next build",
     "start": "next start",
     "lint": "next lint",
+    "generate:icons": "node scripts/generate-icons.js",
     "cap:ensure:android": "node scripts/ensure-platform.js android",
     "cap:ensure:ios": "node scripts/ensure-platform.js ios",
     "cap:sync": "npm run build && npx cap sync",
@@ -48,6 +49,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "sharp": "^0.34.5",
     "supabase": "^2.72.4",
     "tailwindcss": "^4",
     "typescript": "^5"

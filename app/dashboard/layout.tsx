@@ -2,16 +2,15 @@
 
 import { MobileNavbar } from "@/components/MobileNavbar";
 import { Sidebar } from "@/components/Sidebar";
-import { AuthProvider } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { useCapacitor } from "@/hooks/useCapacitor";
 import { useState } from "react";
 
 /**
  * Layout para el dashboard y sus sub-páginas.
- * Incluye el AuthProvider para manejar el estado de autenticación,
- * el Sidebar para navegación, y el MobileNavbar para móviles.
+ * Incluye el Sidebar para navegación, y el MobileNavbar para móviles.
  * Maneja safe areas para Capacitor.
+ * Nota: AuthProvider está en el layout raíz.
  */
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,10 +53,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <DashboardContent>{children}</DashboardContent>
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <DashboardContent>{children}</DashboardContent>
+    </ThemeProvider>
   );
 }

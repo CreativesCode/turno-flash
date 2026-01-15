@@ -3,7 +3,7 @@
 import { PageMetadata } from "@/components/page-metadata";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
-import { ArrowLeft, Eye, EyeOff, Zap } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
@@ -56,10 +56,12 @@ export default function LoginPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="flex items-center hover:opacity-80">
-              <Zap className="h-6 w-6 text-primary" />
-              <span className="ml-2 text-xl font-bold text-foreground">
-                Turno Flash
-              </span>
+              <img
+                src="/images/logo_horizontal.svg"
+                alt="Turno Flash Logo"
+                className="h-10 w-auto"
+                style={{ maxWidth: 200 }}
+              />
             </Link>
             <Link
               href="/"

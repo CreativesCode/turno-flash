@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 interface NavItem {
   name: string;
@@ -35,7 +35,10 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-export const Sidebar = React.memo(function Sidebar({ isOpen, onClose }: SidebarProps) {
+export const Sidebar = React.memo(function Sidebar({
+  isOpen,
+  onClose,
+}: SidebarProps) {
   const { profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
@@ -217,10 +220,15 @@ export const Sidebar = React.memo(function Sidebar({ isOpen, onClose }: SidebarP
           <div className="hidden lg:flex h-16 items-center justify-center border-b border-border">
             <Link
               href="/dashboard"
-              className="text-xl font-bold text-info"
               onClick={onClose}
+              className="flex items-center"
             >
-              🗓️ TurnoFlash
+              <img
+                src="/images/logo_horizontal.svg"
+                alt="Turno Flash Logo"
+                className="h-12 w-auto"
+                style={{ maxWidth: 180 }}
+              />
             </Link>
           </div>
 

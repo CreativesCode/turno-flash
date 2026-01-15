@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
 import {
   ArrowRight,
@@ -16,7 +17,6 @@ import {
   Smartphone,
   Sun,
   Users,
-  Zap,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 export default function HomePageClient() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
@@ -125,10 +126,12 @@ export default function HomePageClient() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
-              <Zap className="h-6 w-6 text-primary" />
-              <span className="ml-2 text-xl font-bold text-foreground">
-                Turno Flash
-              </span>
+              <img
+                src="/images/logo_horizontal.svg"
+                alt="Turno Flash Logo"
+                className="h-10 w-auto"
+                style={{ maxWidth: 200 }}
+              />
             </div>
             <div className="flex items-center gap-4">
               <button
@@ -146,21 +149,43 @@ export default function HomePageClient() {
                   <Moon className="h-5 w-5" />
                 )}
               </button>
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/login")}
-                size="md"
-                className="hidden sm:inline-flex"
-              >
-                Iniciar Sesión
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => router.push("/login")}
-                size="md"
-              >
-                Comenzar
-              </Button>
+              {user ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push("/dashboard")}
+                    size="md"
+                    className="hidden sm:inline-flex"
+                  >
+                    Ir al Dashboard
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => router.push("/dashboard")}
+                    size="md"
+                  >
+                    Ir al Dashboard
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push("/login")}
+                    size="md"
+                    className="hidden sm:inline-flex"
+                  >
+                    Iniciar Sesión
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => router.push("/login")}
+                    size="md"
+                  >
+                    Comenzar
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -379,10 +404,12 @@ export default function HomePageClient() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-center">
-              <Zap className="h-5 w-5 text-primary" />
-              <span className="ml-2 font-semibold text-foreground">
-                Turno Flash
-              </span>
+              <img
+                src="/images/logo_horizontal.svg"
+                alt="Turno Flash Logo"
+                className="h-10 w-auto"
+                style={{ maxWidth: 200 }}
+              />
             </div>
             <p className="text-sm text-foreground-muted">
               © {new Date().getFullYear()} Turno Flash. Todos los derechos
