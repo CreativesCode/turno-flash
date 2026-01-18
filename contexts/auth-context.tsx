@@ -47,6 +47,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   // Ref para controlar si el componente está montado (previene actualizaciones en componentes desmontados)
   const isMountedRef = useRef(true);
+  // Ref para evitar procesar el mismo evento de autenticación múltiples veces
+  const processingRef = useRef<{ userId: string | null; event: string | null }>({
+    userId: null,
+    event: null,
+  });
 
   const loadUserProfile = useCallback(
     async (authUser: User, abortSignal?: AbortSignal) => {
@@ -147,6 +152,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (session?.user) {
           setUser(session.user);
+          processingRef.current = {
+            userId: session.user.id,
+            event: "INIT_SESSION",
+          };
           await loadUserProfile(session.user, abortController.signal);
         } else {
           // Limpiar timeout y terminar loading
@@ -180,14 +189,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // No procesar si el componente fue desmontado
       if (!isMountedRef.current) return;
 
+      // Prevenir procesar el mismo evento para el mismo usuario múltiples veces
+      const currentUserId = session?.user?.id ?? null;
+      if (
+        processingRef.current.userId === currentUserId &&
+        processingRef.current.event === event
+      ) {
+        console.log("Skipping duplicate auth event:", event, currentUserId);
+        return;
+      }
+
       console.log("Auth state changed:", event);
-      setUser(session?.user ?? null);
+      
+      // Actualizar ref antes de procesar
+      processingRef.current = {
+        userId: currentUserId,
+        event,
+      };
+
+      setUser(currentUserId ? session.user : null);
 
       if (session?.user) {
-        await loadUserProfile(session.user);
+        await loadUserProfile(session.user, abortController.signal);
       } else {
         setProfile(null);
         setLoading(false);
+        // Resetear ref cuando no hay sesión
+        processingRef.current = { userId: null, event: null };
       }
     });
 
