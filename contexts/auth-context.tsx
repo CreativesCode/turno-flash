@@ -207,7 +207,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         event,
       };
 
-      setUser(currentUserId ? session.user : null);
+      setUser(session?.user ?? null);
 
       if (session?.user) {
         await loadUserProfile(session.user, abortController.signal);
