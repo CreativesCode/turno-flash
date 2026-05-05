@@ -110,7 +110,7 @@ export function ApptRow({
                 e.stopPropagation();
                 onAdvance(a, next.to);
               }}
-              className="inline-flex items-center gap-0.5 rounded-full border border-primary-600 bg-primary-50 px-2.5 py-0.5 text-[11px] font-bold text-primary-500 transition-colors hover:bg-primary-100 dark:border-primary-300 dark:bg-primary-900/20 dark:text-primary-200 dark:hover:bg-primary-900/40"
+              className="inline-flex items-center gap-0.5 rounded-full border border-primary-600 bg-primary-50 px-2.5 py-0.5 text-[11px] font-bold text-primary-600 transition-colors hover:bg-primary-100 dark:border-primary-400 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/40"
             >
               {next.label}
               <ChevronRight className="h-3 w-3" />

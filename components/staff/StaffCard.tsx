@@ -98,7 +98,7 @@ export function StaffCard({
             {acceptsOnline ? "Online sí" : "Online no"}
           </span>
           {!isActive && (
-            <span className="rounded-full border border-danger-800 bg-danger-50 px-2 py-0.5 text-[11px] font-bold text-danger-800 dark:border-danger-300 dark:bg-danger-900/20 dark:text-danger-200">
+            <span className="rounded-full border border-danger-600 bg-danger-50 px-2 py-0.5 text-[11px] font-bold text-danger-600 dark:border-danger-400 dark:bg-danger-900/20 dark:text-danger-300">
               Inactivo
             </span>
           )}

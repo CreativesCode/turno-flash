@@ -54,12 +54,12 @@ export function CustomerCard({ customer, onEdit, onDelete }: CustomerCardProps) 
             {fullName}
           </span>
           {hasWhatsApp && (
-            <span className="inline-flex items-center gap-0.5 rounded-full border border-primary-800 bg-primary-50 px-2 py-0.5 text-[11px] font-bold text-primary-800 dark:border-primary-300 dark:bg-primary-900/20 dark:text-primary-200">
+            <span className="inline-flex items-center gap-0.5 rounded-full border border-primary-600 bg-primary-50 px-2 py-0.5 text-[11px] font-bold text-primary-600 dark:border-primary-400 dark:bg-primary-900/20 dark:text-primary-300">
               WA
             </span>
           )}
           {!customer.is_active && (
-            <span className="rounded-full border border-danger-800 bg-danger-50 px-2 py-0.5 text-[11px] font-bold text-danger-800 dark:border-danger-300 dark:bg-danger-900/20 dark:text-danger-200">
+            <span className="rounded-full border border-danger-600 bg-danger-50 px-2 py-0.5 text-[11px] font-bold text-danger-600 dark:border-danger-400 dark:bg-danger-900/20 dark:text-danger-300">
               Inactivo
             </span>
           )}

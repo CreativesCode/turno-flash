@@ -70,17 +70,17 @@ export function ServiceCard({
 
           <div className="mt-2 flex flex-wrap gap-1.5">
             {service.available_for_online_booking && (
-              <span className="rounded-full border border-info-800 bg-white px-2 py-0.5 text-[11px] font-bold text-info-800 dark:border-info-300 dark:bg-info-900/20 dark:text-info-200">
+              <span className="rounded-full border border-info-600 bg-info-50 px-2 py-0.5 text-[11px] font-bold text-info-600 dark:border-info-400 dark:bg-info-900/20 dark:text-info-300">
                 Reserva online
               </span>
             )}
             {service.requires_approval && (
-              <span className="rounded-full border border-warning-800 bg-warning-50 px-2 py-0.5 text-[11px] font-bold text-warning-800 dark:border-warning-300 dark:bg-warning-900/20 dark:text-warning-200">
+              <span className="rounded-full border border-warning-600 bg-warning-50 px-2 py-0.5 text-[11px] font-bold text-warning-600 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-300">
                 Requiere aprobación
               </span>
             )}
             {!isActive && (
-              <span className="rounded-full border border-danger-800 bg-danger-50 px-2 py-0.5 text-[11px] font-bold text-danger-800 dark:border-danger-300 dark:bg-danger-900/20 dark:text-danger-200">
+              <span className="rounded-full border border-danger-600 bg-danger-50 px-2 py-0.5 text-[11px] font-bold text-danger-600 dark:border-danger-400 dark:bg-danger-900/20 dark:text-danger-300">
                 Pausado
               </span>
             )}
