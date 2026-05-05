@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components/ui";
 import { Menu } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -37,6 +38,7 @@ export function MobileTopbar({
       >
         <Menu className="h-5 w-5" />
       </button>
+      <Logo size={28} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-base font-bold text-foreground">
           {title}

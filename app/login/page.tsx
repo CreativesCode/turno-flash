@@ -1,9 +1,9 @@
 "use client";
 
 import { PageMetadata } from "@/components/page-metadata";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, Logo } from "@/components/ui";
 import { createClient } from "@/utils/supabase/client";
-import { ArrowLeft, Eye, EyeOff, Zap } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
@@ -54,9 +54,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Brand mark */}
           <div className="mb-7 flex flex-col items-center gap-3">
-            <div className="mesh-primary flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-glow-primary">
-              <Zap className="h-7 w-7" />
-            </div>
+            <Logo size={56} priority />
             <div className="text-xl font-extrabold tracking-tight text-foreground">
               TurnoFlash
             </div>

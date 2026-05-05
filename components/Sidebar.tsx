@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar } from "@/components/ui";
+import { Avatar, Logo } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
 import { createClient } from "@/utils/supabase/client";
@@ -18,7 +18,6 @@ import {
   UserCog,
   UserPlus,
   Users,
-  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -178,9 +177,7 @@ export const Sidebar = React.memo(function Sidebar() {
     <aside className="fixed bottom-0 left-0 top-0 z-30 hidden w-60 flex-col border-r border-border bg-surface lg:flex">
       {/* Brand */}
       <div className="flex items-center gap-3 border-b border-border px-5 py-5">
-        <div className="mesh-primary flex h-9 w-9 items-center justify-center rounded-[10px] text-white shadow-glow-primary">
-          <Zap className="h-5 w-5" />
-        </div>
+        <Logo size={36} priority />
         <div className="min-w-0">
           <div className="text-base font-bold tracking-tight text-foreground">
             TurnoFlash

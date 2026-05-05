@@ -9,6 +9,7 @@ export {
   type ButtonSize,
 } from "./button";
 export { Card, type CardProps } from "./card";
+export { Logo } from "./logo";
 export { Field, Sheet, sheetInputClasses, type SheetProps } from "./sheet";
 export { CalendarSkeleton, ModalSkeleton } from "./skeleton";
 export { StatusBadge, type StatusBadgeProps } from "./status-badge";

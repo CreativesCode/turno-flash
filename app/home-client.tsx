@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Button, Card, StatusBadge } from "@/components/ui";
+import { Avatar, Button, Card, Logo, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
 import {
@@ -18,7 +18,6 @@ import {
   Sparkles,
   Sun,
   Users,
-  Zap,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -143,9 +142,7 @@ export default function HomePageClient() {
       <nav className="border-b border-border bg-surface/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2.5">
-            <div className="mesh-primary flex h-8 w-8 items-center justify-center rounded-lg text-white shadow-glow-primary">
-              <Zap className="h-4 w-4" />
-            </div>
+            <Logo size={32} priority />
             <span className="text-base font-extrabold tracking-tight text-foreground">
               TurnoFlash
             </span>
@@ -408,9 +405,7 @@ export default function HomePageClient() {
       <footer className="border-t border-border bg-surface px-5 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-2.5">
-            <div className="mesh-primary flex h-7 w-7 items-center justify-center rounded-md text-white">
-              <Zap className="h-3.5 w-3.5" />
-            </div>
+            <Logo size={28} />
             <span className="text-sm font-bold tracking-tight text-foreground">
               TurnoFlash
             </span>

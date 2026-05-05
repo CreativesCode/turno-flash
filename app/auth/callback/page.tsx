@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components/ui";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -138,7 +139,8 @@ export default function AuthCallbackPage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
-        <div className="w-full max-w-md space-y-4 text-center">
+        <div className="flex w-full max-w-md flex-col items-center space-y-4 text-center">
+          <Logo size={48} priority />
           <h1 className="text-2xl font-bold text-red-600 dark:text-red-400">
             Error de autenticación
           </h1>
@@ -156,8 +158,9 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
-      <div className="w-full max-w-md space-y-4 text-center">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
+      <div className="flex w-full max-w-md flex-col items-center space-y-4 text-center">
+        <Logo size={48} priority />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
         <p className="text-zinc-600 dark:text-zinc-400">{status}</p>
       </div>
     </div>

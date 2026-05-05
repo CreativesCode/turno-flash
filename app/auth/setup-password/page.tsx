@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components/ui";
 import { createClient } from "@/utils/supabase/client";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
@@ -141,8 +142,9 @@ export default function SetupPasswordPage() {
   if (checkingSession) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
-        <div className="w-full max-w-md space-y-4 text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
+        <div className="flex w-full max-w-md flex-col items-center space-y-4 text-center">
+          <Logo size={48} priority />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
           <p className="text-zinc-600 dark:text-zinc-400">
             Verificando sesión...
           </p>
@@ -154,7 +156,8 @@ export default function SetupPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-12 dark:bg-black sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
+        <div className="flex flex-col items-center text-center">
+          <Logo size={56} priority className="mb-4" />
           <h1 className="text-3xl font-bold tracking-tight text-black dark:text-zinc-50">
             ¡Bienvenido a Turno Flash!
           </h1>
