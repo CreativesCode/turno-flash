@@ -1,48 +1,36 @@
 "use client";
 
-import { MobileNavbar } from "@/components/MobileNavbar";
+import { Drawer } from "@/components/Drawer";
+import { MobileTabBar } from "@/components/MobileTabBar";
+import { MobileTopbar } from "@/components/MobileTopbar";
 import { Sidebar } from "@/components/Sidebar";
+import { useAuth } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
-import { useCapacitor } from "@/hooks/useCapacitor";
 import { useState } from "react";
 
 /**
- * Layout para el dashboard y sus sub-páginas.
- * Incluye el Sidebar para navegación, y el MobileNavbar para móviles.
- * Maneja safe areas para Capacitor.
- * Nota: AuthProvider está en el layout raíz.
+ * Dashboard layout. Mobile gets a sticky topbar + sliding drawer + bottom tab
+ * bar; desktop gets a fixed left sidebar. Both share the same nav data and
+ * read profile/role from AuthProvider (mounted in the root layout).
  */
 function DashboardContent({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isMobile } = useCapacitor();
-
-  const closeSidebar = () => setSidebarOpen(false);
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { profile } = useAuth();
+  const showTabBar = !!profile?.organization_id;
 
   return (
-    <div
-      className="min-h-screen bg-background"
-      style={{
-        paddingTop: isMobile
-          ? "calc(env(safe-area-inset-top, 0px) + 3.5rem)"
-          : 0,
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-      }}
-    >
-      {/* Mobile Navbar - Solo visible en móvil */}
-      <MobileNavbar
-        isOpen={sidebarOpen}
-        onToggle={toggleSidebar}
-        title="TurnoFlash"
-      />
+    <div className="min-h-screen bg-background">
+      <Sidebar />
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-
-      {/* Main Content */}
-      <main className="lg:pl-64 min-h-screen">{children}</main>
+      <div className="flex min-h-screen flex-col lg:pl-60">
+        <MobileTopbar
+          title="TurnoFlash"
+          onMenu={() => setDrawerOpen(true)}
+        />
+        <main className="flex-1">{children}</main>
+        {showTabBar && <MobileTabBar />}
+      </div>
     </div>
   );
 }

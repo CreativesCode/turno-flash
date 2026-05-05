@@ -1,8 +1,10 @@
 "use client";
 
-import { BUSINESS_HOURS, getStatusCalendarColor } from "@/config/constants";
+import { Card } from "@/components/ui";
+import { BUSINESS_HOURS } from "@/config/constants";
 import { AppointmentWithDetails } from "@/types/appointments";
 import { getLocalDateString, isToday } from "@/utils/date";
+import { fmtDuration } from "@/utils/format";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import React, { useCallback, useMemo } from "react";
 
@@ -11,10 +13,15 @@ interface DayCalendarProps {
   appointments: AppointmentWithDetails[];
   onDateChange: (date: Date) => void;
   onAppointmentClick?: (appointment: AppointmentWithDetails) => void;
+  /**
+   * Slot click. Granularity is 30 min — receives "HH:00" or "HH:30".
+   */
   onTimeSlotClick?: (time: string) => void;
   startHour?: number;
   endHour?: number;
 }
+
+const HOUR_PX = 56;
 
 export const DayCalendar = React.memo(
   function DayCalendar({
@@ -26,41 +33,17 @@ export const DayCalendar = React.memo(
     startHour = BUSINESS_HOURS.START_HOUR,
     endHour = BUSINESS_HOURS.END_HOUR,
   }: DayCalendarProps) {
-    // Generate time slots
-    const timeSlots = useMemo(() => {
-      const slots: string[] = [];
-      for (let hour = startHour; hour <= endHour; hour++) {
-        slots.push(`${hour.toString().padStart(2, "0")}:00`);
-        slots.push(`${hour.toString().padStart(2, "0")}:30`);
-      }
-      return slots;
+    const hours = useMemo(() => {
+      const arr: number[] = [];
+      for (let h = startHour; h <= endHour; h++) arr.push(h);
+      return arr;
     }, [startHour, endHour]);
 
-    // Filter appointments for the current day
     const dayAppointments = useMemo(() => {
       const dateStr = getLocalDateString(date);
       return appointments.filter((apt) => apt.appointment_date === dateStr);
     }, [appointments, date]);
 
-    // Calculate appointment position and height
-    const getAppointmentStyle = (appointment: AppointmentWithDetails) => {
-      const [startH, startM] = appointment.start_time.split(":").map(Number);
-      const [endH, endM] = appointment.end_time.split(":").map(Number);
-
-      const startMinutes = (startH - startHour) * 60 + startM;
-      const endMinutes = (endH - startHour) * 60 + endM;
-      const duration = endMinutes - startMinutes;
-
-      const top = (startMinutes / 30) * 48; // 48px per 30min slot
-      const height = Math.max((duration / 30) * 48, 24); // Minimum height
-
-      return { top: `${top}px`, height: `${height}px` };
-    };
-
-    // Get status color (using helper from constants)
-    const getStatusColor = getStatusCalendarColor;
-
-    // Navigation - memoized callbacks
     const goToPrevDay = useCallback(() => {
       const newDate = new Date(date);
       newDate.setDate(newDate.getDate() - 1);
@@ -77,235 +60,230 @@ export const DayCalendar = React.memo(
       onDateChange(new Date());
     }, [onDateChange]);
 
-    // Format date - full version for desktop
-    const formatDate = (d: Date) => {
-      return d.toLocaleDateString("es-ES", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    };
-
-    // Format date - short version for mobile
-    const formatDateShort = (d: Date) => {
-      return d.toLocaleDateString("es-ES", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    };
+    const weekday = date.toLocaleDateString("es-ES", { weekday: "long" });
+    const dayLabel = date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+    });
+    const today = isToday(getLocalDateString(date));
 
     return (
-      <div className="rounded-lg bg-surface shadow-sm">
-        {/* Header */}
-        <div className="border-b border-border p-3 sm:p-4">
-          {/* Mobile Layout */}
-          <div className="flex flex-col gap-3 sm:hidden">
-            {/* Top row: Navigation and Today button */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={goToPrevDay}
-                  className="rounded-md p-1.5 hover:bg-muted"
-                  aria-label="Día anterior"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={goToNextDay}
-                  className="rounded-md p-1.5 hover:bg-muted"
-                  aria-label="Día siguiente"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={goToToday}
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium ${
-                    isToday(getLocalDateString(date))
-                      ? "bg-info-100 text-info-700 dark:bg-info-900/30 dark:text-info-400"
-                      : "bg-muted text-foreground hover:bg-subtle"
-                  }`}
-                >
-                  Hoy
-                </button>
-              </div>
-              <div className="text-xs font-medium text-foreground-muted">
-                {dayAppointments.length} turno
-                {dayAppointments.length !== 1 ? "s" : ""}
-              </div>
-            </div>
-            {/* Date display */}
-            <h2 className="text-base font-semibold capitalize text-foreground leading-tight">
-              {formatDateShort(date)}
-            </h2>
-          </div>
-
-          {/* Desktop Layout */}
-          <div className="hidden sm:flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={goToPrevDay}
-                className="rounded-md p-2 hover:bg-muted"
-                aria-label="Día anterior"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                onClick={goToNextDay}
-                className="rounded-md p-2 hover:bg-muted"
-                aria-label="Día siguiente"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
+      <div className="space-y-3">
+        {/* Header: prev/next/today + uppercase weekday + big date + count */}
+        <div className="flex items-center justify-between gap-2 px-1">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={goToPrevDay}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted transition-colors hover:bg-muted"
+              aria-label="Día anterior"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={goToNextDay}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted transition-colors hover:bg-muted"
+              aria-label="Día siguiente"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            {!today && (
               <button
                 onClick={goToToday}
-                className={`rounded-md px-3 py-1 text-sm font-medium ${
-                  isToday(getLocalDateString(date))
-                    ? "bg-info-100 text-info-700 dark:bg-info-900/30 dark:text-info-400"
-                    : "bg-muted text-foreground hover:bg-subtle"
-                }`}
+                className="ml-1 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
               >
                 Hoy
               </button>
+            )}
+          </div>
+          <div className="text-center">
+            <div className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+              {weekday}
             </div>
-            <h2 className="text-lg font-semibold capitalize text-foreground">
-              {formatDate(date)}
-            </h2>
-            <div className="text-sm text-foreground-muted">
-              {dayAppointments.length} turno
-              {dayAppointments.length !== 1 ? "s" : ""}
+            <div className="text-lg font-extrabold tracking-tight text-foreground sm:text-xl">
+              {dayLabel}
             </div>
+          </div>
+          <div className="rounded-full bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-foreground-muted">
+            {dayAppointments.length} turno
+            {dayAppointments.length !== 1 ? "s" : ""}
           </div>
         </div>
 
-        {/* Calendar Grid */}
-        <div className="relative max-h-[600px] overflow-y-auto">
-          <div className="relative">
-            {/* Time Labels */}
-            <div className="absolute left-0 top-0 w-16 border-r border-border bg-muted">
-              {timeSlots.map((time, index) => (
+        {/* Calendar body */}
+        <Card className="overflow-hidden p-0">
+          <div className="flex max-h-160 overflow-y-auto">
+            {/* Hour rail */}
+            <div className="w-11 shrink-0 border-r border-border pt-1">
+              {hours.map((h) => (
                 <div
-                  key={time}
-                  className="flex h-12 items-start justify-end pr-2 pt-1"
+                  key={h}
+                  className="px-1.5 pt-1 text-right text-[11px] font-semibold tabular-nums text-foreground-muted"
+                  style={{ height: HOUR_PX }}
                 >
-                  {index % 2 === 0 && (
-                    <span className="text-xs text-foreground-muted">
-                      {time}
-                    </span>
-                  )}
+                  {String(h).padStart(2, "0")}:00
                 </div>
               ))}
             </div>
 
-            {/* Grid Lines and Appointments */}
-            <div className="ml-16 relative">
-              {/* Grid Lines */}
-              {timeSlots.map((time, index) => (
-                <div
-                  key={time}
-                  onClick={() => onTimeSlotClick?.(time)}
-                  className={`group h-12 border-b border-border ${
-                    index % 2 === 0 ? "border-border" : ""
-                  } ${
-                    onTimeSlotClick
-                      ? "cursor-pointer hover:bg-info-50 dark:hover:bg-info-900/10"
-                      : ""
-                  }`}
-                >
-                  {onTimeSlotClick && (
-                    <div className="hidden group-hover:flex items-center justify-center h-full">
-                      <Plus className="h-4 w-4 text-info" />
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {/* Appointments */}
-              {dayAppointments.map((appointment) => {
-                const style = getAppointmentStyle(appointment);
+            {/* Slots area */}
+            <div className="relative flex-1 pt-1">
+              {/* Hourly cells with dashed top + dotted half-hour line */}
+              {hours.map((h) => {
+                const slotTopHour = `${String(h).padStart(2, "0")}:00`;
+                const slotTopHalf = `${String(h).padStart(2, "0")}:30`;
                 return (
                   <div
-                    key={appointment.id}
-                    onClick={() => onAppointmentClick?.(appointment)}
-                    style={style}
-                    className={`absolute left-1 right-1 rounded-md border-l-4 px-2 py-1 text-white shadow-sm cursor-pointer transition-transform hover:scale-[1.02] ${getStatusColor(
-                      appointment.status
-                    )}`}
+                    key={h}
+                    className="relative border-t border-dashed border-border"
+                    style={{ height: HOUR_PX }}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
-                          {appointment.customer_first_name}{" "}
-                          {appointment.customer_last_name}
-                        </p>
-                        <p className="truncate text-xs opacity-90">
-                          {appointment.service_name}
-                        </p>
-                      </div>
-                      <span className="ml-2 text-xs whitespace-nowrap">
-                        {appointment.start_time}
-                      </span>
-                    </div>
-                    {appointment.staff_first_name && (
-                      <p className="truncate text-xs opacity-75 mt-1">
-                        {appointment.staff_first_name}
-                      </p>
+                    {/* dotted half-hour separator */}
+                    <div
+                      className="absolute inset-x-0 border-t border-dotted border-border-2 opacity-60"
+                      style={{ top: "50%" }}
+                    />
+                    {/* Click targets — hidden but cover top/bottom halves */}
+                    {onTimeSlotClick && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => onTimeSlotClick(slotTopHour)}
+                          className="group absolute inset-x-0 top-0 cursor-pointer transition-colors hover:bg-info-50/60 dark:hover:bg-info-900/15"
+                          style={{ height: HOUR_PX / 2 }}
+                          aria-label={`Crear turno a las ${slotTopHour}`}
+                        >
+                          <Plus className="absolute right-2 top-1/2 hidden h-3.5 w-3.5 -translate-y-1/2 text-info group-hover:block" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onTimeSlotClick(slotTopHalf)}
+                          className="group absolute inset-x-0 bottom-0 cursor-pointer transition-colors hover:bg-info-50/60 dark:hover:bg-info-900/15"
+                          style={{ height: HOUR_PX / 2 }}
+                          aria-label={`Crear turno a las ${slotTopHalf}`}
+                        >
+                          <Plus className="absolute right-2 top-1/2 hidden h-3.5 w-3.5 -translate-y-1/2 text-info group-hover:block" />
+                        </button>
+                      </>
                     )}
                   </div>
                 );
               })}
 
-              {/* Current Time Indicator */}
-              {isToday(getLocalDateString(date)) && (
-                <CurrentTimeIndicator startHour={startHour} />
-              )}
+              {/* Now indicator */}
+              {today && <NowIndicator startHour={startHour} endHour={endHour} />}
+
+              {/* Appointment blocks */}
+              {dayAppointments.map((appt) => (
+                <ApptBlock
+                  key={appt.id}
+                  appt={appt}
+                  startHour={startHour}
+                  onClick={onAppointmentClick}
+                />
+              ))}
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     );
   },
-  (prevProps, nextProps) => {
-    // Custom comparison function for React.memo
+  (prev, next) => {
     return (
-      prevProps.date.getTime() === nextProps.date.getTime() &&
-      prevProps.appointments.length === nextProps.appointments.length &&
-      prevProps.appointments.every(
-        (apt, idx) =>
-          apt.id === nextProps.appointments[idx]?.id &&
-          apt.status === nextProps.appointments[idx]?.status
+      prev.date.getTime() === next.date.getTime() &&
+      prev.appointments.length === next.appointments.length &&
+      prev.appointments.every(
+        (apt, i) =>
+          apt.id === next.appointments[i]?.id &&
+          apt.status === next.appointments[i]?.status &&
+          apt.start_time === next.appointments[i]?.start_time &&
+          apt.end_time === next.appointments[i]?.end_time
       ) &&
-      prevProps.startHour === nextProps.startHour &&
-      prevProps.endHour === nextProps.endHour &&
-      prevProps.onDateChange === nextProps.onDateChange &&
-      prevProps.onAppointmentClick === nextProps.onAppointmentClick &&
-      prevProps.onTimeSlotClick === nextProps.onTimeSlotClick
+      prev.startHour === next.startHour &&
+      prev.endHour === next.endHour &&
+      prev.onDateChange === next.onDateChange &&
+      prev.onAppointmentClick === next.onAppointmentClick &&
+      prev.onTimeSlotClick === next.onTimeSlotClick
     );
   }
 );
 
-// Current Time Indicator Component
-function CurrentTimeIndicator({ startHour }: { startHour: number }) {
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinutes = now.getMinutes();
+interface ApptBlockProps {
+  appt: AppointmentWithDetails;
+  startHour: number;
+  onClick?: (a: AppointmentWithDetails) => void;
+}
 
-  if (currentHour < startHour || currentHour > BUSINESS_HOURS.END_HOUR) {
-    return null;
-  }
+function ApptBlock({ appt, startHour, onClick }: ApptBlockProps) {
+  const [sH, sM] = appt.start_time.split(":").map(Number);
+  const [eH, eM] = appt.end_time.split(":").map(Number);
+  const startMin = (sH - startHour) * 60 + sM;
+  const durMin = Math.max(15, (eH - startHour) * 60 + eM - startMin);
+  const top = 4 + (startMin / 60) * HOUR_PX;
+  const height = (durMin / 60) * HOUR_PX - 2;
 
-  const minutesSinceStart = (currentHour - startHour) * 60 + currentMinutes;
-  const top = (minutesSinceStart / 30) * 48;
+  const status = appt.status ?? "pending";
+  const time = appt.start_time.length > 5 ? appt.start_time.slice(0, 5) : appt.start_time;
+  const showService = height > 40;
 
   return (
     <div
-      className="absolute left-0 right-0 z-10 flex items-center pointer-events-none"
-      style={{ top: `${top}px` }}
+      className={`st-${status} absolute left-1.5 right-1.5 cursor-pointer overflow-hidden rounded-md border-l-4 px-2 py-1 shadow-xs transition-transform hover:-translate-y-px`}
+      style={{
+        top,
+        height,
+        background: "var(--st-bg)",
+        borderLeftColor: "var(--st-c)",
+        color: "var(--st-cb)",
+      }}
+      onClick={() => onClick?.(appt)}
+      role="button"
+      tabIndex={0}
     >
-      <div className="h-3 w-3 rounded-full bg-danger-600" />
-      <div className="flex-1 h-0.5 bg-danger-600" />
+      <div className="truncate text-[10px] font-bold tabular-nums">
+        {time} · {fmtDuration(appt.duration_minutes)}
+      </div>
+      <div className="truncate text-[12px] font-bold leading-tight">
+        {appt.customer_first_name} {appt.customer_last_name}
+      </div>
+      {showService && (
+        <div className="truncate text-[11px] leading-tight opacity-90">
+          {appt.service_name}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NowIndicator({
+  startHour,
+  endHour,
+}: {
+  startHour: number;
+  endHour: number;
+}) {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  if (h < startHour || h > endHour) return null;
+  const top = 4 + ((h - startHour) * 60 + m) / 60 * HOUR_PX;
+  const label = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+
+  return (
+    <div
+      className="pointer-events-none absolute inset-x-0 z-10"
+      style={{ top, height: 0, borderTop: "2px solid var(--color-secondary-500)" }}
+    >
+      <span
+        aria-hidden
+        className="absolute h-2.5 w-2.5 rounded-full bg-secondary-500"
+        style={{ left: -6, top: -5, boxShadow: "var(--shadow-glow-secondary)" }}
+      />
+      <span
+        className="absolute rounded bg-surface px-1.5 py-px text-[10px] font-bold text-secondary-500"
+        style={{ right: 6, top: -10 }}
+      >
+        {label}
+      </span>
     </div>
   );
 }

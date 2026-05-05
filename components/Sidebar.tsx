@@ -1,8 +1,8 @@
 "use client";
 
+import { Avatar } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
-import { useCapacitor } from "@/hooks/useCapacitor";
 import { createClient } from "@/utils/supabase/client";
 import {
   AlertTriangle,
@@ -11,12 +11,14 @@ import {
   Calendar,
   Home,
   LogOut,
+  type LucideIcon,
   Moon,
   Package,
   Sun,
   UserCog,
   UserPlus,
   Users,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,284 +27,256 @@ import React, { useEffect, useMemo, useState } from "react";
 interface NavItem {
   name: string;
   href: string;
-  icon: React.ReactNode;
-  roles?: string[]; // Si está vacío, todos los roles pueden acceder
-  requiresOrg?: boolean; // Requiere organización
+  Icon: LucideIcon;
+  roles?: string[];
+  requiresOrg?: boolean;
 }
 
-interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface NavSeparator {
+  separator: true;
+  key: string;
 }
 
-export const Sidebar = React.memo(function Sidebar({
-  isOpen,
-  onClose,
-}: SidebarProps) {
+type NavEntry = NavItem | NavSeparator;
+
+const NAV_ITEMS: readonly NavEntry[] = [
+  { name: "Dashboard", href: "/dashboard", Icon: Home },
+  {
+    name: "Turnos",
+    href: "/dashboard/appointments",
+    Icon: Calendar,
+    requiresOrg: true,
+  },
+  {
+    name: "Clientes",
+    href: "/dashboard/customers",
+    Icon: Users,
+    requiresOrg: true,
+  },
+  {
+    name: "Servicios",
+    href: "/dashboard/services",
+    Icon: Package,
+    roles: ["admin", "owner"],
+    requiresOrg: true,
+  },
+  {
+    name: "Profesionales",
+    href: "/dashboard/staff",
+    Icon: UserCog,
+    roles: ["admin", "owner"],
+    requiresOrg: true,
+  },
+  {
+    name: "Recordatorios",
+    href: "/dashboard/reminders",
+    Icon: Bell,
+    requiresOrg: true,
+  },
+  { separator: true, key: "admin" },
+  {
+    name: "Organizaciones",
+    href: "/dashboard/organizations",
+    Icon: Building2,
+    roles: ["admin"],
+  },
+  {
+    name: "Usuarios",
+    href: "/dashboard/users",
+    Icon: Users,
+    roles: ["admin"],
+  },
+  {
+    name: "Invitar",
+    href: "/dashboard/invite",
+    Icon: UserPlus,
+    roles: ["admin", "owner"],
+  },
+  {
+    name: "Errores",
+    href: "/dashboard/errors",
+    Icon: AlertTriangle,
+    roles: ["admin"],
+  },
+];
+
+function isItemVisible(item: NavItem, role?: string, hasOrg?: boolean): boolean {
+  if (item.roles && item.roles.length > 0 && (!role || !item.roles.includes(role))) {
+    return false;
+  }
+  if (item.requiresOrg && !hasOrg) {
+    return false;
+  }
+  return true;
+}
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/dashboard") return pathname === href;
+  return pathname.startsWith(href);
+}
+
+function roleLabel(role?: string): string {
+  if (role === "admin") return "Administrador";
+  if (role === "owner") return "Dueño";
+  return "Staff";
+}
+
+/**
+ * Desktop-only persistent sidebar (visible on lg+ via the dashboard layout).
+ * The mobile counterpart is `Drawer.tsx`, opened from `MobileTopbar`'s menu.
+ * Both components share the same NAV_ITEMS shape but are separate so each can
+ * tune its layout independently (drawer has a fixed width on top of content,
+ * sidebar is part of the desktop grid).
+ */
+export const Sidebar = React.memo(function Sidebar() {
   const { profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
-  const { isMobile } = useCapacitor();
   const supabase = useMemo(() => createClient(), []);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
 
-  // Navigation items with permissions
-  const navItems: NavItem[] = useMemo(
-    () => [
-      {
-        name: "Dashboard",
-        href: "/dashboard",
-        icon: <Home className="h-5 w-5" />,
-      },
-      {
-        name: "Turnos",
-        href: "/dashboard/appointments",
-        icon: <Calendar className="h-5 w-5" />,
-        requiresOrg: true,
-      },
-      {
-        name: "Clientes",
-        href: "/dashboard/customers",
-        icon: <Users className="h-5 w-5" />,
-        requiresOrg: true,
-      },
-      {
-        name: "Servicios",
-        href: "/dashboard/services",
-        icon: <Package className="h-5 w-5" />,
-        roles: ["admin", "owner"],
-        requiresOrg: true,
-      },
-      {
-        name: "Profesionales",
-        href: "/dashboard/staff",
-        icon: <UserCog className="h-5 w-5" />,
-        roles: ["admin", "owner"],
-        requiresOrg: true,
-      },
-      {
-        name: "Recordatorios",
-        href: "/dashboard/reminders",
-        icon: <Bell className="h-5 w-5" />,
-        requiresOrg: true,
-      },
-      // Admin only
-      {
-        name: "Organizaciones",
-        href: "/dashboard/organizations",
-        icon: <Building2 className="h-5 w-5" />,
-        roles: ["admin"],
-      },
-      {
-        name: "Usuarios",
-        href: "/dashboard/users",
-        icon: <Users className="h-5 w-5" />,
-        roles: ["admin"],
-      },
-      {
-        name: "Invitar",
-        href: "/dashboard/invite",
-        icon: <UserPlus className="h-5 w-5" />,
-        roles: ["admin", "owner"],
-      },
-      {
-        name: "Errores",
-        href: "/dashboard/errors",
-        icon: <AlertTriangle className="h-5 w-5" />,
-        roles: ["admin"],
-      },
-    ],
-    []
-  );
-
-  // Filter nav items based on user role and organization
-  const filteredNavItems = useMemo(() => {
-    return navItems.filter((item) => {
-      // Check role permission
-      if (item.roles && item.roles.length > 0) {
-        if (!profile?.role || !item.roles.includes(profile.role)) {
-          return false;
-        }
-      }
-
-      // Check organization requirement
-      if (item.requiresOrg && !profile?.organization_id) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [navItems, profile]);
-
-  // Cargar nombre de la organización
   useEffect(() => {
-    // Flag para controlar si el componente sigue montado
-    let isMounted = true;
-
-    const loadOrganizationName = async () => {
-      if (!profile?.organization_id) {
-        if (isMounted) setOrganizationName(null);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from("organizations")
-          .select("name")
-          .eq("id", profile.organization_id)
-          .single();
-
-        // Verificar si el componente sigue montado antes de actualizar estado
-        if (!isMounted) return;
-
+    let mounted = true;
+    if (!profile?.organization_id) {
+      setOrganizationName(null);
+      return;
+    }
+    supabase
+      .from("organizations")
+      .select("name")
+      .eq("id", profile.organization_id)
+      .single()
+      .then(({ data, error }) => {
+        if (!mounted) return;
         if (error) {
-          console.error("Error loading organization name:", error);
           setOrganizationName(null);
         } else {
-          setOrganizationName(data?.name || null);
+          setOrganizationName(data?.name ?? null);
         }
-      } catch (error) {
-        if (!isMounted) return;
-        console.error("Error loading organization name:", error);
-        setOrganizationName(null);
-      }
-    };
-
-    if (profile) {
-      loadOrganizationName();
-    }
-
-    // Cleanup: marcar como desmontado para evitar actualizaciones de estado
+      });
     return () => {
-      isMounted = false;
+      mounted = false;
     };
-  }, [profile, supabase]);
+  }, [profile?.organization_id, supabase]);
+
+  const visibleEntries = useMemo(() => {
+    const role = profile?.role;
+    const hasOrg = !!profile?.organization_id;
+    return NAV_ITEMS.filter((entry) => {
+      if ("separator" in entry) return true;
+      return isItemVisible(entry, role, hasOrg);
+    });
+  }, [profile?.role, profile?.organization_id]);
 
   const handleSignOut = async () => {
     await signOut();
     router.push("/login");
   };
 
-  const isActive = (href: string) => {
-    if (href === "/dashboard") {
-      return pathname === href;
-    }
-    return pathname.startsWith(href);
-  };
-
   return (
-    <>
-      {/* Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={onClose}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed left-0 top-0 bottom-0 z-40 w-64 transform bg-surface shadow-lg transition-transform duration-300 lg:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-        style={
-          isMobile
-            ? {
-                top: "calc(env(safe-area-inset-top, 0px) + 3.5rem)",
-                paddingBottom: "env(safe-area-inset-bottom, 0px)",
-              }
-            : undefined
-        }
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo - Solo visible en desktop */}
-          <div className="hidden lg:flex h-16 items-center justify-center border-b border-border">
-            <Link
-              href="/dashboard"
-              onClick={onClose}
-              className="flex items-center"
-            >
-              <img
-                src="/images/logo_horizontal.svg"
-                alt="Turno Flash Logo"
-                className="h-12 w-auto"
-                style={{ maxWidth: 180 }}
-              />
-            </Link>
+    <aside className="fixed bottom-0 left-0 top-0 z-30 hidden w-60 flex-col border-r border-border bg-surface lg:flex">
+      {/* Brand */}
+      <div className="flex items-center gap-3 border-b border-border px-5 py-5">
+        <div className="mesh-primary flex h-9 w-9 items-center justify-center rounded-[10px] text-white shadow-glow-primary">
+          <Zap className="h-5 w-5" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-base font-bold tracking-tight text-foreground">
+            TurnoFlash
           </div>
+          {organizationName && (
+            <div className="truncate text-[11px] text-foreground-muted">
+              {organizationName}
+            </div>
+          )}
+        </div>
+      </div>
 
-          {/* User Info */}
-          <div className="border-b border-border p-4">
-            <p className="text-sm font-medium text-foreground truncate">
-              {profile?.full_name || profile?.email || "Usuario"}
-            </p>
-            <p className="mt-1 text-xs text-foreground-muted">
-              {profile?.role === "admin"
-                ? "Administrador"
-                : profile?.role === "owner"
-                ? "Dueño"
-                : "Staff"}
-              {": "}
-              <span className="font-semibold">{organizationName}</span>
-            </p>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4 pb-safe">
-            <ul className="space-y-1">
-              {filteredNavItems.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={onClose}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                      isActive(item.href)
-                        ? "bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-200"
-                        : "text-foreground-muted hover:bg-muted"
-                    }`}
-                  >
-                    {item.icon}
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Footer */}
-          <div className="border-t border-border p-4 space-y-2">
-            <button
-              onClick={toggleTheme}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-foreground-muted transition-colors hover:bg-muted"
-              aria-label={
-                theme === "dark"
-                  ? "Cambiar a tema claro"
-                  : "Cambiar a tema oscuro"
-              }
-            >
-              {theme === "dark" ? (
-                <>
-                  <Sun className="h-5 w-5" />
-                  Tema Claro
-                </>
-              ) : (
-                <>
-                  <Moon className="h-5 w-5" />
-                  Tema Oscuro
-                </>
-              )}
-            </button>
-            <button
-              onClick={handleSignOut}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger-50 dark:hover:bg-danger-900/20"
-            >
-              <LogOut className="h-5 w-5" />
-              Cerrar Sesión
-            </button>
+      {/* User block */}
+      {profile && (
+        <div className="flex items-center gap-3 border-b border-border px-5 py-3.5">
+          <Avatar
+            name={profile.full_name || profile.email || "Usuario"}
+            color="var(--color-secondary-500)"
+            size={36}
+          />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold text-foreground">
+              {profile.full_name || profile.email || "Usuario"}
+            </div>
+            <div className="text-[11px] text-foreground-muted">
+              {roleLabel(profile.role)}
+            </div>
           </div>
         </div>
-      </aside>
-    </>
+      )}
+
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto px-3 py-2.5">
+        {visibleEntries.map((entry) => {
+          if ("separator" in entry) {
+            return (
+              <div
+                key={entry.key}
+                className="my-2 mx-2 h-px bg-border"
+                aria-hidden
+              />
+            );
+          }
+          const active = isActive(pathname, entry.href);
+          const Icon = entry.Icon;
+          return (
+            <Link
+              key={entry.href}
+              href={entry.href}
+              className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-colors ${
+                active
+                  ? "bg-primary-50 font-bold text-primary-500 dark:bg-primary-900/30"
+                  : "font-medium text-foreground-muted hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              {active && (
+                <span
+                  aria-hidden
+                  className="absolute inset-y-1.5 left-0 w-1 rounded-r-full bg-primary-500"
+                />
+              )}
+              <Icon
+                className={`h-4.25 w-4.25 ${active ? "text-primary-500" : ""}`}
+              />
+              {entry.name}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div className="flex flex-col gap-1 border-t border-border p-3">
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-foreground-muted transition-colors hover:bg-muted"
+        >
+          {theme === "dark" ? (
+            <>
+              <Sun className="h-4.25 w-4.25" />
+              Tema claro
+            </>
+          ) : (
+            <>
+              <Moon className="h-4.25 w-4.25" />
+              Tema oscuro
+            </>
+          )}
+        </button>
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-danger transition-colors hover:bg-danger-50 dark:hover:bg-danger-900/20"
+        >
+          <LogOut className="h-4.25 w-4.25" />
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
   );
 });

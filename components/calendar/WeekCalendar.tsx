@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  APPOINTMENT_STATUS,
-  BUSINESS_HOURS,
-  getStatusCalendarColor,
-} from "@/config/constants";
+import { Card } from "@/components/ui";
+import { BUSINESS_HOURS } from "@/config/constants";
 import { AppointmentWithDetails } from "@/types/appointments";
 import { getLocalDateString, getStartOfWeek, getWeekDays } from "@/utils/date";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
@@ -20,264 +17,279 @@ interface WeekCalendarProps {
   endHour?: number;
 }
 
-export const WeekCalendar = React.memo(function WeekCalendar({
-  date,
-  appointments,
-  onDateChange,
-  onAppointmentClick,
-  onTimeSlotClick,
-  startHour = 8,
-  endHour = 20,
-}: WeekCalendarProps) {
-  // Get start of week (Monday) and generate week days
-  const { startOfWeek, weekDays } = useMemo(() => {
-    const start = getStartOfWeek(date);
-    const days = getWeekDays(date);
-    return { startOfWeek: start, weekDays: days };
-  }, [date]);
+const HOUR_PX = 40;
+const RAIL_W = 36;
 
-  // Generate time slots
-  const timeSlots = useMemo(() => {
-    const slots: string[] = [];
-    for (let hour = startHour; hour <= endHour; hour++) {
-      slots.push(`${hour.toString().padStart(2, "0")}:00`);
-    }
-    return slots;
-  }, [startHour, endHour]);
+export const WeekCalendar = React.memo(
+  function WeekCalendar({
+    date,
+    appointments,
+    onDateChange,
+    onAppointmentClick,
+    onTimeSlotClick,
+    startHour = BUSINESS_HOURS.START_HOUR,
+    endHour = BUSINESS_HOURS.END_HOUR,
+  }: WeekCalendarProps) {
+    const { startOfWeek, weekDays } = useMemo(() => {
+      const start = getStartOfWeek(date);
+      const days = getWeekDays(date);
+      return { startOfWeek: start, weekDays: days };
+    }, [date]);
 
-  // Group appointments by date
-  const appointmentsByDate = useMemo(() => {
-    const map = new Map<string, AppointmentWithDetails[]>();
-    appointments.forEach((apt) => {
-      const dateStr = apt.appointment_date;
-      if (!map.has(dateStr)) {
-        map.set(dateStr, []);
+    const hours = useMemo(() => {
+      const arr: number[] = [];
+      for (let h = startHour; h <= endHour; h++) arr.push(h);
+      return arr;
+    }, [startHour, endHour]);
+
+    const appointmentsByDate = useMemo(() => {
+      const map = new Map<string, AppointmentWithDetails[]>();
+      appointments.forEach((apt) => {
+        const arr = map.get(apt.appointment_date) ?? [];
+        arr.push(apt);
+        map.set(apt.appointment_date, arr);
+      });
+      return map;
+    }, [appointments]);
+
+    const goToPrevWeek = useCallback(() => {
+      const newDate = new Date(date);
+      newDate.setDate(newDate.getDate() - 7);
+      onDateChange(newDate);
+    }, [date, onDateChange]);
+
+    const goToNextWeek = useCallback(() => {
+      const newDate = new Date(date);
+      newDate.setDate(newDate.getDate() + 7);
+      onDateChange(newDate);
+    }, [date, onDateChange]);
+
+    const goToToday = useCallback(() => {
+      onDateChange(new Date());
+    }, [onDateChange]);
+
+    const today = getLocalDateString();
+    const containsToday = weekDays.some((d) => getLocalDateString(d) === today);
+
+    const weekRangeLabel = useMemo(() => {
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      const startMonth = startOfWeek.toLocaleDateString("es-ES", {
+        month: "short",
+      });
+      const endMonth = endOfWeek.toLocaleDateString("es-ES", { month: "short" });
+      if (startMonth === endMonth) {
+        return `${startOfWeek.getDate()} — ${endOfWeek.getDate()} ${startMonth}`;
       }
-      map.get(dateStr)!.push(apt);
-    });
-    return map;
-  }, [appointments]);
+      return `${startOfWeek.getDate()} ${startMonth} — ${endOfWeek.getDate()} ${endMonth}`;
+    }, [startOfWeek]);
 
-  // Calculate appointment position and height
-  const getAppointmentStyle = (appointment: AppointmentWithDetails) => {
-    const [startH, startM] = appointment.start_time.split(":").map(Number);
-    const [endH, endM] = appointment.end_time.split(":").map(Number);
+    const gridCols = `${RAIL_W}px repeat(7, 1fr)`;
 
-    const startMinutes = (startH - startHour) * 60 + startM;
-    const endMinutes = (endH - startHour) * 60 + endM;
-    const duration = endMinutes - startMinutes;
-
-    const top = (startMinutes / 60) * 60; // 60px per hour
-    const height = Math.max((duration / 60) * 60, 20); // Minimum height
-
-    return { top: `${top}px`, height: `${height}px` };
-  };
-
-  // Get status color (using helper from constants)
-  const getStatusColor = getStatusCalendarColor;
-
-  // Navigation - memoized callbacks
-  const goToPrevWeek = useCallback(() => {
-    const newDate = new Date(date);
-    newDate.setDate(newDate.getDate() - 7);
-    onDateChange(newDate);
-  }, [date, onDateChange]);
-
-  const goToNextWeek = useCallback(() => {
-    const newDate = new Date(date);
-    newDate.setDate(newDate.getDate() + 7);
-    onDateChange(newDate);
-  }, [date, onDateChange]);
-
-  const goToToday = useCallback(() => {
-    onDateChange(new Date());
-  }, [onDateChange]);
-
-  // Format header
-  const formatWeekRange = () => {
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-    const startMonth = startOfWeek.toLocaleDateString("es-ES", {
-      month: "short",
-    });
-    const endMonth = endOfWeek.toLocaleDateString("es-ES", { month: "short" });
-
-    if (startMonth === endMonth) {
-      return `${startOfWeek.getDate()} - ${endOfWeek.getDate()} de ${startMonth} ${startOfWeek.getFullYear()}`;
-    }
-    return `${startOfWeek.getDate()} ${startMonth} - ${endOfWeek.getDate()} ${endMonth} ${endOfWeek.getFullYear()}`;
-  };
-
-  const today = getLocalDateString();
-
-  return (
-    <div className="rounded-lg bg-surface shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border p-4">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={goToPrevWeek}
-            className="rounded-md p-2 hover:bg-muted"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={goToNextWeek}
-            className="rounded-md p-2 hover:bg-muted"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-          <button
-            onClick={goToToday}
-            className="rounded-md px-3 py-1 text-sm font-medium bg-muted text-foreground hover:bg-subtle"
-          >
-            Hoy
-          </button>
-        </div>
-        <h2 className="text-lg font-semibold capitalize text-foreground">
-          {formatWeekRange()}
-        </h2>
-        <div className="text-sm text-foreground-muted">
-          {appointments.length} turno{appointments.length !== 1 ? "s" : ""}
-        </div>
-      </div>
-
-      {/* Day Headers */}
-      <div
-        className="grid border-b border-border"
-        style={{ gridTemplateColumns: "64px repeat(7, 1fr)" }}
-      >
-        <div className="border-r border-border" />
-        {weekDays.map((day) => {
-          const dateStr = getLocalDateString(day);
-          const isCurrentDay = dateStr === today;
-          const dayApts = appointmentsByDate.get(dateStr) || [];
-
-          return (
-            <div
-              key={dateStr}
-              className={`flex flex-col items-center py-2 ${
-                isCurrentDay
-                  ? "bg-info-50 dark:bg-info-900/20"
-                  : "bg-muted dark:bg-zinc-900/50"
-              }`}
+    return (
+      <div className="space-y-3">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-2 px-1">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={goToPrevWeek}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted transition-colors hover:bg-muted"
+              aria-label="Semana anterior"
             >
-              <span className="text-xs text-foreground-muted uppercase">
-                {day.toLocaleDateString("es-ES", { weekday: "short" })}
-              </span>
-              <span
-                className={`mt-1 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                  isCurrentDay
-                    ? "bg-info text-info-foreground"
-                    : "text-foreground"
-                }`}
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={goToNextWeek}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted transition-colors hover:bg-muted"
+              aria-label="Semana siguiente"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            {!containsToday && (
+              <button
+                onClick={goToToday}
+                className="ml-1 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
               >
-                {day.getDate()}
-              </span>
-              <span className="mt-1 text-xs text-foreground-muted">
-                {dayApts.length} turno{dayApts.length !== 1 ? "s" : ""}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Calendar Grid */}
-      <div className="max-h-[500px] overflow-y-auto">
-        <div
-          className="grid"
-          style={{ gridTemplateColumns: "64px repeat(7, 1fr)" }}
-        >
-          {/* Time Labels */}
-          <div className="border-r border-border">
-            {timeSlots.map((time) => (
-              <div
-                key={time}
-                className="flex h-[60px] items-start justify-end pr-2 pt-1 border-b border-border"
-              >
-                <span className="text-xs text-foreground-muted">{time}</span>
-              </div>
-            ))}
+                Hoy
+              </button>
+            )}
           </div>
+          <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
+            {weekRangeLabel}
+          </h2>
+          <div className="rounded-full bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-foreground-muted">
+            {appointments.length} turno{appointments.length !== 1 ? "s" : ""}
+          </div>
+        </div>
 
-          {/* Day Columns */}
-          {weekDays.map((day) => {
-            const dateStr = getLocalDateString(day);
-            const dayApts = appointmentsByDate.get(dateStr) || [];
-            const isCurrentDay = dateStr === today;
-
-            return (
-              <div
-                key={dateStr}
-                className={`relative border-r border-border ${
-                  isCurrentDay ? "bg-info-50/30 dark:bg-info-900/10" : ""
-                }`}
-              >
-                {/* Grid Lines */}
-                {timeSlots.map((time) => (
+        <Card className="overflow-hidden p-0">
+          {/* Day headers */}
+          <div
+            className="grid border-b border-border bg-surface-2"
+            style={{ gridTemplateColumns: gridCols }}
+          >
+            <div />
+            {weekDays.map((day) => {
+              const dStr = getLocalDateString(day);
+              const isCurrent = dStr === today;
+              const dayApts = appointmentsByDate.get(dStr) ?? [];
+              return (
+                <div
+                  key={dStr}
+                  className="border-l border-border py-2 text-center"
+                >
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-foreground-muted">
+                    {day.toLocaleDateString("es-ES", { weekday: "short" })}
+                  </div>
                   <div
-                    key={`${dateStr}-${time}`}
-                    onClick={() => onTimeSlotClick?.(dateStr, time)}
-                    className={`h-[60px] border-b border-border ${
-                      onTimeSlotClick
-                        ? "cursor-pointer hover:bg-info-50 dark:hover:bg-info-900/20 group"
-                        : ""
+                    className={`mx-auto mt-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-extrabold tabular-nums ${
+                      isCurrent
+                        ? "bg-primary-500 text-white"
+                        : "text-foreground"
                     }`}
                   >
-                    {onTimeSlotClick && (
-                      <div className="hidden group-hover:flex items-center justify-center h-full">
-                        <Plus className="h-4 w-4 text-info" />
-                      </div>
-                    )}
+                    {day.getDate()}
+                  </div>
+                  <div className="mt-1 text-[9px] text-foreground-subtle">
+                    {dayApts.length || "—"}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Grid body */}
+          <div className="max-h-160 overflow-y-auto">
+            <div
+              className="relative grid"
+              style={{
+                gridTemplateColumns: gridCols,
+                minHeight: hours.length * HOUR_PX,
+              }}
+            >
+              {/* Hour rail */}
+              <div>
+                {hours.map((h) => (
+                  <div
+                    key={h}
+                    className="border-t border-dashed border-border pr-1 text-right text-[9px] font-semibold tabular-nums text-foreground-muted"
+                    style={{ height: HOUR_PX, paddingTop: 2 }}
+                  >
+                    {String(h).padStart(2, "0")}
                   </div>
                 ))}
-
-                {/* Appointments */}
-                {dayApts.map((appointment) => {
-                  const style = getAppointmentStyle(appointment);
-                  return (
-                    <div
-                      key={appointment.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAppointmentClick?.(appointment);
-                      }}
-                      style={style}
-                      className={`absolute left-0.5 right-0.5 rounded border-l-2 px-1 py-0.5 text-white shadow-sm cursor-pointer transition-transform hover:scale-[1.02] hover:z-10 ${getStatusColor(
-                        appointment.status
-                      )}`}
-                    >
-                      <p className="truncate text-xs font-medium leading-tight">
-                        {appointment.customer_first_name}
-                      </p>
-                      <p className="truncate text-[10px] opacity-90 leading-tight">
-                        {appointment.start_time}
-                      </p>
-                    </div>
-                  );
-                })}
               </div>
-            );
-          })}
-        </div>
+
+              {/* Day columns */}
+              {weekDays.map((day) => {
+                const dStr = getLocalDateString(day);
+                const isCurrent = dStr === today;
+                const dayApts = appointmentsByDate.get(dStr) ?? [];
+
+                return (
+                  <div
+                    key={dStr}
+                    className="relative border-l border-border"
+                    style={{
+                      background: isCurrent
+                        ? "rgba(34, 197, 94, 0.04)"
+                        : "transparent",
+                    }}
+                  >
+                    {/* Hour cells (click targets) */}
+                    {hours.map((h) => {
+                      const time = `${String(h).padStart(2, "0")}:00`;
+                      return (
+                        <div
+                          key={`${dStr}-${h}`}
+                          onClick={() => onTimeSlotClick?.(dStr, time)}
+                          className={`group relative border-t border-dashed border-border ${
+                            onTimeSlotClick
+                              ? "cursor-pointer hover:bg-info-50/60 dark:hover:bg-info-900/15"
+                              : ""
+                          }`}
+                          style={{ height: HOUR_PX }}
+                        >
+                          {onTimeSlotClick && (
+                            <Plus className="absolute right-1 top-1 hidden h-3 w-3 text-info group-hover:block" />
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Appointments */}
+                    {dayApts.map((appt) => (
+                      <ApptBlock
+                        key={appt.id}
+                        appt={appt}
+                        startHour={startHour}
+                        onClick={onAppointmentClick}
+                      />
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </Card>
       </div>
+    );
+  },
+  (prev, next) => {
+    return (
+      prev.date.getTime() === next.date.getTime() &&
+      prev.appointments.length === next.appointments.length &&
+      prev.appointments.every(
+        (apt, i) =>
+          apt.id === next.appointments[i]?.id &&
+          apt.status === next.appointments[i]?.status &&
+          apt.start_time === next.appointments[i]?.start_time &&
+          apt.end_time === next.appointments[i]?.end_time
+      ) &&
+      prev.startHour === next.startHour &&
+      prev.endHour === next.endHour &&
+      prev.onDateChange === next.onDateChange &&
+      prev.onAppointmentClick === next.onAppointmentClick &&
+      prev.onTimeSlotClick === next.onTimeSlotClick
+    );
+  }
+);
+
+interface ApptBlockProps {
+  appt: AppointmentWithDetails;
+  startHour: number;
+  onClick?: (a: AppointmentWithDetails) => void;
+}
+
+function ApptBlock({ appt, startHour, onClick }: ApptBlockProps) {
+  const [sH, sM] = appt.start_time.split(":").map(Number);
+  const [eH, eM] = appt.end_time.split(":").map(Number);
+  const startMin = (sH - startHour) * 60 + sM;
+  const durMin = Math.max(15, (eH - startHour) * 60 + eM - startMin);
+  const top = (startMin / 60) * HOUR_PX;
+  const height = Math.max((durMin / 60) * HOUR_PX - 1, 12);
+  const status = appt.status ?? "pending";
+  const time =
+    appt.start_time.length > 5 ? appt.start_time.slice(0, 5) : appt.start_time;
+
+  return (
+    <div
+      className={`st-${status} absolute inset-x-0.5 cursor-pointer overflow-hidden rounded border-l-2 px-1 py-0.5 text-[8px] font-bold tabular-nums shadow-xs transition-transform hover:z-10 hover:scale-[1.02]`}
+      style={{
+        top,
+        height,
+        background: "var(--st-bg)",
+        borderLeftColor: "var(--st-c)",
+        color: "var(--st-cb)",
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.(appt);
+      }}
+      role="button"
+      tabIndex={0}
+    >
+      {time}
     </div>
   );
-}, (prevProps, nextProps) => {
-  // Custom comparison function for React.memo
-  return (
-    prevProps.date.getTime() === nextProps.date.getTime() &&
-    prevProps.appointments.length === nextProps.appointments.length &&
-    prevProps.appointments.every(
-      (apt, idx) =>
-        apt.id === nextProps.appointments[idx]?.id &&
-        apt.status === nextProps.appointments[idx]?.status
-    ) &&
-    prevProps.startHour === nextProps.startHour &&
-    prevProps.endHour === nextProps.endHour &&
-    prevProps.onDateChange === nextProps.onDateChange &&
-    prevProps.onAppointmentClick === nextProps.onAppointmentClick &&
-    prevProps.onTimeSlotClick === nextProps.onTimeSlotClick
-  );
-});
+}

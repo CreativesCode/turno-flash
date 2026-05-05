@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * Tailwind v4 changed the default `dark:` variant to use the OS-level
+ * `prefers-color-scheme: dark` media query. We toggle dark mode via the
+ * `.dark` class on <html> (set by ThemeProvider), so we override the variant
+ * to be class-based — otherwise users whose OS is in dark mode would see
+ * `dark:` styles bleed into the app's "light" theme (e.g. `bg-white
+ * dark:bg-info-900/20` rendered as a translucent navy on top of white).
+ * ────────────────────────────────────────────────────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   /* Safe Area Insets for Capacitor mobile apps */
   --safe-area-inset-top: env(safe-area-inset-top);
@@ -10,13 +20,20 @@
   /* Light mode semantic colors */
   --background: #ffffff;
   --surface: #ffffff;
+  --surface-2: #f6f7f9;
   --muted-background: #f8fafc;
   --subtle-background: #f1f5f9;
   --border: #e2e8f0;
+  --border-2: #e2e6ec;
   --foreground: #0f172a;
   --foreground-muted: #334155;
+  --foreground-subtle: #8590a3;
   --primary-foreground: #ffffff;
   --secondary-foreground: #ffffff;
+
+  /* Brand glow shadows (used on mesh-gradient buttons / FAB / hero tiles) */
+  --shadow-glow-primary: 0 8px 20px -6px rgba(34, 197, 94, 0.35);
+  --shadow-glow-secondary: 0 8px 20px -6px rgba(219, 39, 119, 0.35);
 }
 
 @theme inline {
@@ -111,13 +128,20 @@
   /* Semantic colors (reference CSS variables for dark mode support) */
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-muted: var(--muted-background);
   --color-subtle: var(--subtle-background);
   --color-border: var(--border);
+  --color-border-2: var(--border-2);
   --color-foreground: var(--foreground);
   --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary-foreground: var(--secondary-foreground);
+
+  /* Brand glow shadows exposed as Tailwind utilities */
+  --shadow-glow-primary: var(--shadow-glow-primary);
+  --shadow-glow-secondary: var(--shadow-glow-secondary);
 
   /* Fonts */
   --font-sans: var(--font-geist-sans);
@@ -128,13 +152,19 @@
   /* Dark mode semantic colors */
   --background: #020617;
   --surface: #0f172a;
+  --surface-2: #131a2c;
   --muted-background: #111827;
   --subtle-background: #111827;
   --border: #1e293b;
+  --border-2: #243056;
   --foreground: #f8fafc;
   --foreground-muted: #94a3b8;
+  --foreground-subtle: #6c7794;
   --primary-foreground: #ffffff;
   --secondary-foreground: #ffffff;
+
+  --shadow-glow-primary: 0 10px 24px -8px rgba(34, 197, 94, 0.55);
+  --shadow-glow-secondary: 0 10px 24px -8px rgba(219, 39, 119, 0.55);
 }
 
 body {
@@ -222,3 +252,71 @@ body {
 .dark .scrollbar-discreet::-webkit-scrollbar-thumb:hover {
   background-color: rgba(148, 163, 184, 0.2); /* Hover directo en dark mode */
 }
+
+/* ──────────────────────────────────────────────────────────
+ * Mesh gradients — for hero tiles, dashboard shortcut cards,
+ * FAB buttons, drawer logo, KPI tiles. Apply to a square/rounded
+ * container with white text.
+ * ────────────────────────────────────────────────────────── */
+.mesh-primary {
+  background:
+    radial-gradient(60% 80% at 0% 0%, rgba(34, 197, 94, 0.18), transparent 60%),
+    radial-gradient(60% 80% at 100% 100%, rgba(20, 131, 60, 0.22), transparent 60%),
+    linear-gradient(135deg, #1ba64e, #0a5d29);
+}
+.mesh-secondary {
+  background:
+    radial-gradient(60% 80% at 0% 0%, rgba(255, 160, 200, 0.30), transparent 60%),
+    radial-gradient(60% 80% at 100% 100%, rgba(146, 22, 77, 0.35), transparent 60%),
+    linear-gradient(135deg, #db2777, #680d35);
+}
+.mesh-info {
+  background:
+    radial-gradient(60% 80% at 0% 0%, rgba(99, 179, 255, 0.25), transparent 60%),
+    radial-gradient(60% 80% at 100% 100%, rgba(29, 78, 216, 0.30), transparent 60%),
+    linear-gradient(135deg, #3b82f6, #1e3a8a);
+}
+.mesh-warn {
+  background:
+    radial-gradient(60% 80% at 0% 0%, rgba(252, 211, 77, 0.30), transparent 60%),
+    radial-gradient(60% 80% at 100% 100%, rgba(180, 83, 9, 0.30), transparent 60%),
+    linear-gradient(135deg, #f59e0b, #92400e);
+}
+.mesh-violet {
+  background:
+    radial-gradient(60% 80% at 0% 0%, rgba(196, 181, 253, 0.30), transparent 60%),
+    radial-gradient(60% 80% at 100% 100%, rgba(91, 33, 182, 0.30), transparent 60%),
+    linear-gradient(135deg, #8b5cf6, #4c1d95);
+}
+
+/* ──────────────────────────────────────────────────────────
+ * Appointment status palette — apply `.st-{status}` to any element
+ * to expose three CSS vars for that status:
+ *   --st-c   strong accent (icon, dot, current-time line)
+ *   --st-cb  on-bg readable color (text, badge label)
+ *   --st-bg  soft tinted background (badge bg, calendar block bg)
+ * Used by StatusBadge, ApptRow border, calendar blocks, mini stats.
+ * ────────────────────────────────────────────────────────── */
+.st-pending          { --st-c: #94a3b8; --st-cb: #64748b; --st-bg: #f1f5f9; }
+.st-confirmed        { --st-c: #3b82f6; --st-cb: #2563eb; --st-bg: #dbeafe; }
+.st-reminded         { --st-c: #8b5cf6; --st-cb: #7c3aed; --st-bg: #ede9fe; }
+.st-client_confirmed { --st-c: #06b6d4; --st-cb: #0891b2; --st-bg: #cffafe; }
+.st-checked_in       { --st-c: #f59e0b; --st-cb: #d97706; --st-bg: #fef3c7; }
+.st-in_progress      { --st-c: #f97316; --st-cb: #ea580c; --st-bg: #ffedd5; }
+.st-completed        { --st-c: #22c55e; --st-cb: #16a34a; --st-bg: #dcfce7; }
+.st-cancelled        { --st-c: #ef4444; --st-cb: #dc2626; --st-bg: #fee2e2; }
+.st-no_show          { --st-c: #71717a; --st-cb: #52525b; --st-bg: #f4f4f5; }
+.st-rescheduled      { --st-c: #0ea5e9; --st-cb: #0369a1; --st-bg: #e0f2fe; }
+
+/* Dark-mode tinted backgrounds — keep --st-c / --st-cb identical
+ * (they're used as foreground/accent) but darken --st-bg for legibility. */
+.dark .st-pending          { --st-bg: #1c2331; }
+.dark .st-confirmed        { --st-bg: #172554; }
+.dark .st-reminded         { --st-bg: #2e1065; }
+.dark .st-client_confirmed { --st-bg: #083344; }
+.dark .st-checked_in       { --st-bg: #451a03; }
+.dark .st-in_progress      { --st-bg: #431407; }
+.dark .st-completed        { --st-bg: #052e16; }
+.dark .st-cancelled        { --st-bg: #450a0a; }
+.dark .st-no_show          { --st-bg: #18181b; }
+.dark .st-rescheduled      { --st-bg: #082f49; }

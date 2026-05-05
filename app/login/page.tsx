@@ -1,9 +1,9 @@
 "use client";
 
 import { PageMetadata } from "@/components/page-metadata";
-import { Button } from "@/components/ui/button";
+import { Button, Card } from "@/components/ui";
 import { createClient } from "@/utils/supabase/client";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Zap } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
@@ -16,7 +16,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Memoizar el cliente de Supabase para evitar re-renders
   const supabase = useMemo(() => createClient(), []);
 
   const handleLogin = async (e: FormEvent) => {
@@ -36,7 +35,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Login exitoso, redirigir al dashboard
       router.push("/dashboard");
     } catch {
       setError("Error al iniciar sesión. Intenta nuevamente.");
@@ -46,53 +44,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <PageMetadata
         title="Iniciar Sesión"
         description="Inicia sesión en Turno Flash para acceder a tu panel de control y gestionar tus turnos, clientes y servicios."
       />
-      {/* Navigation */}
-      <nav className="border-b border-border bg-surface/80 backdrop-blur-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center hover:opacity-80">
-              <img
-                src="/images/logo_horizontal.svg"
-                alt="Turno Flash Logo"
-                className="h-10 w-auto"
-                style={{ maxWidth: 200 }}
-              />
-            </Link>
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-sm text-foreground-muted hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Volver al inicio
-            </Link>
-          </div>
-        </div>
-      </nav>
 
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-linear-to-br from-primary-50/50 via-background to-secondary-50/50 dark:from-primary-950/30 dark:via-background dark:to-secondary-950/30 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              Iniciar Sesión
+      <div className="flex flex-1 items-center justify-center px-5 py-12 sm:px-6">
+        <div className="w-full max-w-md">
+          {/* Brand mark */}
+          <div className="mb-7 flex flex-col items-center gap-3">
+            <div className="mesh-primary flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-glow-primary">
+              <Zap className="h-7 w-7" />
+            </div>
+            <div className="text-xl font-extrabold tracking-tight text-foreground">
+              TurnoFlash
+            </div>
+          </div>
+
+          {/* Card */}
+          <Card className="p-6 sm:p-7">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+              Bienvenida
             </h1>
-            <p className="mt-2 text-sm text-foreground-muted">
-              Ingresa tus credenciales para acceder a tu cuenta
+            <p className="mt-1 text-sm text-foreground-muted">
+              Ingresá con tu cuenta para administrar tu agenda.
             </p>
-          </div>
 
-          <div className="rounded-lg border border-border bg-surface p-8 shadow-sm">
-            <form onSubmit={handleLogin} className="space-y-6">
+            <form onSubmit={handleLogin} className="mt-6 space-y-4">
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-foreground"
+                  className="text-xs font-semibold tracking-wide text-foreground-muted uppercase"
                 >
-                  Correo electrónico
+                  Email
                 </label>
                 <input
                   id="email"
@@ -102,19 +87,19 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-border bg-background px-3 py-2 text-base text-foreground placeholder-foreground-muted shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:text-sm"
                   placeholder="tu@ejemplo.com"
+                  className="mt-1.5 block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 text-sm text-foreground placeholder-foreground-subtle transition-shadow focus:border-primary-500 focus:outline-none focus:ring-3 focus:ring-primary-500/15"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-foreground"
+                  className="text-xs font-semibold tracking-wide text-foreground-muted uppercase"
                 >
                   Contraseña
                 </label>
-                <div className="relative mt-1">
+                <div className="relative mt-1.5">
                   <input
                     id="password"
                     name="password"
@@ -123,56 +108,58 @@ export default function LoginPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full rounded-md border border-border bg-background px-3 py-2 pr-10 text-base text-foreground placeholder-foreground-muted shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:text-sm"
                     placeholder="••••••••"
+                    className="block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 pr-10 text-sm text-foreground placeholder-foreground-subtle transition-shadow focus:border-primary-500 focus:outline-none focus:ring-3 focus:ring-primary-500/15"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors"
+                    className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
                     aria-label={
                       showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
                     }
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-5 w-5" />
+                      <Eye className="h-4 w-4" />
                     )}
                   </button>
                 </div>
               </div>
 
               {error && (
-                <div className="rounded-md bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+                <div className="rounded-lg bg-danger-50 px-3 py-2.5 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
                   {error}
                 </div>
               )}
 
               <Button
                 type="submit"
-                variant="secondary"
-                size="lg"
+                variant="mesh-primary"
+                size="md"
                 disabled={loading}
                 className="w-full"
               >
-                {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+                {loading ? "Iniciando sesión..." : "Ingresar"}
               </Button>
-
-              <div className="text-center">
-                <p className="text-xs text-foreground-muted">
-                  Si es tu primera vez, solicita una invitación al administrador
-                </p>
-              </div>
             </form>
+          </Card>
+
+          <div className="mt-5 text-center text-xs text-foreground-muted">
+            ¿Aún no tenés cuenta?{" "}
+            <span className="font-semibold text-foreground">
+              Pedí una invitación
+            </span>
           </div>
 
-          <div className="text-center">
+          <div className="mt-8 text-center">
             <Link
               href="/"
-              className="text-sm text-foreground-muted hover:text-primary transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-foreground-muted transition-colors hover:text-primary"
             >
-              ← Volver a la página principal
+              <ArrowLeft className="h-4 w-4" />
+              Volver al inicio
             </Link>
           </div>
         </div>
