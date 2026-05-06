@@ -13,6 +13,7 @@ import {
   AppointmentWithDetails,
 } from "@/types/appointments";
 import {
+  InfiniteData,
   UseQueryOptions,
   useInfiniteQuery,
   useMutation,
@@ -32,6 +33,42 @@ export interface AppointmentFilters {
   status?: AppointmentStatus[];
   startDate?: string;
   endDate?: string;
+}
+
+// `appointmentKeys.lists()` matches both the flat list query and the infinite query,
+// so optimistic updates must handle both array and InfiniteData<T[]> shapes.
+type AppointmentListCache =
+  | AppointmentWithDetails[]
+  | InfiniteData<AppointmentWithDetails[]>
+  | undefined;
+
+function isInfiniteData(
+  value: NonNullable<AppointmentListCache>
+): value is InfiniteData<AppointmentWithDetails[]> {
+  return !Array.isArray(value) && Array.isArray((value as InfiniteData<AppointmentWithDetails[]>).pages);
+}
+
+function prependToAppointmentLists(
+  old: AppointmentListCache,
+  appointment: AppointmentWithDetails
+): AppointmentListCache {
+  if (!old) return [appointment];
+  if (isInfiniteData(old)) {
+    const [firstPage = [], ...rest] = old.pages;
+    return { ...old, pages: [[appointment, ...firstPage], ...rest] };
+  }
+  return [appointment, ...old];
+}
+
+function mapAppointmentLists(
+  old: AppointmentListCache,
+  fn: (appointment: AppointmentWithDetails) => AppointmentWithDetails
+): AppointmentListCache {
+  if (!old) return old;
+  if (isInfiniteData(old)) {
+    return { ...old, pages: old.pages.map((page) => page.map(fn)) };
+  }
+  return old.map(fn);
 }
 
 /**
@@ -226,13 +263,11 @@ export function useCreateAppointment() {
         customer_email: null,
       } as AppointmentWithDetails;
 
-      // Optimistically add to all appointment list queries
-      queryClient.setQueriesData(
+      // Optimistically add to all appointment list queries (handles both flat
+      // and InfiniteData caches that share the `lists()` prefix)
+      queryClient.setQueriesData<AppointmentListCache>(
         { queryKey: appointmentKeys.lists() },
-        (old: AppointmentWithDetails[] | undefined) => {
-          if (!old) return [optimisticAppointment];
-          return [...old, optimisticAppointment];
-        }
+        (old) => prependToAppointmentLists(old, optimisticAppointment)
       );
 
       return { previousAppointments };
@@ -320,16 +355,14 @@ export function useUpdateAppointmentStatus() {
       });
 
       // Optimistically update all appointment list queries
-      queryClient.setQueriesData(
+      queryClient.setQueriesData<AppointmentListCache>(
         { queryKey: appointmentKeys.lists() },
-        (old: AppointmentWithDetails[] | undefined) => {
-          if (!old) return old;
-          return old.map((appointment) =>
+        (old) =>
+          mapAppointmentLists(old, (appointment) =>
             appointment.id === appointmentId
               ? { ...appointment, status: newStatus }
               : appointment
-          );
-        }
+          )
       );
 
       // Return context with previous values for rollback
@@ -397,16 +430,14 @@ export function useDeleteAppointment() {
       });
 
       // Optimistically update status to "cancelled"
-      queryClient.setQueriesData(
+      queryClient.setQueriesData<AppointmentListCache>(
         { queryKey: appointmentKeys.lists() },
-        (old: AppointmentWithDetails[] | undefined) => {
-          if (!old) return old;
-          return old.map((appointment) =>
+        (old) =>
+          mapAppointmentLists(old, (appointment) =>
             appointment.id === appointmentId
               ? { ...appointment, status: APPOINTMENT_STATUS.CANCELLED as AppointmentStatus }
               : appointment
-          );
-        }
+          )
       );
 
       return { previousAppointments };
