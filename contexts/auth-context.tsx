@@ -180,12 +180,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initAuth();
 
     // Escuchar cambios en la autenticación
+    // IMPORTANTE: este callback DEBE ser síncrono respecto a llamadas a Supabase.
+    // Hacer `await` de cualquier método de supabase aquí (incluyendo queries de DB,
+    // que internamente llaman a getAccessToken()) provoca un deadlock con el lock
+    // de @supabase/ssr que mantiene setSession()/refreshToken() mientras dispara
+    // este evento. Por eso diferimos loadUserProfile con setTimeout(_, 0).
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       // Ignorar el evento INITIAL_SESSION ya que lo manejamos manualmente arriba
       if (event === "INITIAL_SESSION") return;
-      
+
       // No procesar si el componente fue desmontado
       if (!isMountedRef.current) return;
 
@@ -200,17 +205,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       console.log("Auth state changed:", event);
-      
+
       // Actualizar ref antes de procesar
       processingRef.current = {
         userId: currentUserId,
         event,
       };
 
-      setUser(session?.user ?? null);
+      const sessionUser = session?.user ?? null;
+      setUser(sessionUser);
 
-      if (session?.user) {
-        await loadUserProfile(session.user, abortController.signal);
+      if (sessionUser) {
+        // Diferir la llamada para liberar el lock de auth de @supabase/ssr.
+        setTimeout(() => {
+          if (!isMountedRef.current) return;
+          if (abortController.signal.aborted) return;
+          void loadUserProfile(sessionUser, abortController.signal);
+        }, 0);
       } else {
         setProfile(null);
         setLoading(false);
