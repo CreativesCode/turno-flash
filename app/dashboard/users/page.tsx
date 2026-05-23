@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { UserProfile, UserRole } from "@/types/auth";
 import { createClient } from "@/utils/supabase/client";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -309,23 +310,22 @@ export default function UsersManagementPage() {
         description="Gestiona los usuarios del sistema. Administra roles, permisos, invitaciones y acceso de usuarios."
       />
       <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Gestión de Usuarios
-              </h1>
-              <p className="mt-2 text-foreground-muted">
-                Administra los usuarios del sistema y sus roles
-              </p>
-            </div>
+          <div className="mb-6">
             <button
               onClick={() => router.push("/dashboard")}
-              className="rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
+              className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-foreground-muted transition-colors hover:text-foreground"
             >
+              <ArrowLeft size={16} />
               Volver al dashboard
             </button>
+            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+              Gestión de Usuarios
+            </h1>
+            <p className="mt-1 text-sm text-foreground-muted">
+              Administra los usuarios del sistema y sus roles
+            </p>
           </div>
 
           {/* Mensajes de éxito/error */}

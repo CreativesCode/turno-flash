@@ -7,6 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import {
   AlertCircle,
   CheckCircle2,
+  ChevronDown,
   Copy,
   Loader2,
   MessageCircle,
@@ -16,6 +17,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface Props {
   organizationId: string;
+  defaultCollapsed?: boolean;
 }
 
 interface OutboundRow {
@@ -56,10 +58,14 @@ function statusTone(
  * (solo visible para admin). No incluye el `whatsapp_phone` de la org
  * porque ese se edita en el formulario de información básica.
  */
-export function WhatsAppOrgSection({ organizationId }: Props) {
+export function WhatsAppOrgSection({
+  organizationId,
+  defaultCollapsed = true,
+}: Props) {
   const toast = useToast();
   const supabase = useMemo(() => createClient(), []);
 
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [enabled, setEnabled] = useState(false);
@@ -160,22 +166,49 @@ export function WhatsAppOrgSection({ organizationId }: Props) {
     }
   };
 
+  const statusBadge = loading ? null : enabled ? (
+    <span className="rounded-full bg-success-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-800 dark:bg-success-900/20 dark:text-success-400">
+      Activa
+    </span>
+  ) : (
+    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-foreground-muted">
+      Inactiva
+    </span>
+  );
+
   return (
-    <Card className="space-y-5 p-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-success-100 text-success-700 dark:bg-success-900/20 dark:text-success-400">
+    <Card className={collapsed ? "p-0" : "space-y-5 p-6"}>
+      <button
+        type="button"
+        onClick={() => setCollapsed((v) => !v)}
+        aria-expanded={!collapsed}
+        className={`flex w-full items-center gap-3 text-left transition-colors ${
+          collapsed ? "p-5 hover:bg-muted/30 rounded-xl" : "pb-1"
+        }`}
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-100 text-success-700 dark:bg-success-900/20 dark:text-success-400">
           <MessageCircle className="h-4.5 w-4.5" />
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">
-            Integración WhatsApp
-          </h2>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-foreground">
+              Integración WhatsApp
+            </h2>
+            {statusBadge}
+          </div>
           <p className="text-xs text-foreground-muted">
             Configuración de OpenWA para esta organización
           </p>
         </div>
-      </div>
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-foreground-muted transition-transform ${
+            collapsed ? "" : "rotate-180"
+          }`}
+        />
+      </button>
 
+      {collapsed ? null : (
+        <>
       {pageError && (
         <div className="rounded-md bg-danger-50 px-3 py-2 text-xs text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
           {pageError}
@@ -355,6 +388,8 @@ export function WhatsAppOrgSection({ organizationId }: Props) {
           </div>
         )}
       </div>
+        </>
+      )}
     </Card>
   );
 }

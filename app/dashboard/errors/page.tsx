@@ -10,13 +10,22 @@ import {
   useUnresolveError,
   useToast,
 } from "@/hooks";
-import { AlertCircle, CheckCircle, Clock, Search, XCircle } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Search,
+  XCircle,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function ErrorsPage() {
   const { profile } = useAuth();
+  const router = useRouter();
   const toast = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [resolvedFilter, setResolvedFilter] = useState<boolean | undefined>(
@@ -98,71 +107,78 @@ export default function ErrorsPage() {
       <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground">
+          <div className="mb-6">
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-foreground-muted transition-colors hover:text-foreground"
+            >
+              <ArrowLeft size={16} />
+              Volver al dashboard
+            </button>
+            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
               Logs de Errores
             </h1>
-            <p className="mt-2 text-foreground-muted">
+            <p className="mt-1 text-sm text-foreground-muted">
               Monitorea y gestiona los errores de la aplicación
             </p>
           </div>
 
           {/* Stats Cards */}
           {stats && (
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-lg border border-border bg-surface p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-foreground-muted">
+            <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+              <div className="rounded-lg border border-border bg-surface p-3 sm:p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-medium text-foreground-muted sm:text-sm">
                       Total Errores
                     </p>
-                    <p className="mt-1 text-2xl font-bold text-foreground">
+                    <p className="mt-1 text-xl font-bold text-foreground sm:text-2xl">
                       {stats.total_errors || 0}
                     </p>
                   </div>
-                  <AlertCircle className="h-8 w-8 text-danger" />
+                  <AlertCircle className="h-6 w-6 shrink-0 text-danger sm:h-8 sm:w-8" />
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border bg-surface p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-foreground-muted">
+              <div className="rounded-lg border border-border bg-surface p-3 sm:p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-medium text-foreground-muted sm:text-sm">
                       Sin Resolver
                     </p>
-                    <p className="mt-1 text-2xl font-bold text-danger">
+                    <p className="mt-1 text-xl font-bold text-danger sm:text-2xl">
                       {stats.unresolved_errors || 0}
                     </p>
                   </div>
-                  <XCircle className="h-8 w-8 text-danger" />
+                  <XCircle className="h-6 w-6 shrink-0 text-danger sm:h-8 sm:w-8" />
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border bg-surface p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-foreground-muted">
+              <div className="rounded-lg border border-border bg-surface p-3 sm:p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-medium text-foreground-muted sm:text-sm">
                       Resueltos
                     </p>
-                    <p className="mt-1 text-2xl font-bold text-success">
+                    <p className="mt-1 text-xl font-bold text-success sm:text-2xl">
                       {stats.resolved_errors || 0}
                     </p>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-success" />
+                  <CheckCircle className="h-6 w-6 shrink-0 text-success sm:h-8 sm:w-8" />
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border bg-surface p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-foreground-muted">
+              <div className="rounded-lg border border-border bg-surface p-3 sm:p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-medium text-foreground-muted sm:text-sm">
                       Hoy
                     </p>
-                    <p className="mt-1 text-2xl font-bold text-foreground">
+                    <p className="mt-1 text-xl font-bold text-foreground sm:text-2xl">
                       {stats.errors_today || 0}
                     </p>
                   </div>
-                  <Clock className="h-8 w-8 text-info" />
+                  <Clock className="h-6 w-6 shrink-0 text-info sm:h-8 sm:w-8" />
                 </div>
               </div>
             </div>

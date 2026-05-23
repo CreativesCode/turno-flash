@@ -3,11 +3,23 @@
 import { LicenseNotification } from "@/components/license-notification";
 import { WhatsAppOrgSection } from "@/components/organizations/WhatsAppOrgSection";
 import { ProtectedRoute } from "@/components/protected-route";
+import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
 import { UserProfile } from "@/types/auth";
 import { OrganizationWithLicenseStatus } from "@/types/organization";
 import { createClient } from "@/utils/supabase/client";
+import {
+  ArrowLeft,
+  Building2,
+  CheckCircle2,
+  KeyRound,
+  Pencil,
+  ShieldCheck,
+  UserCircle2,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   FormEvent,
@@ -328,12 +340,14 @@ function OrganizationDetailsContent() {
             <h1 className="text-2xl font-bold text-foreground">
               ID de organización no proporcionado
             </h1>
-            <button
+            <Button
+              variant="info"
+              className="mt-4"
               onClick={() => router.push("/dashboard/organizations")}
-              className="mt-4 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700"
             >
+              <ArrowLeft size={16} />
               Volver a organizaciones
-            </button>
+            </Button>
           </div>
         </div>
       </ProtectedRoute>
@@ -363,12 +377,14 @@ function OrganizationDetailsContent() {
             <h1 className="text-2xl font-bold text-foreground">
               Organización no encontrada
             </h1>
-            <button
+            <Button
+              variant="info"
+              className="mt-4"
               onClick={() => router.push("/dashboard/organizations")}
-              className="mt-4 rounded-md bg-info px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-info-700"
             >
+              <ArrowLeft size={16} />
               Volver a organizaciones
-            </button>
+            </Button>
           </div>
         </div>
       </ProtectedRoute>
@@ -379,33 +395,62 @@ function OrganizationDetailsContent() {
     <ProtectedRoute>
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <button
-                onClick={() => router.push("/dashboard/organizations")}
-                className="mb-4 text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
-              >
-                ← Volver a organizaciones
-              </button>
-              <h1 className="text-3xl font-bold text-foreground">
-                {isEditing ? "Editar organización" : organization.name}
-              </h1>
-              <p className="mt-2 text-sm text-foreground-muted">
-                {isEditing
-                  ? "Modifica la información de la organización"
-                  : "Detalles y configuración de la organización"}
-              </p>
+          {/* Back link */}
+          <button
+            onClick={() => router.push("/dashboard/organizations")}
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-foreground-muted transition-colors hover:text-foreground"
+          >
+            <ArrowLeft size={16} />
+            Volver a organizaciones
+          </button>
+
+          {/* Header card */}
+          <Card className="mb-6 p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex min-w-0 items-start gap-4">
+                <div className="mesh-info flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm">
+                  <Building2 size={26} />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="truncate text-2xl font-bold text-foreground">
+                      {isEditing ? "Editar organización" : organization.name}
+                    </h1>
+                    {!isEditing && (
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                          organization.is_active
+                            ? "bg-success-100 text-success-800"
+                            : "bg-danger-100 text-danger-800"
+                        }`}
+                      >
+                        {organization.is_active ? "Activa" : "Inactiva"}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-foreground-muted">
+                    {isEditing
+                      ? "Modifica la información de la organización"
+                      : "Detalles y configuración de la organización"}
+                  </p>
+                  {!isEditing && (
+                    <code className="mt-2 inline-block rounded bg-muted px-2 py-0.5 text-xs text-foreground-muted">
+                      /{organization.slug}
+                    </code>
+                  )}
+                </div>
+              </div>
+              {isAdmin && !isEditing && (
+                <Button
+                  variant="mesh-secondary"
+                  onClick={() => setIsEditing(true)}
+                >
+                  <Pencil size={16} />
+                  Editar
+                </Button>
+              )}
             </div>
-            {isAdmin && !isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
-              >
-                Editar organización
-              </button>
-            )}
-          </div>
+          </Card>
 
           {/* Mensajes */}
           {error && (
@@ -445,10 +490,15 @@ function OrganizationDetailsContent() {
             {/* Columna principal */}
             <div className="lg:col-span-2 space-y-6">
               {/* Información básica */}
-              <div className="rounded-lg bg-surface border border-border p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Información básica
-                </h2>
+              <Card className="p-6">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-info-100 text-info-700 dark:bg-info-900/20 dark:text-info-400">
+                    <Building2 size={18} />
+                  </div>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Información básica
+                  </h2>
+                </div>
 
                 {isEditing ? (
                   <form onSubmit={handleSave} className="mt-4 space-y-4">
@@ -563,21 +613,24 @@ function OrganizationDetailsContent() {
                     </div>
 
                     <div className="flex gap-3 pt-4">
-                      <button
+                      <Button
                         type="submit"
+                        variant="mesh-secondary"
                         disabled={saving}
-                        className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-1"
                       >
+                        <CheckCircle2 size={16} />
                         {saving ? "Guardando..." : "Guardar cambios"}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
+                        variant="ghost"
                         onClick={handleCancel}
                         disabled={saving}
-                        className="flex-1 rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-1"
                       >
                         Cancelar
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 ) : (
@@ -653,13 +706,18 @@ function OrganizationDetailsContent() {
                     </div>
                   </dl>
                 )}
-              </div>
+              </Card>
 
               {/* Licencia */}
-              <div className="rounded-lg bg-surface border border-border p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Licencia
-                </h2>
+              <Card className="p-6">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-warning-100 text-warning-700 dark:bg-warning-900/20 dark:text-warning-400">
+                    <KeyRound size={18} />
+                  </div>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Licencia
+                  </h2>
+                </div>
 
                 {isEditing ? (
                   <div className="mt-4 space-y-4">
@@ -792,14 +850,21 @@ function OrganizationDetailsContent() {
                     )}
                   </dl>
                 )}
-              </div>
+              </Card>
             </div>
 
             {/* Columna lateral */}
             <div className="space-y-6">
               {/* Dueño */}
-              <div className="rounded-lg bg-surface border border-border p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-foreground">Dueño</h2>
+              <Card className="p-6">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400">
+                    <UserCircle2 size={18} />
+                  </div>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Dueño
+                  </h2>
+                </div>
                 {organization.owner ? (
                   <div className="mt-4">
                     <div className="text-sm font-semibold text-foreground">
@@ -809,7 +874,8 @@ function OrganizationDetailsContent() {
                       {organization.owner.email}
                     </div>
                     <div className="mt-2">
-                      <span className="inline-flex items-center rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-800">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-800">
+                        <ShieldCheck size={12} />
                         {organization.owner.role}
                       </span>
                     </div>
@@ -819,15 +885,20 @@ function OrganizationDetailsContent() {
                     Sin dueño asignado
                   </p>
                 )}
-              </div>
+              </Card>
 
               {/* Miembros */}
-              <div className="rounded-lg bg-surface border border-border p-6 shadow-sm">
+              <Card className="p-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Miembros
-                  </h2>
-                  <span className="rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-medium text-info-800">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-info-100 text-info-700 dark:bg-info-900/20 dark:text-info-400">
+                      <Users size={18} />
+                    </div>
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Miembros
+                    </h2>
+                  </div>
+                  <span className="rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-bold text-info-800">
                     {organization.members?.length || 0}
                   </span>
                 </div>
@@ -878,17 +949,20 @@ function OrganizationDetailsContent() {
                           {addUserSuccess}
                         </p>
                       )}
-                      <button
+                      <Button
                         type="submit"
+                        variant="secondary"
+                        size="sm"
                         disabled={
                           addingUser ||
                           !selectedUserId ||
                           availableUsers.length === 0
                         }
-                        className="w-full rounded-md bg-secondary-400 px-3 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary-500 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="w-full"
                       >
+                        <UserPlus size={14} />
                         {addingUser ? "Agregando..." : "Agregar usuario"}
-                      </button>
+                      </Button>
                     </form>
                   </div>
                 )}
@@ -927,7 +1001,7 @@ function OrganizationDetailsContent() {
                     No hay miembros registrados
                   </p>
                 )}
-              </div>
+              </Card>
             </div>
           </div>
         </div>

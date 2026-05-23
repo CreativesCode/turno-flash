@@ -2,10 +2,20 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
+import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { UserProfile } from "@/types/auth";
 import { OrganizationWithLicenseStatus } from "@/types/organization";
 import { createClient } from "@/utils/supabase/client";
+import {
+  ArrowLeft,
+  Building2,
+  Clock,
+  Eye,
+  Plus,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -183,30 +193,33 @@ export default function OrganizationsPage() {
         description="Gestiona las organizaciones del sistema. Administra información, licencias y miembros de cada organización."
       />
       <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Gestión de Organizaciones
-              </h1>
-              <p className="mt-2 text-foreground-muted">
-                Administra las organizaciones del sistema
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
+          <div className="mb-6">
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-foreground-muted transition-colors hover:text-foreground"
+            >
+              <ArrowLeft size={16} />
+              Volver al dashboard
+            </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+                  Gestión de Organizaciones
+                </h1>
+                <p className="mt-1 text-sm text-foreground-muted">
+                  Administra las organizaciones del sistema
+                </p>
+              </div>
+              <Button
+                variant="mesh-secondary"
                 onClick={() => router.push("/dashboard/organizations/new")}
-                className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
+                className="w-full justify-center sm:w-auto"
               >
+                <Plus size={16} />
                 Crear organización
-              </button>
-              <button
-                onClick={() => router.push("/dashboard")}
-                className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2"
-              >
-                Volver al dashboard
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -224,8 +237,8 @@ export default function OrganizationsPage() {
           )}
 
           {/* Lista de organizaciones */}
-          <div className="rounded-lg bg-surface border border-border shadow-sm">
-            {loading ? (
+          {loading ? (
+            <Card>
               <div className="flex items-center justify-center p-12">
                 <div className="flex flex-col items-center justify-center text-center">
                   <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
@@ -234,171 +247,158 @@ export default function OrganizationsPage() {
                   </p>
                 </div>
               </div>
-            ) : organizations.length === 0 ? (
+            </Card>
+          ) : organizations.length === 0 ? (
+            <Card>
               <div className="p-12 text-center">
                 <p className="text-foreground-muted">
                   No hay organizaciones en el sistema
                 </p>
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-border">
-                  <thead className="bg-muted">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Nombre
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Slug
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Dueño
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Miembros
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Estado
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Licencia
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Zona horaria
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Fecha de creación
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Acciones
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border bg-surface">
-                    {organizations.map((org) => (
-                      <tr key={org.id} className="hover:bg-muted/50">
-                        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground">
-                          {org.name}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
-                          <code className="rounded bg-muted px-2 py-1 text-xs text-foreground">
-                            {org.slug}
-                          </code>
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
-                          {org.owner ? (
-                            <div>
-                              <div className="font-medium">
-                                {org.owner.full_name || org.owner.email}
-                              </div>
-                              <div className="text-xs text-foreground-muted">
-                                {org.owner.email}
-                              </div>
-                            </div>
-                          ) : (
-                            <span className="text-foreground-muted">
-                              Sin dueño
-                            </span>
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
-                          <span className="inline-flex items-center rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-medium text-info-800">
-                            {org.member_count || 0}
-                          </span>
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm">
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {organizations.map((org) => {
+                const licenseStyle =
+                  org.license_status === "active"
+                    ? "bg-success-100 text-success-800"
+                    : org.license_status === "grace_period"
+                    ? "bg-warning-100 text-warning-800"
+                    : org.license_status === "expired"
+                    ? "bg-danger-100 text-danger-800"
+                    : "bg-muted text-foreground-muted";
+                const licenseLabel =
+                  org.license_status === "active"
+                    ? "Activa"
+                    : org.license_status === "grace_period"
+                    ? "Período de gracia"
+                    : org.license_status === "expired"
+                    ? "Expirada"
+                    : "Sin licencia";
+
+                return (
+                  <Card
+                    key={org.id}
+                    className="flex flex-col p-5 transition-shadow hover:shadow-md"
+                  >
+                    {/* Header: icon + name + status */}
+                    <div className="flex items-start gap-3">
+                      <div className="mesh-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-sm">
+                        <Building2 size={20} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="truncate text-base font-bold text-foreground">
+                            {org.name}
+                          </h3>
                           <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
                               org.is_active
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
+                                ? "bg-success-100 text-success-800"
+                                : "bg-danger-100 text-danger-800"
                             }`}
                           >
                             {org.is_active ? "Activa" : "Inactiva"}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <div className="flex flex-col gap-1">
-                            <span
-                              className={`inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                org.license_status === "active"
-                                  ? "bg-success-100 text-success-800"
-                                  : org.license_status === "grace_period"
-                                  ? "bg-warning-100 text-warning-800"
-                                  : org.license_status === "expired"
-                                  ? "bg-danger-100 text-danger-800"
-                                  : "bg-muted text-foreground-muted"
-                              }`}
-                            >
-                              {org.license_status === "active"
-                                ? "Activa"
-                                : org.license_status === "grace_period"
-                                ? "Período de gracia"
-                                : org.license_status === "expired"
-                                ? "Expirada"
-                                : "Sin licencia"}
-                            </span>
-                            {org.days_remaining !== null && (
-                              <span className="text-xs text-foreground-muted">
-                                {org.days_remaining > 0
-                                  ? `${org.days_remaining} días restantes`
-                                  : `Expirada hace ${Math.abs(
-                                      org.days_remaining
-                                    )} días`}
-                              </span>
-                            )}
-                            {org.license_start_date && org.license_end_date && (
-                              <span className="text-xs text-foreground-muted">
-                                {new Date(
-                                  org.license_end_date
-                                ).toLocaleDateString("es-ES")}
-                              </span>
-                            )}
+                        </div>
+                        <code className="mt-1 inline-block rounded bg-muted px-1.5 py-0.5 text-[11px] text-foreground-muted">
+                          /{org.slug}
+                        </code>
+                      </div>
+                    </div>
+
+                    {/* Owner */}
+                    <div className="mt-4 border-t border-border pt-3">
+                      {org.owner ? (
+                        <div className="text-sm">
+                          <div className="font-medium text-foreground">
+                            {org.owner.full_name || org.owner.email}
                           </div>
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground-muted">
-                          {org.timezone}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground-muted">
-                          {new Date(org.created_at).toLocaleDateString(
-                            "es-ES",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() =>
-                                router.push(
-                                  `/dashboard/organizations/details?id=${org.id}`
-                                )
-                              }
-                              className="rounded-md bg-info px-3 py-1.5 text-xs font-medium text-info-foreground transition-colors hover:bg-info-700 focus:outline-none focus:ring-2 focus:ring-info-500 focus:ring-offset-2"
-                            >
-                              Ver detalles
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClick(org)}
-                              disabled={deleting === org.id}
-                              className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              {deleting === org.id
-                                ? "Eliminando..."
-                                : "Eliminar"}
-                            </button>
+                          <div className="text-xs text-foreground-muted">
+                            {org.owner.email}
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-foreground-muted">
+                          Sin dueño asignado
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Meta grid */}
+                    <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                      <div className="flex items-center gap-1.5 text-foreground-muted">
+                        <Users size={14} />
+                        <span>
+                          {org.member_count || 0}{" "}
+                          {org.member_count === 1 ? "miembro" : "miembros"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-foreground-muted">
+                        <Clock size={14} />
+                        <span className="truncate">{org.timezone}</span>
+                      </div>
+                    </div>
+
+                    {/* License */}
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${licenseStyle}`}
+                      >
+                        {licenseLabel}
+                      </span>
+                      {org.days_remaining !== null && (
+                        <span className="text-[11px] text-foreground-muted">
+                          {org.days_remaining > 0
+                            ? `${org.days_remaining} días restantes`
+                            : `Expirada hace ${Math.abs(
+                                org.days_remaining
+                              )} días`}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Created date */}
+                    <div className="mt-3 text-[11px] text-foreground-subtle">
+                      Creada el{" "}
+                      {new Date(org.created_at).toLocaleDateString("es-ES", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="mt-4 flex gap-2 border-t border-border pt-3">
+                      <Button
+                        variant="info"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/organizations/details?id=${org.id}`
+                          )
+                        }
+                      >
+                        <Eye size={14} />
+                        Ver detalles
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDeleteClick(org)}
+                        disabled={deleting === org.id}
+                        aria-label="Eliminar organización"
+                      >
+                        <Trash2 size={14} />
+                        {deleting === org.id ? "Eliminando..." : "Eliminar"}
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

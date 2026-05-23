@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { Avatar, Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useAppointments } from "@/hooks/useAppointments.query";
+import { useErrorStatsQuery } from "@/hooks/useErrorLogs.query";
 import type { AppointmentStatus } from "@/types/appointments";
 import { LicenseStatusResult } from "@/types/organization";
 import {
@@ -19,6 +20,7 @@ import {
 } from "@/utils/license";
 import { createClient } from "@/utils/supabase/client";
 import {
+  AlertTriangle,
   Bell,
   Building2,
   Calendar,
@@ -120,6 +122,15 @@ const SHORTCUTS: readonly ShortcutCard[] = [
     href: "/dashboard/invite",
     roles: ["admin", "owner"],
   },
+  {
+    key: "errors",
+    title: "Errores",
+    subtitle: "Logs de la app",
+    Icon: AlertTriangle,
+    mesh: "mesh-warn",
+    href: "/dashboard/errors",
+    roles: ["admin", "owner"],
+  },
 ];
 
 // Today in YYYY-MM-DD (local timezone). Computed once per render.
@@ -160,6 +171,16 @@ export default function DashboardPage() {
   const [loadingLicense, setLoadingLicense] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
+  const [adminCounts, setAdminCounts] = useState<{
+    organizations: number;
+    users: number;
+  } | null>(null);
+
+  const isAdminWithoutOrg =
+    profile?.role === "admin" && !profile?.organization_id;
+
+  // Stats de errores para hero de admin (solo cuando admin sin org)
+  const { data: errorStats } = useErrorStatsQuery(7);
 
   // Cargar estado de licencia y nombre de organización al montar el componente
   useEffect(() => {
@@ -213,9 +234,36 @@ export default function DashboardPage() {
       }
     };
 
+    const loadAdminCounts = async () => {
+      if (profile?.role !== "admin") {
+        if (isMounted) setAdminCounts(null);
+        return;
+      }
+      try {
+        const [orgsRes, usersRes] = await Promise.all([
+          supabase
+            .from("organizations")
+            .select("*", { count: "exact", head: true }),
+          supabase
+            .from("user_profiles")
+            .select("*", { count: "exact", head: true }),
+        ]);
+        if (!isMounted) return;
+        setAdminCounts({
+          organizations: orgsRes.count ?? 0,
+          users: usersRes.count ?? 0,
+        });
+      } catch (error) {
+        if (!isMounted) return;
+        console.error("Error loading admin counts:", error);
+        setAdminCounts(null);
+      }
+    };
+
     if (profile) {
       loadLicenseStatus();
       loadOrganizationName();
+      loadAdminCounts();
     }
 
     return () => {
@@ -381,6 +429,54 @@ export default function DashboardPage() {
                 <LicenseNotification licenseStatus={licenseStatus} />
               </div>
             )}
+
+          {/* Hero stat de admin (cuando es admin sin organización) */}
+          {isAdminWithoutOrg && (
+            <Card className="relative mb-6 overflow-hidden p-5 lg:mb-8 lg:p-6">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-12 -top-12 h-52 w-52 rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(99,179,255,0.18), transparent 70%)",
+                }}
+              />
+              <div className="relative">
+                <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
+                  Resumen del sistema
+                </div>
+                <div className="mt-1 text-sm font-semibold text-foreground-muted">
+                  Vista general de la plataforma
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <AdminStat
+                    label="Organizaciones"
+                    value={adminCounts?.organizations ?? 0}
+                    icon={Building2}
+                    tone="info"
+                  />
+                  <AdminStat
+                    label="Usuarios"
+                    value={adminCounts?.users ?? 0}
+                    icon={Users}
+                    tone="primary"
+                  />
+                  <AdminStat
+                    label="Errores hoy"
+                    value={errorStats?.errors_today ?? 0}
+                    icon={AlertTriangle}
+                    tone="warning"
+                  />
+                  <AdminStat
+                    label="Sin resolver"
+                    value={errorStats?.unresolved_errors ?? 0}
+                    icon={AlertTriangle}
+                    tone="danger"
+                  />
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* Hero stat (solo cuando hay org) */}
           {profile?.organization_id && (
@@ -550,6 +646,47 @@ function MiniStat({
         style={{ color: "var(--st-cb)" }}
       >
         {value}
+      </div>
+    </div>
+  );
+}
+
+function AdminStat({
+  label,
+  value,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: number;
+  icon: LucideIcon;
+  tone: "info" | "primary" | "warning" | "danger";
+}) {
+  const toneStyles: Record<typeof tone, string> = {
+    info: "bg-info-50 text-info-700 dark:bg-info-900/20 dark:text-info-400",
+    primary:
+      "bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400",
+    warning:
+      "bg-warning-50 text-warning-700 dark:bg-warning-900/20 dark:text-warning-400",
+    danger:
+      "bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-400",
+  };
+  return (
+    <div className="rounded-lg border border-border bg-surface px-3 py-2.5">
+      <div className="flex items-center gap-2">
+        <div
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${toneStyles[tone]}`}
+        >
+          <Icon className="h-3.5 w-3.5" />
+        </div>
+        <div className="min-w-0">
+          <div className="truncate text-[10px] font-semibold uppercase tracking-wide text-foreground-muted">
+            {label}
+          </div>
+          <div className="text-lg font-extrabold leading-none text-foreground">
+            {value}
+          </div>
+        </div>
       </div>
     </div>
   );
