@@ -1,5 +1,17 @@
-// Edge Function para enviar recordatorios automáticos
-// Se puede configurar con un cron job para ejecutarse diariamente
+// Edge Function: send-reminders
+//
+// Recorre appointments próximos en las ventanas T-24h y T-1h
+// y delega a `wa-send` con el intent correspondiente.
+//
+// Pensada para ejecutarse vía pg_cron cada 15 minutos:
+//   select cron.schedule(
+//     'wa-reminders',
+//     '*/15 * * * *',
+//     $$ select net.http_post(
+//       url := 'https://<proyecto>.supabase.co/functions/v1/send-reminders',
+//       headers := jsonb_build_object('Authorization','Bearer <service-role>')
+//     ); $$
+//   );
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -9,202 +21,142 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface Appointment {
+interface AppointmentRow {
   id: string;
-  customer_first_name: string;
-  customer_last_name: string;
-  customer_phone: string;
-  customer_email: string | null;
-  service_name: string;
-  staff_first_name: string | null;
+  organization_id: string;
   appointment_date: string;
   start_time: string;
-  end_time: string;
   status: string;
-  organization_id: string;
+  reminder_sent_at: string | null;
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get request body (optional filters)
-    let targetDate: string;
-    let organizationId: string | null = null;
-
-    try {
-      const body = await req.json();
-      targetDate = body.date || getTomorrowDate();
-      organizationId = body.organization_id || null;
-    } catch {
-      targetDate = getTomorrowDate();
-    }
-
-    // Query appointments that need reminders
-    let query = supabase
-      .from("appointments_with_details")
-      .select("*")
-      .eq("appointment_date", targetDate)
-      .in("status", ["confirmed", "pending"]);
-
-    if (organizationId) {
-      query = query.eq("organization_id", organizationId);
-    }
-
-    const { data: appointments, error: queryError } = await query;
-
-    if (queryError) {
-      throw new Error(`Error querying appointments: ${queryError.message}`);
-    }
-
-    if (!appointments || appointments.length === 0) {
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "No appointments to remind",
-          count: 0,
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Process reminders
-    const results = [];
-
-    for (const appointment of appointments as Appointment[]) {
-      try {
-        // Generate reminder message
-        const message = generateReminderMessage(appointment);
-
-        // Log the reminder attempt
-        await supabase.from("reminder_logs").insert({
-          appointment_id: appointment.id,
-          reminder_type: "automatic",
-          method: "whatsapp",
-          message_content: message,
-          status: "pending",
-          scheduled_for: new Date().toISOString(),
-        });
-
-        // Here you would integrate with your messaging service
-        // For example: Twilio, WhatsApp Business API, etc.
-        // const sendResult = await sendWhatsAppMessage(appointment.customer_phone, message);
-
-        // Update appointment status to reminded
-        await supabase
-          .from("appointments")
-          .update({ status: "reminded" })
-          .eq("id", appointment.id);
-
-        // Update reminder log
-        await supabase
-          .from("reminder_logs")
-          .update({
-            status: "sent",
-            sent_at: new Date().toISOString(),
-          })
-          .eq("appointment_id", appointment.id)
-          .eq("reminder_type", "automatic")
-          .is("sent_at", null);
-
-        results.push({
-          appointment_id: appointment.id,
-          customer: `${appointment.customer_first_name} ${appointment.customer_last_name}`,
-          phone: appointment.customer_phone,
-          status: "sent",
-        });
-      } catch (err) {
-        console.error(`Error processing reminder for ${appointment.id}:`, err);
-        results.push({
-          appointment_id: appointment.id,
-          customer: `${appointment.customer_first_name} ${appointment.customer_last_name}`,
-          status: "error",
-          error: err instanceof Error ? err.message : "Unknown error",
-        });
-      }
-    }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: `Processed ${results.length} reminders`,
-        date: targetDate,
-        results,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-  } catch (error) {
-    console.error("Error in send-reminders function:", error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+
+    const now = new Date();
+    // Ventana T-24h: appointments entre 23h45m y 24h15m desde ahora
+    const w24Start = addMinutes(now, 23 * 60 + 45);
+    const w24End = addMinutes(now, 24 * 60 + 15);
+    // Ventana T-1h: appointments entre 45min y 1h15m desde ahora
+    const w1Start = addMinutes(now, 45);
+    const w1End = addMinutes(now, 75);
+
+    const targets24h = await loadInWindow(supabase, w24Start, w24End);
+    const targets1h = await loadInWindow(supabase, w1Start, w1End);
+
+    const results = {
+      reminder_24h: await dispatchBatch(targets24h, "reminder_24h"),
+      reminder_1h: await dispatchBatch(targets1h, "reminder_1h"),
+    };
+
+    return json(200, {
+      success: true,
+      processed_at: now.toISOString(),
+      results,
+    });
+  } catch (err) {
+    console.error("[send-reminders] fatal", err);
+    return json(500, {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 });
 
-// Helper functions
-// Note: Edge Functions run in UTC, and PostgreSQL DATE columns are timezone-agnostic
-// so using toISOString() here is appropriate for server-side date calculations
-function getTomorrowDate(): string {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().split("T")[0];
-}
+// ─────────────────────────────────────────────────────────────
 
-function generateReminderMessage(appointment: Appointment): string {
-  const date = new Date(appointment.appointment_date);
-  const formattedDate = date.toLocaleDateString("es-ES", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
+async function loadInWindow(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  start: Date,
+  end: Date
+): Promise<AppointmentRow[]> {
+  // Comparamos contra (appointment_date + start_time) construido en SQL
+  const { data, error } = await supabase.rpc("wa_appointments_in_window", {
+    p_start: start.toISOString(),
+    p_end: end.toISOString(),
   });
 
-  return `🗓️ *Recordatorio de Turno*
-
-Hola ${appointment.customer_first_name}! 👋
-
-Te recordamos que tienes un turno programado:
-
-📅 *Fecha:* ${formattedDate}
-⏰ *Hora:* ${appointment.start_time}
-💇 *Servicio:* ${appointment.service_name}
-${
-  appointment.staff_first_name
-    ? `👤 *Con:* ${appointment.staff_first_name}`
-    : ""
+  if (error) {
+    // Fallback: query directa si el RPC no existe aún
+    console.warn(
+      "[send-reminders] RPC missing, falling back to client-side filter",
+      error.message
+    );
+    return fallbackFilter(supabase, start, end);
+  }
+  return (data ?? []) as AppointmentRow[];
 }
 
-Por favor confirma tu asistencia respondiendo:
-✅ *SÍ* - Confirmo mi turno
-❌ *NO* - No podré asistir
+// Fallback que filtra en JS si no se creó el RPC en DB
+async function fallbackFilter(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  start: Date,
+  end: Date
+): Promise<AppointmentRow[]> {
+  const dateStart = start.toISOString().slice(0, 10);
+  const dateEnd = end.toISOString().slice(0, 10);
 
-¡Te esperamos! 🙌`;
+  const { data } = await supabase
+    .from("appointments")
+    .select(
+      "id, organization_id, appointment_date, start_time, status, reminder_sent_at"
+    )
+    .gte("appointment_date", dateStart)
+    .lte("appointment_date", dateEnd)
+    .in("status", ["confirmed", "pending", "client_confirmed"])
+    .is("reminder_sent_at", null);
+
+  return (data ?? []).filter((a: AppointmentRow) => {
+    const apptAt = new Date(`${a.appointment_date}T${a.start_time}`);
+    return apptAt >= start && apptAt <= end;
+  });
 }
 
-// Placeholder for WhatsApp API integration
-// async function sendWhatsAppMessage(phone: string, message: string) {
-//   // Integrate with Twilio or WhatsApp Business API
-//   // const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-//   // const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-//   // const twilioWhatsAppNumber = Deno.env.get('TWILIO_WHATSAPP_NUMBER');
-//
-//   // Return send result
-// }
+async function dispatchBatch(rows: AppointmentRow[], intent: string) {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+  const results = await Promise.allSettled(
+    rows.map((r) =>
+      fetch(`${supabaseUrl}/functions/v1/wa-send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${serviceKey}`,
+        },
+        body: JSON.stringify({ appointmentId: r.id, intent }),
+      }).then((res) => ({ id: r.id, status: res.status }))
+    )
+  );
+
+  return {
+    total: rows.length,
+    ok: results.filter(
+      (r) => r.status === "fulfilled" && r.value.status < 400
+    ).length,
+    failed: results.filter(
+      (r) => r.status === "rejected" || (r.status === "fulfilled" && r.value.status >= 400)
+    ).length,
+  };
+}
+
+function addMinutes(d: Date, mins: number): Date {
+  return new Date(d.getTime() + mins * 60 * 1000);
+}
+
+function json(status: number, body: unknown): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}

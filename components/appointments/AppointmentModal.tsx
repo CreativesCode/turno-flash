@@ -458,7 +458,11 @@ export function AppointmentDetailModal({
             {next && (
               <Button
                 variant="mesh-primary"
-                onClick={() => onAdvance(next.to)}
+                onClick={() =>
+                  next.to === "reminded"
+                    ? onSendReminder()
+                    : onAdvance(next.to)
+                }
                 disabled={isProcessing}
                 className="w-full justify-center"
               >

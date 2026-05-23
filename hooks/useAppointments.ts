@@ -163,11 +163,11 @@ export function useAppointments(filters?: AppointmentFilters) {
       }
 
       try {
-        const result = await sendReminderMutation.mutateAsync({
+        await sendReminderMutation.mutateAsync({
           appointmentId,
           method,
         });
-        return { success: true, whatsappUrl: result.whatsappUrl };
+        return { success: true };
       } catch (err) {
         return {
           success: false,

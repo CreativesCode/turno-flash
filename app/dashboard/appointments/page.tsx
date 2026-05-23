@@ -127,15 +127,32 @@ export default function AppointmentsPage() {
 
   /* ── Date range based on view ────────────────────────────── */
   const dateRange = useMemo(() => {
-    const start = new Date(selectedDate);
-    const end = new Date(selectedDate);
+    // Vista Lista: mostrar últimos 7 días + próximos 60 días (agenda amplia)
+    if (view === "list") {
+      const past = new Date(selectedDate);
+      past.setDate(past.getDate() - 7);
+      const future = new Date(selectedDate);
+      future.setDate(future.getDate() + 60);
+      return {
+        start: getLocalDateString(past),
+        end: getLocalDateString(future),
+      };
+    }
+    // Vista Semana: semana que contiene selectedDate
     if (view === "week") {
+      const start = new Date(selectedDate);
+      const end = new Date(selectedDate);
       const day = start.getDay();
       const diff = start.getDate() - day + (day === 0 ? -6 : 1);
       start.setDate(diff);
       end.setDate(start.getDate() + 6);
+      return { start: getLocalDateString(start), end: getLocalDateString(end) };
     }
-    return { start: getLocalDateString(start), end: getLocalDateString(end) };
+    // Vista Día: solo el día seleccionado
+    return {
+      start: getLocalDateString(selectedDate),
+      end: getLocalDateString(selectedDate),
+    };
   }, [selectedDate, view]);
 
   /* ── Data queries ────────────────────────────────────────── */
@@ -323,15 +340,14 @@ export default function AppointmentsPage() {
     async (appointment: AppointmentWithDetails) => {
       const loadingToast = toast.loading("Enviando recordatorio...");
       try {
-        const result = await sendReminderMutation.mutateAsync({
+        await sendReminderMutation.mutateAsync({
           appointmentId: appointment.id,
           method: "whatsapp",
         });
-        if (result.whatsappUrl) window.open(result.whatsappUrl, "_blank");
         toast.dismiss(loadingToast);
         toast.success(
           "Recordatorio enviado",
-          `Se envió a ${appointment.customer_first_name}`
+          `WhatsApp en camino a ${appointment.customer_first_name}`
         );
         if (selectedAppointment?.id === appointment.id) {
           setSelectedAppointment({

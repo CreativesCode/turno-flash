@@ -1,6 +1,7 @@
 "use client";
 
 import { LicenseNotification } from "@/components/license-notification";
+import { WhatsAppOrgSection } from "@/components/organizations/WhatsAppOrgSection";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
@@ -432,6 +433,13 @@ function OrganizationDetailsContent() {
                 />
               </div>
             )}
+
+          {/* Sección WhatsApp — solo admin, ancho completo */}
+          {isAdmin && !isEditing && (
+            <div className="mb-6">
+              <WhatsAppOrgSection organizationId={organizationId} />
+            </div>
+          )}
 
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Columna principal */}

@@ -579,74 +579,77 @@ export class AppointmentService {
   }
 
   /**
-   * Send reminder for appointment
+   * Envía un recordatorio manual de un turno vía WhatsApp (OpenWA).
+   * Invoca la Edge Function `wa-send` que se encarga de:
+   *   - validar que la org tiene WA habilitado
+   *   - mandar el mensaje al cliente
+   *   - actualizar reminder_sent_at + status='reminded' + log en reminder_logs
+   *
+   * Por ahora solo soportamos WhatsApp. SMS/email quedan como TODO.
    */
   static async sendReminder(
     appointmentId: string,
     organizationId: string,
-    userId: string,
+    _userId: string,
     method: "whatsapp" | "sms" | "email" = "whatsapp"
-  ): Promise<{ success: boolean; error?: string; whatsappUrl?: string }> {
+  ): Promise<{ success: boolean; error?: string }> {
+    if (method !== "whatsapp") {
+      return {
+        success: false,
+        error: "Solo WhatsApp está soportado por ahora",
+      };
+    }
+
     try {
       const supabase = createClient();
 
-      // Get appointment details
+      // Verificación rápida de existencia/pertenencia (la Edge Function
+      // valida de nuevo internamente, pero esto da un error más útil)
       const { data: appointment, error: fetchError } = await supabase
         .from("appointments_with_details")
-        .select("*")
+        .select("id, organization_id")
         .eq("id", appointmentId)
         .eq("organization_id", organizationId)
         .single();
 
       if (fetchError || !appointment) {
+        return { success: false, error: "El turno no existe" };
+      }
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      if (!accessToken) {
+        return { success: false, error: "Sesión expirada" };
+      }
+
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (!supabaseUrl) {
         return {
           success: false,
-          error: "El turno no existe",
+          error: "Falta NEXT_PUBLIC_SUPABASE_URL",
         };
       }
 
-      // Log the reminder
-      const { error: logError } = await supabase.from("reminder_logs").insert({
-        appointment_id: appointmentId,
-        reminder_type: "manual",
-        method: method,
-        status: "sent",
-        sent_at: getTimestamp(),
-        sent_by: userId,
+      const res = await fetch(`${supabaseUrl}/functions/v1/wa-send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          appointmentId,
+          intent: "reminder_manual",
+        }),
       });
 
-      if (logError) {
-        console.error("Error logging reminder:", logError);
-      }
+      const payload = await res.json().catch(() => null);
 
-      // Update appointment status to reminded
-      await this.updateStatus(
-        appointmentId,
-        APPOINTMENT_STATUS.REMINDED,
-        organizationId,
-        userId
-      );
-
-      const mappedAppointment = this.mapToAppointmentWithDetails(appointment);
-
-      // Generate WhatsApp URL if method is whatsapp
-      if (method === "whatsapp") {
-        if (!mappedAppointment.customer_phone) {
-          return {
-            success: false,
-            error: "El cliente no tiene número de teléfono registrado",
-          };
-        }
-        const message = this.generateReminderMessage(mappedAppointment);
-        const phone = mappedAppointment.customer_phone.replace(/[^0-9]/g, "");
-        const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
-          message
-        )}`;
-
-        return {
-          success: true,
-          whatsappUrl,
-        };
+      if (!res.ok || payload?.success === false) {
+        const msg =
+          payload?.error ??
+          payload?.reason ??
+          `wa-send respondió ${res.status}`;
+        return { success: false, error: String(msg) };
       }
 
       return { success: true };
@@ -657,41 +660,6 @@ export class AppointmentService {
         error: "Error inesperado al enviar el recordatorio",
       };
     }
-  }
-
-  /**
-   * Generate reminder message
-   */
-  private static generateReminderMessage(
-    appointment: AppointmentWithDetails
-  ): string {
-    const date = new Date(appointment.appointment_date);
-    const formattedDate = date.toLocaleDateString("es-ES", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
-
-    return `🗓️ *Recordatorio de Turno*
-
-Hola ${appointment.customer_first_name}! 👋
-
-Te recordamos que tienes un turno programado:
-
-📅 *Fecha:* ${formattedDate}
-⏰ *Hora:* ${appointment.start_time}
-💇 *Servicio:* ${appointment.service_name}
-${
-  appointment.staff_first_name
-    ? `👤 *Con:* ${appointment.staff_first_name}`
-    : ""
-}
-
-Por favor confirma tu asistencia respondiendo:
-✅ *SÍ* - Confirmo mi turno
-❌ *NO* - No podré asistir
-
-¡Te esperamos! 🙌`;
   }
 
   /**

@@ -131,15 +131,14 @@ export default function RemindersPage() {
         `Enviando recordatorio a ${appointment.customer_first_name}…`
       );
       try {
-        const result = await sendReminderMutation.mutateAsync({
+        await sendReminderMutation.mutateAsync({
           appointmentId: appointment.id,
           method: "whatsapp",
         });
         toast.dismiss(loadingToast);
-        if (result.whatsappUrl) window.open(result.whatsappUrl, "_blank");
         toast.success(
           "Recordatorio enviado",
-          `Se envió a ${appointment.customer_first_name}`
+          `WhatsApp en camino a ${appointment.customer_first_name}`
         );
       } catch (err) {
         toast.dismiss(loadingToast);
@@ -161,16 +160,13 @@ export default function RemindersPage() {
     let failed = 0;
     for (const apt of toSend) {
       try {
-        const result = await sendReminderMutation.mutateAsync({
+        await sendReminderMutation.mutateAsync({
           appointmentId: apt.id,
           method: "whatsapp",
         });
-        if (result.whatsappUrl) {
-          window.open(result.whatsappUrl, "_blank");
-        }
         success += 1;
-        // Small breathing room so the browser doesn't drop popups
-        await new Promise((r) => setTimeout(r, 400));
+        // Pequeño respiro para no chocar contra el rate limit de OpenWA (60/min)
+        await new Promise((r) => setTimeout(r, 1100));
       } catch {
         failed += 1;
       }

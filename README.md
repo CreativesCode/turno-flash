@@ -426,6 +426,198 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ---
 
+## 💬 Integración WhatsApp (OpenWA)
+
+TurnoFlash se integra con [OpenWA](https://github.com/rmyndharis/OpenWA) (gateway open-source de WhatsApp) para mandar y recibir mensajes automáticamente.
+
+### Qué hace la integración
+
+| # | Caso | Trigger | Resultado |
+|---|------|---------|-----------|
+| 1 | Confirmación de turno | INSERT en `appointments` (trigger DB) | WA al cliente + WA al negocio |
+| 2 | Recordatorio T-24h | Cron cada 15 min | WA al cliente, marca `reminded` |
+| 3 | Recordatorio T-1h | Cron cada 15 min | WA al cliente |
+| 4 | Cancelar / Confirmar por reply | Webhook `message.received` | UPDATE `appointments` + ack al cliente + WA al negocio |
+
+### 1. Levantar OpenWA en local
+
+```bash
+git clone https://github.com/rmyndharis/OpenWA.git
+cd OpenWA
+npm install
+cp .env.minimal .env
+mkdir -p data/sessions data/media
+npm run start:dev
+```
+
+- API: `http://localhost:2785/api`
+- Swagger: `http://localhost:2785/api/docs`
+- La API key se autogenera en `data/.api-key` (formato `owa_<32 chars>`)
+
+### 2. Crear y conectar la sesión WhatsApp
+
+```bash
+# Variables locales para los comandos
+$env:OPENWA_BASE_URL = "http://localhost:2785/api"
+$env:OPENWA_API_KEY  = "owa_xxxxx"   # leer de OpenWA/data/.api-key
+
+# Crear sesión
+curl -X POST "$env:OPENWA_BASE_URL/sessions" `
+  -H "X-API-Key: $env:OPENWA_API_KEY" `
+  -H "Content-Type: application/json" `
+  -d '{"name":"turnoflash-prod"}'
+
+# Iniciarla
+curl -X POST "$env:OPENWA_BASE_URL/sessions/{sessionId}/start" `
+  -H "X-API-Key: $env:OPENWA_API_KEY"
+
+# Pedir QR y escanear desde el WhatsApp del negocio
+curl "$env:OPENWA_BASE_URL/sessions/{sessionId}/qr" `
+  -H "X-API-Key: $env:OPENWA_API_KEY"
+```
+
+Guardá el `sessionId` (`sess_xxx`) — lo necesitás en el paso 4.
+
+### 3. Configurar secrets de Supabase Edge Functions
+
+> Cuando despliegues OpenWA a una VPS, sólo cambias `OPENWA_BASE_URL` con el mismo comando. Nada más cambia.
+
+```bash
+npx supabase secrets set \
+  OPENWA_BASE_URL=http://host.docker.internal:2785/api \
+  OPENWA_API_KEY=owa_xxxxx \
+  OPENWA_WEBHOOK_SECRET=$(openssl rand -hex 32)
+```
+
+(`host.docker.internal` funciona desde Edge Functions corriendo en Supabase local. Para producción usá el dominio de la VPS.)
+
+### 4. Aplicar migración + configurar negocio
+
+```bash
+npx supabase db push   # aplica supabase/migrations/014_whatsapp_integration.sql
+```
+
+En el dashboard de Supabase Studio (o vía SQL), activá WhatsApp para tu organización:
+
+```sql
+-- 1. Tu organización debe tener el número del negocio para recibir notificaciones
+UPDATE organizations
+SET whatsapp_phone = '5491155556666'   -- sin '+', código país + número
+WHERE id = '<tu-org-id>';
+
+-- 2. Activá la integración y guardá el sessionId de OpenWA
+UPDATE business_settings
+SET
+  whatsapp_integration_enabled = true,
+  openwa_session_id = 'sess_xxxxx'
+WHERE organization_id = '<tu-org-id>';
+
+-- 3. Config para que el trigger DB pueda llamar a las Edge Functions
+INSERT INTO app_config (key, value, description) VALUES
+  ('SUPABASE_URL',              'http://kong:8000',          'URL interna usada por triggers DB'),
+  ('SUPABASE_SERVICE_ROLE_KEY', 'eyJhbGciOi...',             'Service role key (no exponer)')
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+```
+
+> Producción: `SUPABASE_URL` será `https://<proyecto>.supabase.co`.
+
+### 5. Desplegar las Edge Functions
+
+```bash
+npx supabase functions deploy wa-send
+npx supabase functions deploy wa-inbound
+npx supabase functions deploy send-reminders
+```
+
+### 6. Registrar el webhook inbound en OpenWA
+
+OpenWA tiene que poder alcanzar la URL pública de `wa-inbound`. Para desarrollo con OpenWA local + Supabase remoto, la URL es:
+
+```
+https://<proyecto>.supabase.co/functions/v1/wa-inbound
+```
+
+Registrar (una sola vez por sesión):
+
+```bash
+curl -X POST "$env:OPENWA_BASE_URL/sessions/{sessionId}/webhooks" `
+  -H "X-API-Key: $env:OPENWA_API_KEY" `
+  -H "Content-Type: application/json" `
+  -d '{
+    "url": "https://<proyecto>.supabase.co/functions/v1/wa-inbound",
+    "events": ["message.received","session.disconnected","session.qr"],
+    "secret": "<el-mismo-OPENWA_WEBHOOK_SECRET-del-paso-3>"
+  }'
+```
+
+### 7. Cron para recordatorios
+
+En el SQL Editor de Supabase:
+
+```sql
+-- pg_cron ya viene habilitado en Supabase
+SELECT cron.schedule(
+  'wa-reminders',
+  '*/15 * * * *',
+  $$ SELECT net.http_post(
+       url := 'https://<proyecto>.supabase.co/functions/v1/send-reminders',
+       headers := jsonb_build_object(
+         'Authorization', 'Bearer <SUPABASE_SERVICE_ROLE_KEY>',
+         'Content-Type', 'application/json'
+       )
+     ); $$
+);
+
+-- Cleanup diario de idempotencia
+SELECT cron.schedule(
+  'wa-cleanup-idempotency',
+  '0 4 * * *',
+  $$ SELECT public.cleanup_wa_processed_events(); $$
+);
+```
+
+### 8. Probar la integración end-to-end
+
+```sql
+-- Crear un appointment de prueba → debería disparar la confirmación
+INSERT INTO appointments (
+  organization_id, customer_id, service_id,
+  appointment_date, start_time, end_time,
+  status, source
+) VALUES (
+  '<tu-org-id>', '<customer-id>', '<service-id>',
+  CURRENT_DATE + 1, '10:00', '10:30',
+  'confirmed', 'admin'
+);
+
+-- Ver los envíos
+SELECT * FROM wa_outbound_messages ORDER BY sent_at DESC LIMIT 10;
+```
+
+### Cambiar la URL de OpenWA (al mover a VPS)
+
+```bash
+npx supabase secrets set OPENWA_BASE_URL=https://wa.tu-dominio.com/api
+# Y volver a registrar el webhook en OpenWA-VPS apuntando al mismo Supabase
+```
+
+### Tablas e items que crea la migración
+
+- `app_config` — bridge para credenciales Supabase usadas por triggers DB
+- `business_settings.openwa_session_id` — sesión OpenWA por negocio
+- `wa_outbound_messages` — registro de cada envío (status, error, ack)
+- `wa_processed_events` — idempotencia de webhooks
+- Trigger `trg_wa_send_on_appointment_insert` — confirmación + notif al negocio
+- RPC `wa_appointments_in_window` — usado por `send-reminders`
+
+### ⚠️ Riesgos a tener en cuenta
+
+- WhatsApp puede banear números por uso no oficial → usar un número dedicado, no el personal.
+- Si la sesión cae, `wa-inbound` registra una notificación interna (`type=wa_session_down`); hay que re-escanear el QR desde OpenWA.
+- Rate limit OpenWA: 60 envíos/min por sesión. Suficiente para confirmaciones 1-a-1; para broadcasts usar `send-bulk`.
+
+---
+
 ## 🐛 Troubleshooting
 
 ### No puedo ver las nuevas páginas
