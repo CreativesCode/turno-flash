@@ -3,6 +3,7 @@ import { customerFormSchema, customerUpdateSchema } from "@/schemas";
 import { CustomerService } from "@/services/customers.service";
 import { Customer, CustomerFormData } from "@/types/appointments";
 import {
+  InfiniteData,
   UseQueryOptions,
   useInfiniteQuery,
   useMutation,
@@ -17,6 +18,30 @@ import { ZodError } from "zod";
 export interface CustomerFilters {
   isActive?: boolean;
   search?: string;
+}
+
+// `customerKeys.lists()` matches both the flat list query and the infinite query,
+// so optimistic updates must handle both array and InfiniteData<T[]> shapes.
+type CustomerListCache = Customer[] | InfiniteData<Customer[]> | undefined;
+
+function isInfiniteData(
+  value: NonNullable<CustomerListCache>
+): value is InfiniteData<Customer[]> {
+  return (
+    !Array.isArray(value) &&
+    Array.isArray((value as InfiniteData<Customer[]>).pages)
+  );
+}
+
+function mapCustomerLists(
+  old: CustomerListCache,
+  fn: (customer: Customer) => Customer
+): CustomerListCache {
+  if (!old) return old;
+  if (isInfiniteData(old)) {
+    return { ...old, pages: old.pages.map((page) => page.map(fn)) };
+  }
+  return old.map(fn);
 }
 
 /**
@@ -188,15 +213,14 @@ export function useUpdateCustomer() {
         customerKeys.detail(profile.organization_id, customerId)
       );
 
-      // Optimistically update all customer list queries
-      queryClient.setQueriesData(
+      // Optimistically update all customer list queries (handles both flat
+      // and InfiniteData caches that share the `lists()` prefix)
+      queryClient.setQueriesData<CustomerListCache>(
         { queryKey: customerKeys.lists() },
-        (old: Customer[] | undefined) => {
-          if (!old) return old;
-          return old.map((customer) =>
+        (old) =>
+          mapCustomerLists(old, (customer) =>
             customer.id === customerId ? { ...customer, ...data } : customer
-          );
-        }
+          )
       );
 
       // Optimistically update detail query

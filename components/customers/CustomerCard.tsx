@@ -98,7 +98,10 @@ export function CustomerCard({ customer, onEdit, onDelete }: CustomerCardProps) 
           <MoreVertical className="h-4 w-4" />
         </button>
         {menuOpen && (
-          <div className="absolute right-0 top-10 z-20 w-36 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
+          <div
+            data-menu-open
+            className="absolute right-0 top-10 z-20 w-36 overflow-hidden rounded-lg border border-border bg-surface shadow-lg"
+          >
             <button
               type="button"
               onClick={() => {

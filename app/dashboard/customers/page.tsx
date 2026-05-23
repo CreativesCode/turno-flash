@@ -283,6 +283,7 @@ export default function CustomersPage() {
                       key={virtualRow.key}
                       data-index={virtualRow.index}
                       ref={virtualizer.measureElement}
+                      className="has-data-menu-open:z-30"
                       style={{
                         position: "absolute",
                         top: 0,
