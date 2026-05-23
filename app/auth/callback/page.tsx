@@ -3,13 +3,14 @@
 import { Logo } from "@/components/ui";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Logger } from "@/utils/logger";
 
-// Timeout para el callback de autenticación (30 segundos)
+// Timeout para el callback de autenticaciÃ³n (30 segundos)
 const CALLBACK_TIMEOUT_MS = 30000;
 
 export default function AuthCallbackPage() {
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState("Procesando autenticación...");
+  const [status, setStatus] = useState("Procesando autenticaciÃ³n...");
   const hasProcessed = useRef(false);
 
   // Memoizar el cliente de Supabase
@@ -17,7 +18,7 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      // Evitar procesar múltiples veces
+      // Evitar procesar mÃºltiples veces
       if (hasProcessed.current) return;
       hasProcessed.current = true;
 
@@ -25,21 +26,21 @@ export default function AuthCallbackPage() {
       const timeoutId = setTimeout(() => {
         console.warn("Auth callback timeout reached");
         setError(
-          "La autenticación está tardando demasiado. Por favor, intenta nuevamente."
+          "La autenticaciÃ³n estÃ¡ tardando demasiado. Por favor, intenta nuevamente."
         );
       }, CALLBACK_TIMEOUT_MS);
 
       try {
-        // Obtener parámetros de la URL
+        // Obtener parÃ¡metros de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get("code");
 
-        // Obtener parámetros del hash
+        // Obtener parÃ¡metros del hash
         const hashParams = new URLSearchParams(
           window.location.hash.substring(1)
         );
 
-        // Obtener el tipo de autenticación
+        // Obtener el tipo de autenticaciÃ³n
         const urlType = urlParams.get("type");
         const hashType = hashParams.get("type");
         const type = urlType || hashType;
@@ -53,14 +54,14 @@ export default function AuthCallbackPage() {
 
         let session = null;
 
-        // Primero intentar con tokens en el hash (flujo implícito/invitaciones)
-        // Esto tiene prioridad porque las invitaciones vía Admin API usan este flujo
+        // Primero intentar con tokens en el hash (flujo implÃ­cito/invitaciones)
+        // Esto tiene prioridad porque las invitaciones vÃ­a Admin API usan este flujo
         const accessToken = hashParams.get("access_token");
         const refreshToken = hashParams.get("refresh_token");
 
         if (accessToken && refreshToken) {
           console.log("Using implicit flow (tokens in hash)");
-          setStatus("Estableciendo sesión...");
+          setStatus("Estableciendo sesiÃ³n...");
           const { data, error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
@@ -68,30 +69,30 @@ export default function AuthCallbackPage() {
 
           if (sessionError) {
             clearTimeout(timeoutId);
-            console.error("Error setting session:", sessionError);
+            void Logger.error("Error setting session:", sessionError);
             setError(sessionError.message);
             return;
           }
 
           session = data.session;
         } else if (code) {
-          // Flujo PKCE - intercambiar código por sesión
+          // Flujo PKCE - intercambiar cÃ³digo por sesiÃ³n
           // Solo usar si no hay tokens en el hash
           console.log("Using PKCE flow (code exchange)");
-          setStatus("Verificando código...");
+          setStatus("Verificando cÃ³digo...");
           const { data, error: exchangeError } =
             await supabase.auth.exchangeCodeForSession(code);
 
           if (exchangeError) {
             clearTimeout(timeoutId);
-            console.error("Error exchanging code:", exchangeError);
-            // Si el error es de PKCE, dar instrucciones más claras
+            void Logger.error("Error exchanging code:", exchangeError);
+            // Si el error es de PKCE, dar instrucciones mÃ¡s claras
             if (
               exchangeError.message.includes("PKCE") ||
               exchangeError.message.includes("code verifier")
             ) {
               setError(
-                "El enlace de invitación ha expirado o ya fue usado. Por favor, solicita una nueva invitación."
+                "El enlace de invitaciÃ³n ha expirado o ya fue usado. Por favor, solicita una nueva invitaciÃ³n."
               );
             } else {
               setError(exchangeError.message);
@@ -104,18 +105,18 @@ export default function AuthCallbackPage() {
 
         if (!session) {
           clearTimeout(timeoutId);
-          setError("No se encontraron parámetros de autenticación válidos");
+          setError("No se encontraron parÃ¡metros de autenticaciÃ³n vÃ¡lidos");
           return;
         }
 
-        // Limpiar timeout - autenticación exitosa
+        // Limpiar timeout - autenticaciÃ³n exitosa
         clearTimeout(timeoutId);
         console.log("Session established for:", session.user.email);
 
-        // Si es un magic link de invitación, redirigir a configurar contraseña
-        // También verificar si el usuario no tiene contraseña configurada (invited user)
+        // Si es un magic link de invitaciÃ³n, redirigir a configurar contraseÃ±a
+        // TambiÃ©n verificar si el usuario no tiene contraseÃ±a configurada (invited user)
         if (type === "magiclink" || type === "invite" || type === "signup") {
-          setStatus("Redirigiendo a configurar contraseña...");
+          setStatus("Redirigiendo a configurar contraseÃ±a...");
           console.log("Redirecting to setup-password (invitation flow)");
           // Usar window.location para evitar conflictos con el router de React
           window.location.href = "/auth/setup-password";
@@ -128,8 +129,8 @@ export default function AuthCallbackPage() {
         window.location.href = "/dashboard";
       } catch (err) {
         clearTimeout(timeoutId);
-        console.error("Error in callback:", err);
-        setError("Error al procesar la autenticación");
+        void Logger.error("Error in callback:", err);
+        setError("Error al procesar la autenticaciÃ³n");
       }
     };
 
@@ -142,7 +143,7 @@ export default function AuthCallbackPage() {
         <div className="flex w-full max-w-md flex-col items-center space-y-4 text-center">
           <Logo size={48} priority />
           <h1 className="text-2xl font-bold text-red-600 dark:text-red-400">
-            Error de autenticación
+            Error de autenticaciÃ³n
           </h1>
           <p className="text-zinc-600 dark:text-zinc-400">{error}</p>
           <a

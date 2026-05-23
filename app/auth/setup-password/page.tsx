@@ -3,8 +3,9 @@
 import { Logo } from "@/components/ui";
 import { createClient } from "@/utils/supabase/client";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Logger } from "@/utils/logger";
 
-// Timeout para verificación de sesión (10 segundos)
+// Timeout para verificaciÃ³n de sesiÃ³n (10 segundos)
 const SESSION_CHECK_TIMEOUT_MS = 10000;
 
 export default function SetupPasswordPage() {
@@ -20,7 +21,7 @@ export default function SetupPasswordPage() {
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
-    // Verificar que el usuario tenga una sesión activa
+    // Verificar que el usuario tenga una sesiÃ³n activa
     const checkSession = async () => {
       if (hasChecked.current) return;
       hasChecked.current = true;
@@ -40,13 +41,13 @@ export default function SetupPasswordPage() {
         clearTimeout(timeoutId);
 
         if (sessionError) {
-          console.error("Error checking session:", sessionError);
+          void Logger.error("Error checking session:", sessionError);
           window.location.href = "/login";
           return;
         }
 
         if (!session) {
-          // Si no hay sesión, redirigir al login
+          // Si no hay sesiÃ³n, redirigir al login
           window.location.href = "/login";
           return;
         }
@@ -55,7 +56,7 @@ export default function SetupPasswordPage() {
         setCheckingSession(false);
       } catch (err) {
         clearTimeout(timeoutId);
-        console.error("Error in session check:", err);
+        void Logger.error("Error in session check:", err);
         window.location.href = "/login";
       }
     };
@@ -68,34 +69,34 @@ export default function SetupPasswordPage() {
     setLoading(true);
     setError(null);
 
-    // Validar que las contraseñas coincidan
+    // Validar que las contraseÃ±as coincidan
     if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
+      setError("Las contraseÃ±as no coinciden");
       setLoading(false);
       return;
     }
 
-    // Validar longitud mínima
+    // Validar longitud mÃ­nima
     if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
+      setError("La contraseÃ±a debe tener al menos 6 caracteres");
       setLoading(false);
       return;
     }
 
     try {
-      // Obtener información del usuario para verificar metadata
+      // Obtener informaciÃ³n del usuario para verificar metadata
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        setError("Error al obtener información del usuario");
+        setError("Error al obtener informaciÃ³n del usuario");
         setLoading(false);
         return;
       }
 
-      // Actualizar la contraseña del usuario (usando el cliente memoizado)
+      // Actualizar la contraseÃ±a del usuario (usando el cliente memoizado)
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
       });
@@ -106,7 +107,7 @@ export default function SetupPasswordPage() {
         return;
       }
 
-      // Si el usuario fue invitado a una organización, asignarla al perfil
+      // Si el usuario fue invitado a una organizaciÃ³n, asignarla al perfil
       // Esto es un respaldo en caso de que el trigger no haya funcionado
       const invitedOrgId = user.user_metadata?.invited_to_organization_id;
       if (invitedOrgId) {
@@ -115,14 +116,14 @@ export default function SetupPasswordPage() {
             .from("user_profiles")
             .update({ organization_id: invitedOrgId })
             .eq("user_id", user.id)
-            .is("organization_id", null); // Solo actualizar si no tiene organización
+            .is("organization_id", null); // Solo actualizar si no tiene organizaciÃ³n
 
           if (profileUpdateError) {
             console.warn(
               "Error updating profile with organization_id:",
               profileUpdateError
             );
-            // No fallar el flujo si esto falla, el trigger debería haberlo hecho
+            // No fallar el flujo si esto falla, el trigger deberÃ­a haberlo hecho
           }
         } catch (err) {
           console.warn("Error assigning organization:", err);
@@ -130,15 +131,15 @@ export default function SetupPasswordPage() {
         }
       }
 
-      // Contraseña configurada exitosamente, redirigir al dashboard
+      // ContraseÃ±a configurada exitosamente, redirigir al dashboard
       window.location.href = "/dashboard";
     } catch {
-      setError("Error al configurar la contraseña. Intenta nuevamente.");
+      setError("Error al configurar la contraseÃ±a. Intenta nuevamente.");
       setLoading(false);
     }
   };
 
-  // Mostrar pantalla de carga mientras verificamos la sesión
+  // Mostrar pantalla de carga mientras verificamos la sesiÃ³n
   if (checkingSession) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
@@ -146,7 +147,7 @@ export default function SetupPasswordPage() {
           <Logo size={48} priority />
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
           <p className="text-zinc-600 dark:text-zinc-400">
-            Verificando sesión...
+            Verificando sesiÃ³n...
           </p>
         </div>
       </div>
@@ -159,10 +160,10 @@ export default function SetupPasswordPage() {
         <div className="flex flex-col items-center text-center">
           <Logo size={56} priority className="mb-4" />
           <h1 className="text-3xl font-bold tracking-tight text-black dark:text-zinc-50">
-            ¡Bienvenido a Turno Flash!
+            Â¡Bienvenido a Turno Flash!
           </h1>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Configura tu contraseña para completar tu registro
+            Configura tu contraseÃ±a para completar tu registro
           </p>
           {userEmail && (
             <p className="mt-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -178,7 +179,7 @@ export default function SetupPasswordPage() {
                 htmlFor="password"
                 className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
               >
-                Nueva contraseña
+                Nueva contraseÃ±a
               </label>
               <input
                 id="password"
@@ -189,7 +190,7 @@ export default function SetupPasswordPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 sm:text-sm"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="MÃ­nimo 6 caracteres"
               />
             </div>
 
@@ -198,7 +199,7 @@ export default function SetupPasswordPage() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
               >
-                Confirmar contraseña
+                Confirmar contraseÃ±a
               </label>
               <input
                 id="confirmPassword"
@@ -209,7 +210,7 @@ export default function SetupPasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 sm:text-sm"
-                placeholder="Repite tu contraseña"
+                placeholder="Repite tu contraseÃ±a"
               />
             </div>
 
@@ -224,12 +225,12 @@ export default function SetupPasswordPage() {
               disabled={loading}
               className="flex w-full justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-200"
             >
-              {loading ? "Configurando..." : "Configurar contraseña"}
+              {loading ? "Configurando..." : "Configurar contraseÃ±a"}
             </button>
 
             <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
-              Una vez configurada tu contraseña, podrás iniciar sesión con tu
-              correo y contraseña
+              Una vez configurada tu contraseÃ±a, podrÃ¡s iniciar sesiÃ³n con tu
+              correo y contraseÃ±a
             </p>
           </form>
         </div>

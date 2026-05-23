@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "@/contexts/theme-context";
+import { Logger } from "@/utils/logger";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { useEffect, useState } from "react";
@@ -46,7 +47,10 @@ export function useCapacitor() {
             await StatusBar.setBackgroundColor({ color: "#ffffff" });
           }
         } catch (error) {
-          console.error("Error configurando la barra de estado:", error);
+          void Logger.error("Error configurando la barra de estado", error, {
+            hook: "useCapacitor",
+            theme,
+          });
         }
       };
 

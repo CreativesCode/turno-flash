@@ -1,6 +1,7 @@
 import { APPOINTMENT_STATUS } from "@/config/constants";
 import { Customer, CustomerFormData } from "@/types/appointments";
 import { createClient } from "@/utils/supabase/client";
+import { Logger } from "@/utils/logger";
 
 /**
  * Service Layer for Customer Management
@@ -25,20 +26,20 @@ export class CustomerService {
     }
 
     if (!data.phone || data.phone.trim() === "") {
-      errors.push("El teléfono es requerido");
+      errors.push("El telÃ©fono es requerido");
     }
 
     // Validate email format if provided
     if (data.email && data.email.trim() !== "") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(data.email)) {
-        errors.push("El formato del email es inválido");
+        errors.push("El formato del email es invÃ¡lido");
       }
     }
 
     // Validate phone format (basic check)
     if (data.phone && data.phone.length < 8) {
-      errors.push("El teléfono debe tener al menos 8 dígitos");
+      errors.push("El telÃ©fono debe tener al menos 8 dÃ­gitos");
     }
 
     return {
@@ -82,7 +83,7 @@ export class CustomerService {
       if (existingCustomer) {
         return {
           success: false,
-          error: "Ya existe un cliente con ese número de teléfono",
+          error: "Ya existe un cliente con ese nÃºmero de telÃ©fono",
         };
       }
 
@@ -100,7 +101,7 @@ export class CustomerService {
         .single();
 
       if (insertError) {
-        console.error("Error creating customer:", insertError);
+        void Logger.error("Error creating customer:", insertError);
         return {
           success: false,
           error: "Error al crear el cliente: " + insertError.message,
@@ -112,7 +113,7 @@ export class CustomerService {
         customer: customer as Customer,
       };
     } catch (error) {
-      console.error("Unexpected error creating customer:", error);
+      void Logger.error("Unexpected error creating customer:", error);
       return {
         success: false,
         error: "Error inesperado al crear el cliente",
@@ -159,7 +160,7 @@ export class CustomerService {
         if (duplicateCustomer) {
           return {
             success: false,
-            error: "Ya existe otro cliente con ese número de teléfono",
+            error: "Ya existe otro cliente con ese nÃºmero de telÃ©fono",
           };
         }
       }
@@ -173,7 +174,7 @@ export class CustomerService {
         .single();
 
       if (updateError) {
-        console.error("Error updating customer:", updateError);
+        void Logger.error("Error updating customer:", updateError);
         return {
           success: false,
           error: "Error al actualizar el cliente: " + updateError.message,
@@ -185,7 +186,7 @@ export class CustomerService {
         customer: customer as Customer,
       };
     } catch (error) {
-      console.error("Unexpected error updating customer:", error);
+      void Logger.error("Unexpected error updating customer:", error);
       return {
         success: false,
         error: "Error inesperado al actualizar el cliente",
@@ -210,7 +211,7 @@ export class CustomerService {
     try {
       const supabase = createClient();
 
-      // Si hay búsqueda, usar función full-text search optimizada
+      // Si hay bÃºsqueda, usar funciÃ³n full-text search optimizada
       if (filters?.search && filters.search.trim().length > 0) {
         // Function will be available after migration 012_performance_indexes.sql is executed
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -220,17 +221,17 @@ export class CustomerService {
             p_organization_id: organizationId,
             p_search_term: filters.search.trim(),
             p_is_active: filters?.isActive ?? null,
-            p_limit: 1000, // Límite alto para obtener todos los resultados
+            p_limit: 1000, // LÃ­mite alto para obtener todos los resultados
             p_offset: 0,
           }
         );
 
         if (error) {
-          console.error(
+          void Logger.error(
             "Error fetching customers with full-text search:",
             error
           );
-          // Fallback a búsqueda ILIKE si la función RPC falla
+          // Fallback a bÃºsqueda ILIKE si la funciÃ³n RPC falla
           return this.getAllWithIlike(organizationId, filters);
         }
 
@@ -240,7 +241,7 @@ export class CustomerService {
         };
       }
 
-      // Sin búsqueda, usar query normal
+      // Sin bÃºsqueda, usar query normal
       let query = supabase
         .from("customers")
         .select("*")
@@ -255,7 +256,7 @@ export class CustomerService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching customers:", error);
+        void Logger.error("Error fetching customers:", error);
         return {
           success: false,
           error: "Error al cargar los clientes",
@@ -267,7 +268,7 @@ export class CustomerService {
         customers: data || [],
       };
     } catch (error) {
-      console.error("Unexpected error fetching customers:", error);
+      void Logger.error("Unexpected error fetching customers:", error);
       return {
         success: false,
         error: "Error inesperado al cargar los clientes",
@@ -313,7 +314,7 @@ export class CustomerService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching customers:", error);
+        void Logger.error("Error fetching customers:", error);
         return {
           success: false,
           error: "Error al cargar los clientes",
@@ -325,7 +326,7 @@ export class CustomerService {
         customers: data || [],
       };
     } catch (error) {
-      console.error("Unexpected error fetching customers:", error);
+      void Logger.error("Unexpected error fetching customers:", error);
       return {
         success: false,
         error: "Error inesperado al cargar los clientes",
@@ -348,7 +349,7 @@ export class CustomerService {
     try {
       const supabase = createClient();
 
-      // Si hay búsqueda, usar función full-text search optimizada
+      // Si hay bÃºsqueda, usar funciÃ³n full-text search optimizada
       if (filters?.search && filters.search.trim().length > 0) {
         // Function will be available after migration 012_performance_indexes.sql is executed
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -364,11 +365,11 @@ export class CustomerService {
         );
 
         if (error) {
-          console.error(
+          void Logger.error(
             "Error fetching paginated customers with full-text search:",
             error
           );
-          // Fallback a búsqueda ILIKE si la función RPC falla
+          // Fallback a bÃºsqueda ILIKE si la funciÃ³n RPC falla
           return this.getAllPaginatedWithIlike(
             organizationId,
             offset,
@@ -380,7 +381,7 @@ export class CustomerService {
         return (data || []) as Customer[];
       }
 
-      // Sin búsqueda, usar query normal
+      // Sin bÃºsqueda, usar query normal
       let query = supabase
         .from("customers")
         .select("*")
@@ -396,13 +397,13 @@ export class CustomerService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching paginated customers:", error);
+        void Logger.error("Error fetching paginated customers:", error);
         throw new Error("Error al cargar los clientes");
       }
 
       return data || [];
     } catch (error) {
-      console.error("Unexpected error fetching paginated customers:", error);
+      void Logger.error("Unexpected error fetching paginated customers:", error);
       throw error;
     }
   }
@@ -444,13 +445,13 @@ export class CustomerService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching paginated customers:", error);
+        void Logger.error("Error fetching paginated customers:", error);
         throw new Error("Error al cargar los clientes");
       }
 
       return data || [];
     } catch (error) {
-      console.error("Unexpected error fetching paginated customers:", error);
+      void Logger.error("Unexpected error fetching paginated customers:", error);
       throw error;
     }
   }
@@ -477,7 +478,7 @@ export class CustomerService {
         .single();
 
       if (error) {
-        console.error("Error fetching customer:", error);
+        void Logger.error("Error fetching customer:", error);
         return {
           success: false,
           error: "Error al cargar el cliente",
@@ -489,7 +490,7 @@ export class CustomerService {
         customer: data as Customer,
       };
     } catch (error) {
-      console.error("Unexpected error fetching customer:", error);
+      void Logger.error("Unexpected error fetching customer:", error);
       return {
         success: false,
         error: "Error inesperado al cargar el cliente",
@@ -514,7 +515,7 @@ export class CustomerService {
         .eq("organization_id", organizationId);
 
       if (error) {
-        console.error("Error deactivating customer:", error);
+        void Logger.error("Error deactivating customer:", error);
         return {
           success: false,
           error: "Error al desactivar el cliente",
@@ -523,7 +524,7 @@ export class CustomerService {
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error deactivating customer:", error);
+      void Logger.error("Unexpected error deactivating customer:", error);
       return {
         success: false,
         error: "Error inesperado al desactivar el cliente",
@@ -548,7 +549,7 @@ export class CustomerService {
         .eq("organization_id", organizationId);
 
       if (error) {
-        console.error("Error reactivating customer:", error);
+        void Logger.error("Error reactivating customer:", error);
         return {
           success: false,
           error: "Error al reactivar el cliente",
@@ -557,7 +558,7 @@ export class CustomerService {
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error reactivating customer:", error);
+      void Logger.error("Unexpected error reactivating customer:", error);
       return {
         success: false,
         error: "Error inesperado al reactivar el cliente",
@@ -595,10 +596,10 @@ export class CustomerService {
         .single();
 
       if (error) {
-        console.error("Error fetching customer statistics:", error);
+        void Logger.error("Error fetching customer statistics:", error);
         return {
           success: false,
-          error: "Error al cargar las estadísticas",
+          error: "Error al cargar las estadÃ­sticas",
         };
       }
 
@@ -627,10 +628,10 @@ export class CustomerService {
         },
       };
     } catch (error) {
-      console.error("Unexpected error fetching customer statistics:", error);
+      void Logger.error("Unexpected error fetching customer statistics:", error);
       return {
         success: false,
-        error: "Error inesperado al cargar las estadísticas",
+        error: "Error inesperado al cargar las estadÃ­sticas",
       };
     }
   }

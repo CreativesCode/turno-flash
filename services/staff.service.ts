@@ -1,5 +1,6 @@
 import { StaffMember, StaffMemberFormData } from "@/types/appointments";
 import { createClient } from "@/utils/supabase/client";
+import { Logger } from "@/utils/logger";
 
 /**
  * Service Layer for Staff Management
@@ -27,13 +28,13 @@ export class StaffService {
     if (data.email && data.email.trim() !== "") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(data.email)) {
-        errors.push("El formato del email es inválido");
+        errors.push("El formato del email es invÃ¡lido");
       }
     }
 
     // Validate phone format if provided
     if (data.phone && data.phone.length < 8) {
-      errors.push("El teléfono debe tener al menos 8 dígitos");
+      errors.push("El telÃ©fono debe tener al menos 8 dÃ­gitos");
     }
 
     return {
@@ -115,7 +116,7 @@ export class StaffService {
         .single();
 
       if (insertError) {
-        console.error("Error creating staff member:", insertError);
+        void Logger.error("Error creating staff member:", insertError);
         return {
           success: false,
           error: "Error al crear el miembro del staff: " + insertError.message,
@@ -127,7 +128,7 @@ export class StaffService {
         staff: staff as StaffMember,
       };
     } catch (error) {
-      console.error("Unexpected error creating staff member:", error);
+      void Logger.error("Unexpected error creating staff member:", error);
       return {
         success: false,
         error: "Error inesperado al crear el miembro del staff",
@@ -188,7 +189,7 @@ export class StaffService {
         .single();
 
       if (updateError) {
-        console.error("Error updating staff member:", updateError);
+        void Logger.error("Error updating staff member:", updateError);
         return {
           success: false,
           error:
@@ -201,7 +202,7 @@ export class StaffService {
         staff: staff as StaffMember,
       };
     } catch (error) {
-      console.error("Unexpected error updating staff member:", error);
+      void Logger.error("Unexpected error updating staff member:", error);
       return {
         success: false,
         error: "Error inesperado al actualizar el miembro del staff",
@@ -252,7 +253,7 @@ export class StaffService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching staff members:", error);
+        void Logger.error("Error fetching staff members:", error);
         return {
           success: false,
           error: "Error al cargar los miembros del staff",
@@ -264,7 +265,7 @@ export class StaffService {
         staff: data || [],
       };
     } catch (error) {
-      console.error("Unexpected error fetching staff members:", error);
+      void Logger.error("Unexpected error fetching staff members:", error);
       return {
         success: false,
         error: "Error inesperado al cargar los miembros del staff",
@@ -314,13 +315,13 @@ export class StaffService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching paginated staff members:", error);
+        void Logger.error("Error fetching paginated staff members:", error);
         throw new Error("Error al cargar los miembros del staff");
       }
 
       return data || [];
     } catch (error) {
-      console.error("Unexpected error fetching paginated staff members:", error);
+      void Logger.error("Unexpected error fetching paginated staff members:", error);
       throw error;
     }
   }
@@ -347,7 +348,7 @@ export class StaffService {
         .single();
 
       if (error) {
-        console.error("Error fetching staff member:", error);
+        void Logger.error("Error fetching staff member:", error);
         return {
           success: false,
           error: "Error al cargar el miembro del staff",
@@ -359,7 +360,7 @@ export class StaffService {
         staff: data as StaffMember,
       };
     } catch (error) {
-      console.error("Unexpected error fetching staff member:", error);
+      void Logger.error("Unexpected error fetching staff member:", error);
       return {
         success: false,
         error: "Error inesperado al cargar el miembro del staff",
@@ -384,7 +385,7 @@ export class StaffService {
         .eq("organization_id", organizationId);
 
       if (error) {
-        console.error("Error deactivating staff member:", error);
+        void Logger.error("Error deactivating staff member:", error);
         return {
           success: false,
           error: "Error al desactivar el miembro del staff",
@@ -393,7 +394,7 @@ export class StaffService {
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error deactivating staff member:", error);
+      void Logger.error("Unexpected error deactivating staff member:", error);
       return {
         success: false,
         error: "Error inesperado al desactivar el miembro del staff",
@@ -418,7 +419,7 @@ export class StaffService {
         .eq("organization_id", organizationId);
 
       if (error) {
-        console.error("Error reactivating staff member:", error);
+        void Logger.error("Error reactivating staff member:", error);
         return {
           success: false,
           error: "Error al reactivar el miembro del staff",
@@ -427,7 +428,7 @@ export class StaffService {
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error reactivating staff member:", error);
+      void Logger.error("Unexpected error reactivating staff member:", error);
       return {
         success: false,
         error: "Error inesperado al reactivar el miembro del staff",
@@ -458,7 +459,7 @@ export class StaffService {
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error reordering staff members:", error);
+      void Logger.error("Unexpected error reordering staff members:", error);
       return {
         success: false,
         error: "Error inesperado al reordenar los miembros del staff",

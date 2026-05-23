@@ -1,6 +1,7 @@
 "use client";
 
 import { UserProfile } from "@/types/auth";
+import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 import {
@@ -86,7 +87,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
               updated_at: new Date().toISOString(),
             } as UserProfile);
           } else {
-            console.error("Error loading user profile:", error);
+            void Logger.error("Error loading user profile", error, {
+              context: "auth-context.loadUserProfile",
+            });
             setProfile(null);
           }
         } else {
@@ -94,7 +97,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       } catch (err) {
         if (!isMountedRef.current) return;
-        console.error("Error loading user profile:", err);
+        void Logger.error("Exception loading user profile", err, {
+          context: "auth-context.loadUserProfile",
+        });
         setProfile(null);
       } finally {
         if (!isMountedRef.current) return;
@@ -140,7 +145,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (abortController.signal.aborted || !isMountedRef.current) return;
 
         if (error) {
-          console.error("Error getting session:", error);
+          void Logger.error("Error getting session", error, {
+            context: "auth-context.initializeAuth",
+          });
           // Limpiar timeout y terminar loading
           if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
@@ -167,7 +174,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       } catch (err) {
         if (!isMountedRef.current) return;
-        console.error("Error in auth initialization:", err);
+        void Logger.error("Error in auth initialization", err, {
+          context: "auth-context.initializeAuth",
+        });
         // Limpiar timeout y terminar loading en caso de error
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);

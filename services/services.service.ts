@@ -1,5 +1,6 @@
 import { Service, ServiceFormData } from "@/types/appointments";
 import { createClient } from "@/utils/supabase/client";
+import { Logger } from "@/utils/logger";
 
 /**
  * Service Layer for Service Management
@@ -20,11 +21,11 @@ export class ServiceService {
     }
 
     if (!data.duration_minutes || data.duration_minutes <= 0) {
-      errors.push("La duración debe ser mayor a 0 minutos");
+      errors.push("La duraciÃ³n debe ser mayor a 0 minutos");
     }
 
     if (data.duration_minutes && data.duration_minutes > 1440) {
-      errors.push("La duración no puede ser mayor a 24 horas");
+      errors.push("La duraciÃ³n no puede ser mayor a 24 horas");
     }
 
     if (data.buffer_time_minutes && data.buffer_time_minutes < 0) {
@@ -118,7 +119,7 @@ export class ServiceService {
         .single();
 
       if (insertError) {
-        console.error("Error creating service:", insertError);
+        void Logger.error("Error creating service:", insertError);
         return {
           success: false,
           error: "Error al crear el servicio: " + insertError.message,
@@ -130,7 +131,7 @@ export class ServiceService {
         service: service as Service,
       };
     } catch (error) {
-      console.error("Unexpected error creating service:", error);
+      void Logger.error("Unexpected error creating service:", error);
       return {
         success: false,
         error: "Error inesperado al crear el servicio",
@@ -191,7 +192,7 @@ export class ServiceService {
         .single();
 
       if (updateError) {
-        console.error("Error updating service:", updateError);
+        void Logger.error("Error updating service:", updateError);
         return {
           success: false,
           error: "Error al actualizar el servicio: " + updateError.message,
@@ -203,7 +204,7 @@ export class ServiceService {
         service: service as Service,
       };
     } catch (error) {
-      console.error("Unexpected error updating service:", error);
+      void Logger.error("Unexpected error updating service:", error);
       return {
         success: false,
         error: "Error inesperado al actualizar el servicio",
@@ -254,7 +255,7 @@ export class ServiceService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching services:", error);
+        void Logger.error("Error fetching services:", error);
         return {
           success: false,
           error: "Error al cargar los servicios",
@@ -266,7 +267,7 @@ export class ServiceService {
         services: data || [],
       };
     } catch (error) {
-      console.error("Unexpected error fetching services:", error);
+      void Logger.error("Unexpected error fetching services:", error);
       return {
         success: false,
         error: "Error inesperado al cargar los servicios",
@@ -316,13 +317,13 @@ export class ServiceService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching paginated services:", error);
+        void Logger.error("Error fetching paginated services:", error);
         throw new Error("Error al cargar los servicios");
       }
 
       return data || [];
     } catch (error) {
-      console.error("Unexpected error fetching paginated services:", error);
+      void Logger.error("Unexpected error fetching paginated services:", error);
       throw error;
     }
   }
@@ -349,7 +350,7 @@ export class ServiceService {
         .single();
 
       if (error) {
-        console.error("Error fetching service:", error);
+        void Logger.error("Error fetching service:", error);
         return {
           success: false,
           error: "Error al cargar el servicio",
@@ -361,7 +362,7 @@ export class ServiceService {
         service: data as Service,
       };
     } catch (error) {
-      console.error("Unexpected error fetching service:", error);
+      void Logger.error("Unexpected error fetching service:", error);
       return {
         success: false,
         error: "Error inesperado al cargar el servicio",
@@ -386,7 +387,7 @@ export class ServiceService {
         .eq("organization_id", organizationId);
 
       if (error) {
-        console.error("Error deactivating service:", error);
+        void Logger.error("Error deactivating service:", error);
         return {
           success: false,
           error: "Error al desactivar el servicio",
@@ -395,7 +396,7 @@ export class ServiceService {
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error deactivating service:", error);
+      void Logger.error("Unexpected error deactivating service:", error);
       return {
         success: false,
         error: "Error inesperado al desactivar el servicio",
@@ -420,7 +421,7 @@ export class ServiceService {
         .eq("organization_id", organizationId);
 
       if (error) {
-        console.error("Error reactivating service:", error);
+        void Logger.error("Error reactivating service:", error);
         return {
           success: false,
           error: "Error al reactivar el servicio",
@@ -429,7 +430,7 @@ export class ServiceService {
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error reactivating service:", error);
+      void Logger.error("Unexpected error reactivating service:", error);
       return {
         success: false,
         error: "Error inesperado al reactivar el servicio",
@@ -460,7 +461,7 @@ export class ServiceService {
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error reordering services:", error);
+      void Logger.error("Unexpected error reordering services:", error);
       return {
         success: false,
         error: "Error inesperado al reordenar los servicios",

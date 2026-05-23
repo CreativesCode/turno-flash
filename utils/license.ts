@@ -1,5 +1,6 @@
 // Utilidades para gestión de licencias
 
+import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
 import { LicenseStatusResult } from "@/types/organization";
 
@@ -27,7 +28,9 @@ export async function getMyOrganizationLicenseStatus(): Promise<LicenseStatusRes
     );
 
     if (error) {
-      console.error('Error fetching license status:', error);
+      void Logger.error("Error fetching license status", error, {
+        rpc: "get_my_organization_license_status",
+      });
       return null;
     }
 
@@ -38,7 +41,9 @@ export async function getMyOrganizationLicenseStatus(): Promise<LicenseStatusRes
 
     return null;
   } catch (err) {
-    console.error('Exception fetching license status:', err);
+    void Logger.error("Exception fetching license status", err, {
+      rpc: "get_my_organization_license_status",
+    });
     return null;
   }
 }

@@ -7,6 +7,7 @@ import {
 } from "@/types/appointments";
 import { getTimestamp } from "@/utils/date";
 import { createClient } from "@/utils/supabase/client";
+import { Logger } from "@/utils/logger";
 
 /**
  * Service Layer for Appointment Management
@@ -191,7 +192,7 @@ export class AppointmentService {
             success: false,
             error:
               availabilityCheck.reason ||
-              "El horario seleccionado no está disponible",
+              "El horario seleccionado no estÃ¡ disponible",
           };
         }
       }
@@ -215,7 +216,7 @@ export class AppointmentService {
         .single();
 
       if (insertError) {
-        console.error("Error creating appointment:", insertError);
+        void Logger.error("Error creating appointment:", insertError);
         return {
           success: false,
           error: "Error al crear el turno: " + insertError.message,
@@ -227,7 +228,7 @@ export class AppointmentService {
         appointment: appointment as AppointmentWithDetails,
       };
     } catch (error) {
-      console.error("Unexpected error creating appointment:", error);
+      void Logger.error("Unexpected error creating appointment:", error);
       return {
         success: false,
         error: "Error inesperado al crear el turno",
@@ -308,7 +309,7 @@ export class AppointmentService {
         .eq("id", appointmentId);
 
       if (updateError) {
-        console.error("Error updating appointment status:", updateError);
+        void Logger.error("Error updating appointment status:", updateError);
         return {
           success: false,
           error: "Error al actualizar el estado: " + updateError.message,
@@ -317,7 +318,7 @@ export class AppointmentService {
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error updating status:", error);
+      void Logger.error("Unexpected error updating status:", error);
       return {
         success: false,
         error: "Error inesperado al actualizar el estado",
@@ -362,7 +363,7 @@ export class AppointmentService {
       const { data: appointments, error } = await query;
 
       if (error) {
-        console.error("Error checking availability:", error);
+        void Logger.error("Error checking availability:", error);
         return {
           available: false,
           reason: "Error al verificar disponibilidad",
@@ -391,7 +392,7 @@ export class AppointmentService {
 
       return { available: true };
     } catch (error) {
-      console.error("Unexpected error checking availability:", error);
+      void Logger.error("Unexpected error checking availability:", error);
       return {
         available: false,
         reason: "Error inesperado al verificar disponibilidad",
@@ -446,7 +447,7 @@ export class AppointmentService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching appointments:", error);
+        void Logger.error("Error fetching appointments:", error);
         return {
           success: false,
           error: "Error al cargar los turnos",
@@ -460,7 +461,7 @@ export class AppointmentService {
         ),
       };
     } catch (error) {
-      console.error("Unexpected error fetching appointments:", error);
+      void Logger.error("Unexpected error fetching appointments:", error);
       return {
         success: false,
         error: "Error inesperado al cargar los turnos",
@@ -520,7 +521,7 @@ export class AppointmentService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching paginated appointments:", error);
+        void Logger.error("Error fetching paginated appointments:", error);
         throw new Error("Error al cargar los turnos");
       }
 
@@ -528,7 +529,7 @@ export class AppointmentService {
         this.mapToAppointmentWithDetails(apt)
       );
     } catch (error) {
-      console.error("Unexpected error fetching paginated appointments:", error);
+      void Logger.error("Unexpected error fetching paginated appointments:", error);
       throw error;
     }
   }
@@ -552,7 +553,7 @@ export class AppointmentService {
         reason
       );
     } catch (error) {
-      console.error("Unexpected error deleting appointment:", error);
+      void Logger.error("Unexpected error deleting appointment:", error);
       return {
         success: false,
         error: "Error inesperado al eliminar el turno",
@@ -579,7 +580,7 @@ export class AppointmentService {
   }
 
   /**
-   * Envía un recordatorio manual de un turno vía WhatsApp (OpenWA).
+   * EnvÃ­a un recordatorio manual de un turno vÃ­a WhatsApp (OpenWA).
    * Invoca la Edge Function `wa-send` que se encarga de:
    *   - validar que la org tiene WA habilitado
    *   - mandar el mensaje al cliente
@@ -596,15 +597,15 @@ export class AppointmentService {
     if (method !== "whatsapp") {
       return {
         success: false,
-        error: "Solo WhatsApp está soportado por ahora",
+        error: "Solo WhatsApp estÃ¡ soportado por ahora",
       };
     }
 
     try {
       const supabase = createClient();
 
-      // Verificación rápida de existencia/pertenencia (la Edge Function
-      // valida de nuevo internamente, pero esto da un error más útil)
+      // VerificaciÃ³n rÃ¡pida de existencia/pertenencia (la Edge Function
+      // valida de nuevo internamente, pero esto da un error mÃ¡s Ãºtil)
       const { data: appointment, error: fetchError } = await supabase
         .from("appointments_with_details")
         .select("id, organization_id")
@@ -619,7 +620,7 @@ export class AppointmentService {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData?.session?.access_token;
       if (!accessToken) {
-        return { success: false, error: "Sesión expirada" };
+        return { success: false, error: "SesiÃ³n expirada" };
       }
 
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -648,13 +649,13 @@ export class AppointmentService {
         const msg =
           payload?.error ??
           payload?.reason ??
-          `wa-send respondió ${res.status}`;
+          `wa-send respondiÃ³ ${res.status}`;
         return { success: false, error: String(msg) };
       }
 
       return { success: true };
     } catch (error) {
-      console.error("Unexpected error sending reminder:", error);
+      void Logger.error("Unexpected error sending reminder:", error);
       return {
         success: false,
         error: "Error inesperado al enviar el recordatorio",
@@ -691,7 +692,7 @@ export class AppointmentService {
       if (!result.success || !result.appointments) {
         return {
           success: false,
-          error: result.error || "Error al cargar estadísticas",
+          error: result.error || "Error al cargar estadÃ­sticas",
         };
       }
 
@@ -709,10 +710,10 @@ export class AppointmentService {
 
       return { success: true, stats };
     } catch (error) {
-      console.error("Unexpected error getting statistics:", error);
+      void Logger.error("Unexpected error getting statistics:", error);
       return {
         success: false,
-        error: "Error inesperado al cargar estadísticas",
+        error: "Error inesperado al cargar estadÃ­sticas",
       };
     }
   }

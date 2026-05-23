@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Logger } from "@/utils/logger";
 
 export default function InvitePage() {
   const { profile, loading: authLoading } = useAuth();
@@ -40,7 +41,7 @@ export default function InvitePage() {
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
       if (!supabaseUrl || !supabaseAnonKey) {
-        setError("Falta configuración de Supabase (URL/ANON KEY).");
+        setError("Falta configuraciÃ³n de Supabase (URL/ANON KEY).");
         setLoading(false);
         return;
       }
@@ -51,25 +52,25 @@ export default function InvitePage() {
       } = await supabase.auth.getSession();
 
       if (sessionError || !session?.access_token) {
-        setError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
+        setError("SesiÃ³n expirada. Por favor, vuelve a iniciar sesiÃ³n.");
         setLoading(false);
         return;
       }
 
-      // Asegurar token con forma de JWT (a.b.c). Si no, refrescar sesión.
+      // Asegurar token con forma de JWT (a.b.c). Si no, refrescar sesiÃ³n.
       let accessToken = session.access_token;
       if (accessToken.split(".").length !== 3) {
         const { data: refreshed, error: refreshError } =
           await supabase.auth.refreshSession();
         if (refreshError || !refreshed.session?.access_token) {
-          setError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
+          setError("SesiÃ³n expirada. Por favor, vuelve a iniciar sesiÃ³n.");
           setLoading(false);
           return;
         }
         accessToken = refreshed.session.access_token;
       }
 
-      // Preparar el body de la petición
+      // Preparar el body de la peticiÃ³n
       // Si el usuario es owner, debe incluir organization_id
       const requestBody: {
         email: string;
@@ -101,32 +102,32 @@ export default function InvitePage() {
         : { error: await response.text() };
 
       if (!response.ok) {
-        console.error("Error inviting user:", data);
-        setError(data?.error || "Error al enviar la invitación");
+        void Logger.error("Error inviting user:", data);
+        setError(data?.error || "Error al enviar la invitaciÃ³n");
         setLoading(false);
         return;
       }
 
       if (data?.error) {
-        console.error("Error from function:", data.error);
+        void Logger.error("Error from function:", data.error);
         setError(data.error);
         setLoading(false);
         return;
       }
 
       setSuccess(
-        `Se ha enviado una invitación a ${email}. El usuario podrá hacer clic en el enlace para configurar su contraseña.`
+        `Se ha enviado una invitaciÃ³n a ${email}. El usuario podrÃ¡ hacer clic en el enlace para configurar su contraseÃ±a.`
       );
       setEmail(""); // Limpiar el campo
     } catch (err) {
-      console.error("Exception:", err);
-      setError("Error al enviar la invitación. Intenta nuevamente.");
+      void Logger.error("Exception:", err);
+      setError("Error al enviar la invitaciÃ³n. Intenta nuevamente.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Mostrar spinner mientras se carga la autenticación o si no es admin u owner
+  // Mostrar spinner mientras se carga la autenticaciÃ³n o si no es admin u owner
   if (
     authLoading ||
     !profile ||
@@ -159,11 +160,11 @@ export default function InvitePage() {
         <div className="rounded-lg bg-surface p-8 shadow-sm border border-border">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-foreground">
-              Enviar invitación
+              Enviar invitaciÃ³n
             </h2>
             <p className="mt-2 text-sm text-foreground-muted">
-              El usuario recibirá un correo con un enlace para configurar su
-              contraseña y acceder a la plataforma.
+              El usuario recibirÃ¡ un correo con un enlace para configurar su
+              contraseÃ±a y acceder a la plataforma.
             </p>
           </div>
 
@@ -173,7 +174,7 @@ export default function InvitePage() {
                 htmlFor="email"
                 className="block text-sm font-medium text-foreground"
               >
-                Correo electrónico del nuevo usuario
+                Correo electrÃ³nico del nuevo usuario
               </label>
               <input
                 id="email"
@@ -205,21 +206,21 @@ export default function InvitePage() {
               disabled={loading}
               className="flex w-full justify-center rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "Enviando invitación..." : "Enviar invitación"}
+              {loading ? "Enviando invitaciÃ³n..." : "Enviar invitaciÃ³n"}
             </button>
           </form>
 
           <div className="mt-8 border-t border-border pt-6">
             <h3 className="text-sm font-semibold text-foreground">
-              Cómo funciona
+              CÃ³mo funciona
             </h3>
             <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-foreground-muted">
-              <li>Ingresa el correo electrónico del nuevo usuario</li>
-              <li>El usuario recibirá un correo con un enlace de invitación</li>
+              <li>Ingresa el correo electrÃ³nico del nuevo usuario</li>
+              <li>El usuario recibirÃ¡ un correo con un enlace de invitaciÃ³n</li>
               <li>
-                Al hacer clic en el enlace, podrá configurar su contraseña
+                Al hacer clic en el enlace, podrÃ¡ configurar su contraseÃ±a
               </li>
-              <li>Después, podrá iniciar sesión con su correo y contraseña</li>
+              <li>DespuÃ©s, podrÃ¡ iniciar sesiÃ³n con su correo y contraseÃ±a</li>
             </ol>
           </div>
         </div>

@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { Logger } from "@/utils/logger";
 
 interface ShortcutCard {
   key: string;
@@ -78,7 +79,7 @@ const SHORTCUTS: readonly ShortcutCard[] = [
   {
     key: "services",
     title: "Servicios",
-    subtitle: "Catálogo y precios",
+    subtitle: "CatÃ¡logo y precios",
     Icon: Package,
     mesh: "mesh-warn",
     href: "/dashboard/services",
@@ -149,7 +150,7 @@ const TODAY_LABEL_OPTIONS: Intl.DateTimeFormatOptions = {
 
 function roleLabel(role?: string): string {
   if (role === "admin") return "Administrador";
-  if (role === "owner") return "Dueño";
+  if (role === "owner") return "DueÃ±o";
   return "Staff";
 }
 
@@ -182,7 +183,7 @@ export default function DashboardPage() {
   // Stats de errores para hero de admin (solo cuando admin sin org)
   const { data: errorStats } = useErrorStatsQuery(7);
 
-  // Cargar estado de licencia y nombre de organización al montar el componente
+  // Cargar estado de licencia y nombre de organizaciÃ³n al montar el componente
   useEffect(() => {
     let isMounted = true;
 
@@ -201,7 +202,7 @@ export default function DashboardPage() {
           setIsBlocked(true);
         }
       } catch (error) {
-        console.error("Error loading license status:", error);
+        void Logger.error("Error loading license status:", error);
       } finally {
         if (isMounted) setLoadingLicense(false);
       }
@@ -229,7 +230,7 @@ export default function DashboardPage() {
         }
       } catch (error) {
         if (!isMounted) return;
-        console.error("Error loading organization name:", error);
+        void Logger.error("Error loading organization name:", error);
         setOrganizationName(null);
       }
     };
@@ -255,7 +256,7 @@ export default function DashboardPage() {
         });
       } catch (error) {
         if (!isMounted) return;
-        console.error("Error loading admin counts:", error);
+        void Logger.error("Error loading admin counts:", error);
         setAdminCounts(null);
       }
     };
@@ -279,7 +280,7 @@ export default function DashboardPage() {
     endDate: todayString,
   });
 
-  // Group counts by status — used by both the hero stat and shortcut subtitles.
+  // Group counts by status â€” used by both the hero stat and shortcut subtitles.
   const stats = useMemo(() => {
     const total = appointments.length;
     const counts: Record<string, number> = {};
@@ -298,7 +299,7 @@ export default function DashboardPage() {
     };
   }, [appointments]);
 
-  // Visible shortcut cards — filtered by role and org requirement.
+  // Visible shortcut cards â€” filtered by role and org requirement.
   const visibleShortcuts = useMemo(() => {
     const role = profile?.role;
     const hasOrg = !!profile?.organization_id;
@@ -309,7 +310,7 @@ export default function DashboardPage() {
     });
   }, [profile?.role, profile?.organization_id]);
 
-  // Next 3 upcoming non-terminal appointments — sorted by start_time.
+  // Next 3 upcoming non-terminal appointments â€” sorted by start_time.
   const upcoming = useMemo(() => {
     const eligible: AppointmentStatus[] = [
       "pending",
@@ -326,11 +327,11 @@ export default function DashboardPage() {
   const greetName = firstName(profile?.full_name, profile?.email ?? undefined);
   const todayLabel = useMemo(
     () =>
-      new Date().toLocaleDateString("es-AR", TODAY_LABEL_OPTIONS).replace(",", " ·"),
+      new Date().toLocaleDateString("es-AR", TODAY_LABEL_OPTIONS).replace(",", " Â·"),
     []
   );
 
-  // Si está bloqueado por licencia expirada, mostrar pantalla de bloqueo
+  // Si estÃ¡ bloqueado por licencia expirada, mostrar pantalla de bloqueo
   if (isBlocked && profile?.role !== "admin") {
     return (
       <ProtectedRoute>
@@ -341,15 +342,15 @@ export default function DashboardPage() {
           <div className="flex min-h-screen items-center justify-center px-4">
             <Card className="w-full max-w-md p-8 text-center shadow-lg">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-danger-100 dark:bg-danger-900/20">
-                <span className="text-3xl">🚫</span>
+                <span className="text-3xl">ðŸš«</span>
               </div>
               <h1 className="mt-6 text-2xl font-bold text-foreground">
                 Acceso Bloqueado
               </h1>
               <p className="mt-4 text-sm text-foreground-muted">
-                La licencia de tu organización ha expirado. Por favor, contacta
+                La licencia de tu organizaciÃ³n ha expirado. Por favor, contacta
                 al administrador para renovarla y continuar usando la
-                aplicación.
+                aplicaciÃ³n.
               </p>
               {licenseStatus && (
                 <div className="mt-6">
@@ -365,7 +366,7 @@ export default function DashboardPage() {
                 className="mt-6 w-full"
                 onClick={() => signOut().then(() => router.push("/login"))}
               >
-                Cerrar sesión
+                Cerrar sesiÃ³n
               </Button>
             </Card>
           </div>
@@ -381,7 +382,7 @@ export default function DashboardPage() {
         description="Accede a tu panel de control de Turno Flash. Gestiona turnos, clientes, servicios y profesionales desde un solo lugar."
       />
       <div className="min-h-screen bg-background">
-        {/* Banner de notificación de licencia en la parte superior */}
+        {/* Banner de notificaciÃ³n de licencia en la parte superior */}
         {licenseStatus && shouldShowLicenseNotification(licenseStatus) && (
           <LicenseNotificationBanner licenseStatus={licenseStatus} />
         )}
@@ -392,11 +393,11 @@ export default function DashboardPage() {
             <div className="min-w-0">
               {organizationName && (
                 <div className="truncate text-xs font-semibold text-foreground-muted lg:text-[13px]">
-                  {organizationName} · {todayLabel}
+                  {organizationName} Â· {todayLabel}
                 </div>
               )}
               <h1 className="mt-0.5 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-                Hola, {greetName} 👋
+                Hola, {greetName} ðŸ‘‹
               </h1>
             </div>
             <div className="flex items-center gap-3">
@@ -420,7 +421,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Notificación de licencia (versión completa) */}
+          {/* NotificaciÃ³n de licencia (versiÃ³n completa) */}
           {!loadingLicense &&
             licenseStatus &&
             shouldShowLicenseNotification(licenseStatus) &&
@@ -430,7 +431,7 @@ export default function DashboardPage() {
               </div>
             )}
 
-          {/* Hero stat de admin (cuando es admin sin organización) */}
+          {/* Hero stat de admin (cuando es admin sin organizaciÃ³n) */}
           {isAdminWithoutOrg && (
             <Card className="relative mb-6 overflow-hidden p-5 lg:mb-8 lg:p-6">
               <div
@@ -528,7 +529,7 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          {/* Sin organización (no admins) */}
+          {/* Sin organizaciÃ³n (no admins) */}
           {!profile?.organization_id && profile?.role !== "admin" && (
             <Card className="mb-6 flex items-start gap-3 border-warning-200 bg-warning-50 p-5 dark:border-warning-900/40 dark:bg-warning-900/20">
               <svg
@@ -546,11 +547,11 @@ export default function DashboardPage() {
               </svg>
               <div>
                 <h3 className="text-base font-bold text-warning-900 dark:text-warning-100">
-                  Sin organización asignada
+                  Sin organizaciÃ³n asignada
                 </h3>
                 <p className="mt-1 text-sm text-warning-800 dark:text-warning-200">
-                  Necesitás que un administrador te asigne a una organización
-                  para acceder al sistema de gestión de turnos.
+                  NecesitÃ¡s que un administrador te asigne a una organizaciÃ³n
+                  para acceder al sistema de gestiÃ³n de turnos.
                 </p>
               </div>
             </Card>
@@ -570,18 +571,18 @@ export default function DashboardPage() {
             </section>
           )}
 
-          {/* Próximos turnos */}
+          {/* PrÃ³ximos turnos */}
           {profile?.organization_id && (
             <section>
               <div className="mb-3 flex items-center justify-between">
                 <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
-                  Próximos
+                  PrÃ³ximos
                 </div>
                 <button
                   onClick={() => router.push("/dashboard/appointments")}
                   className="text-xs font-semibold text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                 >
-                  Ver todos →
+                  Ver todos â†’
                 </button>
               </div>
               {upcoming.length === 0 ? (
@@ -590,7 +591,7 @@ export default function DashboardPage() {
                     <Calendar className="h-5 w-5" />
                   </div>
                   <div className="mt-3 text-sm font-bold text-foreground">
-                    No hay turnos próximos hoy
+                    No hay turnos prÃ³ximos hoy
                   </div>
                   <div className="mt-1 text-xs text-foreground-muted">
                     Crea uno o consulta el calendario completo.
@@ -617,9 +618,9 @@ export default function DashboardPage() {
   );
 }
 
-// ───────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Local helpers (only used by this page)
-// ───────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function MiniStat({
   label,

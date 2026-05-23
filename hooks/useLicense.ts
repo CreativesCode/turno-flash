@@ -11,6 +11,7 @@ import {
   formatLicenseMessage,
 } from "@/utils/license";
 import { useAuth } from "@/contexts/auth-context";
+import { Logger } from "@/utils/logger";
 
 export function useLicense() {
   const { profile } = useAuth();
@@ -45,7 +46,9 @@ export function useLicense() {
         }
       } catch (err) {
         if (!isMounted) return;
-        console.error("Error loading license status:", err);
+        void Logger.error("Error loading license status", err, {
+          hook: "useLicense",
+        });
         setError(
           err instanceof Error ? err.message : "Error al cargar estado de licencia"
         );

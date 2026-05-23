@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Logger } from "@/utils/logger";
 
 interface OrganizationWithOwner extends OrganizationWithLicenseStatus {
   owner?: UserProfile | null;
@@ -53,11 +54,11 @@ export default function OrganizationsPage() {
 
       if (orgsError) {
         setError("Error al cargar organizaciones: " + orgsError.message);
-        console.error(orgsError);
+        void Logger.error("Error fetching organizations", orgsError);
         return;
       }
 
-      // Para cada organización, cargar el owner y el conteo de miembros
+      // Para cada organizaciÃ³n, cargar el owner y el conteo de miembros
       const validOrgs = (orgsData || []).filter((org) => org.id != null);
 
       const organizationsWithOwners = await Promise.all(
@@ -99,7 +100,7 @@ export default function OrganizationsPage() {
       setOrganizations(organizationsWithOwners);
     } catch (err) {
       setError("Error inesperado al cargar organizaciones");
-      console.error(err);
+      void Logger.error("Unexpected error loading organizations", err);
     } finally {
       setLoading(false);
     }
@@ -131,21 +132,23 @@ export default function OrganizationsPage() {
       setError(null);
       setSuccess(null);
 
-      // Eliminar la organización (los usuarios se actualizarán automáticamente por ON DELETE SET NULL)
+      // Eliminar la organizaciÃ³n (los usuarios se actualizarÃ¡n automÃ¡ticamente por ON DELETE SET NULL)
       const { error: deleteError } = await supabase
         .from("organizations")
         .delete()
         .eq("id", organizationToDelete.id);
 
       if (deleteError) {
-        setError("Error al eliminar la organización: " + deleteError.message);
-        console.error(deleteError);
+        setError("Error al eliminar la organizaciÃ³n: " + deleteError.message);
+        void Logger.error("Error deleting organization", deleteError, {
+          organizationId: organizationToDelete.id,
+        });
         setDeleting(null);
         setOrganizationToDelete(null);
         return;
       }
 
-      setSuccess("Organización eliminada exitosamente");
+      setSuccess("OrganizaciÃ³n eliminada exitosamente");
 
       // Actualizar la lista local
       setOrganizations((prevOrgs) =>
@@ -156,11 +159,13 @@ export default function OrganizationsPage() {
       setOrganizationToDelete(null);
       setDeleting(null);
 
-      // Limpiar mensaje de éxito después de 3 segundos
+      // Limpiar mensaje de Ã©xito despuÃ©s de 3 segundos
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError("Error inesperado al eliminar la organización");
-      console.error(err);
+      setError("Error inesperado al eliminar la organizaciÃ³n");
+      void Logger.error("Unexpected error deleting organization", err, {
+        organizationId: organizationToDelete?.id,
+      });
       setDeleting(null);
       setOrganizationToDelete(null);
     }
@@ -190,7 +195,7 @@ export default function OrganizationsPage() {
     <ProtectedRoute>
       <PageMetadata
         title="Organizaciones"
-        description="Gestiona las organizaciones del sistema. Administra información, licencias y miembros de cada organización."
+        description="Gestiona las organizaciones del sistema. Administra informaciÃ³n, licencias y miembros de cada organizaciÃ³n."
       />
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -206,7 +211,7 @@ export default function OrganizationsPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
                 <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-                  Gestión de Organizaciones
+                  GestiÃ³n de Organizaciones
                 </h1>
                 <p className="mt-1 text-sm text-foreground-muted">
                   Administra las organizaciones del sistema
@@ -218,12 +223,12 @@ export default function OrganizationsPage() {
                 className="w-full justify-center sm:w-auto"
               >
                 <Plus size={16} />
-                Crear organización
+                Crear organizaciÃ³n
               </Button>
             </div>
           </div>
 
-          {/* Mensajes de éxito/error */}
+          {/* Mensajes de Ã©xito/error */}
           {error && (
             <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
@@ -271,7 +276,7 @@ export default function OrganizationsPage() {
                   org.license_status === "active"
                     ? "Activa"
                     : org.license_status === "grace_period"
-                    ? "Período de gracia"
+                    ? "PerÃ­odo de gracia"
                     : org.license_status === "expired"
                     ? "Expirada"
                     : "Sin licencia";
@@ -320,7 +325,7 @@ export default function OrganizationsPage() {
                         </div>
                       ) : (
                         <span className="text-sm text-foreground-muted">
-                          Sin dueño asignado
+                          Sin dueÃ±o asignado
                         </span>
                       )}
                     </div>
@@ -350,10 +355,10 @@ export default function OrganizationsPage() {
                       {org.days_remaining !== null && (
                         <span className="text-[11px] text-foreground-muted">
                           {org.days_remaining > 0
-                            ? `${org.days_remaining} días restantes`
+                            ? `${org.days_remaining} dÃ­as restantes`
                             : `Expirada hace ${Math.abs(
                                 org.days_remaining
-                              )} días`}
+                              )} dÃ­as`}
                         </span>
                       )}
                     </div>
@@ -388,7 +393,7 @@ export default function OrganizationsPage() {
                         size="sm"
                         onClick={() => handleDeleteClick(org)}
                         disabled={deleting === org.id}
-                        aria-label="Eliminar organización"
+                        aria-label="Eliminar organizaciÃ³n"
                       >
                         <Trash2 size={14} />
                         {deleting === org.id ? "Eliminando..." : "Eliminar"}
@@ -402,29 +407,29 @@ export default function OrganizationsPage() {
         </div>
       </div>
 
-      {/* Modal de confirmación de eliminación */}
+      {/* Modal de confirmaciÃ³n de eliminaciÃ³n */}
       {organizationToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="w-full max-w-md rounded-lg bg-surface border border-border p-6 shadow-xl">
             <h3 className="text-lg font-semibold text-foreground">
-              Confirmar eliminación
+              Confirmar eliminaciÃ³n
             </h3>
             <p className="mt-4 text-sm text-foreground-muted">
-              ¿Estás seguro de que deseas eliminar la organización{" "}
+              Â¿EstÃ¡s seguro de que deseas eliminar la organizaciÃ³n{" "}
               <span className="font-medium text-foreground">
                 {organizationToDelete.name}
               </span>
-              ? Esta acción no se puede deshacer.
+              ? Esta acciÃ³n no se puede deshacer.
             </p>
             {organizationToDelete.member_count &&
               organizationToDelete.member_count > 0 && (
                 <div className="mt-4 rounded-md bg-warning-50 p-3 text-sm text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
-                  ⚠️ Esta organización tiene {organizationToDelete.member_count}{" "}
+                  âš ï¸ Esta organizaciÃ³n tiene {organizationToDelete.member_count}{" "}
                   {organizationToDelete.member_count === 1
                     ? "miembro"
                     : "miembros"}
-                  . Los usuarios seguirán existiendo pero perderán su asociación
-                  con esta organización.
+                  . Los usuarios seguirÃ¡n existiendo pero perderÃ¡n su asociaciÃ³n
+                  con esta organizaciÃ³n.
                 </div>
               )}
             <div className="mt-6 flex justify-end gap-3">
