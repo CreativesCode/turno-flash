@@ -86,6 +86,22 @@ export {
   type UseNormalizedDataReturn,
 } from "./useNormalizedData";
 
+// Realtime hooks (Supabase Realtime + React Query)
+export {
+  useRealtimeTable,
+  type RealtimeEvent,
+  type UseRealtimeTableOptions,
+} from "./useRealtimeTable";
+export {
+  useRealtimeAll,
+  useRealtimeAppointments,
+  useRealtimeCustomers,
+  useRealtimeServices,
+  useRealtimeStaff,
+  useRealtimeWAOutbound,
+  waOutboundKeys,
+} from "./useRealtimeEntities";
+
 // Other hooks
 export { useAuth } from "./use-auth";
 export { useCapacitor } from "./useCapacitor";

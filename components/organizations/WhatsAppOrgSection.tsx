@@ -2,6 +2,7 @@
 
 import { Badge, Button, Card, Field, sheetInputClasses } from "@/components/ui";
 import { useToast } from "@/hooks";
+import { useRealtimeWAOutbound } from "@/hooks/useRealtimeEntities";
 import { createClient } from "@/utils/supabase/client";
 import {
   AlertCircle,
@@ -109,6 +110,10 @@ export function WhatsAppOrgSection({ organizationId }: Props) {
   useEffect(() => {
     void reload();
   }, [reload]);
+
+  // Realtime: refrescar lista de mensajes recientes cuando llegan/cambian
+  // eventos en wa_outbound_messages para esta organización.
+  useRealtimeWAOutbound({ onChange: () => void reload() });
 
   const isDirty =
     enabled !== initialEnabled || sessionId.trim() !== initialSessionId;

@@ -6,6 +6,7 @@ import { MobileTopbar } from "@/components/MobileTopbar";
 import { Sidebar } from "@/components/Sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
+import { useRealtimeAll } from "@/hooks/useRealtimeEntities";
 import { useState } from "react";
 
 /**
@@ -17,6 +18,11 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { profile } = useAuth();
   const showTabBar = !!profile?.organization_id;
+
+  // Suscribir realtime a todas las tablas operativas core mientras
+  // el usuario está dentro del dashboard. Los hooks se auto-deshabilitan
+  // si no hay organization_id y se limpian al desmontar.
+  useRealtimeAll();
 
   return (
     <div className="min-h-screen bg-background">
