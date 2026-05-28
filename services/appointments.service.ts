@@ -192,7 +192,7 @@ export class AppointmentService {
             success: false,
             error:
               availabilityCheck.reason ||
-              "El horario seleccionado no estÃ¡ disponible",
+              "El horario seleccionado no está disponible",
           };
         }
       }
@@ -580,7 +580,7 @@ export class AppointmentService {
   }
 
   /**
-   * EnvÃ­a un recordatorio manual de un turno vÃ­a WhatsApp (OpenWA).
+   * Envía un recordatorio manual de un turno vía WhatsApp (OpenWA).
    * Invoca la Edge Function `wa-send` que se encarga de:
    *   - validar que la org tiene WA habilitado
    *   - mandar el mensaje al cliente
@@ -597,15 +597,15 @@ export class AppointmentService {
     if (method !== "whatsapp") {
       return {
         success: false,
-        error: "Solo WhatsApp estÃ¡ soportado por ahora",
+        error: "Solo WhatsApp está soportado por ahora",
       };
     }
 
     try {
       const supabase = createClient();
 
-      // VerificaciÃ³n rÃ¡pida de existencia/pertenencia (la Edge Function
-      // valida de nuevo internamente, pero esto da un error mÃ¡s Ãºtil)
+      // Verificación rápida de existencia/pertenencia (la Edge Function
+      // valida de nuevo internamente, pero esto da un error más útil)
       const { data: appointment, error: fetchError } = await supabase
         .from("appointments_with_details")
         .select("id, organization_id")
@@ -620,7 +620,7 @@ export class AppointmentService {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData?.session?.access_token;
       if (!accessToken) {
-        return { success: false, error: "SesiÃ³n expirada" };
+        return { success: false, error: "Sesión expirada" };
       }
 
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -649,7 +649,7 @@ export class AppointmentService {
         const msg =
           payload?.error ??
           payload?.reason ??
-          `wa-send respondiÃ³ ${res.status}`;
+          `wa-send respondió ${res.status}`;
         return { success: false, error: String(msg) };
       }
 
@@ -692,7 +692,7 @@ export class AppointmentService {
       if (!result.success || !result.appointments) {
         return {
           success: false,
-          error: result.error || "Error al cargar estadÃ­sticas",
+          error: result.error || "Error al cargar estadísticas",
         };
       }
 
@@ -713,7 +713,7 @@ export class AppointmentService {
       void Logger.error("Unexpected error getting statistics:", error);
       return {
         success: false,
-        error: "Error inesperado al cargar estadÃ­sticas",
+        error: "Error inesperado al cargar estadísticas",
       };
     }
   }

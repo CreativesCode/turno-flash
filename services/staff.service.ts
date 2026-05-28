@@ -28,13 +28,13 @@ export class StaffService {
     if (data.email && data.email.trim() !== "") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(data.email)) {
-        errors.push("El formato del email es invÃ¡lido");
+        errors.push("El formato del email es inválido");
       }
     }
 
     // Validate phone format if provided
     if (data.phone && data.phone.length < 8) {
-      errors.push("El telÃ©fono debe tener al menos 8 dÃ­gitos");
+      errors.push("El teléfono debe tener al menos 8 dígitos");
     }
 
     return {

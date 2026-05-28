@@ -21,11 +21,11 @@ export class ServiceService {
     }
 
     if (!data.duration_minutes || data.duration_minutes <= 0) {
-      errors.push("La duraciÃ³n debe ser mayor a 0 minutos");
+      errors.push("La duración debe ser mayor a 0 minutos");
     }
 
     if (data.duration_minutes && data.duration_minutes > 1440) {
-      errors.push("La duraciÃ³n no puede ser mayor a 24 horas");
+      errors.push("La duración no puede ser mayor a 24 horas");
     }
 
     if (data.buffer_time_minutes && data.buffer_time_minutes < 0) {

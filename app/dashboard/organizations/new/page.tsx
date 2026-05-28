@@ -19,7 +19,7 @@ import {
   useState,
 } from "react";
 
-// Timeout para verificaciÃ³n de auth (10 segundos)
+// Timeout para verificación de auth (10 segundos)
 const AUTH_CHECK_TIMEOUT_MS = 10000;
 
 export default function NewOrganizationPage() {
@@ -53,7 +53,7 @@ export default function NewOrganizationPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const hasChecked = useRef(false);
 
-  // Cargar usuarios disponibles (staff sin organizaciÃ³n)
+  // Cargar usuarios disponibles (staff sin organización)
   const loadUsers = useCallback(async () => {
     try {
       setLoadingUsers(true);
@@ -61,7 +61,7 @@ export default function NewOrganizationPage() {
         .from("user_profiles")
         .select("*")
         .eq("role", "staff") // Solo usuarios con rol staff
-        .is("organization_id", null) // Solo usuarios sin organizaciÃ³n
+        .is("organization_id", null) // Solo usuarios sin organización
         .order("email", { ascending: true });
 
       if (fetchError) {
@@ -116,7 +116,7 @@ export default function NewOrganizationPage() {
         }
 
         setCheckingAuth(false);
-        // Cargar usuarios despuÃ©s de verificar que es admin
+        // Cargar usuarios después de verificar que es admin
         loadUsers();
       } catch (err) {
         clearTimeout(timeoutId);
@@ -135,11 +135,11 @@ export default function NewOrganizationPage() {
     setSuccess(null);
 
     try {
-      // Validar slug (debe ser alfanumÃ©rico y guiones)
+      // Validar slug (debe ser alfanumérico y guiones)
       const slugRegex = /^[a-z0-9-]+$/;
       if (!slugRegex.test(formData.org_slug)) {
         setError(
-          "El slug solo puede contener letras minÃºsculas, nÃºmeros y guiones"
+          "El slug solo puede contener letras minúsculas, números y guiones"
         );
         setLoading(false);
         return;
@@ -147,7 +147,7 @@ export default function NewOrganizationPage() {
 
       // Validar que se haya seleccionado un usuario
       if (!formData.selected_user_id) {
-        setError("Debes seleccionar un usuario para asignar como dueÃ±o");
+        setError("Debes seleccionar un usuario para asignar como dueño");
         setLoading(false);
         return;
       }
@@ -166,7 +166,7 @@ export default function NewOrganizationPage() {
         }
       }
 
-      // Preparar parÃ¡metros para la funciÃ³n
+      // Preparar parámetros para la función
       const params: CreateOrganizationParams = {
         org_name: formData.org_name.trim(),
         org_slug: formData.org_slug.trim().toLowerCase(),
@@ -177,7 +177,7 @@ export default function NewOrganizationPage() {
         license_end_date: formData.license_end_date || undefined,
       };
 
-      // Llamar a la funciÃ³n RPC
+      // Llamar a la función RPC
       const { data, error: rpcError } = await supabase.rpc(
         "create_organization_with_owner",
         params
@@ -187,7 +187,7 @@ export default function NewOrganizationPage() {
         void Logger.error("Error creating organization:", rpcError);
         setError(
           rpcError.message ||
-            "Error al crear la organizaciÃ³n. Verifica que el slug no estÃ© en uso y que el usuario no tenga ya una organizaciÃ³n asignada."
+            "Error al crear la organización. Verifica que el slug no esté en uso y que el usuario no tenga ya una organización asignada."
         );
         setLoading(false);
         return;
@@ -195,7 +195,7 @@ export default function NewOrganizationPage() {
 
       const result = data as CreateOrganizationResult | null;
       if (!result || !result.success) {
-        setError("Error al crear la organizaciÃ³n. Intenta nuevamente.");
+        setError("Error al crear la organización. Intenta nuevamente.");
         setLoading(false);
         return;
       }
@@ -203,7 +203,7 @@ export default function NewOrganizationPage() {
       const selectedUser = users.find((u) => u.user_id === result.user_id);
 
       setSuccess(
-        `OrganizaciÃ³n "${formData.org_name}" creada exitosamente. El usuario ${selectedUser?.email} ha sido asignado como dueÃ±o.`
+        `Organización "${formData.org_name}" creada exitosamente. El usuario ${selectedUser?.email} ha sido asignado como dueño.`
       );
 
       // Limpiar formulario
@@ -220,14 +220,14 @@ export default function NewOrganizationPage() {
       // Recargar lista de usuarios
       await loadUsers();
 
-      // Redirigir al dashboard despuÃ©s de 2 segundos
+      // Redirigir al dashboard después de 2 segundos
       setTimeout(() => {
         router.push("/dashboard");
       }, 2000);
     } catch (err) {
       void Logger.error("Exception creating organization:", err);
       setError(
-        "Error inesperado al crear la organizaciÃ³n. Intenta nuevamente."
+        "Error inesperado al crear la organización. Intenta nuevamente."
       );
     } finally {
       setLoading(false);
@@ -274,7 +274,7 @@ export default function NewOrganizationPage() {
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-foreground">
-                Crear nueva organizaciÃ³n
+                Crear nueva organización
               </h1>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -290,22 +290,22 @@ export default function NewOrganizationPage() {
           <div className="rounded-lg bg-surface border border-border p-8 shadow-sm">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-foreground">
-                InformaciÃ³n de la organizaciÃ³n
+                Información de la organización
               </h2>
               <p className="mt-2 text-sm text-foreground-muted">
-                Crea una nueva organizaciÃ³n y asigna un dueÃ±o. El dueÃ±o podrÃ¡
-                gestionar la organizaciÃ³n, servicios y reservas.
+                Crea una nueva organización y asigna un dueño. El dueño podrá
+                gestionar la organización, servicios y reservas.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Nombre de la organizaciÃ³n */}
+              {/* Nombre de la organización */}
               <div>
                 <label
                   htmlFor="org_name"
                   className="block text-sm font-medium text-foreground"
                 >
-                  Nombre de la organizaciÃ³n *
+                  Nombre de la organización *
                 </label>
                 <input
                   id="org_name"
@@ -331,7 +331,7 @@ export default function NewOrganizationPage() {
                     htmlFor="org_slug"
                     className="block text-sm font-medium text-foreground"
                   >
-                    Slug (identificador Ãºnico) *
+                    Slug (identificador único) *
                   </label>
                   <button
                     type="button"
@@ -358,7 +358,7 @@ export default function NewOrganizationPage() {
                   placeholder="mi-negocio"
                 />
                 <p className="mt-1 text-xs text-foreground-muted">
-                  Solo letras minÃºsculas, nÃºmeros y guiones. Se usarÃ¡ en URLs.
+                  Solo letras minúsculas, números y guiones. Se usará en URLs.
                 </p>
               </div>
 
@@ -401,13 +401,13 @@ export default function NewOrganizationPage() {
                 </select>
               </div>
 
-              {/* TelÃ©fono WhatsApp (opcional) */}
+              {/* Teléfono WhatsApp (opcional) */}
               <div>
                 <label
                   htmlFor="org_whatsapp_phone"
                   className="block text-sm font-medium text-foreground"
                 >
-                  TelÃ©fono de WhatsApp (opcional)
+                  Teléfono de WhatsApp (opcional)
                 </label>
                 <input
                   id="org_whatsapp_phone"
@@ -425,15 +425,15 @@ export default function NewOrganizationPage() {
                 />
               </div>
 
-              {/* SecciÃ³n de Licencia */}
+              {/* Sección de Licencia */}
               <div className="rounded-lg border border-border bg-muted/30 p-4">
                 <h3 className="text-sm font-semibold text-foreground">
-                  ConfiguraciÃ³n de Licencia
+                  Configuración de Licencia
                 </h3>
                 <p className="mt-1 text-xs text-foreground-muted">
-                  Define el perÃ­odo de vigencia de la licencia para esta
-                  organizaciÃ³n. Si se deja vacÃ­o, la organizaciÃ³n tendrÃ¡ acceso
-                  sin lÃ­mite de tiempo.
+                  Define el período de vigencia de la licencia para esta
+                  organización. Si se deja vacío, la organización tendrá acceso
+                  sin límite de tiempo.
                 </p>
 
                 <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -485,19 +485,19 @@ export default function NewOrganizationPage() {
                 </div>
 
                 <p className="mt-2 text-xs text-foreground-muted">
-                  Nota: Si la licencia expira, la organizaciÃ³n tendrÃ¡ un perÃ­odo
-                  de gracia de 7 dÃ­as (configurable) para continuar usando la
-                  aplicaciÃ³n con notificaciones de renovaciÃ³n.
+                  Nota: Si la licencia expira, la organización tendrá un período
+                  de gracia de 7 días (configurable) para continuar usando la
+                  aplicación con notificaciones de renovación.
                 </p>
               </div>
 
-              {/* DueÃ±o de la organizaciÃ³n */}
+              {/* Dueño de la organización */}
               <div className="rounded-lg border border-border bg-muted/30 p-4">
                 <h3 className="text-sm font-semibold text-foreground">
-                  DueÃ±o de la organizaciÃ³n *
+                  Dueño de la organización *
                 </h3>
                 <p className="mt-1 text-xs text-foreground-muted">
-                  Selecciona un usuario staff existente sin organizaciÃ³n
+                  Selecciona un usuario staff existente sin organización
                 </p>
 
                 <div className="mt-4">
@@ -507,8 +507,8 @@ export default function NewOrganizationPage() {
                     </div>
                   ) : users.length === 0 ? (
                     <div className="text-sm text-foreground-muted">
-                      No hay usuarios staff disponibles sin organizaciÃ³n.
-                      Primero debes invitar usuarios desde la secciÃ³n de
+                      No hay usuarios staff disponibles sin organización.
+                      Primero debes invitar usuarios desde la sección de
                       invitaciones.
                     </div>
                   ) : (
@@ -561,38 +561,38 @@ export default function NewOrganizationPage() {
                   disabled={loading}
                   className="flex-1 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loading ? "Creando..." : "Crear organizaciÃ³n"}
+                  {loading ? "Creando..." : "Crear organización"}
                 </button>
               </div>
             </form>
 
             <div className="mt-8 border-t border-border pt-6">
               <h3 className="text-sm font-semibold text-foreground">
-                InformaciÃ³n importante
+                Información importante
               </h3>
               <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-foreground-muted">
                 <li>
-                  El slug debe ser Ãºnico y se usarÃ¡ para identificar la
-                  organizaciÃ³n en URLs
+                  El slug debe ser único y se usará para identificar la
+                  organización en URLs
                 </li>
                 <li>
                   Solo se muestran usuarios con rol &quot;staff&quot; que no
-                  tienen organizaciÃ³n asignada
+                  tienen organización asignada
                 </li>
                 <li>
-                  El dueÃ±o podrÃ¡ gestionar la organizaciÃ³n, servicios y reservas
+                  El dueño podrá gestionar la organización, servicios y reservas
                 </li>
                 <li>
                   Si no hay usuarios disponibles, primero debes invitarlos desde
-                  la secciÃ³n de invitaciones
+                  la sección de invitaciones
                 </li>
                 <li>
-                  Las fechas de licencia son opcionales. Si se dejan vacÃ­as, la
-                  organizaciÃ³n tendrÃ¡ acceso ilimitado
+                  Las fechas de licencia son opcionales. Si se dejan vacías, la
+                  organización tendrá acceso ilimitado
                 </li>
                 <li>
-                  El perÃ­odo de gracia permite que los usuarios continÃºen usando
-                  la app despuÃ©s de la expiraciÃ³n, pero con notificaciones
+                  El período de gracia permite que los usuarios continúen usando
+                  la app después de la expiración, pero con notificaciones
                 </li>
               </ul>
             </div>

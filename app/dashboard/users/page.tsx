@@ -25,13 +25,13 @@ export default function UsersManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Estados para el formulario de invitaciÃ³n
+  // Estados para el formulario de invitación
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
-  // FunciÃ³n para cargar usuarios (memoizada para evitar re-renders)
+  // Función para cargar usuarios (memoizada para evitar re-renders)
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -96,7 +96,7 @@ export default function UsersManagementPage() {
         if (updatedUser && profile?.user_id === updatedUser.user_id) {
           await refreshProfile();
         }
-        // Limpiar mensaje de Ã©xito despuÃ©s de 3 segundos
+        // Limpiar mensaje de éxito después de 3 segundos
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
@@ -119,7 +119,7 @@ export default function UsersManagementPage() {
       setError(null);
       setSuccess(null);
 
-      // Eliminar el perfil (el usuario de auth.users se eliminarÃ¡ automÃ¡ticamente por CASCADE)
+      // Eliminar el perfil (el usuario de auth.users se eliminará automáticamente por CASCADE)
       const { error: deleteError } = await supabase
         .from("user_profiles")
         .delete()
@@ -137,7 +137,7 @@ export default function UsersManagementPage() {
 
       setSuccess("Usuario eliminado exitosamente");
 
-      // Si es el usuario actual, cerrar sesiÃ³n y redirigir
+      // Si es el usuario actual, cerrar sesión y redirigir
       if (profile?.user_id === userToDelete.user_id) {
         await signOut();
         router.push("/login");
@@ -153,7 +153,7 @@ export default function UsersManagementPage() {
       setUserToDelete(null);
       setDeleting(null);
 
-      // Limpiar mensaje de Ã©xito despuÃ©s de 3 segundos
+      // Limpiar mensaje de éxito después de 3 segundos
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError("Error inesperado al eliminar el usuario");
@@ -176,14 +176,14 @@ export default function UsersManagementPage() {
     setInviteSuccess(null);
 
     try {
-      // Verificar que la sesiÃ³n es vÃ¡lida (UX: mensaje claro si expirÃ³)
+      // Verificar que la sesión es válida (UX: mensaje claro si expiró)
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        setInviteError("SesiÃ³n expirada. Por favor, vuelve a iniciar sesiÃ³n.");
+        setInviteError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
         setInviteLoading(false);
         return;
       }
@@ -193,7 +193,7 @@ export default function UsersManagementPage() {
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
       if (!supabaseUrl || !supabaseAnonKey) {
-        setInviteError("Falta configuraciÃ³n de Supabase (URL/ANON KEY).");
+        setInviteError("Falta configuración de Supabase (URL/ANON KEY).");
         setInviteLoading(false);
         return;
       }
@@ -204,19 +204,19 @@ export default function UsersManagementPage() {
       } = await supabase.auth.getSession();
 
       if (sessionError || !session?.access_token) {
-        setInviteError("SesiÃ³n expirada. Por favor, vuelve a iniciar sesiÃ³n.");
+        setInviteError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
         setInviteLoading(false);
         return;
       }
 
-      // Asegurar token con forma de JWT (a.b.c). Si no, refrescar sesiÃ³n.
+      // Asegurar token con forma de JWT (a.b.c). Si no, refrescar sesión.
       let accessToken = session.access_token;
       if (accessToken.split(".").length !== 3) {
         const { data: refreshed, error: refreshError } =
           await supabase.auth.refreshSession();
         if (refreshError || !refreshed.session?.access_token) {
           setInviteError(
-            "SesiÃ³n expirada. Por favor, vuelve a iniciar sesiÃ³n."
+            "Sesión expirada. Por favor, vuelve a iniciar sesión."
           );
           setInviteLoading(false);
           return;
@@ -244,7 +244,7 @@ export default function UsersManagementPage() {
 
       if (!response.ok) {
         void Logger.error("Error inviting user:", data);
-        setInviteError(data?.error || "Error al enviar la invitaciÃ³n");
+        setInviteError(data?.error || "Error al enviar la invitación");
         setInviteLoading(false);
         return;
       }
@@ -257,16 +257,16 @@ export default function UsersManagementPage() {
       }
 
       setInviteSuccess(
-        `Se ha enviado una invitaciÃ³n a ${inviteEmail}. El usuario podrÃ¡ hacer clic en el enlace para configurar su contraseÃ±a.`
+        `Se ha enviado una invitación a ${inviteEmail}. El usuario podrá hacer clic en el enlace para configurar su contraseña.`
       );
       setInviteEmail(""); // Limpiar el campo
 
-      // Recargar la lista de usuarios despuÃ©s de un breve delay
+      // Recargar la lista de usuarios después de un breve delay
       setTimeout(() => {
         loadUsers();
       }, 2000);
     } catch {
-      setInviteError("Error al enviar la invitaciÃ³n. Intenta nuevamente.");
+      setInviteError("Error al enviar la invitación. Intenta nuevamente.");
     } finally {
       setInviteLoading(false);
     }
@@ -275,7 +275,7 @@ export default function UsersManagementPage() {
   const getRoleLabel = (role: UserRole) => {
     const labels: Record<UserRole, string> = {
       admin: "Administrador",
-      owner: "DueÃ±o",
+      owner: "Dueño",
       staff: "Empleado",
       special: "Especial",
     };
@@ -326,14 +326,14 @@ export default function UsersManagementPage() {
               Volver al dashboard
             </button>
             <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-              GestiÃ³n de Usuarios
+              Gestión de Usuarios
             </h1>
             <p className="mt-1 text-sm text-foreground-muted">
               Administra los usuarios del sistema y sus roles
             </p>
           </div>
 
-          {/* Mensajes de Ã©xito/error */}
+          {/* Mensajes de éxito/error */}
           {error && (
             <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
@@ -346,15 +346,15 @@ export default function UsersManagementPage() {
             </div>
           )}
 
-          {/* Formulario de InvitaciÃ³n */}
+          {/* Formulario de Invitación */}
           <div className="mb-8 rounded-lg bg-surface p-6 shadow-sm border border-border">
             <div className="mb-4">
               <h2 className="text-xl font-semibold text-foreground">
                 Invitar nuevo usuario
               </h2>
               <p className="mt-2 text-sm text-foreground-muted">
-                El usuario recibirÃ¡ un correo con un enlace para configurar su
-                contraseÃ±a y acceder a la plataforma.
+                El usuario recibirá un correo con un enlace para configurar su
+                contraseña y acceder a la plataforma.
               </p>
             </div>
 
@@ -365,7 +365,7 @@ export default function UsersManagementPage() {
                     htmlFor="invite-email"
                     className="block text-sm font-medium text-foreground"
                   >
-                    Correo electrÃ³nico
+                    Correo electrónico
                   </label>
                   <input
                     id="invite-email"
@@ -385,7 +385,7 @@ export default function UsersManagementPage() {
                     disabled={inviteLoading}
                     className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {inviteLoading ? "Enviando..." : "Enviar invitaciÃ³n"}
+                    {inviteLoading ? "Enviando..." : "Enviar invitación"}
                   </button>
                 </div>
               </div>
@@ -495,7 +495,7 @@ export default function UsersManagementPage() {
                             className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground focus:border-info-500 focus:outline-none focus:ring-2 focus:ring-info-500 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <option value="admin">Administrador</option>
-                            <option value="owner">DueÃ±o</option>
+                            <option value="owner">Dueño</option>
                             <option value="staff">Empleado</option>
                             <option value="special">Especial</option>
                           </select>
@@ -534,7 +534,7 @@ export default function UsersManagementPage() {
             )}
           </div>
 
-          {/* InformaciÃ³n adicional */}
+          {/* Información adicional */}
           <div className="mt-6 rounded-lg bg-surface p-6 shadow-sm border border-border">
             <h2 className="text-lg font-semibold text-foreground">
               Roles disponibles
@@ -551,10 +551,10 @@ export default function UsersManagementPage() {
               </div>
               <div>
                 <dt className="text-sm font-medium text-foreground-muted">
-                  DueÃ±o
+                  Dueño
                 </dt>
                 <dd className="mt-1 text-sm text-foreground">
-                  Gestiona su organizaciÃ³n, servicios y reservas. No puede
+                  Gestiona su organización, servicios y reservas. No puede
                   gestionar usuarios.
                 </dd>
               </div>
@@ -581,24 +581,24 @@ export default function UsersManagementPage() {
         </div>
       </div>
 
-      {/* Modal de confirmaciÃ³n de eliminaciÃ³n */}
+      {/* Modal de confirmación de eliminación */}
       {userToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl border border-border">
             <h3 className="text-lg font-semibold text-foreground">
-              Confirmar eliminaciÃ³n
+              Confirmar eliminación
             </h3>
             <p className="mt-4 text-sm text-foreground-muted">
-              Â¿EstÃ¡s seguro de que deseas eliminar al usuario{" "}
+              ¿Estás seguro de que deseas eliminar al usuario{" "}
               <span className="font-medium text-foreground">
                 {userToDelete.email}
               </span>
-              ? Esta acciÃ³n no se puede deshacer.
+              ? Esta acción no se puede deshacer.
             </p>
             {profile?.user_id === userToDelete.user_id && (
               <div className="mt-4 rounded-md bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
-                âš ï¸ EstÃ¡s a punto de eliminar tu propia cuenta. SerÃ¡s redirigido
-                al login despuÃ©s de la eliminaciÃ³n.
+                ⚠️ Estás a punto de eliminar tu propia cuenta. Serás redirigido
+                al login después de la eliminación.
               </div>
             )}
             <div className="mt-6 flex justify-end gap-3">

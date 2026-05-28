@@ -26,20 +26,20 @@ export class CustomerService {
     }
 
     if (!data.phone || data.phone.trim() === "") {
-      errors.push("El telÃ©fono es requerido");
+      errors.push("El teléfono es requerido");
     }
 
     // Validate email format if provided
     if (data.email && data.email.trim() !== "") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(data.email)) {
-        errors.push("El formato del email es invÃ¡lido");
+        errors.push("El formato del email es inválido");
       }
     }
 
     // Validate phone format (basic check)
     if (data.phone && data.phone.length < 8) {
-      errors.push("El telÃ©fono debe tener al menos 8 dÃ­gitos");
+      errors.push("El teléfono debe tener al menos 8 dígitos");
     }
 
     return {
@@ -83,7 +83,7 @@ export class CustomerService {
       if (existingCustomer) {
         return {
           success: false,
-          error: "Ya existe un cliente con ese nÃºmero de telÃ©fono",
+          error: "Ya existe un cliente con ese número de teléfono",
         };
       }
 
@@ -160,7 +160,7 @@ export class CustomerService {
         if (duplicateCustomer) {
           return {
             success: false,
-            error: "Ya existe otro cliente con ese nÃºmero de telÃ©fono",
+            error: "Ya existe otro cliente con ese número de teléfono",
           };
         }
       }
@@ -211,7 +211,7 @@ export class CustomerService {
     try {
       const supabase = createClient();
 
-      // Si hay bÃºsqueda, usar funciÃ³n full-text search optimizada
+      // Si hay búsqueda, usar función full-text search optimizada
       if (filters?.search && filters.search.trim().length > 0) {
         // Function will be available after migration 012_performance_indexes.sql is executed
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -221,7 +221,7 @@ export class CustomerService {
             p_organization_id: organizationId,
             p_search_term: filters.search.trim(),
             p_is_active: filters?.isActive ?? null,
-            p_limit: 1000, // LÃ­mite alto para obtener todos los resultados
+            p_limit: 1000, // Límite alto para obtener todos los resultados
             p_offset: 0,
           }
         );
@@ -231,7 +231,7 @@ export class CustomerService {
             "Error fetching customers with full-text search:",
             error
           );
-          // Fallback a bÃºsqueda ILIKE si la funciÃ³n RPC falla
+          // Fallback a búsqueda ILIKE si la función RPC falla
           return this.getAllWithIlike(organizationId, filters);
         }
 
@@ -241,7 +241,7 @@ export class CustomerService {
         };
       }
 
-      // Sin bÃºsqueda, usar query normal
+      // Sin búsqueda, usar query normal
       let query = supabase
         .from("customers")
         .select("*")
@@ -349,7 +349,7 @@ export class CustomerService {
     try {
       const supabase = createClient();
 
-      // Si hay bÃºsqueda, usar funciÃ³n full-text search optimizada
+      // Si hay búsqueda, usar función full-text search optimizada
       if (filters?.search && filters.search.trim().length > 0) {
         // Function will be available after migration 012_performance_indexes.sql is executed
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -369,7 +369,7 @@ export class CustomerService {
             "Error fetching paginated customers with full-text search:",
             error
           );
-          // Fallback a bÃºsqueda ILIKE si la funciÃ³n RPC falla
+          // Fallback a búsqueda ILIKE si la función RPC falla
           return this.getAllPaginatedWithIlike(
             organizationId,
             offset,
@@ -381,7 +381,7 @@ export class CustomerService {
         return (data || []) as Customer[];
       }
 
-      // Sin bÃºsqueda, usar query normal
+      // Sin búsqueda, usar query normal
       let query = supabase
         .from("customers")
         .select("*")
@@ -599,7 +599,7 @@ export class CustomerService {
         void Logger.error("Error fetching customer statistics:", error);
         return {
           success: false,
-          error: "Error al cargar las estadÃ­sticas",
+          error: "Error al cargar las estadísticas",
         };
       }
 
@@ -631,7 +631,7 @@ export class CustomerService {
       void Logger.error("Unexpected error fetching customer statistics:", error);
       return {
         success: false,
-        error: "Error inesperado al cargar las estadÃ­sticas",
+        error: "Error inesperado al cargar las estadísticas",
       };
     }
   }

@@ -59,7 +59,7 @@ function OrganizationDetailsContent() {
   const [addUserError, setAddUserError] = useState<string | null>(null);
   const [addUserSuccess, setAddUserSuccess] = useState<string | null>(null);
 
-  // Estados para ediciÃ³n
+  // Estados para edición
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     name: "",
@@ -71,10 +71,10 @@ function OrganizationDetailsContent() {
     license_end_date: "",
   });
 
-  // Cargar organizaciÃ³n con detalles
+  // Cargar organización con detalles
   const loadOrganization = useCallback(async () => {
     if (!organizationId) {
-      setError("ID de organizaciÃ³n no proporcionado");
+      setError("ID de organización no proporcionado");
       setLoading(false);
       return;
     }
@@ -83,7 +83,7 @@ function OrganizationDetailsContent() {
       setLoading(true);
       setError(null);
 
-      // Cargar organizaciÃ³n con estado de licencia
+      // Cargar organización con estado de licencia
       const { data: orgData, error: orgError } = await supabase
         .from("organizations_with_license_status")
         .select("*")
@@ -91,14 +91,14 @@ function OrganizationDetailsContent() {
         .single();
 
       if (orgError || !orgData) {
-        setError("OrganizaciÃ³n no encontrada");
+        setError("Organización no encontrada");
         void Logger.error("Error loading organization", orgError, {
           organizationId,
         });
         return;
       }
 
-      // Cargar dueÃ±o
+      // Cargar dueño
       const { data: ownerData } = await supabase
         .from("user_profiles")
         .select("*")
@@ -130,7 +130,7 @@ function OrganizationDetailsContent() {
 
       setOrganization(orgWithDetails);
 
-      // Inicializar datos de ediciÃ³n
+      // Inicializar datos de edición
       setEditData({
         name: orgData.name || "",
         slug: orgData.slug || "",
@@ -146,7 +146,7 @@ function OrganizationDetailsContent() {
       });
     } catch (err) {
       void Logger.error("Error loading organization:", err);
-      setError("Error inesperado al cargar la organizaciÃ³n");
+      setError("Error inesperado al cargar la organización");
     } finally {
       setLoading(false);
     }
@@ -158,7 +158,7 @@ function OrganizationDetailsContent() {
 
   const isAdmin = profile?.role === "admin";
 
-  // Cargar usuarios disponibles (sin organizaciÃ³n, no owners)
+  // Cargar usuarios disponibles (sin organización, no owners)
   const loadAvailableUsers = useCallback(async () => {
     const userIsAdmin = profile?.role === "admin";
     if (!userIsAdmin && profile?.role !== "owner") return;
@@ -170,7 +170,7 @@ function OrganizationDetailsContent() {
         .select("*")
         .neq("role", "owner") // No owners
         .neq("role", "admin") // No admins
-        .is("organization_id", null) // Sin organizaciÃ³n
+        .is("organization_id", null) // Sin organización
         .eq("is_active", true) // Solo activos
         .order("email", { ascending: true });
 
@@ -198,10 +198,10 @@ function OrganizationDetailsContent() {
     e.preventDefault();
     if (!organizationId) return;
 
-    console.log("ðŸ”µ Guardando organizaciÃ³n...", editData);
+    console.log("🔵 Guardando organización...", editData);
     setSaving(true);
     setError(null);
-    const loadingToast = toast.loading("Actualizando organizaciÃ³n...");
+    const loadingToast = toast.loading("Actualizando organización...");
 
     try {
       // Validar fechas de licencia si se proporcionan
@@ -212,7 +212,7 @@ function OrganizationDetailsContent() {
         if (endDate <= startDate) {
           toast.dismiss(loadingToast);
           toast.error(
-            "Error de validaciÃ³n",
+            "Error de validación",
             "La fecha de fin de licencia debe ser posterior a la fecha de inicio"
           );
           setSaving(false);
@@ -249,24 +249,24 @@ function OrganizationDetailsContent() {
         .eq("id", organizationId);
 
       if (updateError) {
-        void Logger.error("âŒ Error al actualizar organizaciÃ³n:", updateError);
+        void Logger.error("❌ Error al actualizar organización:", updateError);
         toast.dismiss(loadingToast);
         toast.error("Error al actualizar", updateError.message);
         setError("Error al actualizar: " + updateError.message);
       } else {
-        console.log("âœ… OrganizaciÃ³n actualizada exitosamente");
+        console.log("✅ Organización actualizada exitosamente");
         toast.dismiss(loadingToast);
         toast.success(
-          "OrganizaciÃ³n actualizada",
+          "Organización actualizada",
           "Los cambios se han guardado correctamente"
         );
         setIsEditing(false);
         await loadOrganization();
       }
     } catch (err) {
-      void Logger.error("âŒ Error inesperado al actualizar organizaciÃ³n:", err);
+      void Logger.error("❌ Error inesperado al actualizar organización:", err);
       toast.dismiss(loadingToast);
-      toast.error("Error inesperado", "No se pudo actualizar la organizaciÃ³n");
+      toast.error("Error inesperado", "No se pudo actualizar la organización");
       setError("Error inesperado al actualizar");
     } finally {
       setSaving(false);
@@ -302,7 +302,7 @@ function OrganizationDetailsContent() {
     setAddUserSuccess(null);
 
     try {
-      // Actualizar el usuario para asignarlo a la organizaciÃ³n
+      // Actualizar el usuario para asignarlo a la organización
       const { error: updateError } = await supabase
         .from("user_profiles")
         .update({ organization_id: organizationId })
@@ -322,11 +322,11 @@ function OrganizationDetailsContent() {
       setAddUserSuccess(
         `Usuario ${
           selectedUser?.email || selectedUserId
-        } agregado exitosamente a la organizaciÃ³n.`
+        } agregado exitosamente a la organización.`
       );
       setSelectedUserId("");
 
-      // Recargar organizaciÃ³n y usuarios disponibles
+      // Recargar organización y usuarios disponibles
       await Promise.all([loadOrganization(), loadAvailableUsers()]);
 
       setTimeout(() => setAddUserSuccess(null), 3000);
@@ -344,7 +344,7 @@ function OrganizationDetailsContent() {
         <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground">
-              ID de organizaciÃ³n no proporcionado
+              ID de organización no proporcionado
             </h1>
             <Button
               variant="info"
@@ -367,7 +367,7 @@ function OrganizationDetailsContent() {
           <div className="flex flex-col items-center justify-center text-center">
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
             <p className="text-sm text-foreground-muted">
-              Cargando organizaciÃ³n...
+              Cargando organización...
             </p>
           </div>
         </div>
@@ -381,7 +381,7 @@ function OrganizationDetailsContent() {
         <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground">
-              OrganizaciÃ³n no encontrada
+              Organización no encontrada
             </h1>
             <Button
               variant="info"
@@ -420,7 +420,7 @@ function OrganizationDetailsContent() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="truncate text-2xl font-bold text-foreground">
-                      {isEditing ? "Editar organizaciÃ³n" : organization.name}
+                      {isEditing ? "Editar organización" : organization.name}
                     </h1>
                     {!isEditing && (
                       <span
@@ -436,8 +436,8 @@ function OrganizationDetailsContent() {
                   </div>
                   <p className="mt-1 text-sm text-foreground-muted">
                     {isEditing
-                      ? "Modifica la informaciÃ³n de la organizaciÃ³n"
-                      : "Detalles y configuraciÃ³n de la organizaciÃ³n"}
+                      ? "Modifica la información de la organización"
+                      : "Detalles y configuración de la organización"}
                   </p>
                   {!isEditing && (
                     <code className="mt-2 inline-block rounded bg-muted px-2 py-0.5 text-xs text-foreground-muted">
@@ -465,7 +465,7 @@ function OrganizationDetailsContent() {
             </div>
           )}
 
-          {/* NotificaciÃ³n de licencia (si aplica) */}
+          {/* Notificación de licencia (si aplica) */}
           {!isEditing &&
             organization.license_status &&
             organization.license_status !== "no_license" &&
@@ -485,7 +485,7 @@ function OrganizationDetailsContent() {
               </div>
             )}
 
-          {/* SecciÃ³n WhatsApp â€” solo admin, ancho completo */}
+          {/* Sección WhatsApp — solo admin, ancho completo */}
           {isAdmin && !isEditing && (
             <div className="mb-6">
               <WhatsAppOrgSection organizationId={organizationId} />
@@ -495,14 +495,14 @@ function OrganizationDetailsContent() {
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Columna principal */}
             <div className="lg:col-span-2 space-y-6">
-              {/* InformaciÃ³n bÃ¡sica */}
+              {/* Información básica */}
               <Card className="p-6">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-info-100 text-info-700 dark:bg-info-900/20 dark:text-info-400">
                     <Building2 size={18} />
                   </div>
                   <h2 className="text-lg font-semibold text-foreground">
-                    InformaciÃ³n bÃ¡sica
+                    Información básica
                   </h2>
                 </div>
 
@@ -541,7 +541,7 @@ function OrganizationDetailsContent() {
                         className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500"
                       />
                       <p className="mt-1 text-xs text-foreground-muted">
-                        Solo letras minÃºsculas, nÃºmeros y guiones
+                        Solo letras minúsculas, números y guiones
                       </p>
                     </div>
 
@@ -581,7 +581,7 @@ function OrganizationDetailsContent() {
 
                     <div>
                       <label className="block text-sm font-medium text-foreground">
-                        TelÃ©fono WhatsApp
+                        Teléfono WhatsApp
                       </label>
                       <input
                         type="tel"
@@ -614,7 +614,7 @@ function OrganizationDetailsContent() {
                         htmlFor="is_active"
                         className="ml-2 block text-sm font-medium text-foreground"
                       >
-                        OrganizaciÃ³n activa
+                        Organización activa
                       </label>
                     </div>
 
@@ -670,7 +670,7 @@ function OrganizationDetailsContent() {
                     {organization.whatsapp_phone && (
                       <div>
                         <dt className="text-sm font-semibold text-foreground-muted">
-                          TelÃ©fono WhatsApp
+                          Teléfono WhatsApp
                         </dt>
                         <dd className="mt-1 text-sm font-medium text-foreground">
                           {organization.whatsapp_phone}
@@ -695,7 +695,7 @@ function OrganizationDetailsContent() {
                     </div>
                     <div>
                       <dt className="text-sm font-semibold text-foreground-muted">
-                        Fecha de creaciÃ³n
+                        Fecha de creación
                       </dt>
                       <dd className="mt-1 text-sm font-medium text-foreground">
                         {new Date(organization.created_at).toLocaleString(
@@ -763,7 +763,7 @@ function OrganizationDetailsContent() {
                       </div>
                     </div>
                     <p className="text-xs text-foreground-muted">
-                      Deja las fechas vacÃ­as para acceso ilimitado
+                      Deja las fechas vacías para acceso ilimitado
                     </p>
                   </div>
                 ) : (
@@ -787,7 +787,7 @@ function OrganizationDetailsContent() {
                           {organization.license_status === "active"
                             ? "Activa"
                             : organization.license_status === "grace_period"
-                            ? "PerÃ­odo de gracia"
+                            ? "Período de gracia"
                             : organization.license_status === "expired"
                             ? "Expirada"
                             : "Sin licencia"}
@@ -833,14 +833,14 @@ function OrganizationDetailsContent() {
                     {organization.days_remaining !== null && (
                       <div>
                         <dt className="text-sm font-semibold text-foreground-muted">
-                          DÃ­as restantes
+                          Días restantes
                         </dt>
                         <dd className="mt-1 text-sm font-medium text-foreground">
                           {organization.days_remaining > 0
-                            ? `${organization.days_remaining} dÃ­as`
+                            ? `${organization.days_remaining} días`
                             : `Expirada hace ${Math.abs(
                                 organization.days_remaining
-                              )} dÃ­as`}
+                              )} días`}
                         </dd>
                       </div>
                     )}
@@ -861,14 +861,14 @@ function OrganizationDetailsContent() {
 
             {/* Columna lateral */}
             <div className="space-y-6">
-              {/* DueÃ±o */}
+              {/* Dueño */}
               <Card className="p-6">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400">
                     <UserCircle2 size={18} />
                   </div>
                   <h2 className="text-lg font-semibold text-foreground">
-                    DueÃ±o
+                    Dueño
                   </h2>
                 </div>
                 {organization.owner ? (
@@ -888,7 +888,7 @@ function OrganizationDetailsContent() {
                   </div>
                 ) : (
                   <p className="mt-4 text-sm text-foreground-muted">
-                    Sin dueÃ±o asignado
+                    Sin dueño asignado
                   </p>
                 )}
               </Card>
@@ -916,7 +916,7 @@ function OrganizationDetailsContent() {
                       Agregar usuario
                     </h3>
                     <p className="mt-1 text-xs text-foreground-muted">
-                      Selecciona un usuario existente sin organizaciÃ³n
+                      Selecciona un usuario existente sin organización
                     </p>
                     <form onSubmit={handleAddUser} className="mt-3 space-y-3">
                       <div>
@@ -926,7 +926,7 @@ function OrganizationDetailsContent() {
                           </div>
                         ) : availableUsers.length === 0 ? (
                           <div className="text-xs text-foreground-muted">
-                            No hay usuarios disponibles sin organizaciÃ³n
+                            No hay usuarios disponibles sin organización
                           </div>
                         ) : (
                           <select
