@@ -159,20 +159,73 @@ export function checkNumber(
   });
 }
 
-/** Verifica firma HMAC SHA-256 enviada por OpenWA en el header X-OpenWA-Signature. */
-export async function verifySignature(
-  rawBody: string,
-  signatureHeader: string | null,
-  secret: string
-): Promise<boolean> {
-  if (!signatureHeader || !secret) return false;
+/** Verifica firma HMAC SHA-256 de un webhook de OpenWA.
+ *
+ *  La doc de OpenWA es inconsistente respecto a QUÉ firma exactamente
+ *  (raw body vs JSON.stringify del payload, con o sin el campo `signature`)
+ *  y dónde manda la firma (header X-OpenWA-Signature / X-Webhook-Signature,
+ *  o el campo `signature` del body). Para no depender de adivinar, probamos
+ *  todas las canonicalizaciones razonables del mensaje y aceptamos si la firma
+ *  provista coincide con alguna. Sin el `secret`, un atacante no puede forjar
+ *  ninguna, así que esto NO debilita la seguridad.
+ *
+ *  @param rawBody   El body crudo tal cual llegó (string sin re-serializar).
+ *  @param parsed    El envelope ya parseado (para variantes re-stringify).
+ *  @param signature La firma provista (de header o del campo `signature`).
+ *  @param secret    El OPENWA_WEBHOOK_SECRET configurado.
+ *  @param debug     Si true, loguea expected vs provided cuando no matchea.
+ */
+export async function verifyWebhookSignature(opts: {
+  rawBody: string;
+  parsed?: unknown;
+  signature: string | null;
+  secret: string;
+  debug?: boolean;
+}): Promise<boolean> {
+  const { rawBody, parsed, signature, secret, debug } = opts;
+  if (!signature || !secret) return false;
 
-  const expected = await hmacSha256Hex(secret, rawBody);
-  const provided = signatureHeader.startsWith("sha256=")
-    ? signatureHeader.slice(7)
-    : signatureHeader;
+  const provided = (
+    signature.startsWith("sha256=") ? signature.slice(7) : signature
+  )
+    .trim()
+    .toLowerCase();
 
-  return timingSafeEqual(expected, provided);
+  // Mensajes candidatos que OpenWA pudo haber firmado
+  const candidates: string[] = [rawBody];
+  if (parsed && typeof parsed === "object") {
+    try {
+      candidates.push(JSON.stringify(parsed));
+    } catch {
+      /* noop */
+    }
+    try {
+      const clone = { ...(parsed as Record<string, unknown>) };
+      delete clone.signature;
+      candidates.push(JSON.stringify(clone));
+    } catch {
+      /* noop */
+    }
+  }
+
+  const expectedList: string[] = [];
+  for (const msg of candidates) {
+    const expected = (await hmacSha256Hex(secret, msg)).toLowerCase();
+    expectedList.push(expected);
+    if (timingSafeEqual(expected, provided)) return true;
+  }
+
+  if (debug) {
+    console.warn(
+      "[openwa] firma no coincide.",
+      JSON.stringify({
+        provided,
+        expectedCandidates: expectedList,
+        rawBodyLength: rawBody.length,
+      })
+    );
+  }
+  return false;
 }
 
 async function hmacSha256Hex(

@@ -11,7 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   chatIdToPhone,
   sendText,
-  verifySignature,
+  verifyWebhookSignature,
 } from "../_shared/openwa.ts";
 
 interface WebhookEnvelope {
@@ -20,6 +20,7 @@ interface WebhookEnvelope {
   deliveryId?: string;
   idempotencyKey?: string;
   data: Record<string, unknown>;
+  signature?: string;
 }
 
 const WEBHOOK_SECRET = Deno.env.get("OPENWA_WEBHOOK_SECRET") ?? "";
@@ -31,25 +32,41 @@ Deno.serve(async (req) => {
 
   const rawBody = await req.text();
 
-  // 1. Verificar firma HMAC (solo si hay secret configurado).
-  //    En desarrollo se puede dejar vacío para probar sin firmas.
-  if (WEBHOOK_SECRET) {
-    const sigHeader = req.headers.get("x-openwa-signature");
-    const sigOk = await verifySignature(rawBody, sigHeader, WEBHOOK_SECRET);
-    if (!sigOk) {
-      return new Response("Invalid signature", { status: 401 });
-    }
-  } else {
-    console.warn(
-      "[wa-inbound] OPENWA_WEBHOOK_SECRET no configurado — ¡firma NO verificada! Sólo usar en desarrollo."
-    );
-  }
-
+  // Parsear primero — necesitamos el envelope para verificar firma y rutear
   let envelope: WebhookEnvelope;
   try {
     envelope = JSON.parse(rawBody);
   } catch {
     return new Response("Invalid JSON", { status: 400 });
+  }
+
+  // 1. Verificar firma HMAC (solo si hay secret configurado).
+  //    La firma puede venir en varios headers o en el campo `signature`.
+  if (WEBHOOK_SECRET) {
+    const signature =
+      req.headers.get("x-openwa-signature") ||
+      req.headers.get("x-webhook-signature") ||
+      req.headers.get("x-hub-signature-256") ||
+      envelope.signature ||
+      null;
+
+    const sigOk = await verifyWebhookSignature({
+      rawBody,
+      parsed: envelope,
+      signature,
+      secret: WEBHOOK_SECRET,
+      debug: true,
+    });
+
+    if (!sigOk) {
+      console.warn("[wa-inbound] firma inválida — rechazado 401");
+      return new Response("Invalid signature", { status: 401 });
+    }
+    console.log("[wa-inbound] firma verificada OK");
+  } else {
+    console.warn(
+      "[wa-inbound] OPENWA_WEBHOOK_SECRET no configurado — ¡firma NO verificada! Sólo usar en desarrollo."
+    );
   }
 
   // DEBUG: dumpear el envelope completo para entender qué manda OpenWA
