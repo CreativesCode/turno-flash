@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+// Firma de release: lee android/key.properties (gitignored).
+// El keystore vive fuera del repo; ver docs/PLAN-GOOGLE-PLAY.md §3.1.
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+
 android {
     namespace = "com.turnoflash.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,10 +24,23 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            release {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

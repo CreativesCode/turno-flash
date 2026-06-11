@@ -6,22 +6,30 @@ import { useTheme } from "@/contexts/theme-context";
 import {
   ArrowRight,
   BarChart3,
+  Building2,
   Calendar,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   Clock,
+  KeyRound,
+  Lock,
   type LucideIcon,
+  Mail,
   MessageSquare,
   Moon,
+  ServerCog,
   Smartphone,
   Sparkles,
   Sun,
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+const CONTACT_EMAIL = "robert.cabrer92@gmail.com";
 
 interface Feature {
   Icon: LucideIcon;
@@ -75,6 +83,94 @@ const FEATURES: readonly Feature[] = [
   },
 ];
 
+const HOW_IT_WORKS: readonly {
+  step: string;
+  title: string;
+  description: string;
+}[] = [
+    {
+      step: "1",
+      title: "Crea tu negocio",
+      description:
+        "Registra tu organización, define tus servicios, precios y el equipo que atiende.",
+    },
+    {
+      step: "2",
+      title: "Agenda los turnos",
+      description:
+        "Carga las citas en segundos desde el móvil. El sistema evita solapes automáticamente.",
+    },
+    {
+      step: "3",
+      title: "WhatsApp hace el resto",
+      description:
+        "Confirmaciones y recordatorios automáticos. Tus clientes responden OK o CANCELAR y la agenda se actualiza sola.",
+    },
+  ];
+
+const TRUST_POINTS: readonly Feature[] = [
+  {
+    Icon: Lock,
+    title: "Datos aislados por negocio",
+    description:
+      "Cada organización solo accede a su propia información, con aislamiento a nivel de base de datos (Row Level Security).",
+    mesh: "mesh-primary",
+  },
+  {
+    Icon: KeyRound,
+    title: "Roles y permisos",
+    description:
+      "Dueño, staff y permisos especiales: cada miembro del equipo ve exactamente lo que necesita.",
+    mesh: "mesh-secondary",
+  },
+  {
+    Icon: ServerCog,
+    title: "Infraestructura confiable",
+    description:
+      "Cifrado en tránsito (HTTPS/TLS), respaldos automáticos y sincronización en tiempo real.",
+    mesh: "mesh-info",
+  },
+  {
+    Icon: Building2,
+    title: "Hecho para servicios",
+    description:
+      "Salones, barberías, clínicas, estéticas y talleres: flujos de trabajo pensados para el día a día real.",
+    mesh: "mesh-violet",
+  },
+];
+
+const PLANS: readonly {
+  name: string;
+  price: string;
+  period: string;
+  note?: string;
+  features: string[];
+}[] = [
+    {
+      name: "Mensual",
+      price: "$9.99",
+      period: "USD / mes",
+      features: [
+        "Turnos y clientes ilimitados",
+        "Recordatorios por WhatsApp",
+        "Equipo y servicios ilimitados",
+        "Soporte por correo",
+      ],
+    },
+    {
+      name: "Anual",
+      price: "$79.99",
+      period: "USD / año",
+      note: "Ahorra 33%",
+      features: [
+        "Todo lo del plan mensual",
+        "Equivale a $6.67 / mes",
+        "Un solo pago al año",
+        "Prioridad en soporte",
+      ],
+    },
+  ];
+
 const FAQS: readonly { question: string; answer: string }[] = [
   {
     question: "¿Qué es Turno Flash?",
@@ -84,7 +180,7 @@ const FAQS: readonly { question: string; answer: string }[] = [
   {
     question: "¿Cuánto cuesta?",
     answer:
-      "Turno Flash está diseñado para ser accesible para pequeños negocios. Ofrecemos planes flexibles que se adaptan a las necesidades de tu negocio. Contacta con nosotros para conocer nuestros precios.",
+      "Ofrecemos un plan mensual de $9.99 USD y un plan anual de $79.99 USD (equivale a $6.67/mes, un 33% de ahorro). La suscripción se contrata desde la app Android a través de Google Play y puedes cancelarla en cualquier momento. También ofrecemos licencias gestionadas directamente para negocios que lo prefieran: contáctanos.",
   },
   {
     question: "¿Necesito instalar algo?",
@@ -305,6 +401,35 @@ export default function HomePageClient() {
         </div>
       </section>
 
+      {/* How it works */}
+      <section className="px-5 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center">
+            <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
+              Cómo funciona
+            </div>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              En marcha en menos de un día.
+            </h2>
+          </div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            {HOW_IT_WORKS.map((item) => (
+              <Card key={item.step} className="p-6">
+                <div className="mesh-primary flex h-10 w-10 items-center justify-center rounded-full text-base font-extrabold text-white shadow-sm">
+                  {item.step}
+                </div>
+                <h3 className="mt-4 text-base font-bold text-foreground">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-foreground-muted">
+                  {item.description}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Image gallery */}
       <section className="bg-muted px-5 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
@@ -331,6 +456,114 @@ export default function HomePageClient() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Trust / security */}
+      <section className="bg-surface px-5 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center">
+            <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
+              Seguridad y confianza
+            </div>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              Los datos de tu negocio, protegidos.
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-base text-foreground-muted">
+              Tratamos la información de tu negocio y de tus clientes con el
+              mismo cuidado con el que tú atiendes tu agenda. Consulta nuestra{" "}
+              <Link className="underline" href="/privacy">
+                Política de Privacidad
+              </Link>
+              .
+            </p>
+          </div>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {TRUST_POINTS.map((point) => {
+              const Icon = point.Icon;
+              return (
+                <Card key={point.title} className="p-5">
+                  <div
+                    className={`${point.mesh} flex h-10 w-10 items-center justify-center rounded-[10px] text-white shadow-sm`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-3 text-sm font-bold text-foreground">
+                    {point.title}
+                  </h3>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-foreground-muted">
+                    {point.description}
+                  </p>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="px-5 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <div className="text-center">
+            <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
+              Precios
+            </div>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              Simple y de bajo costo.
+            </h2>
+            <p className="mt-3 text-base text-foreground-muted">
+              Un solo plan con todo incluido. Elige cómo pagarlo.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            {PLANS.map((plan) => (
+              <Card key={plan.name} className="relative flex flex-col p-6">
+                {plan.note && (
+                  <span className="absolute right-4 top-4 rounded-full bg-success-100 px-2.5 py-0.5 text-xs font-semibold text-success-800 dark:bg-success-900/20 dark:text-success-400">
+                    {plan.note}
+                  </span>
+                )}
+                <h3 className="text-base font-bold text-foreground">
+                  {plan.name}
+                </h3>
+                <div className="mt-2 flex items-baseline gap-1.5">
+                  <span className="text-4xl font-extrabold tracking-tight text-foreground">
+                    {plan.price}
+                  </span>
+                  <span className="text-sm text-foreground-muted">
+                    {plan.period}
+                  </span>
+                </div>
+                <ul className="mt-5 flex-1 space-y-2.5">
+                  {plan.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-2 text-sm text-foreground-muted"
+                    >
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success-600 dark:text-success-400" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant="mesh-primary"
+                  size="lg"
+                  className="mt-6"
+                  onClick={() => router.push(ctaTarget)}
+                >
+                  {user ? "Ir al Dashboard" : "Comenzar"}
+                </Button>
+              </Card>
+            ))}
+          </div>
+          <p className="mt-6 text-center text-xs text-foreground-muted">
+            La suscripción se gestiona a través de Google Play y se renueva
+            automáticamente; cancela cuando quieras. Consulta los{" "}
+            <Link className="underline" href="/terms">
+              Términos y Condiciones
+            </Link>
+            .
+          </p>
         </div>
       </section>
 
@@ -402,18 +635,101 @@ export default function HomePageClient() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-surface px-5 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="flex items-center gap-2.5">
-            <Logo size={28} />
-            <span className="text-sm font-bold tracking-tight text-foreground">
-              TurnoFlash
-            </span>
+      <footer className="border-t border-border bg-surface px-5 pb-8 pt-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-2.5">
+                <Logo size={28} />
+                <span className="text-sm font-bold tracking-tight text-foreground">
+                  TurnoFlash
+                </span>
+              </div>
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-foreground-muted">
+                Sistema de gestión de turnos para negocios de servicios.
+                Reservas, recordatorios por WhatsApp y control total de tu
+                agenda, desde el móvil.
+              </p>
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="mt-4 inline-flex items-center gap-2 text-sm text-foreground-muted transition-colors hover:text-foreground"
+              >
+                <Mail className="h-4 w-4" />
+                {CONTACT_EMAIL}
+              </a>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-foreground">
+                Producto
+              </h3>
+              <ul className="mt-3 space-y-2 text-sm">
+                <li>
+                  <a
+                    href="#features"
+                    className="text-foreground-muted transition-colors hover:text-foreground"
+                  >
+                    Funcionalidades
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#pricing"
+                    className="text-foreground-muted transition-colors hover:text-foreground"
+                  >
+                    Precios
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    href="/login"
+                    className="text-foreground-muted transition-colors hover:text-foreground"
+                  >
+                    Iniciar sesión
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-foreground">
+                Legal
+              </h3>
+              <ul className="mt-3 space-y-2 text-sm">
+                <li>
+                  <Link
+                    href="/privacy"
+                    className="text-foreground-muted transition-colors hover:text-foreground"
+                  >
+                    Política de Privacidad
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/terms"
+                    className="text-foreground-muted transition-colors hover:text-foreground"
+                  >
+                    Términos y Condiciones
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/account-deletion"
+                    className="text-foreground-muted transition-colors hover:text-foreground"
+                  >
+                    Eliminación de cuenta
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
-          <p className="text-xs text-foreground-subtle">
-            © {new Date().getFullYear()} Turno Flash. Todos los derechos
-            reservados.
-          </p>
+
+          <div className="mt-10 border-t border-border pt-6">
+            <p className="text-center text-xs text-foreground-subtle">
+              © {new Date().getFullYear()} Turno Flash. Todos los derechos
+              reservados.
+            </p>
+          </div>
         </div>
       </footer>
     </div>

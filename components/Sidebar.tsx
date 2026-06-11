@@ -9,12 +9,14 @@ import {
   Bell,
   Building2,
   Calendar,
+  Crown,
   Home,
   LogOut,
   type LucideIcon,
   Moon,
   Package,
   Sun,
+  UserCircle,
   UserCog,
   UserPlus,
   Users,
@@ -71,6 +73,18 @@ const NAV_ITEMS: readonly NavEntry[] = [
     href: "/dashboard/reminders",
     Icon: Bell,
     requiresOrg: true,
+  },
+  {
+    name: "Suscripción",
+    href: "/dashboard/subscription",
+    Icon: Crown,
+    roles: ["admin", "owner"],
+    requiresOrg: true,
+  },
+  {
+    name: "Mi cuenta",
+    href: "/dashboard/account",
+    Icon: UserCircle,
   },
   { separator: true, key: "admin" },
   {
@@ -133,12 +147,13 @@ export const Sidebar = React.memo(function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
-  const [organizationName, setOrganizationName] = useState<string | null>(null);
+  const [fetchedOrgName, setFetchedOrgName] = useState<string | null>(null);
+  // Derivado en render (no en el efecto) para evitar setState síncrono al no haber org
+  const organizationName = profile?.organization_id ? fetchedOrgName : null;
 
   useEffect(() => {
     let mounted = true;
     if (!profile?.organization_id) {
-      setOrganizationName(null);
       return;
     }
     supabase
@@ -149,9 +164,9 @@ export const Sidebar = React.memo(function Sidebar() {
       .then(({ data, error }) => {
         if (!mounted) return;
         if (error) {
-          setOrganizationName(null);
+          setFetchedOrgName(null);
         } else {
-          setOrganizationName(data?.name ?? null);
+          setFetchedOrgName(data?.name ?? null);
         }
       });
     return () => {
