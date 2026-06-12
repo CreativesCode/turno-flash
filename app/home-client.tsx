@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  HeartHandshake,
   KeyRound,
   Lock,
   type LucideIcon,
@@ -48,9 +49,9 @@ const FEATURES: readonly Feature[] = [
   },
   {
     Icon: MessageSquare,
-    title: "WhatsApp",
+    title: "WhatsApp en piloto automático",
     description:
-      "Recordatorios automáticos uno a uno o por lote. Sin configurar nada.",
+      "Confirmaciones, recordatorios, valoraciones post-visita y resumen diario para el dueño. Sin configurar nada.",
     mesh: "mesh-primary",
   },
   {
@@ -76,10 +77,24 @@ const FEATURES: readonly Feature[] = [
   },
   {
     Icon: BarChart3,
-    title: "Página pública",
+    title: "Reportes y estadísticas",
     description:
-      "Comparte tu página de reservas con tus clientes. Ultra ligera y rápida.",
+      "Ingresos, servicios top, horas pico y rendimiento de tu equipo. Decide con datos, no con intuición.",
     mesh: "mesh-info",
+  },
+  {
+    Icon: HeartHandshake,
+    title: "Recupera clientes",
+    description:
+      "Detecta clientes que dejaron de venir y envíales una invitación por WhatsApp con un clic.",
+    mesh: "mesh-secondary",
+  },
+  {
+    Icon: Users,
+    title: "Lista de espera inteligente",
+    description:
+      "Si se cancela un turno, avisamos automáticamente al primer cliente en espera.",
+    mesh: "mesh-warn",
   },
 ];
 
@@ -152,7 +167,9 @@ const PLANS: readonly {
       period: "USD / mes",
       features: [
         "Turnos y clientes ilimitados",
-        "Recordatorios por WhatsApp",
+        "Recordatorios y valoraciones por WhatsApp",
+        "Reportes y estadísticas del negocio",
+        "Campañas para recuperar clientes",
         "Equipo y servicios ilimitados",
         "Soporte por correo",
       ],
@@ -188,9 +205,14 @@ const FAQS: readonly { question: string; answer: string }[] = [
       "No necesitas instalar nada complicado. Turno Flash funciona desde tu navegador móvil y también está disponible como aplicación nativa para iOS y Android. Todo desde un solo código base.",
   },
   {
-    question: "¿Cómo funcionan las confirmaciones por WhatsApp?",
+    question: "¿Cómo funcionan las automatizaciones por WhatsApp?",
     answer:
-      "El sistema puede enviar confirmaciones automáticas de reservas por WhatsApp. Esto reduce significativamente las llamadas telefónicas y mejora la comunicación con tus clientes. Puedes configurarlo según tus necesidades.",
+      "Turno Flash trabaja solo: envía la confirmación al crear el turno, recordatorios 24 horas y 1 hora antes (el cliente responde OK o CANCELAR y la agenda se actualiza), pide una valoración de 1 a 5 estrellas al completar la visita, avisa a la lista de espera cuando se libera un lugar y puede enviarte cada mañana un resumen de tu día con los turnos e ingresos estimados.",
+  },
+  {
+    question: "¿Qué reportes y estadísticas incluye?",
+    answer:
+      "El panel de reportes muestra los ingresos por día con comparación contra el período anterior, los servicios que más facturan, el rendimiento de cada profesional (turnos, ingresos y valoraciones de clientes), las horas pico de tu negocio, el origen de las reservas y cuántos clientes nuevos ganaste. Todo se calcula automáticamente con los turnos que ya cargas, y puedes exportar turnos y clientes a Excel (CSV) cuando quieras.",
   },
   {
     question: "¿Puedo usar Turno Flash en múltiples dispositivos?",

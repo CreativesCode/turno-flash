@@ -13,9 +13,13 @@ import {
   useToast,
   useUpdateCustomer,
 } from "@/hooks";
+import { useAuth } from "@/contexts/auth-context";
 import { Customer, CustomerFormData } from "@/types/appointments";
+import { downloadCsv, todayForFilename } from "@/utils/csv";
+import { createClient } from "@/utils/supabase/client";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Plus, Search, User } from "lucide-react";
+import { Download, HeartHandshake, Plus, Search, User } from "lucide-react";
+import Link from "next/link";
 import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
 
 const EMPTY_FORM: CustomerFormData = {
@@ -35,6 +39,61 @@ export default function CustomersPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const toast = useToast();
+  const { profile } = useAuth();
+  const canRecover = profile?.role === "owner" || profile?.role === "admin";
+
+  const handleExportCsv = useCallback(async () => {
+    if (!profile?.organization_id) return;
+    const supabase = createClient();
+    const { data, error: exportError } = await supabase
+      .from("customers")
+      .select(
+        "first_name, last_name, phone, phone_country_code, whatsapp_number, email, total_appointments, missed_appointments, last_appointment_date, tags, notes"
+      )
+      .eq("organization_id", profile.organization_id)
+      .eq("is_active", true)
+      .order("first_name")
+      .limit(5000);
+
+    if (exportError) {
+      toast.error("Error al exportar", exportError.message);
+      return;
+    }
+    if (!data || data.length === 0) {
+      toast.info("Nada para exportar", "No hay clientes activos");
+      return;
+    }
+    downloadCsv(
+      `clientes_${todayForFilename()}`,
+      [
+        "Nombre",
+        "Apellido",
+        "Teléfono",
+        "WhatsApp",
+        "Email",
+        "Turnos",
+        "No asistió",
+        "Última visita",
+        "Tags",
+        "Notas",
+      ],
+      data.map((c) => [
+        c.first_name,
+        c.last_name,
+        `${c.phone_country_code ?? ""}${c.phone ?? ""}`,
+        c.whatsapp_number ?? "",
+        c.email ?? "",
+        c.total_appointments ?? 0,
+        c.missed_appointments ?? 0,
+        c.last_appointment_date
+          ? String(c.last_appointment_date).slice(0, 10)
+          : "",
+        (c.tags ?? []).join(" | "),
+        c.notes ?? "",
+      ])
+    );
+    toast.success("CSV exportado", `${data.length} clientes descargados`);
+  }, [profile?.organization_id, toast]);
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -208,14 +267,34 @@ export default function CustomersPage() {
                 </h1>
                 <p className="text-xs text-foreground-muted">{subtitle}</p>
               </div>
-              <Button
-                variant="mesh-primary"
-                onClick={handleCreate}
-                className="hidden sm:inline-flex"
-              >
-                <Plus className="h-4 w-4" />
-                Nuevo cliente
-              </Button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportCsv}
+                  title="Exportar todos los clientes activos a CSV"
+                  className="hidden items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
+                >
+                  <Download className="h-4 w-4" />
+                  CSV
+                </button>
+                {canRecover && (
+                  <Link
+                    href="/dashboard/customers/recover"
+                    className="hidden items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
+                  >
+                    <HeartHandshake className="h-4 w-4" />
+                    Recuperar clientes
+                  </Link>
+                )}
+                <Button
+                  variant="mesh-primary"
+                  onClick={handleCreate}
+                  className="hidden sm:inline-flex"
+                >
+                  <Plus className="h-4 w-4" />
+                  Nuevo cliente
+                </Button>
+              </div>
             </div>
 
             <div className="relative">

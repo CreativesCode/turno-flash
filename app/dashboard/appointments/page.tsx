@@ -31,11 +31,13 @@ import {
   AppointmentWithDetails,
   CustomerFormData,
 } from "@/types/appointments";
+import { downloadCsv } from "@/utils/csv";
 import { getLocalDateString } from "@/utils/date";
 import {
   AlertCircle,
   Calendar,
   CalendarDays,
+  Download,
   List,
   Plus,
   Search,
@@ -192,6 +194,57 @@ export default function AppointmentsPage() {
   const loading = appointmentsLoading || normalizedData.loading;
   const error =
     appointmentsError?.message || normalizedData.error || localError;
+
+  /* ── Export CSV ──────────────────────────────────────────── */
+  const handleExportCsv = useCallback(async () => {
+    if (!profile?.organization_id) return;
+    const result = await AppointmentService.getByDateRange(
+      profile.organization_id,
+      dateRange.start,
+      dateRange.end
+    );
+    if (!result.success || !result.appointments) {
+      toast.error("Error al exportar", result.error ?? undefined);
+      return;
+    }
+    if (result.appointments.length === 0) {
+      toast.info("Nada para exportar", "No hay turnos en el rango visible");
+      return;
+    }
+    downloadCsv(
+      `turnos_${dateRange.start}_a_${dateRange.end}`,
+      [
+        "Fecha",
+        "Hora",
+        "Cliente",
+        "Teléfono",
+        "Servicio",
+        "Profesional",
+        "Estado",
+        "Precio",
+        "Pagado",
+        "Origen",
+        "N°",
+      ],
+      result.appointments.map((a) => [
+        a.appointment_date,
+        a.start_time?.slice(0, 5),
+        `${a.customer_first_name} ${a.customer_last_name}`.trim(),
+        a.customer_phone,
+        a.service_name,
+        [a.staff_first_name, a.staff_last_name].filter(Boolean).join(" "),
+        a.status,
+        a.price_charged ?? a.service_price ?? "",
+        a.was_paid ? "Sí" : "No",
+        a.source ?? "",
+        a.appointment_number ?? "",
+      ])
+    );
+    toast.success(
+      "CSV exportado",
+      `${result.appointments.length} turnos descargados`
+    );
+  }, [profile?.organization_id, dateRange.start, dateRange.end, toast]);
 
   /* ── Helpers ─────────────────────────────────────────────── */
   const calculateEndTime = useCallback(
@@ -565,16 +618,27 @@ export default function AppointmentsPage() {
                 </h1>
                 <p className="text-xs text-foreground-muted">{subtitle}</p>
               </div>
-              {canManageAppointments && (
-                <Button
-                  variant="mesh-primary"
-                  onClick={handleCreate}
-                  className="hidden sm:inline-flex"
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportCsv}
+                  title="Exportar turnos del rango visible a CSV"
+                  className="hidden items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
                 >
-                  <Plus className="h-4 w-4" />
-                  Nuevo turno
-                </Button>
-              )}
+                  <Download className="h-4 w-4" />
+                  CSV
+                </button>
+                {canManageAppointments && (
+                  <Button
+                    variant="mesh-primary"
+                    onClick={handleCreate}
+                    className="hidden sm:inline-flex"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Nuevo turno
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* View switcher (segmented) */}

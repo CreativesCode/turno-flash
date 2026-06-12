@@ -239,6 +239,21 @@ async function handleMessageReceived(
     `[wa-inbound] resolving outbound for from="${from}" (suffix="${matchSuffix}")`
   );
 
+  // ¿Es una valoración (respuesta a rating_request)? "5", "4 muy bueno", etc.
+  const ratingValue = parseRating(data.body);
+  if (ratingValue !== null) {
+    const ratingApplied = await tryApplyRating(
+      supabase,
+      settings.organization_id,
+      from,
+      matchSuffix,
+      ratingValue,
+      data.body
+    );
+    if (ratingApplied) return;
+    // Sin rating_request pendiente: cae al flujo normal (confirm/cancel/clarify)
+  }
+
   const OPEN_INTENTS = [
     "confirm",
     "reminder_24h",
@@ -428,6 +443,104 @@ async function handleSessionStatus(supabase: any, env: WebhookEnvelope) {
     title: "WhatsApp desconectado",
     message: `La sesión OpenWA ${env.sessionId} cambió a estado ${derived}. Re-escaneá el QR.`,
   });
+}
+
+/** Extrae una valoración 1-5 si el mensaje empieza con ese número.
+ *  "5" → 5; "4 muy bueno" → 4; "10" → null; "ok" → null.
+ */
+function parseRating(body: string): number | null {
+  const firstToken = body.trim().split(/\s+/)[0] ?? "";
+  if (!/^[1-5]$/.test(firstToken)) return null;
+  return Number(firstToken);
+}
+
+/** Busca el último rating_request enviado a este chat (últimos 14 días) y,
+ *  si el appointment aún no tiene rating, lo guarda junto con el texto extra
+ *  como feedback. Devuelve true si la valoración fue aplicada.
+ */
+async function tryApplyRating(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  organizationId: string,
+  from: string,
+  matchSuffix: string,
+  rating: number,
+  rawBody: string
+): Promise<boolean> {
+  const fourteenDaysAgo = new Date(
+    Date.now() - 14 * 24 * 60 * 60 * 1000
+  ).toISOString();
+
+  // 1) Match por message_id (mismo criterio que el flujo confirm/cancel)
+  let { data: ratingOutbound } = await supabase
+    .from("wa_outbound_messages")
+    .select("appointment_id, sent_at")
+    .eq("organization_id", organizationId)
+    .eq("intent", "rating_request")
+    .ilike("message_id", `%_${from}_%`)
+    .not("appointment_id", "is", null)
+    .gte("sent_at", fourteenDaysAgo)
+    .order("sent_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ appointment_id: string; sent_at: string }>();
+
+  // 2) Fallback por sufijo del número en chat_id
+  if (!ratingOutbound?.appointment_id && matchSuffix) {
+    const fb = await supabase
+      .from("wa_outbound_messages")
+      .select("appointment_id, sent_at")
+      .eq("organization_id", organizationId)
+      .eq("intent", "rating_request")
+      .ilike("chat_id", `%${matchSuffix}@c.us`)
+      .not("appointment_id", "is", null)
+      .gte("sent_at", fourteenDaysAgo)
+      .order("sent_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<{ appointment_id: string; sent_at: string }>();
+    ratingOutbound = fb.data;
+  }
+
+  if (!ratingOutbound?.appointment_id) {
+    console.log(
+      `[wa-inbound] rating ${rating} recibido pero sin rating_request pendiente para from="${from}"`
+    );
+    return false;
+  }
+
+  const appointmentId = ratingOutbound.appointment_id;
+
+  // Solo aplicar si aún no tiene rating (la primera respuesta gana)
+  const { data: appt } = await supabase
+    .from("appointments")
+    .select("rating")
+    .eq("id", appointmentId)
+    .single<{ rating: number | null }>();
+
+  if (!appt || appt.rating !== null) {
+    console.log(
+      `[wa-inbound] appointment ${appointmentId} ya tiene rating, skip`
+    );
+    return true; // era una respuesta a rating, no seguir al flujo confirm/cancel
+  }
+
+  // Texto adicional después del número → feedback
+  const feedback = rawBody.trim().replace(/^[1-5]\s*/, "").trim() || null;
+
+  const { error: updErr } = await supabase
+    .from("appointments")
+    .update({ rating, feedback })
+    .eq("id", appointmentId);
+
+  if (updErr) {
+    console.error(`[wa-inbound] rating UPDATE failed:`, updErr.message);
+    return true;
+  }
+
+  console.log(
+    `[wa-inbound] rating ${rating} aplicado a appointment ${appointmentId}`
+  );
+  await invokeWaSend(appointmentId, "rating_ack");
+  return true;
 }
 
 /** Clasifica la respuesta de un cliente: confirmación, cancelación o ninguna.

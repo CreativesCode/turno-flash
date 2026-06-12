@@ -9,7 +9,12 @@
 // Request body:
 //   { appointmentId: string, intent: "confirm" | "reminder_24h" | "reminder_1h"
 //     | "notify_business_new" | "notify_business_cancel" | "notify_business_confirm"
-//     | "cancel_ack" | "confirm_ack" }
+//     | "cancel_ack" | "confirm_ack" | "rating_request" | "rating_ack"
+//     | "waitlist_slot", waitlistId?: string }
+//
+//   waitlistId es obligatorio para intent=waitlist_slot: el mensaje describe el
+//   hueco liberado (datos del appointment cancelado) pero va al cliente de la
+//   entrada de waitlist, no al del appointment.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -29,7 +34,10 @@ type Intent =
   | "notify_business_cancel"
   | "notify_business_confirm"
   | "cancel_ack"
-  | "confirm_ack";
+  | "confirm_ack"
+  | "rating_request"
+  | "rating_ack"
+  | "waitlist_slot";
 
 interface AppointmentRow {
   id: string;
@@ -59,15 +67,23 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { appointmentId, intent } = (await req.json()) as {
+    const { appointmentId, intent, waitlistId } = (await req.json()) as {
       appointmentId: string;
       intent: Intent;
+      waitlistId?: string;
     };
 
     if (!appointmentId || !intent) {
       return json(400, {
         success: false,
         error: "appointmentId and intent are required",
+      });
+    }
+
+    if (intent === "waitlist_slot" && !waitlistId) {
+      return json(400, {
+        success: false,
+        error: "waitlistId is required for intent=waitlist_slot",
       });
     }
 
@@ -121,7 +137,8 @@ Deno.serve(async (req) => {
     if (
       intent === "confirm" ||
       intent === "reminder_24h" ||
-      intent === "reminder_1h"
+      intent === "reminder_1h" ||
+      intent === "rating_request"
     ) {
       const { data: existing } = await supabase
         .from("wa_outbound_messages")
@@ -141,12 +158,46 @@ Deno.serve(async (req) => {
       }
     }
 
+    // 3b. waitlist_slot: idempotencia por entrada de waitlist (notified_at)
+    let waitlistCustomerName = "";
+    if (intent === "waitlist_slot") {
+      const { data: wl } = await supabase
+        .from("waitlist")
+        .select("id, status, notified_at, customer_id")
+        .eq("id", waitlistId!)
+        .single<{
+          id: string;
+          status: string;
+          notified_at: string | null;
+          customer_id: string;
+        }>();
+
+      if (!wl) {
+        return json(404, { success: false, error: "Waitlist entry not found" });
+      }
+      if (wl.notified_at || wl.status !== "active") {
+        return json(200, {
+          success: true,
+          skipped: true,
+          reason: `Waitlist entry already ${wl.status}`,
+        });
+      }
+
+      const { data: wlCustomer } = await supabase
+        .from("customers")
+        .select("first_name")
+        .eq("id", wl.customer_id)
+        .single<{ first_name: string }>();
+      waitlistCustomerName = wlCustomer?.first_name ?? "";
+    }
+
     // 4. Determinar destinatario y mensaje según intent
     const target = await resolveTarget(
       supabase,
       appt,
       intent,
-      settings.openwa_session_id
+      settings.openwa_session_id,
+      waitlistId
     );
 
     if (!target) {
@@ -157,7 +208,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const text = buildMessage(appt, intent);
+    const text = buildMessage(appt, intent, waitlistCustomerName);
 
     // 5. Enviar
     console.log("[wa-send] sending", {
@@ -189,6 +240,14 @@ Deno.serve(async (req) => {
         status: "sent",
         body: text,
       });
+
+      // Marcar la entrada de waitlist como notificada
+      if (intent === "waitlist_slot" && waitlistId) {
+        await supabase
+          .from("waitlist")
+          .update({ status: "notified", notified_at: new Date().toISOString() })
+          .eq("id", waitlistId);
+      }
 
       // Actualizar columnas del appointment para casos al cliente
       if (intent === "confirm") {
@@ -265,7 +324,8 @@ async function resolveTarget(
   supabase: any,
   appt: AppointmentRow,
   intent: Intent,
-  _sessionId: string
+  _sessionId: string,
+  waitlistId?: string
 ): Promise<{ chatId: string } | null> {
   // Notificaciones al negocio → al número del negocio
   if (intent.startsWith("notify_business")) {
@@ -277,6 +337,33 @@ async function resolveTarget(
 
     if (!org?.whatsapp_phone) return null;
     return { chatId: phoneToChatId(org.whatsapp_phone) };
+  }
+
+  // waitlist_slot → al cliente de la entrada de waitlist (no al del turno)
+  if (intent === "waitlist_slot") {
+    if (!waitlistId) return null;
+    const { data: wl } = await supabase
+      .from("waitlist")
+      .select("customer_id")
+      .eq("id", waitlistId)
+      .single<{ customer_id: string }>();
+    if (!wl) return null;
+
+    const { data: wlCustomer } = await supabase
+      .from("customers")
+      .select("phone, phone_country_code, whatsapp_number")
+      .eq("id", wl.customer_id)
+      .single<{
+        phone: string;
+        phone_country_code: string | null;
+        whatsapp_number: string | null;
+      }>();
+    if (!wlCustomer) return null;
+
+    const wlPhone = wlCustomer.whatsapp_number || wlCustomer.phone;
+    return {
+      chatId: phoneToChatId(wlPhone, wlCustomer.phone_country_code ?? ""),
+    };
   }
 
   // Resto → al cliente
@@ -305,7 +392,11 @@ async function getCustomerId(supabase: any, appointmentId: string) {
   return data?.customer_id;
 }
 
-function buildMessage(appt: AppointmentRow, intent: Intent): string {
+function buildMessage(
+  appt: AppointmentRow,
+  intent: Intent,
+  waitlistCustomerName = ""
+): string {
   const date = new Date(`${appt.appointment_date}T${appt.start_time}`);
   const fechaLarga = date.toLocaleDateString("es-CU", {
     weekday: "long",
@@ -400,6 +491,35 @@ function buildMessage(appt: AppointmentRow, intent: Intent): string {
 
     case "confirm_ack":
       return `¡Gracias ${cliente}! Confirmamos tu turno del ${fechaLarga} a las ${hora}. Te esperamos 🙌`;
+
+    case "rating_request":
+      return [
+        `Hola ${cliente}! Gracias por visitarnos en *${negocio}* 🙌`,
+        ``,
+        `¿Cómo calificarías tu experiencia con *${servicio}*?`,
+        ``,
+        `Responde con un número del *1* al *5*:`,
+        `5 ⭐⭐⭐⭐⭐ Excelente`,
+        `1 ⭐ Muy mala`,
+        ``,
+        `Tu opinión nos ayuda a mejorar 💚`,
+      ].join("\n");
+
+    case "rating_ack":
+      return `¡Gracias por tu valoración, ${cliente}! 💚 Te esperamos pronto en *${negocio}*.`;
+
+    case "waitlist_slot": {
+      const hola = waitlistCustomerName ? `Hola ${waitlistCustomerName}! ` : "";
+      return [
+        `${hola}📣 *Se liberó un lugar en ${negocio}*`,
+        ``,
+        `💇 ${servicio}`,
+        `📅 ${fechaLarga}`,
+        `⏰ ${hora}`,
+        ``,
+        `Estabas en la lista de espera para este servicio. Si te interesa, responde a este mensaje o contáctanos cuanto antes: el lugar se asigna por orden de llegada.`,
+      ].join("\n");
+    }
 
     case "notify_business_new":
       return [

@@ -20,7 +20,9 @@ import {
 } from "@/utils/license";
 import { createClient } from "@/utils/supabase/client";
 import {
+  Activity,
   AlertTriangle,
+  BarChart3,
   Bell,
   Building2,
   Calendar,
@@ -95,6 +97,25 @@ const SHORTCUTS: readonly ShortcutCard[] = [
     href: "/dashboard/staff",
     roles: ["admin", "owner"],
     requiresOrg: true,
+  },
+  {
+    key: "reports",
+    title: "Reportes",
+    subtitle: "Ingresos y estadísticas",
+    Icon: BarChart3,
+    mesh: "mesh-violet",
+    href: "/dashboard/reports",
+    roles: ["admin", "owner"],
+    requiresOrg: true,
+  },
+  {
+    key: "platform",
+    title: "Plataforma",
+    subtitle: "Salud del sistema",
+    Icon: Activity,
+    mesh: "mesh-warn",
+    href: "/dashboard/platform",
+    roles: ["admin"],
   },
   {
     key: "organizations",

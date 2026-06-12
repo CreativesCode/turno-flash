@@ -69,6 +69,13 @@ export {
   useUpdateStaffMember,
 } from "./useStaff.query";
 
+// Analytics hooks (React Query powered)
+export {
+  analyticsKeys,
+  useOrganizationAnalytics,
+  usePlatformStats,
+} from "./useAnalytics.query";
+
 // Error logs hooks (React Query powered)
 export {
   useErrorLogsQuery,

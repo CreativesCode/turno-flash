@@ -5,7 +5,9 @@ import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
 import { createClient } from "@/utils/supabase/client";
 import {
+  Activity,
   AlertTriangle,
+  BarChart3,
   Bell,
   Building2,
   Calendar,
@@ -75,6 +77,13 @@ const NAV_ITEMS: readonly NavEntry[] = [
     requiresOrg: true,
   },
   {
+    name: "Reportes",
+    href: "/dashboard/reports",
+    Icon: BarChart3,
+    roles: ["admin", "owner"],
+    requiresOrg: true,
+  },
+  {
     name: "Suscripción",
     href: "/dashboard/subscription",
     Icon: Crown,
@@ -87,6 +96,12 @@ const NAV_ITEMS: readonly NavEntry[] = [
     Icon: UserCircle,
   },
   { separator: true, key: "admin" },
+  {
+    name: "Plataforma",
+    href: "/dashboard/platform",
+    Icon: Activity,
+    roles: ["admin"],
+  },
   {
     name: "Organizaciones",
     href: "/dashboard/organizations",
