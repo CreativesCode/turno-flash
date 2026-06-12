@@ -76,6 +76,15 @@ export {
   usePlatformStats,
 } from "./useAnalytics.query";
 
+// Business settings hooks (React Query powered)
+export {
+  businessSettingsKeys,
+  useBusinessSettings,
+  useUpdateBusinessSettings,
+  type BusinessAutomationSettings,
+  type BusinessAutomationSettingsPatch,
+} from "./useBusinessSettings.query";
+
 // Error logs hooks (React Query powered)
 export {
   useErrorLogsQuery,

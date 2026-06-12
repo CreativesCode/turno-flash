@@ -148,6 +148,7 @@ Reutilizan la Edge Function `wa-send` y el patrón de `send-reminders` (cron).
 | 8 | Export CSV (turnos y clientes) | ✅ |
 | 9 | Lista de espera → WhatsApp (trigger + `wa-send`) | ✅ |
 | 10 | Landing actualizado (features, planes, FAQ) | ✅ |
+| 11 | `/dashboard/settings` (toggles de automatización) | ✅ |
 
 ## Lo que quedó implementado (resumen técnico)
 
@@ -161,8 +162,9 @@ Reutilizan la Edge Function `wa-send` y el patrón de `send-reminders` (cron).
 - **Config por negocio** (`business_settings`):
   - `enable_rating_request` (default **true**): pide valoración al completar.
   - `enable_daily_summary` (default **false**, opt-in) + `daily_summary_time`
-    (default 07:00 hora local de la org). No hay UI todavía para estos toggles:
-    se activan por SQL/dashboard de Supabase. ⚠️ Pendiente menor: UI de settings.
+    (default 07:00 hora local de la org).
+  - UI: página **`/dashboard/settings`** (owner/admin con org) con los toggles
+    y la hora del resumen; muestra además si WhatsApp está conectado.
 - **Throttle reactivación**: `customers.last_reactivation_sent_at`, máx. 1
   mensaje cada 30 días, máx. 50 por envío (validado también en el servidor).
 - `[functions.wa-inbound] verify_jwt = false` fijado en `supabase/config.toml`.
