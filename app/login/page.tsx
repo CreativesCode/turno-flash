@@ -146,9 +146,12 @@ export default function LoginPage() {
 
           <div className="mt-5 text-center text-xs text-foreground-muted">
             ¿Aún no tenés cuenta?{" "}
-            <span className="font-semibold text-foreground">
-              Pedí una invitación
-            </span>
+            <Link
+              href="/register"
+              className="font-semibold text-foreground hover:text-primary"
+            >
+              Registrá tu negocio gratis
+            </Link>
           </div>
 
           <div className="mt-8 text-center">
