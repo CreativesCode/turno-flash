@@ -1,6 +1,7 @@
 "use client";
 
 import { Drawer } from "@/components/Drawer";
+import { LicenseGate } from "@/components/license-gate";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { MobileTopbar } from "@/components/MobileTopbar";
 import { Sidebar } from "@/components/Sidebar";
@@ -48,7 +49,9 @@ export default function DashboardLayout({
 }) {
   return (
     <ThemeProvider>
-      <DashboardContent>{children}</DashboardContent>
+      <LicenseGate>
+        <DashboardContent>{children}</DashboardContent>
+      </LicenseGate>
     </ThemeProvider>
   );
 }

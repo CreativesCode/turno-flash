@@ -251,7 +251,7 @@ export default function HomePageClient() {
     }
   }, []);
 
-  const ctaTarget = user ? "/dashboard" : "/login";
+  const ctaTarget = user ? "/dashboard" : "/register";
   const ctaLabel = user ? "Ir al Dashboard" : "Comenzar";
 
   return (
@@ -281,6 +281,14 @@ export default function HomePageClient() {
                 <Moon className="h-5 w-5" />
               )}
             </button>
+            {!user && (
+              <Link
+                href="/login"
+                className="hidden text-sm font-semibold text-foreground-muted transition-colors hover:text-foreground sm:inline"
+              >
+                Iniciar sesión
+              </Link>
+            )}
             <Button
               variant="mesh-primary"
               size="md"
