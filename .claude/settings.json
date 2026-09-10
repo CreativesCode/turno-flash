@@ -6,5 +6,6 @@
       "Bash(npx eslint *)",
       "Bash(npm run *)"
     ]
-  }
+  },
+  "autoMemoryEnabled": true
 }
