@@ -1,4 +1,5 @@
 // Tipos para organizaciones
+import type { UserProfile } from "./auth";
 import { Database } from "./database.types";
 
 // Tipos generados desde Supabase
@@ -10,6 +11,11 @@ export interface OrganizationWithLicenseStatus extends Organization {
   days_remaining: number | null;
   is_usable: boolean;
   license_message: string;
+}
+
+export interface OrganizationWithOwner extends OrganizationWithLicenseStatus {
+  owner?: UserProfile | null;
+  member_count?: number;
 }
 
 export interface CreateOrganizationParams {

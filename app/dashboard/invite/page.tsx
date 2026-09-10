@@ -1,10 +1,24 @@
 "use client";
 
+import {
+  Button,
+  Card,
+  Field,
+  sheetInputClasses as inputClasses,
+} from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
+import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
+import { Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Logger } from "@/utils/logger";
+
+const STEPS = [
+  "Ingresa el correo electrónico del nuevo usuario",
+  "El usuario recibirá un correo con un enlace de invitación",
+  "Al hacer clic en el enlace, podrá configurar su contraseña",
+  "Después, podrá iniciar sesión con su correo y contraseña",
+];
 
 export default function InvitePage() {
   const { profile, loading: authLoading } = useAuth();
@@ -140,42 +154,42 @@ export default function InvitePage() {
     );
   }
 
+  const isOwner = profile.role === "owner";
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground"></h1>
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle"
-            >
-              Volver al dashboard
-            </button>
-          </div>
+    <div className="min-h-screen bg-background pb-24">
+      <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+        <div className="mx-auto max-w-2xl px-4 py-3 sm:px-6">
+          <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+            Invitar usuario
+          </h1>
+          <p className="text-xs text-foreground-muted">
+            {isOwner
+              ? "Se sumará a tu negocio como empleado"
+              : "Quedará sin organización hasta que lo asignes"}
+          </p>
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="rounded-lg bg-surface p-8 shadow-sm border border-border">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-foreground">
-              Enviar invitación
-            </h2>
-            <p className="mt-2 text-sm text-foreground-muted">
-              El usuario recibirá un correo con un enlace para configurar su
-              contraseña y acceder a la plataforma.
-            </p>
+      <div className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-5 sm:px-6">
+        <Card className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400">
+              <Mail className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-foreground">
+                Enviar invitación
+              </h2>
+              <p className="mt-0.5 text-xs text-foreground-muted">
+                El usuario recibirá un correo con un enlace para configurar su
+                contraseña y acceder a la plataforma.
+              </p>
+            </div>
           </div>
 
-          <form onSubmit={handleInvite} className="space-y-6">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-foreground"
-              >
-                Correo electrónico del nuevo usuario
-              </label>
+          <form onSubmit={handleInvite} className="mt-4 flex flex-col gap-4">
+            <Field label="Correo electrónico del nuevo usuario">
               <input
                 id="email"
                 name="email"
@@ -184,46 +198,47 @@ export default function InvitePage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-base text-foreground placeholder-foreground-muted shadow-sm focus:border-info-500 focus:outline-none focus:ring-info-500 sm:text-sm"
+                className={inputClasses}
                 placeholder="usuario@ejemplo.com"
               />
-            </div>
+            </Field>
 
             {error && (
-              <div className="rounded-md bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+              <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+              <div className="rounded-lg bg-success-50 p-3 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
                 {success}
               </div>
             )}
 
-            <button
+            <Button
               type="submit"
+              variant="mesh-primary"
               disabled={loading}
-              className="flex w-full justify-center rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-info-foreground transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full justify-center"
             >
-              {loading ? "Enviando invitación..." : "Enviar invitación"}
-            </button>
+              {loading ? "Enviando invitación…" : "Enviar invitación"}
+            </Button>
           </form>
+        </Card>
 
-          <div className="mt-8 border-t border-border pt-6">
-            <h3 className="text-sm font-semibold text-foreground">
-              Cómo funciona
-            </h3>
-            <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-foreground-muted">
-              <li>Ingresa el correo electrónico del nuevo usuario</li>
-              <li>El usuario recibirá un correo con un enlace de invitación</li>
-              <li>
-                Al hacer clic en el enlace, podrá configurar su contraseña
+        <Card className="p-4">
+          <h3 className="text-sm font-bold text-foreground">Cómo funciona</h3>
+          <ol className="mt-3 flex flex-col gap-2.5">
+            {STEPS.map((step, i) => (
+              <li key={step} className="flex items-start gap-2.5">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-2 text-[11px] font-bold text-foreground-muted">
+                  {i + 1}
+                </span>
+                <span className="text-sm text-foreground-muted">{step}</span>
               </li>
-              <li>Después, podrá iniciar sesión con su correo y contraseña</li>
-            </ol>
-          </div>
-        </div>
+            ))}
+          </ol>
+        </Card>
       </div>
     </div>
   );

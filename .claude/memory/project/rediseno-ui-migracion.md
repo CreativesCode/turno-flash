@@ -1,6 +1,6 @@
 ---
 name: rediseno-ui-migracion
-description: Estado del rediseno de UI (prototipo docs/design → codigo) — 8 de 9 pasos hechos, solo faltan las pantallas de admin
+description: Rediseno de UI (prototipo docs/design → codigo) — COMPLETO (9/9) desde 2026-09-10; decisiones cerradas y patrones a mantener
 metadata:
   type: project
 ---
@@ -17,7 +17,10 @@ Orden del plan y estado:
 Topbar/Drawer/TabBar mobile), login y landing, dashboard home, appointments (page + Day/Week
 calendar + modales), customers/services/staff, reminders.
 
-9. ⬜ **Pendiente: pantallas de admin** — Organizations, Users, NewOrg. Es lo unico que queda.
+9. ✅ Hecho (2026-09-10): pantallas de admin — Organizations (`OrganizationCard`), Users (`UserCard` +
+`InviteUserSheet`) y NewOrg. Tambien (fuera del plan original) `/dashboard/organizations/details`
+(`OrganizationEditSheet` + `AddMemberSheet`) e `/dashboard/invite`. Todo el admin esta migrado. El prefijo `turnoflash.com/` del slug en NewOrg es decorativo: la
+reserva publica `/book/[slug]` aun no existe.
 
 ## Decisiones ya tomadas (no volver a preguntarlas)
 

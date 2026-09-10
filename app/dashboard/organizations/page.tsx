@@ -1,44 +1,32 @@
 "use client";
 
+import { OrganizationCard } from "@/components/organizations/OrganizationCard";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Button, Card } from "@/components/ui";
+import { Button, ConfirmSheet } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
-import { UserProfile } from "@/types/auth";
-import { OrganizationWithLicenseStatus } from "@/types/organization";
+import { useToast } from "@/hooks";
+import { OrganizationWithOwner } from "@/types/organization";
+import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
-import {
-  ArrowLeft,
-  Building2,
-  Clock,
-  Eye,
-  Plus,
-  Trash2,
-  Users,
-} from "lucide-react";
+import { Building2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Logger } from "@/utils/logger";
-
-interface OrganizationWithOwner extends OrganizationWithLicenseStatus {
-  owner?: UserProfile | null;
-  member_count?: number;
-}
 
 export default function OrganizationsPage() {
   const { profile } = useAuth();
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
+  const toast = useToast();
 
   const [organizations, setOrganizations] = useState<OrganizationWithOwner[]>(
     []
   );
   const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [organizationToDelete, setOrganizationToDelete] =
     useState<OrganizationWithOwner | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   // Cargar organizaciones
   const loadOrganizations = useCallback(async () => {
@@ -46,11 +34,21 @@ export default function OrganizationsPage() {
       setLoading(true);
       setError(null);
 
-      // Cargar organizaciones con estado de licencia
-      const { data: orgsData, error: orgsError } = await supabase
-        .from("organizations_with_license_status")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // Dos consultas en paralelo (antes eran 2 por organización):
+      // organizaciones con estado de licencia + perfiles con organización asignada.
+      const [
+        { data: orgsData, error: orgsError },
+        { data: membersData, error: membersError },
+      ] = await Promise.all([
+        supabase
+          .from("organizations_with_license_status")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("user_profiles")
+          .select("*")
+          .not("organization_id", "is", null),
+      ]);
 
       if (orgsError) {
         setError("Error al cargar organizaciones: " + orgsError.message);
@@ -58,44 +56,44 @@ export default function OrganizationsPage() {
         return;
       }
 
-      // Para cada organización, cargar el owner y el conteo de miembros
-      const validOrgs = (orgsData || []).filter((org) => org.id != null);
+      if (membersError) {
+        void Logger.error("Error fetching organization members", membersError);
+      }
 
-      const organizationsWithOwners = await Promise.all(
-        validOrgs.map(async (org) => {
-          if (!org.id) {
-            throw new Error("Organization ID is null");
-          }
+      // Agrupar owner y conteo de miembros por organización
+      const ownerByOrg = new Map<
+        string,
+        NonNullable<OrganizationWithOwner["owner"]>
+      >();
+      const memberCountByOrg = new Map<string, number>();
+      for (const member of membersData || []) {
+        const orgId = member.organization_id;
+        if (!orgId) continue;
+        memberCountByOrg.set(orgId, (memberCountByOrg.get(orgId) ?? 0) + 1);
+        if (member.role === "owner" && !ownerByOrg.has(orgId)) {
+          ownerByOrg.set(orgId, member);
+        }
+      }
 
-          // Buscar el owner (usuario con role='owner' y organization_id=org.id)
-          const { data: ownerData } = await supabase
-            .from("user_profiles")
-            .select("*")
-            .eq("organization_id", org.id)
-            .eq("role", "owner")
-            .single();
-
-          // Contar miembros totales
-          const { count } = await supabase
-            .from("user_profiles")
-            .select("*", { count: "exact", head: true })
-            .eq("organization_id", org.id);
-
-          return {
-            ...org,
-            id: org.id,
-            name: org.name || "",
-            slug: org.slug || "",
-            timezone: org.timezone || "",
-            created_at: org.created_at || new Date().toISOString(),
-            license_status: org.license_status || "no_license",
-            license_message: org.license_message || "",
-            is_usable: org.is_usable ?? false,
-            owner: ownerData || null,
-            member_count: count || 0,
-          } as OrganizationWithOwner;
-        })
-      );
+      const organizationsWithOwners = (orgsData || [])
+        .filter(
+          (org): org is typeof org & { id: string } => org.id != null
+        )
+        .map(
+          (org) =>
+            ({
+              ...org,
+              name: org.name || "",
+              slug: org.slug || "",
+              timezone: org.timezone || "",
+              created_at: org.created_at || new Date().toISOString(),
+              license_status: org.license_status || "no_license",
+              license_message: org.license_message || "",
+              is_usable: org.is_usable ?? false,
+              owner: ownerByOrg.get(org.id) ?? null,
+              member_count: memberCountByOrg.get(org.id) ?? 0,
+            }) as OrganizationWithOwner
+        );
 
       setOrganizations(organizationsWithOwners);
     } catch (err) {
@@ -120,70 +118,62 @@ export default function OrganizationsPage() {
     }
   }, [profile, loadOrganizations]);
 
-  const handleDeleteClick = (org: OrganizationWithOwner) => {
-    setOrganizationToDelete(org);
-  };
+  const handleViewDetails = useCallback(
+    (org: OrganizationWithOwner) => {
+      router.push(`/dashboard/organizations/details?id=${org.id}`);
+    },
+    [router]
+  );
+
+  const handleCreate = useCallback(() => {
+    router.push("/dashboard/organizations/new");
+  }, [router]);
 
   const handleDeleteConfirm = async () => {
     if (!organizationToDelete) return;
+    const org = organizationToDelete;
 
     try {
-      setDeleting(organizationToDelete.id);
-      setError(null);
-      setSuccess(null);
+      setDeleting(true);
 
       // Eliminar la organización (los usuarios se actualizarán automáticamente por ON DELETE SET NULL)
       const { error: deleteError } = await supabase
         .from("organizations")
         .delete()
-        .eq("id", organizationToDelete.id);
+        .eq("id", org.id);
 
       if (deleteError) {
-        setError("Error al eliminar la organización: " + deleteError.message);
+        toast.error("Error al eliminar la organización", deleteError.message);
         void Logger.error("Error deleting organization", deleteError, {
-          organizationId: organizationToDelete.id,
+          organizationId: org.id,
         });
-        setDeleting(null);
-        setOrganizationToDelete(null);
         return;
       }
 
-      setSuccess("Organización eliminada exitosamente");
-
-      // Actualizar la lista local
-      setOrganizations((prevOrgs) =>
-        prevOrgs.filter((org) => org.id !== organizationToDelete.id)
-      );
-
-      // Cerrar modal y limpiar
-      setOrganizationToDelete(null);
-      setDeleting(null);
-
-      // Limpiar mensaje de éxito después de 3 segundos
-      setTimeout(() => setSuccess(null), 3000);
+      setOrganizations((prevOrgs) => prevOrgs.filter((o) => o.id !== org.id));
+      toast.success("Organización eliminada", `${org.name} fue eliminada`);
     } catch (err) {
-      setError("Error inesperado al eliminar la organización");
+      toast.error("Error inesperado", "No se pudo eliminar la organización");
       void Logger.error("Unexpected error deleting organization", err, {
-        organizationId: organizationToDelete?.id,
+        organizationId: org.id,
       });
-      setDeleting(null);
+    } finally {
+      setDeleting(false);
       setOrganizationToDelete(null);
     }
   };
 
-  const handleDeleteCancel = () => {
-    setOrganizationToDelete(null);
-  };
-
-  // Mostrar loading mientras se verifica el rol
-  if (!profile || profile.role !== "admin") {
+  // Mostrar loading mientras se verifica el rol o se cargan los datos
+  if (!profile || profile.role !== "admin" || loading) {
     return (
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
             <p className="text-sm text-foreground-muted">
-              Verificando permisos...
+              {!profile || profile.role !== "admin"
+                ? "Verificando permisos..."
+                : "Cargando organizaciones..."}
             </p>
           </div>
         </div>
@@ -191,268 +181,111 @@ export default function OrganizationsPage() {
     );
   }
 
+  const memberCount = organizationToDelete?.member_count ?? 0;
+
   return (
     <ProtectedRoute>
       <PageMetadata
         title="Organizaciones"
         description="Gestiona las organizaciones del sistema. Administra información, licencias y miembros de cada organización."
       />
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          {/* Header */}
-          <div className="mb-6">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-foreground-muted transition-colors hover:text-foreground"
-            >
-              <ArrowLeft size={16} />
-              Volver al dashboard
-            </button>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div className="min-w-0">
-                <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-                  Gestión de Organizaciones
-                </h1>
-                <p className="mt-1 text-sm text-foreground-muted">
-                  Administra las organizaciones del sistema
-                </p>
-              </div>
-              <Button
-                variant="mesh-secondary"
-                onClick={() => router.push("/dashboard/organizations/new")}
-                className="w-full justify-center sm:w-auto"
-              >
-                <Plus size={16} />
-                Crear organización
-              </Button>
-            </div>
-          </div>
 
-          {/* Mensajes de éxito/error */}
+      <div className="relative min-h-screen bg-background pb-24">
+        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:px-6 lg:px-8">
+            <div>
+              <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                Organizaciones
+              </h1>
+              <p className="text-xs text-foreground-muted">
+                {organizations.length}{" "}
+                {organizations.length === 1 ? "negocio" : "negocios"}
+              </p>
+            </div>
+            <Button
+              variant="mesh-primary"
+              onClick={handleCreate}
+              className="hidden sm:inline-flex"
+            >
+              <Plus className="h-4 w-4" />
+              Nueva organización
+            </Button>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           {error && (
-            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
 
-          {success && (
-            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
-              {success}
+          {organizations.length === 0 ? (
+            <div className="rounded-xl border border-border bg-surface p-10 text-center shadow-sm">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
+                <Building2 className="h-6 w-6" />
+              </div>
+              <h3 className="mt-3 text-base font-bold text-foreground">
+                Sin organizaciones
+              </h3>
+              <p className="mt-1 text-sm text-foreground-muted">
+                No hay organizaciones en el sistema.
+              </p>
+              <Button
+                variant="mesh-primary"
+                onClick={handleCreate}
+                className="mx-auto mt-4"
+              >
+                <Plus className="h-4 w-4" />
+                Crear organización
+              </Button>
             </div>
-          )}
-
-          {/* Lista de organizaciones */}
-          {loading ? (
-            <Card>
-              <div className="flex items-center justify-center p-12">
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
-                  <p className="text-sm text-foreground-muted">
-                    Cargando organizaciones...
-                  </p>
-                </div>
-              </div>
-            </Card>
-          ) : organizations.length === 0 ? (
-            <Card>
-              <div className="p-12 text-center">
-                <p className="text-foreground-muted">
-                  No hay organizaciones en el sistema
-                </p>
-              </div>
-            </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {organizations.map((org) => {
-                const licenseStyle =
-                  org.license_status === "active"
-                    ? "bg-success-100 text-success-800"
-                    : org.license_status === "grace_period"
-                    ? "bg-warning-100 text-warning-800"
-                    : org.license_status === "expired"
-                    ? "bg-danger-100 text-danger-800"
-                    : "bg-muted text-foreground-muted";
-                const licenseLabel =
-                  org.license_status === "active"
-                    ? "Activa"
-                    : org.license_status === "grace_period"
-                    ? "Período de gracia"
-                    : org.license_status === "expired"
-                    ? "Expirada"
-                    : "Sin licencia";
-
-                return (
-                  <Card
-                    key={org.id}
-                    className="flex flex-col p-5 transition-shadow hover:shadow-md"
-                  >
-                    {/* Header: icon + name + status */}
-                    <div className="flex items-start gap-3">
-                      <div className="mesh-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-sm">
-                        <Building2 size={20} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="truncate text-base font-bold text-foreground">
-                            {org.name}
-                          </h3>
-                          <span
-                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                              org.is_active
-                                ? "bg-success-100 text-success-800"
-                                : "bg-danger-100 text-danger-800"
-                            }`}
-                          >
-                            {org.is_active ? "Activa" : "Inactiva"}
-                          </span>
-                        </div>
-                        <code className="mt-1 inline-block rounded bg-muted px-1.5 py-0.5 text-[11px] text-foreground-muted">
-                          /{org.slug}
-                        </code>
-                      </div>
-                    </div>
-
-                    {/* Owner */}
-                    <div className="mt-4 border-t border-border pt-3">
-                      {org.owner ? (
-                        <div className="text-sm">
-                          <div className="font-medium text-foreground">
-                            {org.owner.full_name || org.owner.email}
-                          </div>
-                          <div className="text-xs text-foreground-muted">
-                            {org.owner.email}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-foreground-muted">
-                          Sin dueño asignado
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Meta grid */}
-                    <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                      <div className="flex items-center gap-1.5 text-foreground-muted">
-                        <Users size={14} />
-                        <span>
-                          {org.member_count || 0}{" "}
-                          {org.member_count === 1 ? "miembro" : "miembros"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-foreground-muted">
-                        <Clock size={14} />
-                        <span className="truncate">{org.timezone}</span>
-                      </div>
-                    </div>
-
-                    {/* License */}
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span
-                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${licenseStyle}`}
-                      >
-                        {licenseLabel}
-                      </span>
-                      {org.days_remaining !== null && (
-                        <span className="text-[11px] text-foreground-muted">
-                          {org.days_remaining > 0
-                            ? `${org.days_remaining} días restantes`
-                            : `Expirada hace ${Math.abs(
-                                org.days_remaining
-                              )} días`}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Created date */}
-                    <div className="mt-3 text-[11px] text-foreground-subtle">
-                      Creada el{" "}
-                      {new Date(org.created_at).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="mt-4 flex gap-2 border-t border-border pt-3">
-                      <Button
-                        variant="info"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/organizations/details?id=${org.id}`
-                          )
-                        }
-                      >
-                        <Eye size={14} />
-                        Ver detalles
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDeleteClick(org)}
-                        disabled={deleting === org.id}
-                        aria-label="Eliminar organización"
-                      >
-                        <Trash2 size={14} />
-                        {deleting === org.id ? "Eliminando..." : "Eliminar"}
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {organizations.map((org) => (
+                <OrganizationCard
+                  key={org.id}
+                  org={org}
+                  onViewDetails={handleViewDetails}
+                  onDelete={setOrganizationToDelete}
+                />
+              ))}
             </div>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={handleCreate}
+          aria-label="Nueva organización"
+          className="mesh-primary fixed bottom-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-glow-primary transition-transform hover:-translate-y-px sm:hidden"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
       </div>
 
-      {/* Modal de confirmación de eliminación */}
-      {organizationToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-surface border border-border p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-foreground">
-              Confirmar eliminación
-            </h3>
-            <p className="mt-4 text-sm text-foreground-muted">
-              ¿Estás seguro de que deseas eliminar la organización{" "}
-              <span className="font-medium text-foreground">
-                {organizationToDelete.name}
-              </span>
-              ? Esta acción no se puede deshacer.
-            </p>
-            {organizationToDelete.member_count &&
-              organizationToDelete.member_count > 0 && (
-                <div className="mt-4 rounded-md bg-warning-50 p-3 text-sm text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
-                  ⚠️ Esta organización tiene {organizationToDelete.member_count}{" "}
-                  {organizationToDelete.member_count === 1
-                    ? "miembro"
-                    : "miembros"}
-                  . Los usuarios seguirán existiendo pero perderán su asociación
-                  con esta organización.
-                </div>
-              )}
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={handleDeleteCancel}
-                disabled={deleting === organizationToDelete.id}
-                className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                disabled={deleting === organizationToDelete.id}
-                className="rounded-md bg-danger px-4 py-2 text-sm font-medium text-danger-foreground transition-colors hover:bg-danger-700 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {deleting === organizationToDelete.id
-                  ? "Eliminando..."
-                  : "Eliminar"}
-              </button>
-            </div>
+      <ConfirmSheet
+        open={!!organizationToDelete}
+        onClose={() => setOrganizationToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        busy={deleting}
+        title="Eliminar organización"
+      >
+        <p>
+          ¿Seguro que deseas eliminar{" "}
+          <span className="font-semibold text-foreground">
+            {organizationToDelete?.name}
+          </span>
+          ? Esta acción no se puede deshacer.
+        </p>
+        {memberCount > 0 && (
+          <div className="mt-3 rounded-lg bg-warning-50 p-3 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+            Tiene {memberCount} {memberCount === 1 ? "miembro" : "miembros"}.
+            Los usuarios seguirán existiendo pero perderán su asociación con
+            esta organización.
           </div>
-        </div>
-      )}
+        )}
+      </ConfirmSheet>
     </ProtectedRoute>
   );
 }

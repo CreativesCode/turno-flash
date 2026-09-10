@@ -104,6 +104,22 @@ export const BUSINESS_HOURS = {
 } as const;
 
 /**
+ * Timezones offered when creating or editing an organization
+ */
+export const ORGANIZATION_TIMEZONES = [
+  "UTC",
+  "America/Argentina/Buenos_Aires",
+  "America/Mexico_City",
+  "America/Santiago",
+  "America/Bogota",
+  "America/Lima",
+  "America/Caracas",
+  "America/New_York",
+  "America/Los_Angeles",
+  "Europe/Madrid",
+] as const;
+
+/**
  * Filter Status Options
  */
 export const FILTER_STATUS = {

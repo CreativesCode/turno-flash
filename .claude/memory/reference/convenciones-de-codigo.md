@@ -40,7 +40,19 @@ Todos los tokens viven en `app/globals.css` bajo `@theme inline`:
 
 `components/ui/` tiene las primitivas: `Sheet` (bottom-sheet en mobile, modal centrado en
 desktop) + `Field` + `sheetInputClasses`, `Card`, `Avatar`, `StatusBadge`, `Button`
-(variantes `mesh-primary`, `mesh-secondary`, `soft`, size `icon`). El resto se agrupa por
+(variantes `mesh-primary`, `mesh-secondary`, `soft`, size `icon`), `KebabMenu` (menu de tres puntos
+de las cards) y `ConfirmSheet` (confirmacion destructiva). **Usar `ConfirmSheet` en vez de `confirm()` o de
+modales `fixed` a mano** (customers y staff todavia usan `confirm()`; StaffCard/CustomerCard tienen su
+menu inline, candidatos a migrar a `KebabMenu` si se tocan).
+
+Inputs `datetime-local`: el valor debe ser **hora local**, nunca `toISOString().slice(0,16)` (eso es
+UTC y al guardar `new Date(valor)` lo lee como local → la fecha se corre el offset en cada guardado).
+Patron correcto: `toDateTimeInput` en `app/dashboard/organizations/details/page.tsx`.
+
+Consultas de listas: **nunca N+1 por fila**. Traer las filas relacionadas en una sola query y agrupar
+en el cliente (patron en `app/dashboard/organizations/page.tsx`: orgs + `user_profiles` con
+`organization_id` no nulo en `Promise.all`, luego `Map` por org). Si crece mucho, pasar a RPC agregada
+como las de analitica (migracion 022). El resto se agrupa por
 dominio (`appointments/`, `calendar/`, `customers/`, `services/`, `staff/`, `analytics/`).
 Navegacion: `Sidebar` (desktop) + `MobileTopbar` + `Drawer` + `MobileTabBar` (5 slots con "+" central).
 

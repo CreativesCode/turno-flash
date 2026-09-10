@@ -22,7 +22,7 @@ Foto tomada el **2026-09-07** al instalar Titan Factory. Version del app: 0.1.0
   con RPCs que agregan en Postgres (migracion 022); export CSV.
 - Realtime (migracion 020), indices de performance (012), error logging (011),
   keepalive de Supabase via GitHub Actions.
-- Rediseno de UI casi terminado ([[rediseno-ui-migracion]]).
+- Rediseno de UI completo, 9/9 pasos ([[rediseno-ui-migracion]]).
 
 ## Tamano real de la BD (2026-09-10)
 
@@ -39,7 +39,13 @@ adopcion y activacion de negocios si.
 - **Monitoreo:** no hay Sentry; el error tracking es propio, en tabla de Postgres (migracion 011).
 - `npm run lint` roto y errores de ESLint preexistentes ([[turno-flash-tooling]]).
 - Reserva publica online (`/book/[slug]`) planeada y **no** implementada.
-- Pantallas de admin (Organizations / Users / NewOrg) sin rediseñar.
+
+## Bugs arreglados que dejan huella en datos
+
+- **Fechas de licencia se corrian al editar** (`/dashboard/organizations/details`), arreglado
+  2026-09-10: cada guardado del form movia `license_*_date` +N horas (N = offset de la zona del admin,
+  +3h en Argentina). Las orgs editadas antes de esa fecha pueden tener vencimientos corridos unas
+  horas; no hay forma de saber cuales. Regla en [[convenciones-de-codigo]].
 
 ## Cuidado con los docs
 

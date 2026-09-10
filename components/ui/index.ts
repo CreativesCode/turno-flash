@@ -9,6 +9,12 @@ export {
   type ButtonSize,
 } from "./button";
 export { Card, type CardProps } from "./card";
+export { ConfirmSheet, type ConfirmSheetProps } from "./confirm-sheet";
+export {
+  KebabMenu,
+  type KebabMenuItem,
+  type KebabMenuProps,
+} from "./kebab-menu";
 export { Logo } from "./logo";
 export { Field, Sheet, sheetInputClasses, type SheetProps } from "./sheet";
 export { CalendarSkeleton, ModalSkeleton } from "./skeleton";

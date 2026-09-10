@@ -2,30 +2,36 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
+import { Button, Card, ConfirmSheet } from "@/components/ui";
+import { InviteUserSheet } from "@/components/users/InviteUserSheet";
+import { ROLE_META, ROLE_ORDER, UserCard } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
+import { useToast } from "@/hooks";
 import { UserProfile, UserRole } from "@/types/auth";
+import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
-import { ArrowLeft } from "lucide-react";
+import { Mail, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Logger } from "@/utils/logger";
 
 export default function UsersManagementPage() {
   const { profile, refreshProfile, signOut } = useAuth();
   const router = useRouter();
+  const toast = useToast();
 
   // Memoizar el cliente de Supabase para evitar re-renders infinitos
   const supabase = useMemo(() => createClient(), []);
 
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [orgNames, setOrgNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   // Estados para el formulario de invitación
+  const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
@@ -35,16 +41,22 @@ export default function UsersManagementPage() {
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const [{ data, error: fetchError }, { data: orgs }] = await Promise.all([
+        supabase
+          .from("user_profiles")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase.from("organizations").select("id, name"),
+      ]);
 
       if (fetchError) {
         setError("Error al cargar usuarios: " + fetchError.message);
         void Logger.error("Error fetching users", fetchError);
       } else {
         setUsers(data || []);
+        setOrgNames(
+          Object.fromEntries((orgs || []).map((o) => [o.id, o.name]))
+        );
         setError(null);
       }
     } catch (err) {
@@ -69,104 +81,91 @@ export default function UsersManagementPage() {
     }
   }, [profile, loadUsers]);
 
-  const handleRoleChange = async (userId: string, newRole: UserRole) => {
+  const handleRoleChange = async (user: UserProfile, newRole: UserRole) => {
     try {
-      setUpdating(userId);
-      setError(null);
-      setSuccess(null);
+      setUpdating(user.id);
 
       const { error: updateError } = await supabase
         .from("user_profiles")
         .update({ role: newRole })
-        .eq("id", userId);
+        .eq("id", user.id);
 
       if (updateError) {
-        setError("Error al actualizar el rol: " + updateError.message);
-        void Logger.error("Error updating user role", updateError, { userId, newRole });
-      } else {
-        setSuccess("Rol actualizado exitosamente");
-        // Actualizar la lista local
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === userId ? { ...user, role: newRole } : user
-          )
-        );
-        // Si es el usuario actual, refrescar su perfil
-        const updatedUser = users.find((u) => u.id === userId);
-        if (updatedUser && profile?.user_id === updatedUser.user_id) {
-          await refreshProfile();
-        }
-        // Limpiar mensaje de éxito después de 3 segundos
-        setTimeout(() => setSuccess(null), 3000);
+        toast.error("Error al actualizar el rol", updateError.message);
+        void Logger.error("Error updating user role", updateError, {
+          userId: user.id,
+          newRole,
+        });
+        return;
+      }
+
+      setUsers((prevUsers) =>
+        prevUsers.map((u) => (u.id === user.id ? { ...u, role: newRole } : u))
+      );
+      toast.success(
+        "Rol actualizado",
+        `${user.full_name || user.email} ahora es ${ROLE_META[newRole].label}`
+      );
+      // Si es el usuario actual, refrescar su perfil
+      if (profile?.user_id === user.user_id) {
+        await refreshProfile();
       }
     } catch (err) {
-      setError("Error inesperado al actualizar el rol");
-      void Logger.error("Unexpected error updating user role", err, { userId, newRole });
+      toast.error("Error inesperado", "No se pudo actualizar el rol");
+      void Logger.error("Unexpected error updating user role", err, {
+        userId: user.id,
+        newRole,
+      });
     } finally {
       setUpdating(null);
     }
   };
 
-  const handleDeleteClick = (user: UserProfile) => {
-    setUserToDelete(user);
-  };
-
   const handleDeleteConfirm = async () => {
     if (!userToDelete) return;
+    const user = userToDelete;
 
     try {
-      setDeleting(userToDelete.id);
-      setError(null);
-      setSuccess(null);
+      setDeleting(true);
 
       // Eliminar el perfil (el usuario de auth.users se eliminará automáticamente por CASCADE)
       const { error: deleteError } = await supabase
         .from("user_profiles")
         .delete()
-        .eq("id", userToDelete.id);
+        .eq("id", user.id);
 
       if (deleteError) {
-        setError("Error al eliminar el usuario: " + deleteError.message);
+        toast.error("Error al eliminar el usuario", deleteError.message);
         void Logger.error("Error deleting user", deleteError, {
-          userId: userToDelete.id,
+          userId: user.id,
         });
-        setDeleting(null);
-        setUserToDelete(null);
         return;
       }
 
-      setSuccess("Usuario eliminado exitosamente");
-
       // Si es el usuario actual, cerrar sesión y redirigir
-      if (profile?.user_id === userToDelete.user_id) {
+      if (profile?.user_id === user.user_id) {
         await signOut();
         router.push("/login");
         return;
       }
 
-      // Actualizar la lista local
-      setUsers((prevUsers) =>
-        prevUsers.filter((user) => user.id !== userToDelete.id)
-      );
-
-      // Cerrar modal y limpiar
-      setUserToDelete(null);
-      setDeleting(null);
-
-      // Limpiar mensaje de éxito después de 3 segundos
-      setTimeout(() => setSuccess(null), 3000);
+      setUsers((prevUsers) => prevUsers.filter((u) => u.id !== user.id));
+      toast.success("Usuario eliminado", `${user.email} fue eliminado`);
     } catch (err) {
-      setError("Error inesperado al eliminar el usuario");
+      toast.error("Error inesperado", "No se pudo eliminar el usuario");
       void Logger.error("Unexpected error deleting user", err, {
-        userId: userToDelete?.id,
+        userId: user.id,
       });
-      setDeleting(null);
+    } finally {
+      setDeleting(false);
       setUserToDelete(null);
     }
   };
 
-  const handleDeleteCancel = () => {
-    setUserToDelete(null);
+  const openInvite = () => {
+    setInviteError(null);
+    setInviteSuccess(null);
+    setShowInvite(true);
   };
 
   const handleInvite = async (e: FormEvent) => {
@@ -272,33 +271,13 @@ export default function UsersManagementPage() {
     }
   };
 
-  const getRoleLabel = (role: UserRole) => {
-    const labels: Record<UserRole, string> = {
-      admin: "Administrador",
-      owner: "Dueño",
-      staff: "Empleado",
-      special: "Especial",
-    };
-    return labels[role];
-  };
-
-  const getRoleBadgeColor = (role: UserRole) => {
-    const colors: Record<UserRole, string> = {
-      admin: "bg-red-100 text-red-800",
-      owner: "bg-blue-100 text-blue-800",
-      staff: "bg-gray-100 text-gray-800",
-      special: "bg-purple-100 text-purple-800",
-    };
-    return colors[role];
-  };
-
   // Mostrar loading mientras se verifica el rol
   if (!profile || profile.role !== "admin") {
     return (
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
             <p className="text-sm text-foreground-muted">
               Verificando permisos...
             </p>
@@ -308,318 +287,139 @@ export default function UsersManagementPage() {
     );
   }
 
+  const isDeletingSelf = profile.user_id === userToDelete?.user_id;
+
   return (
     <ProtectedRoute>
       <PageMetadata
         title="Usuarios"
         description="Gestiona los usuarios del sistema. Administra roles, permisos, invitaciones y acceso de usuarios."
       />
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          {/* Header */}
-          <div className="mb-6">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-foreground-muted transition-colors hover:text-foreground"
-            >
-              <ArrowLeft size={16} />
-              Volver al dashboard
-            </button>
-            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-              Gestión de Usuarios
-            </h1>
-            <p className="mt-1 text-sm text-foreground-muted">
-              Administra los usuarios del sistema y sus roles
-            </p>
-          </div>
 
-          {/* Mensajes de éxito/error */}
+      <div className="relative min-h-screen bg-background pb-24">
+        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+            <div>
+              <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                Usuarios
+              </h1>
+              <p className="text-xs text-foreground-muted">
+                {users.length} {users.length === 1 ? "cuenta" : "cuentas"}
+              </p>
+            </div>
+            <Button
+              variant="soft"
+              onClick={openInvite}
+              className="w-full justify-center sm:w-auto"
+            >
+              <Mail className="h-4 w-4" />
+              Invitar nuevo usuario
+            </Button>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           {error && (
-            <div className="mb-4 rounded-md bg-danger-50 p-4 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
             </div>
           )}
 
-          {success && (
-            <div className="mb-4 rounded-md bg-success-50 p-4 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
-              {success}
+          {loading ? (
+            <div className="flex flex-col items-center p-12 text-center">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <p className="text-sm text-foreground-muted">
+                Cargando usuarios...
+              </p>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="rounded-xl border border-border bg-surface p-10 text-center shadow-sm">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
+                <Users className="h-6 w-6" />
+              </div>
+              <h3 className="mt-3 text-base font-bold text-foreground">
+                Sin usuarios
+              </h3>
+              <p className="mt-1 text-sm text-foreground-muted">
+                No hay usuarios en el sistema.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-2 md:grid-cols-2">
+              {users.map((user) => (
+                <UserCard
+                  key={user.id}
+                  user={user}
+                  orgName={
+                    user.organization_id
+                      ? (orgNames[user.organization_id] ?? null)
+                      : null
+                  }
+                  isSelf={profile.user_id === user.user_id}
+                  updating={updating === user.id}
+                  onRoleChange={handleRoleChange}
+                  onDelete={setUserToDelete}
+                />
+              ))}
             </div>
           )}
 
-          {/* Formulario de Invitación */}
-          <div className="mb-8 rounded-lg bg-surface p-6 shadow-sm border border-border">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold text-foreground">
-                Invitar nuevo usuario
-              </h2>
-              <p className="mt-2 text-sm text-foreground-muted">
-                El usuario recibirá un correo con un enlace para configurar su
-                contraseña y acceder a la plataforma.
-              </p>
-            </div>
-
-            <form onSubmit={handleInvite} className="space-y-4">
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label
-                    htmlFor="invite-email"
-                    className="block text-sm font-medium text-foreground"
-                  >
-                    Correo electrónico
-                  </label>
-                  <input
-                    id="invite-email"
-                    name="invite-email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-base text-foreground placeholder-foreground-muted shadow-sm focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500 sm:text-sm"
-                    placeholder="usuario@ejemplo.com"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <button
-                    type="submit"
-                    disabled={inviteLoading}
-                    className="rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {inviteLoading ? "Enviando..." : "Enviar invitación"}
-                  </button>
-                </div>
-              </div>
-
-              {inviteError && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
-                  {inviteError}
-                </div>
-              )}
-
-              {inviteSuccess && (
-                <div className="rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                  {inviteSuccess}
-                </div>
-              )}
-            </form>
-          </div>
-
-          {/* Tabla de usuarios */}
-          <div className="rounded-lg bg-surface shadow-sm border border-border">
-            {loading ? (
-              <div className="flex items-center justify-center p-12">
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
-                  <p className="text-sm text-foreground-muted">
-                    Cargando usuarios...
-                  </p>
-                </div>
-              </div>
-            ) : users.length === 0 ? (
-              <div className="p-12 text-center">
-                <p className="text-foreground-muted">
-                  No hay usuarios en el sistema
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-border">
-                  <thead className="bg-muted">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Email
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Nombre
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Rol Actual
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Estado
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Cambiar Rol
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Fecha de registro
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-foreground-muted">
-                        Acciones
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border bg-surface">
-                    {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-muted">
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
-                          {user.email}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
-                          {user.full_name || (
-                            <span className="text-foreground-muted">
-                              Sin nombre
-                            </span>
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm">
-                          <span
-                            className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getRoleBadgeColor(
-                              user.role
-                            )}`}
-                          >
-                            {getRoleLabel(user.role)}
-                          </span>
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm">
-                          <span
-                            className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                              user.is_active
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {user.is_active ? "Activo" : "Inactivo"}
-                          </span>
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm">
-                          <select
-                            value={user.role}
-                            onChange={(e) =>
-                              handleRoleChange(
-                                user.id,
-                                e.target.value as UserRole
-                              )
-                            }
-                            disabled={updating === user.id}
-                            className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground focus:border-info-500 focus:outline-none focus:ring-2 focus:ring-info-500 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            <option value="admin">Administrador</option>
-                            <option value="owner">Dueño</option>
-                            <option value="staff">Empleado</option>
-                            <option value="special">Especial</option>
-                          </select>
-                          {updating === user.id && (
-                            <span className="ml-2 text-xs text-foreground-muted">
-                              Actualizando...
-                            </span>
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground-muted">
-                          {new Date(user.created_at).toLocaleDateString(
-                            "es-ES",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm">
-                          <button
-                            onClick={() => handleDeleteClick(user)}
-                            disabled={deleting === user.id}
-                            className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {deleting === user.id
-                              ? "Eliminando..."
-                              : "Eliminar"}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* Información adicional */}
-          <div className="mt-6 rounded-lg bg-surface p-6 shadow-sm border border-border">
-            <h2 className="text-lg font-semibold text-foreground">
+          <Card className="mt-6 p-4">
+            <h2 className="text-sm font-bold text-foreground">
               Roles disponibles
             </h2>
-            <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <dt className="text-sm font-medium text-foreground-muted">
-                  Administrador
-                </dt>
-                <dd className="mt-1 text-sm text-foreground">
-                  Acceso total al sistema. Puede gestionar usuarios,
-                  organizaciones y todas las funcionalidades.
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-foreground-muted">
-                  Dueño
-                </dt>
-                <dd className="mt-1 text-sm text-foreground">
-                  Gestiona su organización, servicios y reservas. No puede
-                  gestionar usuarios.
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-foreground-muted">
-                  Empleado
-                </dt>
-                <dd className="mt-1 text-sm text-foreground">
-                  Puede ver y gestionar reservas. Acceso limitado a funciones
-                  administrativas.
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-foreground-muted">
-                  Especial
-                </dt>
-                <dd className="mt-1 text-sm text-foreground">
-                  Usuario con permisos especiales personalizables. Similar a
-                  empleado por defecto.
-                </dd>
-              </div>
+            <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {ROLE_ORDER.map((role) => (
+                <div key={role}>
+                  <dt>
+                    <span
+                      className={`rounded-full px-2.25 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em] ${ROLE_META[role].chip}`}
+                    >
+                      {ROLE_META[role].label}
+                    </span>
+                  </dt>
+                  <dd className="mt-1.5 text-xs text-foreground-muted">
+                    {ROLE_META[role].description}
+                  </dd>
+                </div>
+              ))}
             </dl>
-          </div>
+          </Card>
         </div>
       </div>
 
-      {/* Modal de confirmación de eliminación */}
-      {userToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl border border-border">
-            <h3 className="text-lg font-semibold text-foreground">
-              Confirmar eliminación
-            </h3>
-            <p className="mt-4 text-sm text-foreground-muted">
-              ¿Estás seguro de que deseas eliminar al usuario{" "}
-              <span className="font-medium text-foreground">
-                {userToDelete.email}
-              </span>
-              ? Esta acción no se puede deshacer.
-            </p>
-            {profile?.user_id === userToDelete.user_id && (
-              <div className="mt-4 rounded-md bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
-                ⚠️ Estás a punto de eliminar tu propia cuenta. Serás redirigido
-                al login después de la eliminación.
-              </div>
-            )}
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={handleDeleteCancel}
-                disabled={deleting === userToDelete.id}
-                className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                disabled={deleting === userToDelete.id}
-                className="rounded-md bg-danger px-4 py-2 text-sm font-medium text-danger-foreground transition-colors hover:bg-danger-700 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {deleting === userToDelete.id ? "Eliminando..." : "Eliminar"}
-              </button>
-            </div>
+      <InviteUserSheet
+        open={showInvite}
+        onClose={() => setShowInvite(false)}
+        email={inviteEmail}
+        onEmailChange={setInviteEmail}
+        onSubmit={handleInvite}
+        isSubmitting={inviteLoading}
+        error={inviteError}
+        success={inviteSuccess}
+      />
+
+      <ConfirmSheet
+        open={!!userToDelete}
+        onClose={() => setUserToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        busy={deleting}
+        title="Eliminar usuario"
+      >
+        <p>
+          ¿Seguro que deseas eliminar a{" "}
+          <span className="font-semibold text-foreground">
+            {userToDelete?.email}
+          </span>
+          ? Esta acción no se puede deshacer.
+        </p>
+        {isDeletingSelf && (
+          <div className="mt-3 rounded-lg bg-warning-50 p-3 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+            Estás a punto de eliminar tu propia cuenta. Serás redirigido al
+            login después de la eliminación.
           </div>
-        </div>
-      )}
+        )}
+      </ConfirmSheet>
     </ProtectedRoute>
   );
 }
