@@ -7,6 +7,7 @@ import { InviteUserSheet } from "@/components/users/InviteUserSheet";
 import { ROLE_META, ROLE_ORDER, UserCard } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
+import { InvitationService } from "@/services";
 import { UserProfile, UserRole } from "@/types/auth";
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
@@ -174,101 +175,23 @@ export default function UsersManagementPage() {
     setInviteError(null);
     setInviteSuccess(null);
 
-    try {
-      // Verificar que la sesión es válida (UX: mensaje claro si expiró)
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+    const result = await InvitationService.invite(inviteEmail);
+    setInviteLoading(false);
 
-      if (userError || !user) {
-        setInviteError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
-        setInviteLoading(false);
-        return;
-      }
-
-      // Static export: no hay API Routes. Llamamos a la Edge Function directamente.
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-      if (!supabaseUrl || !supabaseAnonKey) {
-        setInviteError("Falta configuración de Supabase (URL/ANON KEY).");
-        setInviteLoading(false);
-        return;
-      }
-
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
-
-      if (sessionError || !session?.access_token) {
-        setInviteError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
-        setInviteLoading(false);
-        return;
-      }
-
-      // Asegurar token con forma de JWT (a.b.c). Si no, refrescar sesión.
-      let accessToken = session.access_token;
-      if (accessToken.split(".").length !== 3) {
-        const { data: refreshed, error: refreshError } =
-          await supabase.auth.refreshSession();
-        if (refreshError || !refreshed.session?.access_token) {
-          setInviteError(
-            "Sesión expirada. Por favor, vuelve a iniciar sesión."
-          );
-          setInviteLoading(false);
-          return;
-        }
-        accessToken = refreshed.session.access_token;
-      }
-
-      const response = await fetch(`${supabaseUrl}/functions/v1/invite-user`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: supabaseAnonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          email: inviteEmail,
-          redirectTo: `${window.location.origin}/auth/callback?type=invite`,
-        }),
-      });
-
-      const contentType = response.headers.get("content-type") || "";
-      const data = contentType.includes("application/json")
-        ? await response.json()
-        : { error: await response.text() };
-
-      if (!response.ok) {
-        void Logger.error("Error inviting user:", data);
-        setInviteError(data?.error || "Error al enviar la invitación");
-        setInviteLoading(false);
-        return;
-      }
-
-      if (data?.error) {
-        void Logger.error("Error from function:", data.error);
-        setInviteError(data.error);
-        setInviteLoading(false);
-        return;
-      }
-
-      setInviteSuccess(
-        `Se ha enviado una invitación a ${inviteEmail}. El usuario podrá hacer clic en el enlace para configurar su contraseña.`
-      );
-      setInviteEmail(""); // Limpiar el campo
-
-      // Recargar la lista de usuarios después de un breve delay
-      setTimeout(() => {
-        loadUsers();
-      }, 2000);
-    } catch {
-      setInviteError("Error al enviar la invitación. Intenta nuevamente.");
-    } finally {
-      setInviteLoading(false);
+    if (!result.success) {
+      setInviteError(result.error ?? "Error al enviar la invitación");
+      return;
     }
+
+    setInviteSuccess(
+      `Se ha enviado una invitación a ${inviteEmail}. El usuario podrá hacer clic en el enlace para configurar su contraseña.`
+    );
+    setInviteEmail(""); // Limpiar el campo
+
+    // Recargar la lista de usuarios después de un breve delay
+    setTimeout(() => {
+      loadUsers();
+    }, 2000);
   };
 
   // Mostrar loading mientras se verifica el rol

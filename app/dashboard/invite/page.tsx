@@ -7,11 +7,10 @@ import {
   sheetInputClasses as inputClasses,
 } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
-import { Logger } from "@/utils/logger";
-import { createClient } from "@/utils/supabase/client";
+import { InvitationService } from "@/services";
 import { Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 const STEPS = [
   "Ingresa el correo electrónico del nuevo usuario",
@@ -27,9 +26,6 @@ export default function InvitePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  // Memoizar el cliente de Supabase para evitar re-renders infinitos
-  const supabase = useMemo(() => createClient(), []);
 
   // Verificar que el usuario sea admin u owner
   useEffect(() => {
@@ -49,96 +45,23 @@ export default function InvitePage() {
     setError(null);
     setSuccess(null);
 
-    try {
-      // Static export: no hay API Routes. Llamamos a la Edge Function directamente.
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    // Los owners envían su organization_id para que el invitado se una a su negocio
+    const organizationId =
+      profile?.role === "owner"
+        ? (profile.organization_id ?? undefined)
+        : undefined;
+    const result = await InvitationService.invite(email, organizationId);
+    setLoading(false);
 
-      if (!supabaseUrl || !supabaseAnonKey) {
-        setError("Falta configuración de Supabase (URL/ANON KEY).");
-        setLoading(false);
-        return;
-      }
-
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
-
-      if (sessionError || !session?.access_token) {
-        setError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
-        setLoading(false);
-        return;
-      }
-
-      // Asegurar token con forma de JWT (a.b.c). Si no, refrescar sesión.
-      let accessToken = session.access_token;
-      if (accessToken.split(".").length !== 3) {
-        const { data: refreshed, error: refreshError } =
-          await supabase.auth.refreshSession();
-        if (refreshError || !refreshed.session?.access_token) {
-          setError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
-          setLoading(false);
-          return;
-        }
-        accessToken = refreshed.session.access_token;
-      }
-
-      // Preparar el body de la petición
-      // Si el usuario es owner, debe incluir organization_id
-      const requestBody: {
-        email: string;
-        redirectTo: string;
-        organization_id?: string;
-      } = {
-        email,
-        redirectTo: `${window.location.origin}/auth/callback?type=invite`,
-      };
-
-      // Los owners deben enviar su organization_id para asignar el usuario invitado
-      if (profile?.role === "owner" && profile?.organization_id) {
-        requestBody.organization_id = profile.organization_id;
-      }
-
-      const response = await fetch(`${supabaseUrl}/functions/v1/invite-user`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: supabaseAnonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      const contentType = response.headers.get("content-type") || "";
-      const data = contentType.includes("application/json")
-        ? await response.json()
-        : { error: await response.text() };
-
-      if (!response.ok) {
-        void Logger.error("Error inviting user:", data);
-        setError(data?.error || "Error al enviar la invitación");
-        setLoading(false);
-        return;
-      }
-
-      if (data?.error) {
-        void Logger.error("Error from function:", data.error);
-        setError(data.error);
-        setLoading(false);
-        return;
-      }
-
-      setSuccess(
-        `Se ha enviado una invitación a ${email}. El usuario podrá hacer clic en el enlace para configurar su contraseña.`
-      );
-      setEmail(""); // Limpiar el campo
-    } catch (err) {
-      void Logger.error("Exception:", err);
-      setError("Error al enviar la invitación. Intenta nuevamente.");
-    } finally {
-      setLoading(false);
+    if (!result.success) {
+      setError(result.error ?? "Error al enviar la invitación");
+      return;
     }
+
+    setSuccess(
+      `Se ha enviado una invitación a ${email}. El usuario podrá hacer clic en el enlace para configurar su contraseña.`
+    );
+    setEmail(""); // Limpiar el campo
   };
 
   // Mostrar spinner mientras se carga la autenticación o si no es admin u owner

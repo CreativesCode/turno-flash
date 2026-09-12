@@ -76,8 +76,16 @@ export function ApptRow({
 
       {/* Body */}
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-bold text-foreground">
-          {customer}
+        <div className="flex items-baseline gap-2">
+          <div className="min-w-0 flex-1 truncate text-sm font-bold text-foreground">
+            {customer}
+          </div>
+          {/* Same number the WhatsApp messages show, to match them at a glance */}
+          {a.appointment_number && (
+            <span className="shrink-0 text-[11px] font-semibold tabular-nums text-foreground-muted">
+              N° {a.appointment_number}
+            </span>
+          )}
         </div>
         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-foreground-muted">
           {serviceColor && (

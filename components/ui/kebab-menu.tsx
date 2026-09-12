@@ -60,6 +60,7 @@ export function KebabMenu({ items, label = "Más acciones" }: KebabMenuProps) {
       {open && (
         <div
           role="menu"
+          data-menu-open
           className="absolute right-0 top-10 z-20 w-48 overflow-hidden rounded-lg border border-border bg-surface shadow-lg"
         >
           {items.map((item) => (

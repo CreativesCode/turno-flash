@@ -4,7 +4,7 @@ import { CustomerCard } from "@/components/customers/CustomerCard";
 import { CustomerFormModal } from "@/components/customers/CustomerFormModal";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Button } from "@/components/ui";
+import { Button, ConfirmSheet } from "@/components/ui";
 import {
   useCreateCustomer,
   useDeactivateCustomer,
@@ -194,15 +194,12 @@ export default function CustomersPage() {
     ]
   );
 
+  const [customerToDeactivate, setCustomerToDeactivate] =
+    useState<Customer | null>(null);
+
   const handleDelete = useCallback(
     async (customer: Customer) => {
-      if (
-        !confirm(
-          `¿Desactivar a ${customer.first_name} ${customer.last_name}?`
-        )
-      ) {
-        return;
-      }
+      setCustomerToDeactivate(null);
       const loadingToast = toast.loading("Desactivando cliente...");
       try {
         await deactivateCustomerMutation.mutateAsync(customer.id);
@@ -375,7 +372,7 @@ export default function CustomersPage() {
                       <CustomerCard
                         customer={customer}
                         onEdit={handleEdit}
-                        onDelete={handleDelete}
+                        onDelete={setCustomerToDeactivate}
                       />
                     </div>
                   );
@@ -421,6 +418,22 @@ export default function CustomersPage() {
           createCustomerMutation.isPending || updateCustomerMutation.isPending
         }
       />
+
+      <ConfirmSheet
+        open={!!customerToDeactivate}
+        onClose={() => setCustomerToDeactivate(null)}
+        onConfirm={() =>
+          void (customerToDeactivate && handleDelete(customerToDeactivate))
+        }
+        title="Desactivar cliente"
+        confirmLabel="Desactivar"
+      >
+        ¿Desactivar a{" "}
+        <span className="font-semibold text-foreground">
+          {customerToDeactivate?.first_name} {customerToDeactivate?.last_name}
+        </span>
+        ? Podrás reactivarlo desde su ficha.
+      </ConfirmSheet>
     </ProtectedRoute>
   );
 }

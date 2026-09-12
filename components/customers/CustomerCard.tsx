@@ -1,9 +1,9 @@
 "use client";
 
-import { Avatar, Card } from "@/components/ui";
+import { Avatar, Card, KebabMenu } from "@/components/ui";
 import type { Customer } from "@/types/appointments";
-import { Mail, MoreVertical, Phone } from "lucide-react";
-import { useMemo, useRef, useState, useEffect } from "react";
+import { Mail, Phone } from "lucide-react";
+import { useMemo } from "react";
 
 const PALETTE = [
   "#db2777",
@@ -32,17 +32,6 @@ export function CustomerCard({ customer, onEdit, onDelete }: CustomerCardProps) 
     `${customer.first_name} ${customer.last_name}`.trim() || "Sin nombre";
   const color = useMemo(() => pickColor(customer.id), [customer.id]);
   const hasWhatsApp = !!customer.whatsapp_number;
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onDocClick = (e: MouseEvent) => {
-      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [menuOpen]);
 
   return (
     <Card className="relative flex items-center gap-3 p-3">
@@ -85,46 +74,16 @@ export function CustomerCard({ customer, onEdit, onDelete }: CustomerCardProps) 
         )}
       </div>
 
-      <div ref={menuRef} className="relative">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setMenuOpen((v) => !v);
-          }}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
-          aria-label="Más acciones"
-        >
-          <MoreVertical className="h-4 w-4" />
-        </button>
-        {menuOpen && (
-          <div
-            data-menu-open
-            className="absolute right-0 top-10 z-20 w-36 overflow-hidden rounded-lg border border-border bg-surface shadow-lg"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                onEdit(customer);
-              }}
-              className="block w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-muted"
-            >
-              Editar
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                onDelete(customer);
-              }}
-              className="block w-full px-3 py-2 text-left text-sm text-danger-600 transition-colors hover:bg-danger-50 dark:hover:bg-danger-900/20"
-            >
-              {customer.is_active ? "Desactivar" : "Eliminar"}
-            </button>
-          </div>
-        )}
-      </div>
+      <KebabMenu
+        items={[
+          { label: "Editar", onClick: () => onEdit(customer) },
+          {
+            label: customer.is_active ? "Desactivar" : "Eliminar",
+            danger: true,
+            onClick: () => onDelete(customer),
+          },
+        ]}
+      />
     </Card>
   );
 }
