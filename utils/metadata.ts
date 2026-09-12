@@ -17,7 +17,7 @@ const getBaseUrl = (): string => {
   }
 
   // Fallback a dominio de producción
-  return "https://turnoflash.com";
+  return "https://turno-flash.vercel.app";
 };
 
 /**
