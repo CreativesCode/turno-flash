@@ -14,6 +14,8 @@ export interface BusinessAutomationSettings {
   enable_daily_summary: boolean;
   /** Hora local de la organización, formato HH:MM[:SS] */
   daily_summary_time: string | null;
+  /** Public online booking page (PRP-001). Opt-in per business. */
+  booking_page_enabled: boolean | null;
 }
 
 export type BusinessAutomationSettingsPatch = Partial<
@@ -36,7 +38,7 @@ export function useBusinessSettings() {
       const { data, error } = await supabase
         .from("business_settings")
         .select(
-          "organization_id, whatsapp_integration_enabled, enable_rating_request, enable_daily_summary, daily_summary_time"
+          "organization_id, whatsapp_integration_enabled, enable_rating_request, enable_daily_summary, daily_summary_time, booking_page_enabled"
         )
         .eq("organization_id", orgId)
         .maybeSingle();

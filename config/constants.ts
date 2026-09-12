@@ -108,6 +108,7 @@ export const BUSINESS_HOURS = {
  */
 export const ORGANIZATION_TIMEZONES = [
   "UTC",
+  "America/Havana",
   "America/Argentina/Buenos_Aires",
   "America/Mexico_City",
   "America/Santiago",

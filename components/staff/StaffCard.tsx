@@ -1,14 +1,14 @@
 "use client";
 
-import { Avatar, Card } from "@/components/ui";
+import { Avatar, Card, KebabMenu } from "@/components/ui";
 import type { StaffMember } from "@/types/appointments";
-import { Edit3, MoreVertical } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { CalendarClock, Edit3 } from "lucide-react";
 
 export interface StaffCardProps {
   member: StaffMember;
   canManage: boolean;
   onEdit: (s: StaffMember) => void;
+  onSchedule: (s: StaffMember) => void;
   onToggleActive: (s: StaffMember) => void;
   onDelete: (s: StaffMember) => void;
 }
@@ -17,6 +17,7 @@ export function StaffCard({
   member,
   canManage,
   onEdit,
+  onSchedule,
   onToggleActive,
   onDelete,
 }: StaffCardProps) {
@@ -25,17 +26,6 @@ export function StaffCard({
   const isBookable = member.is_bookable ?? false;
   const acceptsOnline = member.accepts_online_bookings ?? false;
   const isActive = member.is_active ?? false;
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onDocClick = (e: MouseEvent) => {
-      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [menuOpen]);
 
   return (
     <Card className="flex items-start gap-3 p-3.5">
@@ -106,54 +96,29 @@ export function StaffCard({
       </div>
 
       {canManage && (
-        <div ref={menuRef} className="relative">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setMenuOpen((v) => !v);
-            }}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Más acciones"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-10 z-20 w-44 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onEdit(member);
-                }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-muted"
-              >
-                <Edit3 className="h-3.5 w-3.5" />
-                Editar
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onToggleActive(member);
-                }}
-                className="block w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-muted"
-              >
-                {isActive ? "Pausar" : "Reactivar"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onDelete(member);
-                }}
-                className="block w-full px-3 py-2 text-left text-sm text-danger-600 transition-colors hover:bg-danger-50 dark:hover:bg-danger-900/20"
-              >
-                Eliminar
-              </button>
-            </div>
-          )}
-        </div>
+        <KebabMenu
+          items={[
+            {
+              label: "Editar",
+              icon: <Edit3 className="h-3.5 w-3.5" />,
+              onClick: () => onEdit(member),
+            },
+            {
+              label: "Horario y servicios",
+              icon: <CalendarClock className="h-3.5 w-3.5" />,
+              onClick: () => onSchedule(member),
+            },
+            {
+              label: isActive ? "Pausar" : "Reactivar",
+              onClick: () => onToggleActive(member),
+            },
+            {
+              label: "Eliminar",
+              danger: true,
+              onClick: () => onDelete(member),
+            },
+          ]}
+        />
       )}
     </Card>
   );

@@ -2,6 +2,8 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
+import { BookingPageDetails } from "@/components/settings/BookingPageDetails";
+import { ExceptionsEditor } from "@/components/staff/ExceptionsEditor";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
@@ -11,6 +13,8 @@ import {
   type BusinessAutomationSettingsPatch,
 } from "@/hooks/useBusinessSettings.query";
 import {
+  CalendarCheck,
+  CalendarOff,
   Loader2,
   MessageSquare,
   Settings as SettingsIcon,
@@ -20,10 +24,10 @@ import {
 import { useState } from "react";
 
 /**
- * Ajustes de automatización del negocio (owner/admin con organización):
- * valoración post-cita y resumen diario por WhatsApp.
- * La integración WhatsApp en sí (sesión OpenWA) la configura el admin desde
- * el detalle de la organización.
+ * Ajustes del negocio (owner/admin con organización): página de reservas
+ * online, cierres del negocio, valoración post-cita y resumen diario por
+ * WhatsApp. La integración WhatsApp en sí (sesión OpenWA) la configura el
+ * admin desde el detalle de la organización.
  */
 export default function SettingsPage() {
   const { profile } = useAuth();
@@ -34,12 +38,15 @@ export default function SettingsPage() {
   const canView =
     (profile?.role === "owner" || profile?.role === "admin") &&
     !!profile?.organization_id;
+  const organizationId = profile?.organization_id ?? "";
 
   // Formulario = datos del servidor + cambios locales pendientes (draft).
   // Sin useEffect: los valores se derivan en render.
   const [draft, setDraft] = useState<BusinessAutomationSettingsPatch>({});
   const dirty = Object.keys(draft).length > 0;
 
+  const bookingEnabled =
+    draft.booking_page_enabled ?? settings?.booking_page_enabled ?? false;
   const ratingEnabled =
     draft.enable_rating_request ?? settings?.enable_rating_request ?? true;
   const summaryEnabled =
@@ -58,6 +65,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     try {
       await updateMutation.mutateAsync({
+        booking_page_enabled: bookingEnabled,
         enable_rating_request: ratingEnabled,
         enable_daily_summary: summaryEnabled,
         daily_summary_time: summaryTime,
@@ -76,7 +84,7 @@ export default function SettingsPage() {
     <ProtectedRoute>
       <PageMetadata
         title="Ajustes"
-        description="Configura las automatizaciones de tu negocio: valoraciones post-cita y resumen diario por WhatsApp."
+        description="Configura tu negocio: página de reservas online, cierres, valoraciones post-cita y resumen diario por WhatsApp."
       />
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
@@ -90,7 +98,7 @@ export default function SettingsPage() {
                 Ajustes
               </h1>
               <p className="text-sm text-foreground-muted">
-                Automatizaciones por WhatsApp de tu negocio.
+                Reservas online y automatizaciones de tu negocio.
               </p>
             </div>
           </div>
@@ -111,6 +119,43 @@ export default function SettingsPage() {
 
           {canView && !error && (
             <>
+              {/* Reservas online */}
+              <Card className="mb-4 p-0">
+                <SettingRow
+                  icon={CalendarCheck}
+                  title="Página de reservas online"
+                  description="Tus clientes reservan solos desde un link: eligen servicio, profesional y un horario libre. Aparecen solo los profesionales con horario y servicios cargados."
+                  loading={isLoading}
+                  checked={bookingEnabled}
+                  onChange={(v) => patchDraft({ booking_page_enabled: v })}
+                  extra={
+                    <BookingPageDetails
+                      organizationId={organizationId}
+                      enabled={bookingEnabled}
+                    />
+                  }
+                />
+              </Card>
+
+              {/* Cierres del negocio */}
+              <Card className="mb-4 p-4 sm:p-5">
+                <div className="mb-3 flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-foreground-muted">
+                    <CalendarOff className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-foreground">
+                      Feriados y cierres del negocio
+                    </div>
+                    <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
+                      Días en que no atiende nadie. Se guardan al agregarlos y no
+                      se ofrecen en la reserva online.
+                    </p>
+                  </div>
+                </div>
+                <ExceptionsEditor organizationId={organizationId} staffId={null} />
+              </Card>
+
               {/* Estado de la integración */}
               <Card className="mb-4 flex items-start gap-3 p-4">
                 <div
@@ -248,7 +293,7 @@ function Toggle({
       aria-checked={checked}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+      className={`relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors ${
         checked ? "bg-primary-500" : "bg-border-2"
       } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
     >

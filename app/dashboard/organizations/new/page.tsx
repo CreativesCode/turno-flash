@@ -318,7 +318,7 @@ export default function NewOrganizationPage() {
           </Field>
 
           <Field
-            label="Slug (URL)"
+            label="Slug (link de reservas)"
             hint={
               slugTouched
                 ? "Solo letras minúsculas, números y guiones. Debe ser único."
@@ -327,7 +327,7 @@ export default function NewOrganizationPage() {
           >
             <div className="flex items-center gap-2">
               <span className="shrink-0 text-sm text-foreground-muted">
-                turnoflash.com/
+                /book?b=
               </span>
               <input
                 type="text"

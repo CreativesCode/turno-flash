@@ -18,6 +18,7 @@ const TIMEZONES = [
   "America/Caracas",
   "America/New_York",
   "America/Los_Angeles",
+  "America/Havana",
   "Europe/Madrid",
   "UTC",
 ] as const;

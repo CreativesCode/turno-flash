@@ -53,12 +53,12 @@ export function OrganizationEditSheet({
         </Field>
 
         <Field
-          label="Slug (URL)"
-          hint="Solo letras minúsculas, números y guiones. Debe ser único."
+          label="Slug (link de reservas)"
+          hint="Solo letras minúsculas, números y guiones. Debe ser único. Cambiarlo invalida el link ya compartido."
         >
           <div className="flex items-center gap-2">
             <span className="shrink-0 text-sm text-foreground-muted">
-              turnoflash.com/
+              /book?b=
             </span>
             <input
               type="text"

@@ -4,7 +4,8 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { StaffCard } from "@/components/staff/StaffCard";
 import { StaffFormModal } from "@/components/staff/StaffFormModal";
-import { Button } from "@/components/ui";
+import { StaffScheduleSheet } from "@/components/staff/StaffScheduleSheet";
+import { Button, ConfirmSheet } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import {
   useCreateStaffMember,
@@ -199,15 +200,15 @@ export default function StaffPage() {
     [deactivateStaffMutation, reactivateStaffMutation, toast]
   );
 
+  const [scheduleStaff, setScheduleStaff] = useState<StaffMember | null>(
+    null
+  );
+  const [staffToDeactivate, setStaffToDeactivate] =
+    useState<StaffMember | null>(null);
+
   const handleDelete = useCallback(
     async (staff: StaffMember) => {
-      if (
-        !confirm(
-          `¿Desactivar a ${staff.first_name} ${staff.last_name}?`
-        )
-      ) {
-        return;
-      }
+      setStaffToDeactivate(null);
       const loadingToast = toast.loading("Desactivando profesional...");
       try {
         await deactivateStaffMutation.mutateAsync(staff.id);
@@ -328,8 +329,9 @@ export default function StaffPage() {
                   member={member}
                   canManage={canManageStaff}
                   onEdit={handleEdit}
+                  onSchedule={setScheduleStaff}
                   onToggleActive={handleToggleActive}
-                  onDelete={handleDelete}
+                  onDelete={setStaffToDeactivate}
                 />
               ))}
             </div>
@@ -360,6 +362,25 @@ export default function StaffPage() {
           createStaffMutation.isPending || updateStaffMutation.isPending
         }
       />
+
+      <StaffScheduleSheet
+        staff={scheduleStaff}
+        onClose={() => setScheduleStaff(null)}
+      />
+
+      <ConfirmSheet
+        open={!!staffToDeactivate}
+        onClose={() => setStaffToDeactivate(null)}
+        onConfirm={() => void (staffToDeactivate && handleDelete(staffToDeactivate))}
+        title="Desactivar profesional"
+        confirmLabel="Desactivar"
+      >
+        ¿Desactivar a{" "}
+        <span className="font-semibold text-foreground">
+          {staffToDeactivate?.first_name} {staffToDeactivate?.last_name}
+        </span>
+        ? Dejará de aparecer para nuevos turnos.
+      </ConfirmSheet>
     </ProtectedRoute>
   );
 }

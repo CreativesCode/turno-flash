@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   graphql_public: {
     Tables: {
@@ -1622,6 +1622,12 @@ export type Database = {
         Returns: Json
       }
       auth_user_role: { Args: never; Returns: string }
+      booking_min_to_time: { Args: { p_min: number }; Returns: string }
+      booking_phone_key: {
+        Args: { p_country_code: string; p_phone: string }
+        Returns: string
+      }
+      booking_time_to_min: { Args: { p_time: string }; Returns: number }
       check_license_status: {
         Args: { grace_period_days?: number; org_id: string }
         Returns: {
@@ -1642,6 +1648,21 @@ export type Database = {
           org_whatsapp_phone?: string
           owner_email?: string
           owner_user_id?: string
+        }
+        Returns: Json
+      }
+      create_public_booking: {
+        Args: {
+          p_date: string
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_notes: string
+          p_org_id: string
+          p_phone: string
+          p_service_id: string
+          p_staff_id: string
+          p_start: string
         }
         Returns: Json
       }
@@ -1682,6 +1703,42 @@ export type Database = {
         Returns: undefined
       }
       is_admin_or_owner_check: { Args: never; Returns: boolean }
+      is_staff_slot_free: {
+        Args: {
+          p_date: string
+          p_occupied_minutes: number
+          p_staff_id: string
+          p_start: string
+        }
+        Returns: boolean
+      }
+      org_license_usable: { Args: { p_org_id: string }; Returns: boolean }
+      ping: { Args: never; Returns: string }
+      public_booking_info: { Args: { p_slug: string }; Returns: Json }
+      public_booking_org_open: { Args: { p_org_id: string }; Returns: boolean }
+      public_booking_slots: {
+        Args: {
+          p_date: string
+          p_org_id: string
+          p_service_id: string
+          p_staff_id: string
+        }
+        Returns: {
+          staff_id: string
+          start_time: string
+        }[]
+      }
+      public_booking_staff_for_service: {
+        Args: { p_org_id: string; p_service_id: string }
+        Returns: {
+          sort_order: number
+          staff_id: string
+        }[]
+      }
+      save_staff_schedule: {
+        Args: { p_ranges: Json; p_service_ids: string[]; p_staff_id: string }
+        Returns: undefined
+      }
       search_customers_fulltext: {
         Args: {
           p_is_active?: boolean
@@ -1778,6 +1835,7 @@ export type Database = {
         | "rating_ack"
         | "reactivation"
         | "waitlist_slot"
+        | "approved"
       wa_outbound_status: "pending" | "sent" | "delivered" | "read" | "failed"
       waitlist_status:
         | "active"
@@ -1800,12 +1858,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1829,11 +1887,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1854,11 +1912,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1879,11 +1937,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1896,11 +1954,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1962,6 +2020,7 @@ export const Constants = {
         "rating_ack",
         "reactivation",
         "waitlist_slot",
+        "approved",
       ],
       wa_outbound_status: ["pending", "sent", "delivered", "read", "failed"],
       waitlist_status: ["active", "notified", "booked", "expired", "cancelled"],
