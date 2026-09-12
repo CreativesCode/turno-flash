@@ -32,13 +32,22 @@ Waitlist, notifications, staff_availability y service_categories estan vacias.
 Las 21 tablas de `public` tienen RLS. Implicacion: optimizaciones de escala no son prioridad;
 adopcion y activacion de negocios si.
 
+## Dominio
+
+**`https://turno-flash.vercel.app`** (confirmado por el usuario 2026-09-11). Es el fallback de
+`getBaseUrl()` en `utils/metadata.ts`, asi que el build de Vercel no necesita `NEXT_PUBLIC_SITE_URL`
+(`.env*` esta en .gitignore). En local esa variable si esta en `.env.local`.
+
 ## Agujeros reales (a septiembre 2026)
 
 - **Testing: cero.** No hay Jest ni Playwright configurados pese a lo que digan los docs.
 - **CI/CD: solo** `.github/workflows/keep-supabase-alive.yml`. No hay pipeline de build/lint/test.
 - **Monitoreo:** no hay Sentry; el error tracking es propio, en tabla de Postgres (migracion 011).
 - `npm run lint` roto y errores de ESLint preexistentes ([[turno-flash-tooling]]).
-- Reserva publica online (`/book/[slug]`) planeada y **no** implementada.
+- Reserva publica online implementada 2026-09-10 ([[reserva-online]]): `/book?b=<slug>`, opt-in por
+  negocio; ningun negocio la tiene activa todavia.
+- ~~`/manifest.json` 404~~ resuelto 2026-09-11: `public/manifest.json` + iconos web generados desde
+  `public/images/isotipo.svg` con sharp (`icon-192`, `icon-512`, `icon-maskable-512`, `apple-touch-icon`).
 
 ## Bugs arreglados que dejan huella en datos
 

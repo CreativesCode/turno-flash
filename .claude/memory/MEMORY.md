@@ -9,11 +9,13 @@
 
 ## project/ — Proyectos y decisiones activas
 - [Producto y dominio](project/producto-y-dominio.md) — que es Turno Flash, multi-org, roles admin/owner/staff, maquina de 9 estados de turno
-- [Estado actual (sep 2026)](project/estado-actual-2026-09.md) — que esta hecho, que falta (cero tests, cero CI, sin Sentry), fechas de licencia posiblemente corridas (bug ya arreglado) y por que los docs mienten
+- [Estado actual (sep 2026)](project/estado-actual-2026-09.md) — que esta hecho, que falta (cero tests, cero CI, sin Sentry), dominio `turno-flash.vercel.app`, fechas de licencia posiblemente corridas (bug ya arreglado) y por que los docs mienten
 - [Rediseno de UI](project/rediseno-ui-migracion.md) — completo (9/9) desde 2026-09-10, incluidos details e invite; decisiones cerradas
+- [Reserva online](project/reserva-online.md) — implementada 2026-09-10 (migraciones 029-031 + edge `public-booking`); horario y servicios por profesional (estricto), aprobacion por servicio, opt-in, vacaciones; `/book?b=<slug>`
+- [Modulo reserva de asientos](project/modulo-reserva-asientos.md) — IDEA sin empezar: modulo aparte para vender asientos de guagua (salidas por dia con descripcion, capacidad, sena); no tocar el motor de turnos
 - [WhatsApp y automatizaciones](project/whatsapp-automatizaciones.md) — OpenWA, edge functions por intent, crons cada 15 min, toggles por negocio
 - [Enforcement de licencia](project/license-enforcement.md) — bloqueo de trial vencido (RLS de escritura + LicenseGate); gracia de 7d hardcodeada en SQL a sincronizar con el cliente
-- [Tooling](project/turno-flash-tooling.md) — CLI de Supabase enlazado (sin npx); `npm run lint` roto (usar `npx eslint`); regenerar tipos via Bash; pg_cron en migracion 025
+- [Tooling](project/turno-flash-tooling.md) — CLI de Supabase via scoop v2.117 (sin npx); `npm run lint` roto (usar `npx eslint`); regenerar tipos via Bash; pg_cron en migracion 025
 
 ## feedback/ — Correcciones y preferencias
 - [Preferencias de Roberto](feedback/preferencias-roberto.md) — espanol para hablar, ingles para el codigo; landing solo al cerrar un plan completo; nada de refactors ni dependencias sorpresa

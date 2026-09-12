@@ -9,6 +9,11 @@ metadata:
 (peluquerias, consultorios, spas, talleres). Web (Next.js en Vercel) + app movil
 nativa (Capacitor iOS/Android, `appId: com.turnoflash.app`). Idioma de producto: **espanol**.
 
+**Mercado inicial: Cuba** (dicho por el usuario 2026-09-10). Todo lo que dependa de pais (telefono,
+zona horaria `America/Havana`, defaults) debe funcionar para Cuba primero y no asumir Argentina,
+aunque el codigo viejo tenia defaults argentinos. En Cuba es comun usar VPN: no confiar en la IP para
+detectar el pais. Moneda: pendiente de confirmar con el usuario.
+
 ## Modelo multi-organizacion
 
 Todo cuelga de `organizations`. Un usuario (`user_profiles`) pertenece a una org y tiene un rol:

@@ -18,6 +18,13 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
   `npx eslint <paths>`. Errores preexistentes conocidos: Drawer.tsx
   (setState en efecto), customers/page.tsx (useVirtualizer), dashboard/page.tsx
   (roleLabel sin uso).
+- CLI de Supabase: el que se usa es el de **scoop** (`~/scoop/shims/supabase`), v2.117.0 desde
+  2026-09-10 (`scoop update supabase`). La devDependency `supabase` 2.72.4 de package.json no se usa.
+- SQL contra produccion sin MCP: `supabase db query --linked "select ..."` o `-f archivo.sql`
+  (via Management API). Para probar migraciones sin persistir, ver Aprendizajes del PRP de reserva online.
+- Edge functions: `supabase functions deploy <nombre> --use-api` (sin Docker; el daemon suele estar apagado).
+  No hay Deno: chequear sintaxis antes con `typescript.transpileModule` desde Node.
+- Antes de `supabase db push`, correr `supabase migration list --linked` (la 028 estaba aplicada a mano).
 - Build de producción: `npm run build:next` (el `build` normal añade scripts
   de Capacitor).
 - pg_cron se habilitó en la migración 025 (antes los recordatorios WhatsApp NO

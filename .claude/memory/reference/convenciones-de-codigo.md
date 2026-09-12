@@ -42,8 +42,9 @@ Todos los tokens viven en `app/globals.css` bajo `@theme inline`:
 desktop) + `Field` + `sheetInputClasses`, `Card`, `Avatar`, `StatusBadge`, `Button`
 (variantes `mesh-primary`, `mesh-secondary`, `soft`, size `icon`), `KebabMenu` (menu de tres puntos
 de las cards) y `ConfirmSheet` (confirmacion destructiva). **Usar `ConfirmSheet` en vez de `confirm()` o de
-modales `fixed` a mano** (customers y staff todavia usan `confirm()`; StaffCard/CustomerCard tienen su
-menu inline, candidatos a migrar a `KebabMenu` si se tocan).
+modales `fixed` a mano** (adoptados en todo el dashboard desde 2026-09-10). Invitaciones por email:
+`InvitationService.invite(email, orgId?)` en `services/invitations.service.ts`; no llamar a la edge
+function `invite-user` a mano desde las paginas.
 
 Inputs `datetime-local`: el valor debe ser **hora local**, nunca `toISOString().slice(0,16)` (eso es
 UTC y al guardar `new Date(valor)` lo lee como local → la fecha se corre el offset en cada guardado).
