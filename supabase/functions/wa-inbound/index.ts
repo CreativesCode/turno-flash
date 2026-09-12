@@ -220,23 +220,15 @@ async function handleMessageReceived(
     `[wa-inbound] resolved org=${settings.organization_id} for session=${env.sessionId}`
   );
 
-  // Resolver el appointment asociado a este chat.
-  // Estrategia (en orden):
-  //   1. Match exacto por message_id que contiene `data.from` (más fiable —
-  //      WhatsApp usa @lid para cuentas con privacidad, distinto del @c.us
-  //      que usamos al enviar; el messageId que devuelve OpenWA incluye el
-  //      chatId real entregado, así que ese es el ground truth).
-  //   2. Fallback: match por sufijo del número en chat_id (cubre el caso
-  //      en que message_id no contiene el `from` por la razón que sea).
+  // Resolve the appointment of this chat: first the chat ids we write to for
+  // this sender (see resolveChatIds), then the latest open message of an
+  // appointment that is still ahead. The message_id of that message is not
+  // required: OpenWA can answer with an error after delivering, leaving it null.
   const from = data.from ?? "";
-  const fromDigits = from.replace(/[^0-9]/g, "");
-  const matchSuffix =
-    fromDigits.length >= 8
-      ? fromDigits.slice(-Math.min(10, fromDigits.length))
-      : fromDigits;
+  const chatIds = await resolveChatIds(supabase, settings.organization_id, from);
 
   console.log(
-    `[wa-inbound] resolving outbound for from="${from}" (suffix="${matchSuffix}")`
+    `[wa-inbound] resolving outbound for from="${from}" (chatIds=${chatIds.join(",") || "none"})`
   );
 
   // ¿Es una valoración (respuesta a rating_request)? "5", "4 muy bueno", etc.
@@ -245,8 +237,7 @@ async function handleMessageReceived(
     const ratingApplied = await tryApplyRating(
       supabase,
       settings.organization_id,
-      from,
-      matchSuffix,
+      chatIds,
       ratingValue,
       data.body
     );
@@ -259,54 +250,44 @@ async function handleMessageReceived(
     "reminder_24h",
     "reminder_1h",
     "reminder_manual",
+    "approved",
   ];
+  // A reply only applies to appointments that are still open and ahead
+  const OPEN_STATUSES = ["pending", "confirmed", "reminded", "client_confirmed"];
+  // One day of slack: appointment_date is in the business timezone
+  const minDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
 
-  // 1) Match por message_id (contiene el chatId real entregado)
-  let { data: lastOutbound } = await supabase
-    .from("wa_outbound_messages")
-    .select("appointment_id, sent_at, chat_id, message_id")
-    .eq("organization_id", settings.organization_id)
-    .ilike("message_id", `%_${from}_%`)
-    .not("appointment_id", "is", null)
-    .in("intent", OPEN_INTENTS)
-    .order("sent_at", { ascending: false })
-    .limit(1)
-    .maybeSingle<{
-      appointment_id: string;
-      sent_at: string;
-      chat_id: string;
-      message_id: string;
-    }>();
-
-  // 2) Fallback: match por sufijo en chat_id
-  if (!lastOutbound?.appointment_id && matchSuffix) {
-    const fb = await supabase
-      .from("wa_outbound_messages")
-      .select("appointment_id, sent_at, chat_id, message_id")
-      .eq("organization_id", settings.organization_id)
-      .ilike("chat_id", `%${matchSuffix}@c.us`)
-      .not("appointment_id", "is", null)
-      .in("intent", OPEN_INTENTS)
-      .order("sent_at", { ascending: false })
-      .limit(1)
-      .maybeSingle<{
-        appointment_id: string;
-        sent_at: string;
-        chat_id: string;
-        message_id: string;
-      }>();
-    lastOutbound = fb.data;
-  }
+  const { data: lastOutbound } = chatIds.length
+    ? await supabase
+        .from("wa_outbound_messages")
+        .select(
+          "appointment_id, sent_at, chat_id, appointments!inner(status, appointment_date)"
+        )
+        .eq("organization_id", settings.organization_id)
+        .in("chat_id", chatIds)
+        .in("intent", OPEN_INTENTS)
+        .in("appointments.status", OPEN_STATUSES)
+        .gte("appointments.appointment_date", minDate)
+        .order("sent_at", { ascending: false })
+        .limit(1)
+        .maybeSingle<{
+          appointment_id: string;
+          sent_at: string;
+          chat_id: string;
+        }>()
+    : { data: null };
 
   if (!lastOutbound?.appointment_id) {
     console.log(
-      `[wa-inbound] no matching appointment for from="${from}" suffix="${matchSuffix}" in org ${settings.organization_id}`
+      `[wa-inbound] no open appointment for from="${from}" in org ${settings.organization_id}`
     );
     return;
   }
 
   console.log(
-    `[wa-inbound] matched appointment=${lastOutbound.appointment_id} via chat_id=${lastOutbound.chat_id} message_id=${lastOutbound.message_id}`
+    `[wa-inbound] matched appointment=${lastOutbound.appointment_id} via chat_id=${lastOutbound.chat_id}`
   );
 
   const appointmentId = lastOutbound.appointment_id;
@@ -327,12 +308,21 @@ async function handleMessageReceived(
     console.log(
       `[wa-inbound] applying CONFIRM to appointment ${appointmentId}`
     );
+    // A pending appointment still needs the business approval: record the
+    // customer's confirmation but keep the status (only the business approves).
+    const { data: current } = await supabase
+      .from("appointments")
+      .select("status")
+      .eq("id", appointmentId)
+      .maybeSingle();
+    const awaitingApproval = current?.status === "pending";
+
     const { error: updErr, count } = await supabase
       .from("appointments")
       .update(
         {
           client_confirmed_at: new Date().toISOString(),
-          status: "client_confirmed",
+          ...(awaitingApproval ? {} : { status: "client_confirmed" }),
         },
         { count: "exact" }
       )
@@ -445,6 +435,44 @@ async function handleSessionStatus(supabase: any, env: WebhookEnvelope) {
   });
 }
 
+/** Chat ids ("<digits>@c.us", as wa-send writes them) that belong to the
+ *  sender. WhatsApp can deliver replies from an @lid alias instead of the
+ *  phone number; the alias is learned from earlier message_ids, which OpenWA
+ *  builds from the delivered chat ("true_<lid>@lid_<id>").
+ */
+async function resolveChatIds(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  organizationId: string,
+  from: string
+): Promise<string[]> {
+  if (!from) return [];
+  const chatIds = new Set<string>();
+
+  const digits = from.replace(/[^0-9]/g, "");
+  if (from.endsWith("@c.us") && digits.length >= 8) {
+    const suffix = digits.slice(-Math.min(10, digits.length));
+    const { data } = await supabase
+      .from("wa_outbound_messages")
+      .select("chat_id")
+      .eq("organization_id", organizationId)
+      .ilike("chat_id", `%${suffix}@c.us`)
+      .limit(20);
+    for (const row of data ?? []) chatIds.add(row.chat_id);
+  }
+
+  const { data: aliased } = await supabase
+    .from("wa_outbound_messages")
+    .select("chat_id")
+    .eq("organization_id", organizationId)
+    .ilike("message_id", `%_${from}_%`)
+    .order("sent_at", { ascending: false })
+    .limit(20);
+  for (const row of aliased ?? []) chatIds.add(row.chat_id);
+
+  return [...chatIds];
+}
+
 /** Extrae una valoración 1-5 si el mensaje empieza con ese número.
  *  "5" → 5; "4 muy bueno" → 4; "10" → null; "ok" → null.
  */
@@ -462,8 +490,7 @@ async function tryApplyRating(
   // deno-lint-ignore no-explicit-any
   supabase: any,
   organizationId: string,
-  from: string,
-  matchSuffix: string,
+  chatIds: string[],
   rating: number,
   rawBody: string
 ): Promise<boolean> {
@@ -471,38 +498,24 @@ async function tryApplyRating(
     Date.now() - 14 * 24 * 60 * 60 * 1000
   ).toISOString();
 
-  // 1) Match por message_id (mismo criterio que el flujo confirm/cancel)
-  let { data: ratingOutbound } = await supabase
-    .from("wa_outbound_messages")
-    .select("appointment_id, sent_at")
-    .eq("organization_id", organizationId)
-    .eq("intent", "rating_request")
-    .ilike("message_id", `%_${from}_%`)
-    .not("appointment_id", "is", null)
-    .gte("sent_at", fourteenDaysAgo)
-    .order("sent_at", { ascending: false })
-    .limit(1)
-    .maybeSingle<{ appointment_id: string; sent_at: string }>();
-
-  // 2) Fallback por sufijo del número en chat_id
-  if (!ratingOutbound?.appointment_id && matchSuffix) {
-    const fb = await supabase
-      .from("wa_outbound_messages")
-      .select("appointment_id, sent_at")
-      .eq("organization_id", organizationId)
-      .eq("intent", "rating_request")
-      .ilike("chat_id", `%${matchSuffix}@c.us`)
-      .not("appointment_id", "is", null)
-      .gte("sent_at", fourteenDaysAgo)
-      .order("sent_at", { ascending: false })
-      .limit(1)
-      .maybeSingle<{ appointment_id: string; sent_at: string }>();
-    ratingOutbound = fb.data;
-  }
+  // Same chat resolution as the confirm/cancel flow
+  const { data: ratingOutbound } = chatIds.length
+    ? await supabase
+        .from("wa_outbound_messages")
+        .select("appointment_id, sent_at")
+        .eq("organization_id", organizationId)
+        .eq("intent", "rating_request")
+        .in("chat_id", chatIds)
+        .not("appointment_id", "is", null)
+        .gte("sent_at", fourteenDaysAgo)
+        .order("sent_at", { ascending: false })
+        .limit(1)
+        .maybeSingle<{ appointment_id: string; sent_at: string }>()
+    : { data: null };
 
   if (!ratingOutbound?.appointment_id) {
     console.log(
-      `[wa-inbound] rating ${rating} recibido pero sin rating_request pendiente para from="${from}"`
+      `[wa-inbound] rating ${rating} recibido pero sin rating_request pendiente para chatIds=${chatIds.join(",") || "none"}`
     );
     return false;
   }

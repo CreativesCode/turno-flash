@@ -10,7 +10,9 @@
 //   { appointmentId: string, intent: "confirm" | "reminder_24h" | "reminder_1h"
 //     | "notify_business_new" | "notify_business_cancel" | "notify_business_confirm"
 //     | "cancel_ack" | "confirm_ack" | "rating_request" | "rating_ack"
-//     | "waitlist_slot", waitlistId?: string }
+//     | "waitlist_slot" | "approved", waitlistId?: string }
+//
+//   approved: el negocio aprobó un turno pending (trigger en UPDATE de status).
 //
 //   waitlistId es obligatorio para intent=waitlist_slot: el mensaje describe el
 //   hueco liberado (datos del appointment cancelado) pero va al cliente de la
@@ -37,7 +39,8 @@ type Intent =
   | "confirm_ack"
   | "rating_request"
   | "rating_ack"
-  | "waitlist_slot";
+  | "waitlist_slot"
+  | "approved";
 
 interface AppointmentRow {
   id: string;
@@ -138,7 +141,8 @@ Deno.serve(async (req) => {
       intent === "confirm" ||
       intent === "reminder_24h" ||
       intent === "reminder_1h" ||
-      intent === "rating_request"
+      intent === "rating_request" ||
+      intent === "approved"
     ) {
       const { data: existing } = await supabase
         .from("wa_outbound_messages")
@@ -414,6 +418,23 @@ function buildMessage(
 
   switch (intent) {
     case "confirm":
+      // Web bookings of services that need approval: it is a request, not a
+      // booked time yet, so the customer is not asked to confirm with OK.
+      if (appt.status === "pending") {
+        return [
+          `Hola ${cliente}! 👋`,
+          ``,
+          `Recibimos tu solicitud de turno en *${negocio}*:`,
+          ``,
+          `📅 ${fechaLarga}`,
+          `⏰ ${hora}`,
+          `💇 ${servicio}${staff}`,
+          `🎫 N° ${numero}`,
+          ``,
+          `El negocio revisará tu solicitud y te contactará para confirmarla.`,
+          `❌ Si ya no puedes ir, responde *CANCELAR*.`,
+        ].join("\n");
+      }
       return [
         `Hola ${cliente}! 👋`,
         ``,
@@ -427,6 +448,19 @@ function buildMessage(
         `Por favor confirma:`,
         `✅ *OK* — confirmo que asisto`,
         `❌ *CANCELAR* — no podré ir`,
+      ].join("\n");
+
+    case "approved":
+      return [
+        `✅ Hola ${cliente}! *${negocio}* aprobó tu solicitud. Tu turno está confirmado:`,
+        ``,
+        `📅 ${fechaLarga}`,
+        `⏰ ${hora}`,
+        `💇 ${servicio}${staff}`,
+        `🎫 N° ${numero}`,
+        ``,
+        `Te esperamos 🙌`,
+        `❌ Si ya no puedes ir, responde *CANCELAR*.`,
       ].join("\n");
 
     case "reminder_24h":
@@ -490,6 +524,9 @@ function buildMessage(
       return `Tu turno N° ${numero} fue cancelado. Si quieres reagendar, escríbenos cuando quieras 🙌`;
 
     case "confirm_ack":
+      if (appt.status === "pending") {
+        return `¡Gracias ${cliente}! Anotamos que asistirás el ${fechaLarga} a las ${hora}. El negocio todavía tiene que aprobar tu solicitud.`;
+      }
       return `¡Gracias ${cliente}! Confirmamos tu turno del ${fechaLarga} a las ${hora}. Te esperamos 🙌`;
 
     case "rating_request":
