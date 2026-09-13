@@ -281,6 +281,12 @@ export default function HomePageClient() {
                 <Moon className="h-5 w-5" />
               )}
             </button>
+            <Link
+              href="/help"
+              className="hidden text-sm font-semibold text-foreground-muted transition-colors hover:text-foreground sm:inline"
+            >
+              Ayuda
+            </Link>
             {!user && (
               <Link
                 href="/login"
@@ -709,6 +715,14 @@ export default function HomePageClient() {
                   >
                     Precios
                   </a>
+                </li>
+                <li>
+                  <Link
+                    href="/help"
+                    className="text-foreground-muted transition-colors hover:text-foreground"
+                  >
+                    Ayuda
+                  </Link>
                 </li>
                 <li>
                   <Link

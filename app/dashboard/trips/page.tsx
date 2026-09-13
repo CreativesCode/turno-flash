@@ -363,7 +363,7 @@ export default function TripsPage() {
               </h3>
               <p className="mx-auto mt-1 max-w-md text-sm text-foreground-muted">
                 Este módulo se elige al registrarse. Si quieres vender asientos de
-                viaje, pedíselo al equipo de Turno Flash y lo activamos.
+                viaje, pídeselo al equipo de Turno Flash y lo activamos.
               </p>
             </div>
           ) : filteredTrips.length === 0 ? (
@@ -450,7 +450,7 @@ export default function TripsPage() {
       >
         <p className="text-sm text-foreground-muted">
           {cancelling?.seats_taken
-            ? `Hay ${cancelling.seats_taken} asiento(s) reservado(s). La salida deja de publicarse y vas a tener que avisarle a los pasajeros.`
+            ? `Hay ${cancelling.seats_taken} asiento(s) reservado(s). La salida deja de publicarse y, si tienes WhatsApp conectado, les avisamos a los pasajeros.`
             : "La salida deja de publicarse y no aceptará más reservas."}
         </p>
       </ConfirmSheet>

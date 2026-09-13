@@ -129,7 +129,7 @@ export function TripBookingDetails({
           placeholder={
             "*Transfiere el anticipo* a la tarjeta 9200 1299 1234 5678 (Juan Pérez)." +
             "\n" +
-            "Mandanos el comprobante por WhatsApp y te confirmamos el asiento."
+            "Envíanos el comprobante por WhatsApp y te confirmamos el asiento."
           }
         />
       </Field>

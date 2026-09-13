@@ -16,6 +16,7 @@ import {
   Building2,
   Bus,
   Calendar,
+  CircleHelp,
   Crown,
   Home,
   LogOut,
@@ -78,6 +79,7 @@ const NAV_ITEMS: readonly NavEntry[] = [
     Icon: Package,
     roles: ["admin", "owner"],
     requiresOrg: true,
+    module: "appointments",
   },
   {
     name: "Profesionales",
@@ -85,12 +87,14 @@ const NAV_ITEMS: readonly NavEntry[] = [
     Icon: UserCog,
     roles: ["admin", "owner"],
     requiresOrg: true,
+    module: "appointments",
   },
   {
     name: "Recordatorios",
     href: "/dashboard/reminders",
     Icon: Bell,
     requiresOrg: true,
+    module: "appointments",
   },
   {
     name: "Reportes",
@@ -98,6 +102,7 @@ const NAV_ITEMS: readonly NavEntry[] = [
     Icon: BarChart3,
     roles: ["admin", "owner"],
     requiresOrg: true,
+    module: "appointments",
   },
   {
     name: "Ajustes",
@@ -117,6 +122,11 @@ const NAV_ITEMS: readonly NavEntry[] = [
     name: "Mi cuenta",
     href: "/dashboard/account",
     Icon: UserCircle,
+  },
+  {
+    name: "Ayuda",
+    href: "/help",
+    Icon: CircleHelp,
   },
   { separator: true, key: "admin" },
   {

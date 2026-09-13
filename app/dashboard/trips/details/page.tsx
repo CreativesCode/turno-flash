@@ -58,8 +58,8 @@ const STATUS_TEXT: Record<string, string> = {
 
 const DEPOSIT_TEXT: Record<string, string> = {
   pending: "Pendiente",
-  paid: "Cobrada",
-  refunded: "Devuelta",
+  paid: "Cobrado",
+  refunded: "Devuelto",
   waived: "Sin anticipo",
 };
 
@@ -244,6 +244,7 @@ function TripDetailsContent() {
   /**
    * One row per passenger, with what THAT passenger owes: dividing by seats
    * is the whole point — a 4-seat booking of 2000 is 500 per person.
+   * Cancelled bookings are left out: nobody boards or pays for them.
    */
   const passengerRows = useMemo(() => {
     if (!trip) return [];
@@ -261,7 +262,7 @@ function TripDetailsContent() {
       pendingEach: number;
       extra: string;
     }[] = [];
-    for (const booking of bookings) {
+    for (const booking of liveBookings) {
       const bookedBy = booking.customer
         ? `${booking.customer.first_name} ${booking.customer.last_name}`.trim()
         : "";
@@ -289,7 +290,7 @@ function TripDetailsContent() {
       }
     }
     return rows;
-  }, [bookings, trip]);
+  }, [liveBookings, trip]);
 
   const handleExport = useCallback(() => {
     if (!trip) return;

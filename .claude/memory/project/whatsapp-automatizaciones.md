@@ -60,3 +60,7 @@ Limite: un cliente nuevo que responde desde `@lid` sin mensajes previos con id n
 
 Docs: [docs/REMINDERS-SETUP.md](../../docs/REMINDERS-SETUP.md), [docs/PLAN-DASHBOARDS-Y-MEJORAS.md](../../docs/PLAN-DASHBOARDS-Y-MEJORAS.md).
 Relacionado: [[producto-y-dominio]], [[arquitectura-static-export]].
+
+**Viajes (`wa-trip-send`, migraciones 043-047):** reserva recibida, aviso al negocio (solo reservas
+web), aprobada, anticipo cobrado, reserva cancelada y salida cancelada. Un envío por intent por
+reserva. Detalle en [[modulo-reserva-asientos]].

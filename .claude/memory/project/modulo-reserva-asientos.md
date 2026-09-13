@@ -214,3 +214,20 @@ asiento. Se migro a espanol internacional: los textos van en tuteo y el pago es 
 **"anticipo"** (masculino: *el* anticipo, *un* anticipo, anticipo *cobrado*). Las columnas de
 la base siguen llamandose `deposit_*`, que es lo correcto en ingles — el cambio es solo de
 copy. Regla completa en [[copy-espanol-internacional]].
+
+## Cancelaciones, hoja del chofer y módulos (2026-09-12, migraciones 046 y 047)
+
+- **WhatsApp al cancelar**: `trip_booking_cancelled` (el negocio cancela una reserva) y
+  `trip_departure_cancelled` (se cancela la salida entera: un mensaje por cada reserva viva, desde
+  el trigger `trg_wa_on_trip_cancelled` sobre `trips.cancelled_at`). Si la reserva ya tenía algo
+  pagado, el texto pide contactar al negocio para la devolución. Cancelar una salida **sigue sin
+  cancelar sus reservas**: solo avisa.
+- **La hoja del chofer y el CSV excluyen las reservas canceladas** (antes sumaban su "a cobrar" en
+  los totales).
+- **Un negocio solo-viajes ya no ve nada de turnos**: Servicios, Profesionales, Recordatorios y
+  Reportes llevan `module: "appointments"` en `Sidebar`/`Drawer`; el inicio oculta "Hoy", "Nuevo
+  turno" y "Próximos" y muestra un atajo a Viajes; la `MobileTabBar` cambia Avisos por Cuenta; y
+  Ajustes oculta cierres, valoraciones y resumen diario. Esto reemplaza lo que decía la Fase 6 del
+  PRP ("Servicios siguen visibles para ambos módulos").
+- **Fase 5 (vencimiento automático del anticipo) sigue pendiente a propósito**: Roberto la volvió a
+  frenar el 2026-09-12 ("eso aún no"). El manual y Ajustes lo advierten.

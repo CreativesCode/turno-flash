@@ -263,8 +263,8 @@ export function TripFormSheet({
                 Tengo que aprobar cada reserva
               </span>
               <span className="mt-0.5 block text-foreground-muted">
-                Sin marcar, quien reserve queda confirmado al instante. Cobrar la
-                anticipo es aparte: marcarla no aprueba ni rechaza nada.
+                Sin marcar, quien reserve queda confirmado al instante. Cobrar el
+                anticipo es aparte: registrarlo no aprueba ni rechaza nada.
               </span>
             </span>
           </label>
@@ -342,8 +342,8 @@ export function TripFormSheet({
             Cuándo se puede reservar (opcional)
           </p>
           <p className="mt-0.5 text-[11px] text-foreground-subtle">
-            Para abrir las reservas recién un día y hora concretos. Vacío = se
-            puede reservar desde que publicás y hasta que sale.
+            Para abrir las reservas a partir de un día y hora concretos. Vacío = se
+            puede reservar desde que publicas y hasta que sale.
           </p>
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
             <Field label="Abren">

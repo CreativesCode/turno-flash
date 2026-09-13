@@ -1,0 +1,1322 @@
+<title>Manual de Turno Flash</title>
+<meta name="description" content="Qué puede hacer cada persona en Turno Flash: dueño y personal, en negocios de turnos y en negocios de venta de pasajes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+  :root {
+    --hm-ground: #f5f7f6;
+    --hm-surface: #ffffff;
+    --hm-surface-2: #eef2f0;
+    --hm-ink: #0f1a15;
+    --hm-ink-2: #3a4a42;
+    --hm-muted: #5d6d65;
+    --hm-line: #dbe3df;
+    --hm-brand: #16a34a;
+    --hm-brand-ink: #11783a;
+    --hm-brand-soft: #e3f6e9;
+    --hm-warn-ink: #8a4b06;
+    --hm-warn-soft: #fdf1dc;
+    --hm-note-ink: #1d4f9c;
+    --hm-note-soft: #e6effc;
+    --hm-wa-bubble: #d9fdd3;
+    --hm-wa-ground: #efe7de;
+    --hm-wa-ink: #111b21;
+    --hm-shadow: 0 1px 2px rgba(15, 26, 21, .06), 0 4px 16px rgba(15, 26, 21, .05);
+    --hm-font-display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+    --hm-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --hm-font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --hm-ground: #0b110e;
+      --hm-surface: #121a16;
+      --hm-surface-2: #19231e;
+      --hm-ink: #e8efeb;
+      --hm-ink-2: #c2cfc8;
+      --hm-muted: #8fa198;
+      --hm-line: #26332c;
+      --hm-brand: #34d06a;
+      --hm-brand-ink: #5fe08b;
+      --hm-brand-soft: #123321;
+      --hm-warn-ink: #f5c26b;
+      --hm-warn-soft: #33250c;
+      --hm-note-ink: #9cc3ff;
+      --hm-note-soft: #13233c;
+      --hm-wa-bubble: #144d37;
+      --hm-wa-ground: #0f1714;
+      --hm-wa-ink: #e9edef;
+      --hm-shadow: 0 1px 2px rgba(0, 0, 0, .4);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --hm-ground: #0b110e;
+    --hm-surface: #121a16;
+    --hm-surface-2: #19231e;
+    --hm-ink: #e8efeb;
+    --hm-ink-2: #c2cfc8;
+    --hm-muted: #8fa198;
+    --hm-line: #26332c;
+    --hm-brand: #34d06a;
+    --hm-brand-ink: #5fe08b;
+    --hm-brand-soft: #123321;
+    --hm-warn-ink: #f5c26b;
+    --hm-warn-soft: #33250c;
+    --hm-note-ink: #9cc3ff;
+    --hm-note-soft: #13233c;
+    --hm-wa-bubble: #144d37;
+    --hm-wa-ground: #0f1714;
+    --hm-wa-ink: #e9edef;
+    --hm-shadow: 0 1px 2px rgba(0, 0, 0, .4);
+    color-scheme: dark;
+  }
+
+  /* Appointment status palette, same values as the app (globals.css) */
+  .st-pending          { --c: #64748b; --bg: #f1f5f9; }
+  .st-confirmed        { --c: #2563eb; --bg: #dbeafe; }
+  .st-reminded         { --c: #7c3aed; --bg: #ede9fe; }
+  .st-client_confirmed { --c: #0891b2; --bg: #cffafe; }
+  .st-checked_in       { --c: #b45309; --bg: #fef3c7; }
+  .st-in_progress      { --c: #c2410c; --bg: #ffedd5; }
+  .st-completed        { --c: #15803d; --bg: #dcfce7; }
+  .st-cancelled        { --c: #dc2626; --bg: #fee2e2; }
+  .st-no_show          { --c: #52525b; --bg: #f4f4f5; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .st-pending          { --c: #a3b1c6; --bg: #1c2331; }
+    :root:not([data-theme="light"]) .st-confirmed        { --c: #7fb0ff; --bg: #172554; }
+    :root:not([data-theme="light"]) .st-reminded         { --c: #c4a8ff; --bg: #2e1065; }
+    :root:not([data-theme="light"]) .st-client_confirmed { --c: #5fd8ee; --bg: #083344; }
+    :root:not([data-theme="light"]) .st-checked_in       { --c: #fbbf24; --bg: #451a03; }
+    :root:not([data-theme="light"]) .st-in_progress      { --c: #fb923c; --bg: #431407; }
+    :root:not([data-theme="light"]) .st-completed        { --c: #4ade80; --bg: #052e16; }
+    :root:not([data-theme="light"]) .st-cancelled        { --c: #f87171; --bg: #450a0a; }
+    :root:not([data-theme="light"]) .st-no_show          { --c: #a1a1aa; --bg: #18181b; }
+  }
+  :root[data-theme="dark"] .st-pending          { --c: #a3b1c6; --bg: #1c2331; }
+  :root[data-theme="dark"] .st-confirmed        { --c: #7fb0ff; --bg: #172554; }
+  :root[data-theme="dark"] .st-reminded         { --c: #c4a8ff; --bg: #2e1065; }
+  :root[data-theme="dark"] .st-client_confirmed { --c: #5fd8ee; --bg: #083344; }
+  :root[data-theme="dark"] .st-checked_in       { --c: #fbbf24; --bg: #451a03; }
+  :root[data-theme="dark"] .st-in_progress      { --c: #fb923c; --bg: #431407; }
+  :root[data-theme="dark"] .st-completed        { --c: #4ade80; --bg: #052e16; }
+  :root[data-theme="dark"] .st-cancelled        { --c: #f87171; --bg: #450a0a; }
+  :root[data-theme="dark"] .st-no_show          { --c: #a1a1aa; --bg: #18181b; }
+
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 132px; }
+  body {
+    background: var(--hm-ground);
+    color: var(--hm-ink);
+    font-family: var(--hm-font-body);
+    font-size: 15.5px;
+    line-height: 1.6;
+    padding-inline: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ─────────────────────────────── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-inline: -16px;
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--hm-ground) 90%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--hm-line);
+  }
+  .topbar-inner {
+    max-width: 1120px;
+    margin-inline: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 20px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: auto;
+  }
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: linear-gradient(140deg, #22c55e, #0f9a47);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .brand-name {
+    font-family: var(--hm-font-display);
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: -.01em;
+  }
+  .brand-sub { color: var(--hm-muted); font-size: 13px; }
+  .brand-back { color: var(--hm-muted); font-size: 13px; text-decoration: none; }
+  .brand-back:hover { color: var(--hm-ink); }
+  .switches { display: flex; flex-wrap: wrap; gap: 8px; }
+  .seg {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 11px;
+    background: var(--hm-surface-2);
+    border: 1px solid var(--hm-line);
+  }
+  .seg button {
+    font: 600 13.5px/1 var(--hm-font-body);
+    color: var(--hm-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .seg button[aria-pressed="true"] {
+    background: var(--hm-surface);
+    color: var(--hm-ink);
+    box-shadow: var(--hm-shadow);
+  }
+  .seg button:focus-visible, .toc a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--hm-brand);
+    outline-offset: 2px;
+  }
+  .seg svg { width: 15px; height: 15px; }
+
+  /* ── Layout ─────────────────────────────── */
+  .shell {
+    max-width: 1120px;
+    margin-inline: auto;
+    padding-block: 28px 80px;
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 48px;
+  }
+  .toc {
+    position: sticky;
+    top: 92px;
+    align-self: start;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+  }
+  .toc-label, .eyebrow {
+    font: 600 11px/1.2 var(--hm-font-mono);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--hm-muted);
+  }
+  .toc ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 1px; }
+  .toc a {
+    display: block;
+    padding: 6px 10px;
+    border-radius: 7px;
+    color: var(--hm-ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+    line-height: 1.35;
+  }
+  .toc a:hover { background: var(--hm-surface-2); color: var(--hm-ink); }
+  .toc-mobile { display: none; }
+
+  main { min-width: 0; }
+  .panel { max-width: 720px; }
+
+  /* ── Type ───────────────────────────────── */
+  .panel-head { padding-bottom: 22px; border-bottom: 1px solid var(--hm-line); margin-bottom: 8px; }
+  h1 {
+    font-family: var(--hm-font-display);
+    font-weight: 800;
+    font-size: clamp(30px, 5vw, 42px);
+    line-height: 1.05;
+    letter-spacing: -.025em;
+    margin: 8px 0 12px;
+    text-wrap: balance;
+  }
+  .lede { font-size: 17px; color: var(--hm-ink-2); margin: 0; max-width: 62ch; }
+  h2 {
+    font-family: var(--hm-font-display);
+    font-weight: 800;
+    font-size: 25px;
+    line-height: 1.15;
+    letter-spacing: -.015em;
+    margin: 52px 0 10px;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--hm-font-body);
+    font-weight: 700;
+    font-size: 16.5px;
+    margin: 30px 0 6px;
+    text-wrap: balance;
+  }
+  p, li { max-width: 68ch; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  ul { list-style: disc; }
+  ol { list-style: decimal; }
+  li { margin-bottom: 5px; }
+  li::marker { color: var(--hm-muted); }
+  strong { font-weight: 650; }
+  a { color: var(--hm-brand-ink); }
+
+  /* App vocabulary: what the user sees on screen */
+  .ui {
+    font: 600 .84em/1 var(--hm-font-mono);
+    background: var(--hm-surface);
+    border: 1px solid var(--hm-line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: .18em .45em .16em;
+    white-space: nowrap;
+    color: var(--hm-ink);
+  }
+  .path { font-weight: 600; color: var(--hm-ink); }
+  .path i { font-style: normal; color: var(--hm-muted); padding-inline: .25em; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 5px 9px;
+    border-radius: 999px;
+    color: var(--c, var(--hm-ink-2));
+    background: var(--bg, var(--hm-surface-2));
+    white-space: nowrap;
+  }
+  .chip::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .chip.plain::before { display: none; }
+  .num { font-family: var(--hm-font-mono); font-size: .9em; font-weight: 600; }
+
+  /* ── Blocks ─────────────────────────────── */
+  .steps { counter-reset: s; list-style: none; padding: 0; margin: 14px 0 18px; display: grid; gap: 10px; }
+  .steps > li {
+    counter-increment: s;
+    position: relative;
+    padding-left: 42px;
+    margin: 0;
+    max-width: none;
+  }
+  .steps > li::before {
+    content: counter(s);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font: 700 13px/1 var(--hm-font-mono);
+    background: var(--hm-brand-soft);
+    color: var(--hm-brand-ink);
+  }
+
+  .callout {
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin: 16px 0;
+    font-size: 14.5px;
+    max-width: 68ch;
+  }
+  .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+  .callout .tag {
+    display: block;
+    font: 600 11px/1 var(--hm-font-mono);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .note { background: var(--hm-note-soft); color: var(--hm-ink); }
+  .note .tag { color: var(--hm-note-ink); }
+  .warn { background: var(--hm-warn-soft); color: var(--hm-ink); }
+  .warn .tag { color: var(--hm-warn-ink); }
+  .tip { background: var(--hm-brand-soft); color: var(--hm-ink); }
+  .tip .tag { color: var(--hm-brand-ink); }
+
+  .table-wrap { overflow-x: auto; margin: 14px 0 18px; border: 1px solid var(--hm-line); border-radius: 12px; background: var(--hm-surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--hm-line); }
+  tr:last-child td { border-bottom: 0; }
+  th { font: 600 11px/1.2 var(--hm-font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--hm-muted); background: var(--hm-surface-2); }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  td.wrap { white-space: normal; }
+
+  .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 14px 0 18px; }
+  .split > div { background: var(--hm-surface); border: 1px solid var(--hm-line); border-radius: 12px; padding: 14px 16px 6px; }
+  .split h4 { margin: 0 0 8px; font: 600 11px/1.2 var(--hm-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+  .split .yes h4 { color: var(--hm-brand-ink); }
+  .split .no h4 { color: var(--hm-muted); }
+  .split ul { padding-left: 18px; font-size: 14.5px; }
+
+  .axes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 14px 0 18px; }
+  .axis { background: var(--hm-surface); border: 1px solid var(--hm-line); border-radius: 12px; padding: 14px 16px; }
+  .axis h4 { margin: 0 0 4px; font-size: 14.5px; }
+  .axis p { font-size: 13.5px; color: var(--hm-muted); margin-bottom: 10px; }
+  .axis .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 18px; }
+  .flow .arrow { color: var(--hm-muted); font-size: 13px; }
+
+  /* WhatsApp message samples */
+  .wa-list { display: grid; gap: 14px; margin: 16px 0 20px; }
+  .wa {
+    background: var(--hm-wa-ground);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .wa-when { font: 600 11px/1.3 var(--hm-font-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--hm-muted); margin-bottom: 8px; }
+  .wa-bubble {
+    background: var(--hm-wa-bubble);
+    color: var(--hm-wa-ink);
+    border-radius: 10px 10px 10px 2px;
+    padding: 9px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 440px;
+    white-space: pre-line;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .08);
+  }
+  .wa-bubble b { font-weight: 700; }
+
+  hr.soft { border: 0; border-top: 1px solid var(--hm-line); margin: 40px 0 0; }
+  .foot { color: var(--hm-muted); font-size: 13px; margin-top: 48px; }
+
+  /* ── Responsive ─────────────────────────── */
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 18px; }
+    .toc { display: none; }
+    .toc-mobile { display: block; margin-bottom: 18px; background: var(--hm-surface); border: 1px solid var(--hm-line); border-radius: 12px; }
+    .toc-mobile summary { cursor: pointer; padding: 11px 14px; font-weight: 600; font-size: 14px; }
+    .toc-mobile ol { list-style: none; margin: 0; padding: 0 8px 10px; display: grid; }
+    .toc-mobile a { display: block; padding: 7px 8px; color: var(--hm-ink-2); text-decoration: none; font-size: 14px; border-radius: 6px; }
+    html { scroll-padding-top: 150px; }
+  }
+  @media (max-width: 560px) {
+    .brand-sub { display: none; }
+    .switches { width: 100%; }
+    .seg { flex: 1; }
+    .seg button { flex: 1; justify-content: center; padding-inline: 8px; }
+    .split, .axes { grid-template-columns: minmax(0, 1fr); }
+    td:first-child { white-space: normal; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .panel:not([hidden]) { animation: rise .25s ease-out; }
+    @keyframes rise { from { transform: translateY(4px); } to { transform: none; } }
+  }
+  @media print {
+    .topbar, .toc, .toc-mobile { display: none !important; }
+    .shell { display: block; padding: 0; }
+    body { background: #fff; color: #000; }
+    h2 { break-after: avoid; }
+    .wa, .callout, .table-wrap { break-inside: avoid; }
+  }
+</style>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      </span>
+      <div>
+        <div class="brand-name">Manual de Turno Flash</div>
+        <div class="brand-sub">Qué puedes hacer desde tu negocio</div>
+      </div>
+    </div>
+    <div class="switches">
+      <div class="seg" role="group" aria-label="Tipo de negocio">
+        <button type="button" id="mod-turnos" data-module="turnos" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Turnos
+        </button>
+        <button type="button" id="mod-viajes" data-module="viajes" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6v6M16 6v6M2 12h19.6M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
+          Viajes
+        </button>
+      </div>
+      <div class="seg" role="group" aria-label="Rol">
+        <button type="button" id="role-dueno" data-role="dueno" aria-pressed="true">Dueño</button>
+        <button type="button" id="role-personal" data-role="personal" aria-pressed="false">Personal</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="toc" aria-label="Contenido">
+    <div class="toc-label">En esta guía</div>
+    <ol id="toc-list"></ol>
+  </nav>
+
+  <main>
+    <details class="toc-mobile" id="toc-mobile">
+      <summary>Contenido de esta guía</summary>
+      <ol id="toc-mobile-list"></ol>
+    </details>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TURNOS · DUEÑO
+     ═══════════════════════════════════════════════════════════════ -->
+<article class="panel" id="turnos-dueno" data-panel="turnos-dueno">
+  <div class="panel-head">
+    <div class="eyebrow">Negocios de turnos · Dueño del negocio</div>
+    <h1>Todo lo que puedes hacer con tu agenda</h1>
+    <p class="lede">Para peluquerías, barberías, clínicas, estudios y talleres. Como dueño ves y controlas todo: la agenda, tus clientes, lo que ofreces, quién atiende, la reserva online, los avisos por WhatsApp y los números del negocio.</p>
+  </div>
+
+  <h2 id="td-arranque">Puesta en marcha</h2>
+  <p>Este es el orden que conviene seguir la primera vez. Cada paso depende del anterior: por ejemplo, un profesional sin servicios asignados no aparece en la reserva online.</p>
+  <ol class="steps">
+    <li><strong>Crea tu cuenta.</strong> En la pantalla de registro completa tu nombre, el nombre del negocio, tu email y una contraseña de al menos 6 caracteres. En <em>¿Qué hace tu negocio?</em> elige <span class="ui">Doy turnos o citas</span> (o <span class="ui">Las dos cosas</span> si también vendes asientos de viajes). Agrega el WhatsApp del negocio y tu zona horaria. Empiezas con <strong>7 días de prueba gratis</strong>.</li>
+    <li><strong>Elige la moneda.</strong> En <span class="path">Ajustes <i>›</i> Moneda</span> selecciona la moneda en la que cobras y pulsa <span class="ui">Guardar</span>.</li>
+    <li><strong>Carga tus servicios</strong> en <span class="path">Servicios</span>: nombre, duración y precio de cada uno.</li>
+    <li><strong>Carga a tu equipo</strong> en <span class="path">Profesionales</span> y, para cada persona, abre el menú <span class="ui">⋮</span> › <span class="ui">Horario y servicios</span>.</li>
+    <li><strong>Invita a tu personal</strong> desde <span class="path">Invitar</span> para que cada uno entre con su propio usuario.</li>
+    <li><strong>Pide que conecten tu WhatsApp.</strong> La conexión la hace el equipo de Turno Flash. Mientras no esté conectada, la app funciona igual pero no se envía ningún mensaje.</li>
+    <li><strong>Activa la reserva online</strong> en <span class="path">Ajustes</span> y comparte el link con tus clientes.</li>
+  </ol>
+
+  <h2 id="td-inicio">La pantalla de inicio</h2>
+  <p>Al entrar ves un saludo con el nombre del negocio y la fecha, y debajo:</p>
+  <ul>
+    <li><strong>Hoy:</strong> cuántos turnos hay en el día, separados en Confirmados, Pendientes, En curso y Completados.</li>
+    <li><strong>Atajos</strong> a las secciones que más se usan.</li>
+    <li><strong>Próximos:</strong> los siguientes tres turnos del día que todavía no empezaron. <span class="ui">Ver todos →</span> te lleva a la agenda completa.</li>
+  </ul>
+  <p>En la computadora el menú está siempre a la izquierda; ahí también encuentras <span class="ui">Ayuda</span>, que abre esta guía, y puedes cambiar a <span class="ui">Tema oscuro</span> o <span class="ui">Cerrar sesión</span>. En el teléfono tienes una barra inferior con Inicio, Turnos, Clientes y Avisos, y un botón <span class="ui">+</span> en el centro que abre la agenda para crear un turno.</p>
+
+  <h2 id="td-turnos">La agenda de turnos</h2>
+  <p>Todo pasa en <span class="path">Turnos</span>. Arriba eliges cómo ver la agenda:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Vista</th><th>Qué muestra</th></tr></thead>
+      <tbody>
+        <tr><td><span class="ui">Lista</span></td><td class="wrap">Los turnos desde 7 días atrás hasta 60 días adelante, agrupados por día (Hoy, Mañana, luego la fecha) y dentro de cada día en <em>Mañana</em> y <em>Tarde</em>. Es la única vista con buscador y filtros por estado.</td></tr>
+        <tr><td><span class="ui">Día</span></td><td class="wrap">Una grilla de 8:00 a 20:00 con cada turno dibujado en su horario. Usa las flechas para cambiar de día y <span class="ui">Hoy</span> para volver. Tocar un hueco libre abre el formulario con esa hora ya puesta.</td></tr>
+        <tr><td><span class="ui">Semana</span></td><td class="wrap">Los siete días de la semana, de lunes a domingo, en la misma grilla horaria. También puedes tocar un hueco para crear un turno ahí.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Buscar y filtrar</h3>
+  <p>En la vista Lista, el buscador encuentra turnos por nombre o teléfono del cliente, por servicio o por profesional. Debajo, las pastillas filtran por estado: Todos, Pendientes, Confirmados, Recordatorio, Cliente OK, Check-in, En curso, Completados y Cancelados. Si hay muchos turnos, al final aparece <span class="ui">Cargar más</span>.</p>
+
+  <h3>Crear un turno</h3>
+  <ol class="steps">
+    <li>Pulsa <span class="ui">Nuevo turno</span> (en el teléfono, el botón redondo <span class="ui">+</span>).</li>
+    <li>Elige el <strong>cliente</strong> de la lista. Si es nuevo, pulsa <span class="ui">Nuevo</span>, completa nombre, apellido, teléfono y (si quieres) email, y pulsa <span class="ui">Crear y seleccionar</span>.</li>
+    <li>Elige <strong>fecha</strong> y <strong>hora</strong> de inicio.</li>
+    <li>Toca el <strong>servicio</strong>. Cada tarjeta muestra la duración y el precio; la hora de fin se calcula sola.</li>
+    <li>Opcional: elige el <strong>profesional</strong> o deja <span class="ui">Cualquiera</span>, y agrega una nota.</li>
+    <li>Pulsa <span class="ui">Crear turno</span>.</li>
+  </ol>
+  <div class="callout note">
+    <span class="tag">Bueno saber</span>
+    <ul>
+      <li>Si eliges un profesional, la app comprueba que no tenga otro turno a esa hora. Si lo tiene, verás <em>El profesional ya tiene un turno en ese horario</em>.</li>
+      <li>Si el servicio tiene activado <em>Requiere aprobación manual</em>, el turno se crea como <span class="chip st-pending">Pendiente</span>. Si no, nace <span class="chip st-confirmed">Confirmado</span>.</li>
+      <li>Con WhatsApp conectado, al crear el turno el cliente recibe la confirmación y el negocio recibe un aviso de <em>Nuevo turno</em>.</li>
+    </ul>
+  </div>
+
+  <h3>Atender un turno: avanzar de estado</h3>
+  <p>Cada turno de la lista tiene un botón con el <strong>siguiente paso</strong> (por ejemplo <span class="ui">Confirmar</span> o <span class="ui">Empezar</span>). Tócalo para avanzar sin abrir el turno. Si tocas el turno, se abre su detalle con fecha, hora, servicio, profesional, duración, precio y notas, más estas acciones:</p>
+  <ul>
+    <li>El botón principal con el siguiente paso.</li>
+    <li><span class="ui">WhatsApp</span>: envía un recordatorio al cliente en ese momento.</li>
+    <li><span class="ui">No vino</span>: marca que el cliente no se presentó.</li>
+    <li><span class="ui">Cancelar</span>: cancela el turno. Con WhatsApp conectado, el cliente recibe <em>Tu turno N° … fue cancelado</em>.</li>
+  </ul>
+  <p>No hace falta pasar por todos los pasos: puedes saltar de <span class="chip st-confirmed">Confirmado</span> directamente a <span class="chip st-completed">Completado</span>, por ejemplo. Lo que no se puede es volver atrás, ni cambiar un turno completado, cancelado o marcado como no asistió.</p>
+
+  <h3>Los estados de un turno</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Estado</th><th>Qué significa</th><th>Botón para avanzar</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip st-pending">Pendiente</span></td><td class="wrap">Solicitud que el negocio todavía no aprobó.</td><td><span class="ui">Confirmar</span></td></tr>
+        <tr><td><span class="chip st-confirmed">Confirmado</span></td><td class="wrap">El turno está reservado.</td><td><span class="ui">Enviar recordatorio</span></td></tr>
+        <tr><td><span class="chip st-reminded">Recordatorio enviado</span></td><td class="wrap">Se le mandó el recordatorio al cliente.</td><td><span class="ui">Marcar confirmado por cliente</span></td></tr>
+        <tr><td><span class="chip st-client_confirmed">Cliente confirmó</span></td><td class="wrap">El cliente dijo que viene (respondiendo OK o porque lo marcaste tú).</td><td><span class="ui">Hacer check-in</span></td></tr>
+        <tr><td><span class="chip st-checked_in">Check-in</span></td><td class="wrap">El cliente llegó al local.</td><td><span class="ui">Empezar</span></td></tr>
+        <tr><td><span class="chip st-in_progress">En curso</span></td><td class="wrap">Lo están atendiendo.</td><td><span class="ui">Completar</span></td></tr>
+        <tr><td><span class="chip st-completed">Completado</span></td><td class="wrap">Terminado. Cuenta como ingreso en los reportes.</td><td>—</td></tr>
+        <tr><td><span class="chip st-cancelled">Cancelado</span></td><td class="wrap">Lo canceló el negocio o el cliente.</td><td>—</td></tr>
+        <tr><td><span class="chip st-no_show">No asistió</span></td><td class="wrap">El cliente no se presentó.</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout warn">
+    <span class="tag">Ojo</span>
+    <p>Un turno <span class="chip st-in_progress">En curso</span> ya no se puede marcar como <span class="ui">No vino</span>: solo completarlo o cancelarlo.</p>
+  </div>
+
+  <h3>Exportar la agenda</h3>
+  <p>Desde la computadora, el botón <span class="ui">CSV</span> descarga los turnos del rango que estás viendo, con fecha, hora, cliente, teléfono, servicio, profesional, estado, precio, si se pagó, origen y número. Se abre con Excel o Google Sheets.</p>
+
+  <h2 id="td-clientes">Clientes</h2>
+  <p>En <span class="path">Clientes</span> tienes la base de clientes activos, con buscador por nombre, teléfono o email. Cada tarjeta muestra el teléfono, el email, las notas y una marca <strong>WA</strong> si tiene WhatsApp cargado.</p>
+  <ul>
+    <li><span class="ui">Nuevo cliente</span>: nombre, apellido y teléfono son obligatorios; WhatsApp, email y notas (preferencias, alergias…) son opcionales.</li>
+    <li>Menú <span class="ui">⋮</span> › <span class="ui">Editar</span> para corregir datos.</li>
+    <li>Menú <span class="ui">⋮</span> › <span class="ui">Desactivar</span> para sacarlo de la lista sin borrar su historial.</li>
+    <li><span class="ui">CSV</span> descarga todos los clientes activos con sus contactos, cantidad de turnos, faltas y última visita.</li>
+  </ul>
+  <p>Los clientes que reservan por la página online se crean solos. Si alguien vuelve a reservar con el mismo teléfono, se reutiliza su ficha.</p>
+
+  <h3>Recuperar clientes</h3>
+  <p>El botón <span class="ui">Recuperar clientes</span> lista a quienes no vienen hace tiempo y les envía por WhatsApp una invitación a volver.</p>
+  <ol class="steps">
+    <li>Elige cuánto tiempo sin venir: <span class="ui">Sin venir +30 días</span>, <span class="ui">+60 días</span> o <span class="ui">+90 días</span>.</li>
+    <li>Marca a los clientes uno por uno o pulsa <span class="ui">Seleccionar todos</span>.</li>
+    <li>Pulsa <span class="ui">Enviar a N</span>. Al terminar, la app te dice cuántos mensajes se enviaron y cuántos fallaron.</li>
+  </ol>
+  <div class="callout note">
+    <span class="tag">Para no molestar</span>
+    <p>Cada cliente recibe como máximo un mensaje de este tipo cada 30 días; los ya contactados aparecen en gris con la fecha. Puedes enviar hasta 50 mensajes por vez.</p>
+  </div>
+
+  <h2 id="td-servicios">Servicios</h2>
+  <p>En <span class="path">Servicios</span> armas el catálogo de lo que ofreces. Pulsa <span class="ui">Nuevo servicio</span> o <span class="ui">Editar</span> en una tarjeta.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Campo</th><th>Para qué sirve</th></tr></thead>
+      <tbody>
+        <tr><td>Nombre y descripción</td><td class="wrap">Lo que ven tú y tus clientes en la reserva online.</td></tr>
+        <tr><td>Duración (min)</td><td class="wrap">Cuánto dura el servicio. Define la hora de fin del turno.</td></tr>
+        <tr><td>Buffer (min)</td><td class="wrap">Tiempo extra que se reserva después del servicio para limpiar o prepararse. Ocupa agenda aunque no se cobre.</td></tr>
+        <tr><td>Precio</td><td class="wrap">En la moneda de tu negocio.</td></tr>
+        <tr><td>Color</td><td class="wrap">Punto de color con el que el servicio aparece en la agenda.</td></tr>
+        <tr><td>Disponible para reserva online</td><td class="wrap">Si lo desmarcas, solo lo puedes agendar tú desde la app.</td></tr>
+        <tr><td>Requiere aprobación manual</td><td class="wrap">Los turnos de este servicio nacen <span class="chip st-pending">Pendiente</span> y tienes que confirmarlos tú.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>El interruptor <span class="ui">Activo</span> / <span class="ui">Pausado</span> de cada tarjeta deja de ofrecer un servicio sin borrarlo. Puedes volver a activarlo cuando quieras.</p>
+
+  <h2 id="td-profesionales">Profesionales</h2>
+  <p>En <span class="path">Profesionales</span> cargas a las personas que atienden. Pulsa <span class="ui">Nuevo profesional</span> y completa nombre y apellido; el resto es opcional: apodo (es el nombre que se muestra), teléfono, email, especialidades separadas por coma, una bio y un color para la agenda. Además hay tres casillas:</p>
+  <ul>
+    <li><strong>Profesional activo:</strong> si está desmarcada, la persona queda pausada.</li>
+    <li><strong>Se pueden reservar turnos con esta persona:</strong> desmárcala para quien no atiende clientes (por ejemplo, recepción).</li>
+    <li><strong>Acepta reservas online:</strong> desmárcala si esa persona solo toma turnos que agenda el negocio.</li>
+  </ul>
+
+  <h3>Horario y servicios de cada profesional</h3>
+  <p>Desde el menú <span class="ui">⋮</span> › <span class="ui">Horario y servicios</span> de cada tarjeta configuras tres cosas:</p>
+  <ul>
+    <li><strong>Servicios que realiza:</strong> toca los que hace esa persona. Solo esos se le ofrecen online.</li>
+    <li><strong>Horario semanal:</strong> para cada día marca <em>Trabaja</em> y define desde y hasta. Si corta al mediodía, usa <span class="ui">Agregar tramo</span> para cargar un segundo horario el mismo día.</li>
+    <li><strong>Días libres y vacaciones:</strong> elige desde, hasta y un motivo, y pulsa <span class="ui">Agregar</span>. Se guardan en el momento.</li>
+  </ul>
+  <p>Pulsa <span class="ui">Guardar servicios y horario</span>. Los cambios se ven enseguida en la reserva online.</p>
+  <p>El mismo menú tiene <span class="ui">Pausar</span> / <span class="ui">Reactivar</span> y <span class="ui">Eliminar</span>, que en realidad <strong>desactiva</strong> al profesional: sus turnos pasados no se pierden.</p>
+
+  <h2 id="td-online">Reserva online</h2>
+  <p>Tus clientes pueden reservar solos desde un link, sin llamar ni escribir. Para activarlo:</p>
+  <ol class="steps">
+    <li>Entra a <span class="path">Ajustes</span> y enciende <strong>Página de reservas online</strong>.</li>
+    <li>Pulsa <span class="ui">Guardar cambios</span>. Hasta que guardes, el link no funciona.</li>
+    <li>Usa <span class="ui">Copiar link</span>, <span class="ui">Compartir</span> (abre WhatsApp con el mensaje <em>Reserva tu turno online</em> y el link) o <span class="ui">Ver página</span> para probarla.</li>
+  </ol>
+  <p>Debajo del link, la app te avisa cuántos profesionales aparecerán y, para los que no, qué les falta (horario o servicios), con un acceso directo a <span class="path">Profesionales</span>.</p>
+
+  <h3>Qué hace tu cliente en la página</h3>
+  <div class="flow" aria-label="Pasos de la reserva online">
+    <span class="chip plain">Elige un servicio</span><span class="arrow">→</span>
+    <span class="chip plain">¿Con quién?</span><span class="arrow">→</span>
+    <span class="chip plain">Elige día y horario</span><span class="arrow">→</span>
+    <span class="chip plain">Tus datos</span><span class="arrow">→</span>
+    <span class="chip plain">Listo</span>
+  </div>
+  <ul>
+    <li>En <em>¿Con quién?</em> puede elegir a un profesional o <strong>Sin preferencia</strong>, y la app asigna al primero que esté libre.</li>
+    <li>Solo ve horarios realmente libres, calculados con el horario de cada profesional, sus turnos, sus días libres y los cierres del negocio.</li>
+    <li>En <em>Tus datos</em> deja nombre, apellido, teléfono de WhatsApp (con selector de país), email opcional y una nota para el negocio.</li>
+    <li>Al final ve <strong>¡Turno confirmado!</strong> o, si el servicio requiere aprobación, <strong>Solicitud enviada</strong>, con su número de turno.</li>
+  </ul>
+  <div class="callout note">
+    <span class="tag">Reglas de la reserva online</span>
+    <ul>
+      <li>Se puede reservar con al menos <strong>2 horas de anticipación</strong> y hasta <strong>60 días</strong> por delante.</li>
+      <li>Un mismo teléfono puede tener como máximo <strong>3 turnos futuros</strong>.</li>
+      <li>Un profesional aparece solo si tiene horario semanal, al menos un servicio asignado y las casillas de reservable y reservas online marcadas.</li>
+    </ul>
+  </div>
+
+  <h3>Feriados y cierres del negocio</h3>
+  <p>En <span class="path">Ajustes <i>›</i> Feriados y cierres del negocio</span> cargas los días en que no atiende nadie: desde, hasta, motivo y <span class="ui">Agregar</span>. Esos días no se ofrecen en la página online.</p>
+
+  <h2 id="td-whatsapp">WhatsApp y recordatorios</h2>
+  <p>En <span class="path">Ajustes</span> ves si tu negocio tiene <strong>WhatsApp conectado</strong>. Si dice <em>no conectado</em>, pídele al equipo de Turno Flash que lo conecte: sin eso no sale ningún mensaje.</p>
+
+  <h3>Lo que se envía solo</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Cuándo</th><th>Quién lo recibe</th><th>Qué dice</th></tr></thead>
+      <tbody>
+        <tr><td>Al crear un turno</td><td class="wrap">Cliente y negocio</td><td class="wrap">Al cliente, los datos del turno con opción de responder OK o CANCELAR. Si está pendiente de aprobación, le dice que su solicitud se recibió. Al negocio, un aviso de <em>Nuevo turno</em>.</td></tr>
+        <tr><td>Al aprobar un pendiente</td><td class="wrap">Cliente</td><td class="wrap">Que el negocio aprobó su solicitud y el turno está confirmado.</td></tr>
+        <tr><td>24 horas antes</td><td class="wrap">Cliente</td><td class="wrap">Recordatorio para confirmar con OK o cancelar.</td></tr>
+        <tr><td>1 hora antes</td><td class="wrap">Cliente</td><td class="wrap">Aviso de que el turno es en una hora.</td></tr>
+        <tr><td>Al cancelar</td><td class="wrap">Cliente</td><td class="wrap">Que su turno fue cancelado y que puede escribir para reagendar.</td></tr>
+        <tr><td>Al completar</td><td class="wrap">Cliente</td><td class="wrap">Pedido de valoración del 1 al 5 (si está activado).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wa-list">
+    <div class="wa">
+      <div class="wa-when">Ejemplo · al crear un turno</div>
+      <div class="wa-bubble">Hola Laura! 👋
+
+Tu turno en <b>Estudio Nova</b> está reservado:
+
+📅 jueves 24 de septiembre
+⏰ 10:30
+💇 Corte y peinado
+👤 <b>Con:</b> Carla
+🎫 N° T-0042
+
+Por favor confirma:
+✅ <b>OK</b> — confirmo que asisto
+❌ <b>CANCELAR</b> — no podré ir</div>
+    </div>
+    <div class="wa">
+      <div class="wa-when">Ejemplo · 24 horas antes</div>
+      <div class="wa-bubble">🔔 <b>Recordatorio</b> — Hola Laura!
+
+Mañana jueves 24 de septiembre a las 10:30 te esperamos en <b>Estudio Nova</b>.
+
+💇 Corte y peinado
+
+Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
+    </div>
+  </div>
+
+  <h3>Cuando el cliente responde</h3>
+  <ul>
+    <li><strong>OK, SI o CONFIRMO:</strong> el turno pasa a <span class="chip st-client_confirmed">Cliente confirmó</span> y el negocio recibe <em>Cliente confirmó asistencia</em>. En un turno pendiente solo queda anotado que vendrá: aprobarlo sigue siendo decisión tuya.</li>
+    <li><strong>CANCELAR o NO:</strong> el turno se cancela solo, el cliente recibe la confirmación y el negocio, un aviso de <em>Turno cancelado por el cliente</em>.</li>
+    <li><strong>Un número del 1 al 5</strong> después de un pedido de valoración: se guarda como rating y alimenta tus reportes.</li>
+    <li><strong>Cualquier otra cosa:</strong> el cliente recibe un mensaje que le vuelve a explicar cómo confirmar o cancelar.</li>
+  </ul>
+
+  <h3>Enviar recordatorios a mano</h3>
+  <p>En <span class="path">Recordatorios</span> eliges el día con las pastillas <span class="ui">Hoy</span>, <span class="ui">Mañana</span>, <span class="ui">+2 días</span> y <span class="ui">+3 días</span>. Arriba ves tres números: <strong>Por enviar</strong> (turnos pendientes o confirmados), <strong>Enviados</strong> y <strong>Tasa de respuesta</strong> (qué parte de los avisados confirmó). Envía uno por uno con <span class="ui">Enviar</span> o a todos juntos con <span class="ui">Enviar a N clientes</span>; los mensajes salen con un segundo de diferencia. Cada turno avisado pasa a <span class="chip st-reminded">Recordatorio enviado</span>.</p>
+
+  <h3>Automatizaciones que puedes encender</h3>
+  <ul>
+    <li><strong>Pedir valoración al completar un turno:</strong> viene encendida.</li>
+    <li><strong>Resumen diario por WhatsApp:</strong> cada mañana, a la hora que elijas (hora local del negocio), llega al WhatsApp del negocio cuántos turnos hay hoy, cuántos faltan confirmar y el ingreso estimado.</li>
+  </ul>
+  <p>Después de cambiar algo en Ajustes pulsa <span class="ui">Guardar cambios</span>.</p>
+
+  <h2 id="td-reportes">Reportes</h2>
+  <p><span class="path">Reportes</span> resume cómo va el negocio en el período que elijas: <span class="ui">7 días</span>, <span class="ui">30 días</span>, <span class="ui">90 días</span> o <span class="ui">Este mes</span>.</p>
+  <ul>
+    <li><strong>Indicadores:</strong> Ingresos (comparados con el período anterior), Turnos, Completados, Cancelados + No-show, Clientes nuevos y Rating promedio.</li>
+    <li><strong>Gráficos y tablas:</strong> Ingresos por día, Turnos por estado, Top servicios por ingresos, Rendimiento del equipo (turnos, ingresos y rating por profesional), Horas pico y Origen de las reservas.</li>
+  </ul>
+  <div class="callout note">
+    <span class="tag">Cómo se cuentan los ingresos</span>
+    <p>Solo suman los turnos <span class="chip st-completed">Completado</span>, con el precio del servicio. Un turno que quedó en Confirmado aunque el cliente vino no aparece en los ingresos: acostúmbrate a completarlos.</p>
+  </div>
+
+  <h2 id="td-equipo">Tu equipo</h2>
+  <p>En <span class="path">Invitar</span> escribe el correo de la persona y pulsa <span class="ui">Enviar invitación</span>. Recibe un correo con un enlace para crear su contraseña y queda en tu negocio como <strong>personal</strong>.</p>
+  <div class="split">
+    <div class="yes">
+      <h4>Tu personal puede</h4>
+      <ul>
+        <li>Ver la agenda y crear turnos</li>
+        <li>Avanzar estados, marcar No vino y cancelar</li>
+        <li>Enviar recordatorios por WhatsApp</li>
+        <li>Crear, editar y desactivar clientes</li>
+        <li>Exportar la agenda y los clientes</li>
+      </ul>
+    </div>
+    <div class="no">
+      <h4>Solo tú puedes</h4>
+      <ul>
+        <li>Servicios y Profesionales</li>
+        <li>Ajustes, reserva online y moneda</li>
+        <li>Reportes</li>
+        <li>Recuperar clientes</li>
+        <li>Invitar gente y gestionar la suscripción</li>
+      </ul>
+    </div>
+  </div>
+  <p>Invitar a alguien no lo agrega a la agenda: si esa persona atiende clientes, cárgala también en <span class="path">Profesionales</span>.</p>
+
+  <h2 id="td-licencia">Suscripción y licencia</h2>
+  <ul>
+    <li>Empiezas con <strong>7 días de prueba</strong>. Cuando la licencia se acerca a su vencimiento, la app muestra un aviso arriba.</li>
+    <li>Al vencer tienes <strong>7 días de gracia</strong> para renovar. Pasado ese plazo aparece <strong>Acceso bloqueado</strong>: tus datos no se borran, pero no puedes seguir trabajando hasta renovar. Solo quedan abiertas <span class="path">Suscripción</span> y <span class="path">Mi cuenta</span>.</li>
+    <li>La suscripción se compra desde la <strong>app de Android</strong> (Google Play), en <span class="path">Suscripción</span>: elige el Plan Mensual o el Plan Anual y pulsa <span class="ui">Suscribirme</span>. Desde la web solo ves el estado. Si cambias de teléfono, usa <span class="ui">Restaurar compras</span>.</li>
+  </ul>
+
+  <h2 id="td-cuenta">Mi cuenta</h2>
+  <p>Muestra tu correo, tu nombre y tu rol. Desde aquí también puedes eliminar tu cuenta escribiendo <span class="ui">ELIMINAR</span> para confirmar. Si eres el único miembro del negocio, el negocio se desactiva; si hay más personas, la app no te deja borrarla hasta que no queden otros miembros. Si pagas una suscripción, cancélala en Google Play.</p>
+
+  <h2 id="td-limites">Lo que todavía no se puede hacer</h2>
+  <ul>
+    <li><strong>Mover un turno</strong> a otra fecha, hora o servicio. Cancélalo y crea uno nuevo.</li>
+    <li><strong>Ver o dar de baja a tu personal</strong> desde la app, o <strong>cambiar el nombre o el WhatsApp del negocio</strong>. Pídeselo al equipo de Turno Flash.</li>
+    <li><strong>Reactivar un cliente desactivado</strong>: deja de verse en la lista. Si vuelve, crea su ficha de nuevo.</li>
+    <li><strong>Recuperar la contraseña</strong> desde la pantalla de inicio de sesión.</li>
+    <li><strong>Exportar a CSV desde el teléfono</strong>: el botón aparece solo en pantallas grandes.</li>
+  </ul>
+</article>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TURNOS · PERSONAL
+     ═══════════════════════════════════════════════════════════════ -->
+<article class="panel" id="turnos-personal" data-panel="turnos-personal" hidden>
+  <div class="panel-head">
+    <div class="eyebrow">Negocios de turnos · Personal</div>
+    <h1>Tu día a día con la agenda</h1>
+    <p class="lede">Para recepción y profesionales. Con tu usuario llevas la agenda del día: creas turnos, recibes a los clientes, avisas por WhatsApp y mantienes al día los datos de cada cliente.</p>
+  </div>
+
+  <h2 id="tp-entrar">Cómo entrar</h2>
+  <ol class="steps">
+    <li>El dueño del negocio te invita con tu correo.</li>
+    <li>Abre el correo de invitación y toca el enlace para crear tu contraseña.</li>
+    <li>Desde entonces entra con tu correo y tu contraseña, en la web o en la app del teléfono.</li>
+  </ol>
+  <div class="split">
+    <div class="yes">
+      <h4>Puedes</h4>
+      <ul>
+        <li>Ver la agenda y crear turnos</li>
+        <li>Avanzar estados, marcar No vino y cancelar</li>
+        <li>Enviar recordatorios por WhatsApp</li>
+        <li>Crear, editar y desactivar clientes</li>
+        <li>Exportar la agenda y los clientes</li>
+      </ul>
+    </div>
+    <div class="no">
+      <h4>Lo hace el dueño</h4>
+      <ul>
+        <li>Servicios, precios y profesionales</li>
+        <li>Horarios y días libres</li>
+        <li>Reserva online y ajustes</li>
+        <li>Reportes e invitaciones</li>
+      </ul>
+    </div>
+  </div>
+  <p>Si ves el aviso <strong>Sin organización asignada</strong>, pídele al dueño que revise la invitación.</p>
+
+  <h2 id="tp-inicio">La pantalla de inicio</h2>
+  <p>Arriba ves cuántos turnos hay <strong>hoy</strong>, separados en Confirmados, Pendientes, En curso y Completados. Más abajo están los atajos y los <strong>próximos</strong> tres turnos del día. En el teléfono, la barra inferior te lleva a Inicio, Turnos, Clientes y Avisos, y el botón <span class="ui">+</span> del centro abre la agenda.</p>
+
+  <h2 id="tp-agenda">La agenda</h2>
+  <p>En <span class="path">Turnos</span> elige la vista:</p>
+  <ul>
+    <li><span class="ui">Lista</span>: turnos por día, con buscador (cliente, teléfono, servicio o profesional) y filtros por estado.</li>
+    <li><span class="ui">Día</span>: grilla de 8:00 a 20:00. Toca un hueco libre para crear un turno a esa hora.</li>
+    <li><span class="ui">Semana</span>: los siete días en la misma grilla.</li>
+  </ul>
+
+  <h3>Crear un turno</h3>
+  <ol class="steps">
+    <li>Pulsa <span class="ui">Nuevo turno</span> o el botón redondo <span class="ui">+</span>.</li>
+    <li>Elige el cliente. Si no está, pulsa <span class="ui">Nuevo</span>, completa nombre, apellido y teléfono y pulsa <span class="ui">Crear y seleccionar</span>.</li>
+    <li>Pon fecha y hora, toca el servicio y, si corresponde, el profesional (o deja <span class="ui">Cualquiera</span>).</li>
+    <li>Agrega una nota si hace falta y pulsa <span class="ui">Crear turno</span>.</li>
+  </ol>
+  <div class="callout note">
+    <span class="tag">Bueno saber</span>
+    <ul>
+      <li>Si el profesional ya tiene otro turno a esa hora, la app no te deja crearlo.</li>
+      <li>Algunos servicios requieren aprobación: el turno queda <span class="chip st-pending">Pendiente</span> hasta que alguien lo confirme.</li>
+      <li>Si el negocio tiene WhatsApp conectado, el cliente recibe la confirmación en cuanto guardas.</li>
+    </ul>
+  </div>
+
+  <h2 id="tp-atender">Recibir y atender a un cliente</h2>
+  <p>Cada turno muestra un botón con el siguiente paso. El recorrido completo es este, aunque puedes saltar pasos (por ejemplo, completar directamente un turno confirmado):</p>
+  <div class="flow" aria-label="Recorrido de un turno">
+    <span class="chip st-pending">Pendiente</span><span class="arrow">→</span>
+    <span class="chip st-confirmed">Confirmado</span><span class="arrow">→</span>
+    <span class="chip st-reminded">Recordatorio enviado</span><span class="arrow">→</span>
+    <span class="chip st-client_confirmed">Cliente confirmó</span><span class="arrow">→</span>
+    <span class="chip st-checked_in">Check-in</span><span class="arrow">→</span>
+    <span class="chip st-in_progress">En curso</span><span class="arrow">→</span>
+    <span class="chip st-completed">Completado</span>
+  </div>
+  <ol class="steps">
+    <li>Cuando llega el cliente, pulsa <span class="ui">Hacer check-in</span>.</li>
+    <li>Cuando empiezas a atenderlo, <span class="ui">Empezar</span>.</li>
+    <li>Al terminar, <span class="ui">Completar</span>. Esto es importante: <strong>solo los turnos completados cuentan como ingreso</strong> en los reportes del negocio, y es el momento en que al cliente se le pide una valoración.</li>
+  </ol>
+  <p>Tocando el turno abres su detalle, con los botones <span class="ui">WhatsApp</span> (envía un recordatorio ahora), <span class="ui">No vino</span> y <span class="ui">Cancelar</span>. Un turno ya <span class="chip st-in_progress">En curso</span> no se puede marcar como No vino, y los turnos completados, cancelados o no asistidos ya no cambian.</p>
+
+  <h2 id="tp-recordatorios">Recordatorios</h2>
+  <p>La app envía sola un recordatorio <strong>24 horas</strong> y otro <strong>1 hora</strong> antes de cada turno. Además, en <span class="path">Recordatorios</span> puedes avisar a mano:</p>
+  <ol class="steps">
+    <li>Elige el día: <span class="ui">Hoy</span>, <span class="ui">Mañana</span>, <span class="ui">+2 días</span> o <span class="ui">+3 días</span>.</li>
+    <li>Revisa la lista <strong>Por enviar</strong> (turnos pendientes o confirmados).</li>
+    <li>Pulsa <span class="ui">Enviar</span> en cada uno o <span class="ui">Enviar a N clientes</span> para todos.</li>
+  </ol>
+  <div class="wa">
+    <div class="wa-when">Lo que recibe el cliente</div>
+    <div class="wa-bubble">🔔 Hola Laura!
+
+Te recordamos tu turno en <b>Estudio Nova</b> mañana a las 10:30.
+
+💇 Corte y peinado
+🎫 N° T-0042
+
+Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
+  </div>
+  <p>Si responde <strong>OK</strong>, el turno pasa solo a <span class="chip st-client_confirmed">Cliente confirmó</span>. Si responde <strong>CANCELAR</strong>, se cancela solo y el hueco queda libre. La <strong>Tasa de respuesta</strong> te dice qué parte de los avisados ya confirmó.</p>
+
+  <h2 id="tp-clientes">Clientes</h2>
+  <ul>
+    <li>Busca por nombre, teléfono o email.</li>
+    <li><span class="ui">Nuevo cliente</span>: nombre, apellido y teléfono son obligatorios. Anota en <em>Notas</em> lo que conviene recordar (preferencias, alergias).</li>
+    <li>Menú <span class="ui">⋮</span> › <span class="ui">Editar</span> para corregir datos, o <span class="ui">Desactivar</span> para sacarlo de la lista. Un cliente desactivado ya no aparece, así que úsalo solo cuando corresponda.</li>
+  </ul>
+
+  <h2 id="tp-cuenta">Tu cuenta y la licencia</h2>
+  <ul>
+    <li>En <span class="path">Mi cuenta</span> ves tu correo, tu nombre y tu rol, y puedes eliminar tu cuenta escribiendo <span class="ui">ELIMINAR</span>.</li>
+    <li>Si aparece <strong>Acceso bloqueado</strong>, la licencia del negocio venció. Avísale al dueño: tus datos siguen ahí y vuelves a trabajar en cuanto la renueve.</li>
+    <li>No hay recuperación de contraseña desde la pantalla de inicio de sesión; si la olvidas, avísale al dueño.</li>
+  </ul>
+</article>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VIAJES · DUEÑO
+     ═══════════════════════════════════════════════════════════════ -->
+<article class="panel" id="viajes-dueno" data-panel="viajes-dueno" hidden>
+  <div class="panel-head">
+    <div class="eyebrow">Negocios de viajes · Dueño del negocio</div>
+    <h1>Vende asientos de tus salidas</h1>
+    <p class="lede">Para agencias, excursiones y traslados en autobús. Publicas cada salida con sus asientos, paradas y precios; tus clientes reservan desde un link, y tú apruebas, cobras el anticipo y sales con la hoja de pasajeros impresa.</p>
+  </div>
+
+  <h2 id="vd-arranque">Puesta en marcha</h2>
+  <ol class="steps">
+    <li><strong>Crea tu cuenta.</strong> En <em>¿Qué hace tu negocio?</em> elige <span class="ui">Vendo asientos de viajes</span> (o <span class="ui">Las dos cosas</span>). Agrega el WhatsApp del negocio, que es donde te llegarán los avisos de reservas nuevas. Empiezas con 7 días de prueba.</li>
+    <li><strong>Elige la moneda</strong> en <span class="path">Ajustes <i>›</i> Moneda</span>: CUP, USD, EUR y otras monedas de la región.</li>
+    <li><strong>Configura el cobro del anticipo</strong> en <span class="path">Ajustes <i>›</i> Página de reservas de viajes</span>: escribe cómo se paga y cuántas horas hay para pagarlo.</li>
+    <li><strong>Crea tu primera salida</strong> en <span class="path">Viajes</span> y déjala publicada.</li>
+    <li><strong>Enciende la página de reservas</strong>, pulsa <span class="ui">Guardar cambios</span> y comparte el link.</li>
+    <li><strong>Pide que conecten tu WhatsApp</strong> al equipo de Turno Flash para que salgan los mensajes a los pasajeros.</li>
+  </ol>
+
+  <h2 id="vd-conceptos">Cómo está organizado</h2>
+  <ul>
+    <li><strong>Salida:</strong> un viaje concreto, con su fecha, su hora y sus asientos. <em>Excursión a Varadero del sábado 26</em> es una salida; la del sábado siguiente es otra.</li>
+    <li><strong>Reserva:</strong> una compra de uno o varios asientos de una salida, con el nombre de cada pasajero. Cada reserva tiene su número, como <span class="num">V-0001</span>.</li>
+    <li><strong>Punto de recogida:</strong> una parada donde sube gente, con su propia hora, precio y anticipo.</li>
+    <li><strong>Anticipo:</strong> lo que el cliente paga por adelantado para guardar su asiento. El resto se cobra después, normalmente en efectivo el día del viaje.</li>
+  </ul>
+
+  <h3>Aprobar y cobrar son dos cosas distintas</h3>
+  <p>Cada reserva lleva dos marcas independientes. Aprobar una reserva no la da por pagada, y registrar un cobro no la aprueba.</p>
+  <div class="axes">
+    <div class="axis">
+      <h4>¿Está aceptada?</h4>
+      <p>La decides tú con Aprobar o Cancelar.</p>
+      <div class="chips">
+        <span class="chip st-checked_in">Por aprobar</span>
+        <span class="chip st-completed">Confirmada</span>
+        <span class="chip st-cancelled">Cancelada</span>
+      </div>
+    </div>
+    <div class="axis">
+      <h4>¿Pagó el anticipo?</h4>
+      <p>Cambia sola según lo que registres como cobrado.</p>
+      <div class="chips">
+        <span class="chip st-checked_in">Anticipo pendiente</span>
+        <span class="chip st-completed">Anticipo cobrado</span>
+        <span class="chip st-pending">Sin anticipo</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 id="vd-salidas">Crear una salida</h2>
+  <p>En <span class="path">Viajes</span> pulsa <span class="ui">Nueva salida</span>. La fecha viene puesta para mañana.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Campo</th><th>Para qué sirve</th></tr></thead>
+      <tbody>
+        <tr><td>Título</td><td class="wrap">Nombre corto de la salida, por ejemplo <em>Santa Clara – La Habana</em>.</td></tr>
+        <tr><td>Descripción</td><td class="wrap">Lo que ve el cliente: ruta, qué incluye, qué llevar.</td></tr>
+        <tr><td>Punto de encuentro</td><td class="wrap">Dónde y cómo encontrar el autobús.</td></tr>
+        <tr><td>Fecha, Sale, Regresa</td><td class="wrap">Día y hora de salida. El regreso es opcional y siempre del mismo día.</td></tr>
+        <tr><td>Asientos</td><td class="wrap">Capacidad total de la salida (hasta 200).</td></tr>
+        <tr><td>Máx. por reserva</td><td class="wrap">Cuántos asientos puede tomar una misma persona en una reserva.</td></tr>
+        <tr><td>Precio solo ida y Anticipo</td><td class="wrap">Precio y anticipo por asiento. Se usan si no cargas puntos de recogida.</td></tr>
+        <tr><td>Ida y vuelta</td><td class="wrap">Marca <em>Vendo esta salida también de ida y vuelta</em> y pon su precio. Es el mismo autobús y los mismos asientos: el cliente elige al reservar y solo cambia el precio.</td></tr>
+        <tr><td>Tengo que aprobar cada reserva</td><td class="wrap">Viene marcada. Si la desmarcas, quien reserva queda confirmado al instante.</td></tr>
+        <tr><td>Mostrar en mi página de reservas</td><td class="wrap">Si la desmarcas, la salida existe solo para ti y cargas las reservas a mano.</td></tr>
+        <tr><td>Chofer y vehículo</td><td class="wrap">Nombre y teléfono del chofer, descripción del vehículo y una foto. Todo opcional: puedes completarlo el día antes.</td></tr>
+        <tr><td>Cuándo se puede reservar</td><td class="wrap">Fecha y hora en que <em>abren</em> y <em>cierran</em> las reservas. Vacío = se puede reservar desde que publicas hasta que sale.</td></tr>
+        <tr><td>Notas internas</td><td class="wrap">Solo las ven tú y tu equipo.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Pulsa <span class="ui">Crear salida</span>. La descripción y el punto de encuentro aceptan el mismo formato que WhatsApp: <b>*negrita*</b>, <i>_cursiva_</i>, <s>~tachado~</s> y texto monoespaciado, con una barra de botones y vista previa. Así lo que escribes se ve igual cuando lo pegas en tus grupos.</p>
+
+  <h3>Puntos de recogida</h3>
+  <p>Si el autobús recoge gente en varias paradas y el precio cambia según desde dónde sube, agrega cada parada con su nombre, hora, precio solo ida, precio ida y vuelta, anticipo e indicaciones (por ejemplo, <em>frente a la terminal</em>). Si una parada no tiene precio, usa el de la salida.</p>
+  <div class="callout note">
+    <span class="tag">Ejemplo</span>
+    <p>La salida <em>Sagua – La Habana</em> recoge en Sagua a las 6:00 por 10 000 y en Santa Clara a las 7:15 por 8 500, con anticipos distintos. El cliente que sube en Santa Clara ve y paga 8 500.</p>
+  </div>
+  <p>Cuando una salida tiene paradas cargadas, <strong>elegir una es obligatorio</strong> al reservar, y la parada define el precio y el anticipo de esa reserva.</p>
+
+  <h3>La ventana de reserva</h3>
+  <p>Sirve para casos como <em>se reserva desde el jueves anterior a las 4 de la tarde</em>. Mientras está cerrada, la salida sigue apareciendo en tu página con el aviso <em>Las reservas abren el …</em>, y al cerrarse muestra <em>Las reservas de esta salida ya cerraron</em>. La ventana solo frena a la página web: tú puedes cargar reservas a mano en cualquier momento.</p>
+
+  <h2 id="vd-lista">Gestionar tus salidas</h2>
+  <p>La lista muestra las salidas próximas, con buscador. Cada tarjeta indica fecha, horario, punto de encuentro, precio, anticipo y una barra de ocupación (<em>12 de 20 asientos · 8 libres</em>), además de marcas como <span class="chip st-checked_in">Requiere aprobación</span>, <span class="chip st-pending">Sin publicar</span>, <span class="chip st-checked_in">Completo</span> o <span class="chip st-cancelled">Cancelada</span>. El menú <span class="ui">⋮</span> tiene:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Acción</th><th>Qué hace</th></tr></thead>
+      <tbody>
+        <tr><td><span class="ui">Ver pasajeros</span></td><td class="wrap">Abre la lista de reservas de la salida. También se abre tocando el contador de asientos.</td></tr>
+        <tr><td><span class="ui">Editar</span></td><td class="wrap">Cambia cualquier dato de la salida.</td></tr>
+        <tr><td><span class="ui">Publicar</span> / <span class="ui">Quitar de la página</span></td><td class="wrap">Muestra u oculta la salida en tu página sin tocar las reservas que ya tiene.</td></tr>
+        <tr><td><span class="ui">Compartir</span></td><td class="wrap">Arma un mensaje con la salida, sus paradas con precios y el link para reservar, y abre WhatsApp para enviarlo o pegarlo en tus grupos.</td></tr>
+        <tr><td><span class="ui">Duplicar</span></td><td class="wrap">Copia todo (horario, asientos, paradas, precios, anticipo, chofer y foto) con la fecha que elijas. La ventana de reserva se corre los mismos días. Las reservas no se copian.</td></tr>
+        <tr><td><span class="ui">Cancelar salida</span></td><td class="wrap">Deja de publicarla y no acepta más reservas. Con WhatsApp conectado, cada pasajero con reserva recibe un aviso.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout tip">
+    <span class="tag">Consejo</span>
+    <p>Si haces la misma ruta varias veces por semana, arma bien la primera salida y después usa <span class="ui">Duplicar</span> para cada fecha.</p>
+  </div>
+
+  <h2 id="vd-pasajeros">Pasajeros y cobros</h2>
+  <p>Al abrir <span class="ui">Ver pasajeros</span> ves arriba el título, la fecha y la ocupación; los datos del chofer y la foto del vehículo; y un resumen con lo que requiere atención: <em>3 por aprobar</em>, <em>2 con anticipo pendiente</em>, <em>Falta cobrar …</em>.</p>
+  <p>Cada reserva muestra quién reservó, su número, cantidad de asientos, teléfono (tócalo para llamar), parada, si es ida y vuelta, las dos marcas de estado, el monto que falta (<em>Falta …</em> o <em>Pagó completo</em>), los nombres de los pasajeros y la nota del cliente. Si faltan nombres, lo avisa: <em>Faltan 2 nombres para la lista del chofer</em>.</p>
+
+  <h3>Aprobar una reserva</h3>
+  <p>Pulsa <span class="ui">Aprobar</span> en la reserva. Pasa a <span class="chip st-completed">Confirmada</span> y, con WhatsApp conectado, el pasajero recibe la confirmación. El anticipo sigue como estaba.</p>
+
+  <h3>Registrar un cobro</h3>
+  <ol class="steps">
+    <li>Pulsa <span class="ui">Registrar cobro</span> (si ya cobraste algo, el botón muestra <em>Cobrado …</em>).</li>
+    <li>En <strong>Cobrado</strong> escribe el <strong>total recibido hasta ahora</strong> por esa reserva, no solo el último pago.</li>
+    <li>Si hay un extra (llevarlo al aeropuerto, equipaje, otro destino), escribe qué es y cuánto cuesta: se suma a lo que falta cobrar.</li>
+    <li>Opcional: indica cómo pagó (transferencia, efectivo al chofer…).</li>
+    <li>Pulsa <span class="ui">Guardar cobro</span>.</li>
+  </ol>
+  <p>Cuando lo cobrado alcanza el anticipo, la reserva pasa sola a <span class="chip st-completed">Anticipo cobrado</span> y el pasajero recibe un WhatsApp con lo que le queda por pagar el día del viaje.</p>
+
+  <h3>Otras acciones del menú ⋮ de cada reserva</h3>
+  <ul>
+    <li><span class="ui">Editar nombres de pasajeros</span>: un nombre por asiento.</li>
+    <li><span class="ui">Aprobar reserva</span> o <span class="ui">Confirmar</span>.</li>
+    <li><span class="ui">Cancelar reserva</span>: los asientos vuelven a quedar libres y, con WhatsApp conectado, el pasajero recibe un aviso. Si ya había pagado algo, el mensaje le pide contactarte para la devolución.</li>
+  </ul>
+
+  <h3>Cargar una reserva a mano</h3>
+  <p>Para quien reserva por teléfono o en persona, pulsa <span class="ui">Cargar reserva</span>:</p>
+  <ol class="steps">
+    <li>Nombre, apellido y teléfono (obligatorio). Si ese teléfono ya es cliente, se reutiliza su ficha.</li>
+    <li>Tipo de viaje (solo ida o ida y vuelta) y punto de recogida, que define precio y anticipo.</li>
+    <li>Cantidad de asientos y nombres de los pasajeros. Los nombres pueden quedar vacíos y completarse antes del viaje.</li>
+    <li>Si ya te pagó algo, ponlo en <strong>Ya cobrado</strong>; la app te muestra el total y lo que falta. Agrega un extra si lo hay.</li>
+    <li>Pulsa <span class="ui">Cargar reserva</span>.</li>
+  </ol>
+  <p>Una reserva cargada a mano respeta la aprobación de la salida y los asientos libres, pero puede cargarse aunque la ventana de reserva esté cerrada.</p>
+
+  <h3>La hoja del chofer</h3>
+  <ul>
+    <li><span class="ui">Imprimir</span> genera una hoja con el nombre del negocio, los datos de la salida y una fila <strong>por pasajero</strong>: nombre, quién reservó, teléfono, número de reserva, estado, extra, total, lo que pagó y <strong>lo que hay que cobrarle</strong>, con totales al pie. Desde el diálogo de impresión puedes guardarla como PDF.</li>
+    <li><span class="ui">Exportar CSV</span> descarga la misma información para Excel o Google Sheets.</li>
+  </ul>
+  <p>Los importes se reparten por pasajero: una reserva de 4 asientos por 2 000 figura como 500 por persona. Las reservas canceladas no aparecen ni suman en los totales.</p>
+
+  <h2 id="vd-pagina">Tu página de reservas</h2>
+  <p>En <span class="path">Ajustes</span>, la sección <strong>Página de reservas de viajes</strong> tiene:</p>
+  <ul>
+    <li>El interruptor para activarla (luego <span class="ui">Guardar cambios</span>) y el link, con <span class="ui">Copiar link</span>, <span class="ui">Compartir</span> (WhatsApp con <em>Reserva tu asiento</em>) y <span class="ui">Ver página</span>. Si no tienes ninguna salida publicada, te lo advierte.</li>
+    <li><strong>Cómo se paga el anticipo:</strong> las instrucciones que el cliente ve apenas reserva y en el WhatsApp de confirmación, con formato de WhatsApp. Por ejemplo: <em>*Transfiere el anticipo* a la tarjeta 9200 1299 1234 5678 (Juan Pérez) y envíanos el comprobante por WhatsApp.</em></li>
+    <li><strong>Horas para pagar el anticipo:</strong> de 1 a 168 (una semana). Viene en 24.</li>
+  </ul>
+
+  <h3>Qué hace tu cliente en la página</h3>
+  <div class="flow" aria-label="Pasos de la reserva de viaje">
+    <span class="chip plain">Elige tu viaje</span><span class="arrow">→</span>
+    <span class="chip plain">Tu reserva</span><span class="arrow">→</span>
+    <span class="chip plain">Tus datos</span><span class="arrow">→</span>
+    <span class="chip plain">Listo</span>
+  </div>
+  <ol class="steps">
+    <li><strong>Elige tu viaje:</strong> ve las salidas publicadas con foto, fecha, precio desde y asientos que quedan, o si están sin asientos, por abrir o cerradas.</li>
+    <li><strong>Tu reserva:</strong> elige dónde lo recogen, solo ida o ida y vuelta, cuántos asientos (hasta el máximo por reserva) y escribe el nombre de <strong>cada</strong> pasajero, que aquí es obligatorio.</li>
+    <li><strong>Tus datos:</strong> nombre, apellido, teléfono de WhatsApp con su país, email opcional y una nota.</li>
+    <li><strong>Listo:</strong> ve <strong>¡Asiento reservado!</strong> o <strong>Solicitud enviada</strong> si la salida requiere aprobación, con el resumen, el total, el número de reserva, el anticipo que falta, hasta cuándo se guardan sus asientos y tus instrucciones de pago.</li>
+  </ol>
+  <p>La página revisa sola cada 30 segundos cuántos asientos quedan, y vuelve a comprobarlo antes de pedir los datos, para que nadie complete el formulario de una salida que se llenó. Es imposible vender más asientos de los que hay. Un mismo teléfono puede tener hasta 3 reservas futuras.</p>
+
+  <div class="callout warn">
+    <span class="tag">Importante sobre el plazo del anticipo</span>
+    <p>La reserva muestra <em>Vence …</em> con la fecha límite, pero <strong>por ahora los asientos no se liberan solos</strong> cuando pasa el plazo. Revisa las reservas con anticipo pendiente y vencido y cancélalas tú con <span class="ui">Cancelar reserva</span> para liberar los asientos.</p>
+  </div>
+
+  <h2 id="vd-whatsapp">Mensajes de WhatsApp</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Cuándo</th><th>Quién lo recibe</th></tr></thead>
+      <tbody>
+        <tr><td>Se crea una reserva</td><td class="wrap">El pasajero, con el detalle, el total, el anticipo, el plazo y tus instrucciones de pago. Pasa con las reservas web y con las que cargas a mano.</td></tr>
+        <tr><td>Llega una reserva por la web</td><td class="wrap">El negocio, en su WhatsApp: <em>Nueva reserva de viaje</em> con quién reservó, los pasajeros, el total y si está pendiente de tu aprobación.</td></tr>
+        <tr><td>Apruebas una reserva</td><td class="wrap">El pasajero: su reserva quedó confirmada y cuánto le falta abonar.</td></tr>
+        <tr><td>Se cobra el anticipo</td><td class="wrap">El pasajero: se recibió su anticipo y cuánto queda para el día del viaje.</td></tr>
+        <tr><td>Cancelas una reserva</td><td class="wrap">El pasajero: su reserva fue cancelada y, si ya había pagado algo, que te contacte para coordinar la devolución.</td></tr>
+        <tr><td>Cancelas una salida</td><td class="wrap">Cada pasajero con una reserva activa en esa salida: que la salida fue cancelada, con el mismo aviso de devolución si pagó algo.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="wa-list">
+    <div class="wa">
+      <div class="wa-when">Ejemplo · reserva recibida</div>
+      <div class="wa-bubble">Hola Yanet! Recibimos tu solicitud de reserva.
+
+<b>Santa Clara – La Habana</b>
+🗓️ sábado 26 de septiembre a las 06:00
+💺 2 asientos
+📍 Te recogemos en: Santa Clara (07:15)
+N° de reserva: V-0031
+
+Total: <b>17.000 CUP</b>
+
+💵 Para guardarte los asientos falta el anticipo de <b>4.000 CUP</b>, antes del 25 de septiembre, 07:15.
+<b>Transfiere el anticipo</b> a la tarjeta 9200 1299 1234 5678 (Juan Pérez).
+
+Te confirmamos apenas la revisemos.
+
+Viajes Ruta Central</div>
+    </div>
+    <div class="wa">
+      <div class="wa-when">Ejemplo · anticipo cobrado</div>
+      <div class="wa-bubble">Hola Yanet! 💵 Recibimos tu anticipo de <b>4.000 CUP</b>.
+
+<b>Santa Clara – La Habana</b>
+🗓️ sábado 26 de septiembre a las 06:00
+💺 2 asientos
+📍 Te recogemos en: Santa Clara (07:15)
+N° de reserva: V-0031
+
+Quedan <b>13.000 CUP</b> para abonar el día del viaje.
+
+Viajes Ruta Central</div>
+    </div>
+    <div class="wa">
+      <div class="wa-when">Ejemplo · salida cancelada</div>
+      <div class="wa-bubble">Hola Yanet. Lamentamos avisarte que esta salida fue <b>cancelada</b>:
+
+<b>Santa Clara – La Habana</b>
+🗓️ sábado 26 de septiembre a las 06:00
+💺 2 asientos
+📍 Te recogemos en: Santa Clara (07:15)
+N° de reserva: V-0031
+
+Por los <b>4.000 CUP</b> que ya pagaste, contáctanos para coordinar la devolución.
+
+Viajes Ruta Central</div>
+    </div>
+  </div>
+
+  <h2 id="vd-resto">Clientes, equipo y cuenta</h2>
+  <ul>
+    <li><strong>Clientes:</strong> cada persona que reserva queda guardada por su teléfono en <span class="path">Clientes</span>, donde puedes buscarla, editarla, desactivarla o exportar la lista a CSV.</li>
+    <li><strong>Equipo:</strong> en <span class="path">Invitar</span> escribe el correo de alguien de tu equipo y pulsa <span class="ui">Enviar invitación</span>. Entra como personal: ve las salidas y los pasajeros, e imprime o exporta la hoja, pero no crea salidas, no carga reservas, no aprueba y no registra cobros.</li>
+    <li><strong>Suscripción:</strong> 7 días de prueba y 7 de gracia al vencer. Pasado eso aparece Acceso bloqueado hasta renovar, sin perder datos. La suscripción se compra desde la app de Android, en <span class="path">Suscripción</span>.</li>
+    <li><strong>Mi cuenta:</strong> tu correo, tu nombre y tu rol, y la opción de eliminar la cuenta escribiendo <span class="ui">ELIMINAR</span>.</li>
+  </ul>
+  <p>Si tu negocio solo vende viajes, la app no te muestra las secciones de turnos: en el menú verás Viajes, Clientes, Ajustes, Suscripción, Invitar, Mi cuenta y Ayuda, y en el teléfono la barra inferior tiene Inicio, Viajes, Clientes y Cuenta.</p>
+
+  <h2 id="vd-limites">Lo que todavía no se puede hacer</h2>
+  <ul>
+    <li><strong>Liberar asientos solos</strong> cuando vence el plazo del anticipo (ver arriba).</li>
+    <li><strong>Marcar quién viajó y quién no se presentó</strong>.</li>
+    <li><strong>Cobrar el anticipo dentro de la app</strong>: se paga fuera (transferencia, efectivo) y tú lo registras.</li>
+    <li><strong>Elegir un asiento concreto</strong>: el cliente elige cuántos, no cuáles.</li>
+    <li><strong>Viajes de varios días</strong>: el regreso es siempre el mismo día.</li>
+    <li><strong>Cambiar el nombre o el WhatsApp del negocio</strong>, o <strong>ver y dar de baja a tu personal</strong>. Pídeselo al equipo de Turno Flash.</li>
+  </ul>
+</article>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VIAJES · PERSONAL
+     ═══════════════════════════════════════════════════════════════ -->
+<article class="panel" id="viajes-personal" data-panel="viajes-personal" hidden>
+  <div class="panel-head">
+    <div class="eyebrow">Negocios de viajes · Personal</div>
+    <h1>Salidas, pasajeros y la hoja del chofer</h1>
+    <p class="lede">Para quien atiende a los pasajeros, coordina el embarque o maneja. Con tu usuario consultas cada salida, sabes quién viaja y cuánto hay que cobrarle a cada uno, y llevas la hoja impresa.</p>
+  </div>
+
+  <h2 id="vp-entrar">Cómo entrar y qué puedes hacer</h2>
+  <ol class="steps">
+    <li>El dueño te invita con tu correo.</li>
+    <li>Abre la invitación y toca el enlace para crear tu contraseña.</li>
+    <li>Entra con tu correo y tu contraseña, en la web o en la app del teléfono.</li>
+  </ol>
+  <div class="split">
+    <div class="yes">
+      <h4>Puedes</h4>
+      <ul>
+        <li>Ver las salidas próximas y cuántos asientos quedan</li>
+        <li>Ver cada reserva, sus pasajeros y lo que falta cobrar</li>
+        <li>Imprimir la hoja del chofer y exportarla a CSV</li>
+        <li>Llamar a un pasajero tocando su teléfono</li>
+        <li>Crear, editar y desactivar clientes</li>
+      </ul>
+    </div>
+    <div class="no">
+      <h4>Lo hace el dueño</h4>
+      <ul>
+        <li>Crear, editar, publicar o cancelar salidas</li>
+        <li>Cargar reservas a mano</li>
+        <li>Aprobar o cancelar reservas</li>
+        <li>Registrar cobros y extras</li>
+        <li>Ajustes y página de reservas</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 id="vp-salidas">Consultar las salidas</h2>
+  <p>En <span class="path">Viajes</span> (en el teléfono, en la barra inferior, junto a Inicio, Clientes y Cuenta) ves las salidas próximas, con buscador. Cada tarjeta muestra:</p>
+  <ul>
+    <li>Título, fecha, hora de salida y regreso, punto de encuentro y precio.</li>
+    <li>Cuántos asientos están ocupados y cuántos quedan, con una barra de ocupación.</li>
+    <li>Marcas como <span class="chip st-checked_in">Requiere aprobación</span>, <span class="chip st-pending">Sin publicar</span>, <span class="chip st-checked_in">Completo</span> o <span class="chip st-cancelled">Cancelada</span>.</li>
+  </ul>
+  <p>Toca el contador de asientos (<em>12 de 20 asientos</em>) para abrir la lista de pasajeros.</p>
+
+  <h2 id="vp-pasajeros">Leer la lista de pasajeros</h2>
+  <p>Arriba ves los datos del chofer y del vehículo, y un resumen como <em>2 por aprobar · 3 con anticipo pendiente · Falta cobrar …</em>. Cada reserva muestra:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Dato</th><th>Cómo leerlo</th></tr></thead>
+      <tbody>
+        <tr><td>Nombre y <span class="num">V-0012</span></td><td class="wrap">Quién reservó y el número de reserva, el mismo que figura en su WhatsApp.</td></tr>
+        <tr><td>Asientos y parada</td><td class="wrap">Cuántos viajan y dónde suben.</td></tr>
+        <tr><td><span class="chip st-completed">Confirmada</span> <span class="chip st-checked_in">Por aprobar</span></td><td class="wrap">Si el negocio ya aceptó la reserva.</td></tr>
+        <tr><td><span class="chip st-completed">Anticipo cobrado</span> <span class="chip st-checked_in">Anticipo pendiente</span></td><td class="wrap">Si ya pagó el anticipo. Es independiente de lo anterior.</td></tr>
+        <tr><td><em>Falta …</em> / <em>Pagó completo</em></td><td class="wrap">Cuánto dinero queda por cobrar de esa reserva, extras incluidos.</td></tr>
+        <tr><td>Pasajeros</td><td class="wrap">Los nombres, numerados. Si falta alguno verás <em>Faltan N nombres para la lista del chofer</em>.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Las reservas <span class="chip st-cancelled">Cancelada</span> aparecen atenuadas: esos pasajeros ya no viajan.</p>
+
+  <h2 id="vp-dia">El día del viaje</h2>
+  <ol class="steps">
+    <li>Abre la salida y pulsa <span class="ui">Imprimir</span> (o guárdala como PDF desde el diálogo de impresión). Con <span class="ui">Exportar CSV</span> tienes la misma información en planilla.</li>
+    <li>La hoja tiene una fila <strong>por pasajero</strong> con su nombre, quién reservó, teléfono, reserva, estado, extra, total, lo que pagó y la columna <strong>A cobrar</strong>. Al pie están los totales.</li>
+    <li>Cobra a cada pasajero lo que indica <strong>A cobrar</strong>. Si una reserva de varios asientos la paga una sola persona, suma las filas de esa reserva.</li>
+    <li>Al terminar, pásale al dueño lo que cobraste por reserva para que lo registre en la app.</li>
+  </ol>
+  <p>Las reservas canceladas no aparecen en la hoja: todo lo que figura ahí viaja.</p>
+
+  <h2 id="vp-clientes">Clientes</h2>
+  <p>En <span class="path">Clientes</span> encuentras a cada persona que reservó, buscando por nombre, teléfono o email. Puedes crear clientes nuevos y corregir sus datos desde el menú <span class="ui">⋮</span> › <span class="ui">Editar</span>.</p>
+
+  <h2 id="vp-cuenta">Tu cuenta</h2>
+  <ul>
+    <li>En <span class="path">Mi cuenta</span> ves tu correo, tu nombre y tu rol.</li>
+    <li>Si aparece <strong>Acceso bloqueado</strong>, venció la licencia del negocio: avísale al dueño.</li>
+  </ul>
+</article>
+
+    <p class="foot">Manual basado en la versión de Turno Flash de septiembre de 2026. Dentro de la app lo encuentras en Ayuda. Los ejemplos de nombres, negocios y montos son ilustrativos.</p>
+  </main>
+</div>
+
+<script>
+  (function () {
+    var state = { module: "turnos", role: "dueno" };
+    var panels = document.querySelectorAll("[data-panel]");
+    var tocList = document.getElementById("toc-list");
+    var tocMobileList = document.getElementById("toc-mobile-list");
+    var tocMobile = document.getElementById("toc-mobile");
+
+    function fillToc(panel) {
+      var headings = panel.querySelectorAll("h2[id]");
+      [tocList, tocMobileList].forEach(function (list) {
+        list.textContent = "";
+        headings.forEach(function (h) {
+          var li = document.createElement("li");
+          var a = document.createElement("a");
+          a.href = "#" + h.id;
+          a.textContent = h.textContent;
+          if (list === tocMobileList) {
+            a.addEventListener("click", function () { tocMobile.open = false; });
+          }
+          li.appendChild(a);
+          list.appendChild(li);
+        });
+      });
+    }
+
+    function render(scroll) {
+      var key = state.module + "-" + state.role;
+      var active = null;
+      panels.forEach(function (p) {
+        var on = p.dataset.panel === key;
+        p.hidden = !on;
+        if (on) active = p;
+      });
+      document.querySelectorAll("[data-module]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.dataset.module === state.module));
+      });
+      document.querySelectorAll("[data-role]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.dataset.role === state.role));
+      });
+      if (active) fillToc(active);
+      try { history.replaceState(null, "", "#" + key); } catch (e) {}
+      if (scroll) window.scrollTo({ top: 0 });
+    }
+
+    function fromHash() {
+      var hash = (location.hash || "").slice(1);
+      var target = hash ? document.getElementById(hash) : null;
+      var panel = target ? target.closest("[data-panel]") : null;
+      if (panel) {
+        var parts = panel.dataset.panel.split("-");
+        state.module = parts[0];
+        state.role = parts[1];
+      }
+      render(false);
+      if (target && target.tagName === "H2") target.scrollIntoView();
+    }
+
+    document.querySelectorAll("[data-module]").forEach(function (b) {
+      b.addEventListener("click", function () { state.module = b.dataset.module; render(true); });
+    });
+    document.querySelectorAll("[data-role]").forEach(function (b) {
+      b.addEventListener("click", function () { state.role = b.dataset.role; render(true); });
+    });
+
+    fromHash();
+  })();
+</script>

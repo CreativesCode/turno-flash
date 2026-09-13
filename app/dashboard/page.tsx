@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { Avatar, Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useAppointments } from "@/hooks/useAppointments.query";
+import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { useErrorStatsQuery } from "@/hooks/useErrorLogs.query";
 import type { AppointmentStatus } from "@/types/appointments";
 import { LicenseStatusResult } from "@/types/organization";
@@ -25,6 +26,7 @@ import {
   BarChart3,
   Bell,
   Building2,
+  Bus,
   Calendar,
   type LucideIcon,
   Package,
@@ -48,6 +50,8 @@ interface ShortcutCard {
   roles?: string[];
   /** If true, requires the user to have an organization. */
   requiresOrg?: boolean;
+  /** Only shown when the organization has this module enabled. */
+  module?: "appointments" | "trips";
 }
 
 const SHORTCUTS: readonly ShortcutCard[] = [
@@ -59,6 +63,17 @@ const SHORTCUTS: readonly ShortcutCard[] = [
     mesh: "mesh-info",
     href: "/dashboard/appointments",
     requiresOrg: true,
+    module: "appointments",
+  },
+  {
+    key: "trips",
+    title: "Viajes",
+    subtitle: "Salidas y pasajeros",
+    Icon: Bus,
+    mesh: "mesh-info",
+    href: "/dashboard/trips",
+    requiresOrg: true,
+    module: "trips",
   },
   {
     key: "customers",
@@ -77,6 +92,7 @@ const SHORTCUTS: readonly ShortcutCard[] = [
     mesh: "mesh-secondary",
     href: "/dashboard/reminders",
     requiresOrg: true,
+    module: "appointments",
   },
   {
     key: "services",
@@ -87,6 +103,7 @@ const SHORTCUTS: readonly ShortcutCard[] = [
     href: "/dashboard/services",
     roles: ["admin", "owner"],
     requiresOrg: true,
+    module: "appointments",
   },
   {
     key: "staff",
@@ -97,6 +114,7 @@ const SHORTCUTS: readonly ShortcutCard[] = [
     href: "/dashboard/staff",
     roles: ["admin", "owner"],
     requiresOrg: true,
+    module: "appointments",
   },
   {
     key: "reports",
@@ -107,6 +125,7 @@ const SHORTCUTS: readonly ShortcutCard[] = [
     href: "/dashboard/reports",
     roles: ["admin", "owner"],
     requiresOrg: true,
+    module: "appointments",
   },
   {
     key: "platform",
@@ -192,6 +211,10 @@ export default function DashboardPage() {
   const { profile, signOut } = useAuth();
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
+  const { modules } = useOrganizationModules();
+  // Today's stats, "Nuevo turno" and the upcoming list only make sense for a
+  // business that takes appointments; a bus agency would see empty counters.
+  const showAppointments = !!profile?.organization_id && modules.appointments;
 
   const [licenseStatus, setLicenseStatus] =
     useState<LicenseStatusResult | null>(null);
@@ -332,9 +355,10 @@ export default function DashboardPage() {
     return SHORTCUTS.filter((s) => {
       if (s.roles && (!role || !s.roles.includes(role))) return false;
       if (s.requiresOrg && !hasOrg) return false;
+      if (s.module && hasOrg && !modules[s.module]) return false;
       return true;
     });
-  }, [profile?.role, profile?.organization_id]);
+  }, [profile?.role, profile?.organization_id, modules]);
 
   // Next 3 upcoming non-terminal appointments — sorted by start_time.
   const upcoming = useMemo(() => {
@@ -427,7 +451,7 @@ export default function DashboardPage() {
               </h1>
             </div>
             <div className="flex items-center gap-3">
-              {profile?.organization_id && (
+              {showAppointments && (
                 <Button
                   variant="mesh-primary"
                   size="md"
@@ -506,7 +530,7 @@ export default function DashboardPage() {
           )}
 
           {/* Hero stat (solo cuando hay org) */}
-          {profile?.organization_id && (
+          {showAppointments && (
             <Card className="relative mb-6 overflow-hidden p-5 lg:mb-8 lg:p-6">
               {/* Decorative radial */}
               <div
@@ -598,7 +622,7 @@ export default function DashboardPage() {
           )}
 
           {/* Próximos turnos */}
-          {profile?.organization_id && (
+          {showAppointments && (
             <section>
               <div className="mb-3 flex items-center justify-between">
                 <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">

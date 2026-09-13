@@ -5,7 +5,8 @@
 // appointments.
 //
 // Body: { bookingId: string, intent: "trip_booked" | "trip_approved"
-//         | "trip_deposit_paid" | "trip_notify_business" }
+//         | "trip_deposit_paid" | "trip_notify_business"
+//         | "trip_booking_cancelled" | "trip_departure_cancelled" }
 //
 // One intent per EVENT: approving a booking and receiving its deposit are
 // independent, so each one has its own message.
@@ -22,7 +23,9 @@ type Intent =
   | "trip_booked"
   | "trip_approved"
   | "trip_deposit_paid"
-  | "trip_notify_business";
+  | "trip_notify_business"
+  | "trip_booking_cancelled"
+  | "trip_departure_cancelled";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -293,6 +296,12 @@ function buildMessage(
   const total = (booking.price_total ?? 0) + (booking.extra_amount ?? 0);
   const pending = Math.max(total - (booking.amount_paid ?? 0), 0);
   const deposit = booking.deposit_amount ?? 0;
+  const refundNote =
+    (booking.amount_paid ?? 0) > 0
+      ? `Por los *${money(booking.amount_paid, currency)}* que ya pagaste, contáctanos para coordinar la devolución.
+
+`
+      : "";
 
   const header = `*${trip?.title ?? "Tu viaje"}*\n🗓️ ${when}\n💺 ${seats}${roundTrip}${pickup}${ref}`;
 
@@ -340,6 +349,28 @@ function buildMessage(
         (pending > 0
           ? `Quedan *${money(pending, currency)}* para abonar el día del viaje.\n\n`
           : "Está todo abonado. 🙌\n\n") +
+        `${orgName}`
+      );
+
+    case "trip_booking_cancelled":
+      return (
+        `Hola ${name}. Tu reserva fue *cancelada*.
+
+${header}
+
+` +
+        refundNote +
+        `${orgName}`
+      );
+
+    case "trip_departure_cancelled":
+      return (
+        `Hola ${name}. Lamentamos avisarte que esta salida fue *cancelada*:
+
+${header}
+
+` +
+        refundNote +
         `${orgName}`
       );
 

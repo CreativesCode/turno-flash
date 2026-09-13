@@ -191,23 +191,25 @@ export default function SettingsPage() {
               )}
 
               {/* Cierres del negocio */}
-              <Card className="mb-4 p-4 sm:p-5">
-                <div className="mb-3 flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-foreground-muted">
-                    <CalendarOff className="h-4.5 w-4.5" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-foreground">
-                      Feriados y cierres del negocio
+              {modules.appointments && (
+                <Card className="mb-4 p-4 sm:p-5">
+                  <div className="mb-3 flex items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-foreground-muted">
+                      <CalendarOff className="h-4.5 w-4.5" />
                     </div>
-                    <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
-                      Días en que no atiende nadie. Se guardan al agregarlos y no
-                      se ofrecen en la reserva online.
-                    </p>
+                    <div>
+                      <div className="text-sm font-bold text-foreground">
+                        Feriados y cierres del negocio
+                      </div>
+                      <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
+                        Días en que no atiende nadie. Se guardan al agregarlos y no
+                        se ofrecen en la reserva online.
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <ExceptionsEditor organizationId={organizationId} staffId={null} />
-              </Card>
+                  <ExceptionsEditor organizationId={organizationId} staffId={null} />
+                </Card>
+              )}
 
               {/* Estado de la integración */}
               <Card className="mb-4 flex items-start gap-3 p-4">
@@ -226,49 +228,51 @@ export default function SettingsPage() {
                   </div>
                   <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
                     {waEnabled
-                      ? "La integración está activa: las automatizaciones de abajo se enviarán por WhatsApp."
-                      : "Las automatizaciones quedan guardadas pero no se enviará nada hasta que el administrador conecte WhatsApp para tu negocio."}
+                      ? "La integración está activa: los avisos a tus clientes salen por WhatsApp."
+                      : "Tus ajustes quedan guardados, pero no se enviará ningún WhatsApp hasta que el administrador lo conecte para tu negocio."}
                   </p>
                 </div>
               </Card>
 
               {/* Toggles */}
-              <Card className="divide-y divide-border p-0">
-                <SettingRow
-                  icon={Star}
-                  title="Pedir valoración al completar un turno"
-                  description="Al marcar un turno como completado, le pedimos al cliente una valoración de 1 a 5 estrellas. Alimenta el rating de tus reportes."
-                  loading={isLoading}
-                  checked={ratingEnabled}
-                  onChange={(v) => patchDraft({ enable_rating_request: v })}
-                />
-                <SettingRow
-                  icon={Sunrise}
-                  title="Resumen diario por WhatsApp"
-                  description="Cada mañana te enviamos al WhatsApp del negocio cuántos turnos tienes hoy, cuántos faltan confirmar y el ingreso estimado."
-                  loading={isLoading}
-                  checked={summaryEnabled}
-                  onChange={(v) => patchDraft({ enable_daily_summary: v })}
-                  extra={
-                    summaryEnabled && (
-                      <label className="mt-3 flex items-center gap-2 text-xs font-semibold text-foreground-muted">
-                        Hora de envío
-                        <input
-                          type="time"
-                          value={summaryTime}
-                          onChange={(e) =>
-                            patchDraft({ daily_summary_time: e.target.value })
-                          }
-                          className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-foreground focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
-                        />
-                        <span className="font-normal">
-                          (hora local de tu negocio)
-                        </span>
-                      </label>
-                    )
-                  }
-                />
-              </Card>
+              {modules.appointments && (
+                <Card className="divide-y divide-border p-0">
+                  <SettingRow
+                    icon={Star}
+                    title="Pedir valoración al completar un turno"
+                    description="Al marcar un turno como completado, le pedimos al cliente una valoración de 1 a 5 estrellas. Alimenta el rating de tus reportes."
+                    loading={isLoading}
+                    checked={ratingEnabled}
+                    onChange={(v) => patchDraft({ enable_rating_request: v })}
+                  />
+                  <SettingRow
+                    icon={Sunrise}
+                    title="Resumen diario por WhatsApp"
+                    description="Cada mañana te enviamos al WhatsApp del negocio cuántos turnos tienes hoy, cuántos faltan confirmar y el ingreso estimado."
+                    loading={isLoading}
+                    checked={summaryEnabled}
+                    onChange={(v) => patchDraft({ enable_daily_summary: v })}
+                    extra={
+                      summaryEnabled && (
+                        <label className="mt-3 flex items-center gap-2 text-xs font-semibold text-foreground-muted">
+                          Hora de envío
+                          <input
+                            type="time"
+                            value={summaryTime}
+                            onChange={(e) =>
+                              patchDraft({ daily_summary_time: e.target.value })
+                            }
+                            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-foreground focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
+                          />
+                          <span className="font-normal">
+                            (hora local de tu negocio)
+                          </span>
+                        </label>
+                      )
+                    }
+                  />
+                </Card>
+              )}
 
               <div className="mt-5 flex justify-end">
                 <Button

@@ -12,7 +12,7 @@
 - [Estado actual (sep 2026)](project/estado-actual-2026-09.md) — que esta hecho, que falta (cero tests, cero CI, sin Sentry), dominio `turno-flash.vercel.app`, fechas de licencia posiblemente corridas (bug ya arreglado) y por que los docs mienten
 - [Rediseno de UI](project/rediseno-ui-migracion.md) — completo (9/9) desde 2026-09-10, incluidos details e invite; decisiones cerradas
 - [Reserva online](project/reserva-online.md) — implementada 2026-09-10 (migraciones 029-031 + edge `public-booking`); horario y servicios por profesional (estricto), aprobacion por servicio, opt-in, vacaciones; `/book?b=<slug>`
-- [Modulo reserva de asientos](project/modulo-reserva-asientos.md) — 9/10 fases (migraciones 033-045, edges public-trips y wa-trip-send, dashboard, pagina publica /trips, WhatsApp); solo falta el cron de vencimiento; anticipo y confirmacion son ejes independientes
+- [Modulo reserva de asientos](project/modulo-reserva-asientos.md) — 9/10 fases (migraciones 033-047, edges public-trips y wa-trip-send, dashboard, pagina publica /trips, WhatsApp incl. cancelaciones); solo falta el cron de vencimiento (frenado otra vez 2026-09-12); anticipo y confirmacion son ejes independientes
 - [WhatsApp y automatizaciones](project/whatsapp-automatizaciones.md) — OpenWA, edge functions por intent, crons cada 15 min, toggles por negocio
 - [Enforcement de licencia](project/license-enforcement.md) — bloqueo de trial vencido (RLS de escritura + LicenseGate); gracia de 7d hardcodeada en SQL a sincronizar con el cliente
 - [Tooling](project/turno-flash-tooling.md) — CLI de Supabase via scoop v2.117 (sin npx); `npm run lint` roto (usar `npx eslint`); regenerar tipos via Bash; pg_cron en migracion 025
@@ -25,4 +25,5 @@
 - [Arquitectura: static export](reference/arquitectura-static-export.md) — **sin API routes ni middleware**; la seguridad real es RLS; lo de servidor va en Edge Functions
 - [Convenciones de codigo](reference/convenciones-de-codigo.md) — services estaticos, hooks `.query`, schemas Zod, tokens `st-*`/`mesh-*`, primitivas en `components/ui/` (incl. `KebabMenu`, `ConfirmSheet`, `Select`, `RichTextEditor`), `datetime-local` en hora local, sin N+1
 - [Mapa de docs](reference/mapa-docs.md) — que doc sirve y cuales son de enero y estan obsoletos
+- [Manual de usuario](reference/manual-de-usuario.md) — fuente única en `docs/user-manual/`, servida en `/help` (se lee en build); actualizarla cuando cambie algo visible
 - [Secretos en assets del template](reference/secretos-en-assets-del-template.md) — el PNG de video-visuals traia una API key de OpenRouter en su XMP; como detectarla y como reescribir commits sin pushear

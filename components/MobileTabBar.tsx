@@ -1,7 +1,7 @@
 "use client";
 
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
-import { Bell, Bus, Calendar, Home, Plus, Users } from "lucide-react";
+import { Bell, Bus, Calendar, Home, Plus, UserCircle, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -37,14 +37,20 @@ const REMINDERS: TabItem = {
   href: "/dashboard/reminders",
   icon: Bell,
 };
+const ACCOUNT: TabItem = {
+  key: "account",
+  label: "Cuenta",
+  href: "/dashboard/account",
+  icon: UserCircle,
+};
 
 /**
  * The bar has 4 slots plus the central "+", so it shows what this business
  * actually uses: a bus agency has no appointments to create, and Avisos is
- * about appointment reminders.
+ * about appointment reminders, so its fourth slot is the account instead.
  */
 function tabsFor(appointments: boolean, trips: boolean): TabItem[] {
-  if (trips && !appointments) return [HOME, TRIPS, CUSTOMERS, REMINDERS];
+  if (trips && !appointments) return [HOME, TRIPS, CUSTOMERS, ACCOUNT];
   if (trips && appointments) return [HOME, APPOINTMENTS, TRIPS, CUSTOMERS];
   return [HOME, APPOINTMENTS, CUSTOMERS, REMINDERS];
 }

@@ -2228,6 +2228,8 @@ export type Database = {
         | "trip_approved"
         | "trip_deposit_paid"
         | "trip_notify_business"
+        | "trip_booking_cancelled"
+        | "trip_departure_cancelled"
       wa_outbound_status: "pending" | "sent" | "delivered" | "read" | "failed"
       waitlist_status:
         | "active"
@@ -2425,6 +2427,8 @@ export const Constants = {
         "trip_approved",
         "trip_deposit_paid",
         "trip_notify_business",
+        "trip_booking_cancelled",
+        "trip_departure_cancelled",
       ],
       wa_outbound_status: ["pending", "sent", "delivered", "read", "failed"],
       waitlist_status: ["active", "notified", "booked", "expired", "cancelled"],

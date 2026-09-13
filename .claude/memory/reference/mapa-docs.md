@@ -23,6 +23,7 @@ metadata:
 | `ERROR-TRACKING.md` | Error logging propio (migracion 011) |
 | `MOBILE-README.md`, `mobile-*.md`, `ADD-PLATFORMS-TO-REPO.md` | Build y flujo Capacitor |
 | `COLOR-SYSTEM.md` | Paleta y tokens |
+| `user-manual/turno-flash-user-manual.html` | Manual para clientes; fuente de `/help` ([[manual-de-usuario]]) |
 
 ## Obsoletos — leer con escepticismo
 
