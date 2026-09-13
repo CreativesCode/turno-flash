@@ -271,7 +271,7 @@ export default function TripsPage() {
         trip: duplicating,
         departureDate: duplicateDate,
       });
-      toast.success("Salida duplicada", "Revisá la nueva fecha en la lista");
+      toast.success("Salida duplicada", "Revisa la nueva fecha en la lista");
       setDuplicating(null);
     } catch (err) {
       toast.error(
@@ -306,7 +306,7 @@ export default function TripsPage() {
     <ProtectedRoute>
       <PageMetadata
         title="Viajes"
-        description="Publicá las salidas de tus viajes con su fecha, cantidad de asientos, precio y seña, y seguí la ocupación de cada una."
+        description="Publica las salidas de tus viajes con su fecha, cantidad de asientos, precio y anticipo, y sigue la ocupación de cada una."
       />
 
       <div className="relative min-h-screen bg-background pb-24">
@@ -362,7 +362,7 @@ export default function TripsPage() {
                 La venta de asientos no está activa
               </h3>
               <p className="mx-auto mt-1 max-w-md text-sm text-foreground-muted">
-                Este módulo se elige al registrarse. Si querés vender asientos de
+                Este módulo se elige al registrarse. Si quieres vender asientos de
                 viaje, pedíselo al equipo de Turno Flash y lo activamos.
               </p>
             </div>
@@ -376,8 +376,8 @@ export default function TripsPage() {
               </h3>
               <p className="mt-1 text-sm text-foreground-muted">
                 {searchTerm
-                  ? "Probá con otro término."
-                  : "Creá la primera salida y después duplicala para los días siguientes."}
+                  ? "Prueba con otro término."
+                  : "Crea la primera salida y después duplícala para los días siguientes."}
               </p>
               {canManage && !searchTerm && (
                 <Button
@@ -465,7 +465,7 @@ export default function TripsPage() {
         busy={duplicateTrip.isPending}
       >
         <p className="text-sm text-foreground-muted">
-          Se copia todo (horario, asientos, precio y seña) con la fecha que
+          Se copia todo (horario, asientos, precio y anticipo) con la fecha que
           elijas. Las reservas no se copian.
         </p>
         <input

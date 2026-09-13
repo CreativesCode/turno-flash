@@ -48,7 +48,7 @@ export function ServiceCard({
               {service.name}
             </h3>
             <div className="whitespace-nowrap text-base font-extrabold tracking-tight text-foreground">
-              {service.price != null ? fmtMoney(service.price) : "—"}
+              {service.price != null ? fmtMoney(service.price, undefined, service.currency ?? undefined) : "—"}
             </div>
           </div>
 

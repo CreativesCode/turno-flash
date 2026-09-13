@@ -196,7 +196,7 @@ export default function RemindersPage() {
               Sin organización
             </h1>
             <p className="mt-2 text-sm text-foreground-muted">
-              Necesitás pertenecer a una organización para enviar recordatorios.
+              Necesitas pertenecer a una organización para enviar recordatorios.
             </p>
             <Button
               variant="info"

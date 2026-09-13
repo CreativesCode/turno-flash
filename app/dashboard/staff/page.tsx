@@ -307,8 +307,8 @@ export default function StaffPage() {
               </h3>
               <p className="mt-1 text-sm text-foreground-muted">
                 {searchTerm
-                  ? "Probá con otro término."
-                  : "Sumá a tu equipo de trabajo."}
+                  ? "Prueba con otro término."
+                  : "Suma a tu equipo de trabajo."}
               </p>
               {canManageStaff && !searchTerm && (
                 <Button

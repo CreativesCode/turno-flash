@@ -73,7 +73,7 @@ export function ModulesCard({
           <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
             {canEdit
               ? "Definen qué ve este negocio en la app. Apagar uno oculta sus pantallas, no borra nada."
-              : "Definen qué ves en la app. Para cambiarlos, escribile al soporte de TurnoFlash."}
+              : "Definen qué ves en la app. Para cambiarlos, escríbele al soporte de TurnoFlash."}
           </p>
         </div>
       </div>

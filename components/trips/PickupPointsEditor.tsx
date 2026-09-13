@@ -62,7 +62,7 @@ export function PickupPointsEditor({
   return (
     <Field
       label="Puntos de recogida"
-      hint="Cada punto puede tener su propio precio y su propia seña. Sin puntos, se usa el precio de la salida."
+      hint="Cada punto puede tener su propio precio y su propio anticipo. Sin puntos, se usa el precio de la salida."
     >
       <div className="flex flex-col gap-3">
         {points.length === 0 && (
@@ -149,7 +149,7 @@ export function PickupPointsEditor({
               )}
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
-                  Seña
+                  Anticipo
                 </label>
                 <input
                   type="number"

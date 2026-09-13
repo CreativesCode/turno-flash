@@ -11,7 +11,7 @@ import { useMemo } from "react";
  */
 
 export function formatMoney(value: number): string {
-  return `$${new Intl.NumberFormat("es-AR", {
+  return `$${new Intl.NumberFormat("es", {
     maximumFractionDigits: 0,
   }).format(value)}`;
 }

@@ -932,7 +932,7 @@ function EmptyListState({
       <p className="mt-1 text-sm text-foreground-muted">
         {hasFilters
           ? "No encontramos turnos con esos filtros."
-          : "Cuando crees un turno aparecerá acá."}
+          : "Cuando crees un turno aparecerá aquí."}
       </p>
       {canManage && !hasFilters && (
         <Button

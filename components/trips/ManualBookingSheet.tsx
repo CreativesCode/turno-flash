@@ -154,14 +154,14 @@ export function ManualBookingSheet({
         {trip.pickup_points.length > 0 && (
           <Field
             label="Punto de recogida"
-            hint="Define el precio y la seña de esta reserva."
+            hint="Define el precio y el anticipo de esta reserva."
           >
             <Select
               required
               value={form.pickup_point_id}
               onChange={(e) => onChange({ pickup_point_id: e.target.value })}
             >
-              <option value="">Elegí dónde lo recogen…</option>
+              <option value="">Elige dónde lo recogen…</option>
               {trip.pickup_points.map((point) => (
                 <option key={point.id} value={point.id}>
                   {point.name}
@@ -188,7 +188,7 @@ export function ManualBookingSheet({
         {seats > 0 && (
           <Field
             label="Nombres de los pasajeros"
-            hint="Podés dejarlos vacíos ahora y completarlos antes del viaje."
+            hint="Puedes dejarlos vacíos ahora y completarlos antes del viaje."
           >
             <div className="flex flex-col gap-2">
               {Array.from({ length: seats }, (_, index) => (
@@ -249,7 +249,7 @@ export function ManualBookingSheet({
             onClick={() => onChange({ amount_paid: depositTotal })}
             className="w-fit rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
           >
-            Cobré la seña ({money(depositTotal)})
+            Cobré el anticipo ({money(depositTotal)})
           </button>
         )}
 

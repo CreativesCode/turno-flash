@@ -20,7 +20,8 @@ import type {
 } from "@/types/appointments";
 import { NEXT_ACTIONS } from "@/utils/appointment-status";
 import { formatDateForDisplay, parseLocalDate } from "@/utils/date";
-import { fmtDuration, fmtMoney } from "@/utils/format";
+import { useMoney } from "@/hooks/useMoney";
+import { fmtDuration } from "@/utils/format";
 import {
   ChevronRight,
   Edit3,
@@ -76,6 +77,7 @@ export function AppointmentCreateModal({
   onCreateCustomer,
   isCreatingCustomer,
 }: AppointmentCreateModalProps) {
+  const { format: money } = useMoney();
   const selectedService = services.find((s) => s.id === formData.service_id);
 
   return (
@@ -237,7 +239,7 @@ export function AppointmentCreateModal({
                   </div>
                   <div className="mt-1 text-[11px] text-foreground-muted">
                     {fmtDuration(s.duration_minutes)} ·{" "}
-                    {s.price != null ? fmtMoney(s.price) : "Sin precio"}
+                    {s.price != null ? money(s.price) : "Sin precio"}
                   </div>
                 </button>
               );
@@ -381,6 +383,7 @@ export function AppointmentDetailModal({
   staffColor,
   isProcessing = false,
 }: AppointmentDetailModalProps) {
+  const { format: money } = useMoney();
   const status = (a.status ?? "pending") as AppointmentStatus;
   const next = NEXT_ACTIONS[status];
   const customerName =
@@ -438,7 +441,7 @@ export function AppointmentDetailModal({
           />
           <DetailItem
             label="Precio"
-            value={a.service_price != null ? fmtMoney(a.service_price) : "—"}
+            value={a.service_price != null ? money(a.service_price) : "—"}
           />
         </div>
 

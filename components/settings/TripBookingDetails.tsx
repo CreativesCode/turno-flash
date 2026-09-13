@@ -46,7 +46,7 @@ export function TripBookingDetails({
   // Always the public web domain: inside the native app window.location is localhost
   const link = `${getSiteUrl()}/trips?b=${basics.slug}`;
   const shareUrl = `https://wa.me/?text=${encodeURIComponent(
-    `Reservá tu asiento: ${link}`
+    `Reserva tu asiento: ${link}`
   )}`;
   const published = trips.filter(
     (trip) => trip.is_published && !trip.cancelled_at
@@ -96,7 +96,7 @@ export function TripBookingDetails({
 
       {!enabled && (
         <p className="text-[11px] text-foreground-subtle">
-          Activá la página y guardá los cambios para que el link empiece a
+          Activa la página y guarda los cambios para que el link empiece a
           funcionar.
         </p>
       )}
@@ -105,7 +105,7 @@ export function TripBookingDetails({
         <div className="flex items-start gap-1.5 rounded-lg bg-warning-50 p-3 text-xs text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
           <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>
-            No tenés ninguna salida publicada, así que el cliente va a ver la
+            No tienes ninguna salida publicada, así que el cliente va a ver la
             página vacía.{" "}
             <Link
               href="/dashboard/trips"
@@ -118,7 +118,7 @@ export function TripBookingDetails({
       )}
 
       <Field
-        label="Cómo se paga la seña"
+        label="Cómo se paga el anticipo"
         hint="Se lo mostramos al cliente apenas reserva y en el WhatsApp de confirmación."
       >
         <RichTextEditor
@@ -127,7 +127,7 @@ export function TripBookingDetails({
           onChange={(value) => onChange({ deposit_instructions: value })}
           rows={4}
           placeholder={
-            "*Transferí la seña* a la tarjeta 9200 1299 1234 5678 (Juan Pérez)." +
+            "*Transfiere el anticipo* a la tarjeta 9200 1299 1234 5678 (Juan Pérez)." +
             "\n" +
             "Mandanos el comprobante por WhatsApp y te confirmamos el asiento."
           }
@@ -135,7 +135,7 @@ export function TripBookingDetails({
       </Field>
 
       <Field
-        label="Horas para pagar la seña"
+        label="Horas para pagar el anticipo"
         hint="Pasado ese tiempo sin pagar, el asiento vuelve a quedar libre."
       >
         <input

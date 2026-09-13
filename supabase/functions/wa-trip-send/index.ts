@@ -306,7 +306,7 @@ function buildMessage(
         booking.deposit_status === "pending" && deposit > 0
           ? `\n\n💵 Para guardarte ${
               booking.seats === 1 ? "el asiento" : "los asientos"
-            } falta la seña de *${money(deposit, currency)}*${
+            } falta el anticipo de *${money(deposit, currency)}*${
               booking.hold_expires_at
                 ? `, antes del ${new Date(booking.hold_expires_at).toLocaleString(
                     "es",
@@ -333,7 +333,7 @@ function buildMessage(
 
     case "trip_deposit_paid":
       return (
-        `Hola ${name}! 💵 Recibimos tu seña de *${money(
+        `Hola ${name}! 💵 Recibimos tu anticipo de *${money(
           booking.deposit_amount ?? 0,
           currency
         )}*.\n\n${header}\n\n` +

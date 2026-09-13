@@ -66,7 +66,7 @@ export default function LoginPage() {
               Bienvenida
             </h1>
             <p className="mt-1 text-sm text-foreground-muted">
-              Ingresá con tu cuenta para administrar tu agenda.
+              Ingresa con tu cuenta para administrar tu agenda.
             </p>
 
             <form onSubmit={handleLogin} className="mt-6 space-y-4">
@@ -145,12 +145,12 @@ export default function LoginPage() {
           </Card>
 
           <div className="mt-5 text-center text-xs text-foreground-muted">
-            ¿Aún no tenés cuenta?{" "}
+            ¿Aún no tienes cuenta?{" "}
             <Link
               href="/register"
               className="font-semibold text-foreground hover:text-primary"
             >
-              Registrá tu negocio gratis
+              Registra tu negocio gratis
             </Link>
           </div>
 

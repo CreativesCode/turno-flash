@@ -31,7 +31,7 @@ import { ReactNode, useState } from "react";
 type Step = "trips" | "seats" | "details" | "done";
 
 const STEP_TITLES: Record<Step, string> = {
-  trips: "Elegí tu viaje",
+  trips: "Elige tu viaje",
   seats: "Tu reserva",
   details: "Tus datos",
   done: "Listo",
@@ -74,7 +74,7 @@ export function TripsFlow({ slug }: { slug: string }) {
           </h1>
           <p className="mt-1 text-sm text-foreground-muted">
             {error
-              ? "No pudimos cargar la página. Revisá tu conexión e intentá de nuevo."
+              ? "No pudimos cargar la página. Revisa tu conexión e intenta de nuevo."
               : "Este negocio no está recibiendo reservas de viajes en este momento."}
           </p>
         </Card>
@@ -272,7 +272,7 @@ export function TripsFlow({ slug }: { slug: string }) {
             (confirmation.deposit_amount ?? 0) > 0 && (
               <div className="mt-4 rounded-xl border border-warning-600 bg-warning-50 p-4 text-left text-sm dark:border-warning-400 dark:bg-warning-900/20">
                 <p className="font-bold text-warning-800 dark:text-warning-300">
-                  Falta la seña de {money(confirmation.deposit_amount ?? 0)}
+                  Falta el anticipo de {money(confirmation.deposit_amount ?? 0)}
                 </p>
                 {confirmation.hold_expires_at && (
                   <p className="mt-0.5 text-xs text-warning-800 dark:text-warning-300">

@@ -95,7 +95,7 @@ export function TripFormSheet({
 
           <Field
             label="Punto de encuentro"
-            hint="Dónde y cómo encontrar la guagua."
+            hint="Dónde y cómo encontrar el autobús."
           >
             <RichTextEditor
               label="Punto de encuentro"
@@ -186,7 +186,7 @@ export function TripFormSheet({
             />
           </Field>
 
-          <Field label="Seña / asiento" hint="Por defecto">
+          <Field label="Anticipo / asiento" hint="Por defecto">
             <input
               type="number"
               min={0}
@@ -264,7 +264,7 @@ export function TripFormSheet({
               </span>
               <span className="mt-0.5 block text-foreground-muted">
                 Sin marcar, quien reserve queda confirmado al instante. Cobrar la
-                seña es aparte: marcarla no aprueba ni rechaza nada.
+                anticipo es aparte: marcarla no aprueba ni rechaza nada.
               </span>
             </span>
           </label>
@@ -281,7 +281,7 @@ export function TripFormSheet({
                 Mostrar en mi página de reservas
               </span>
               <span className="mt-0.5 block text-foreground-muted">
-                Sin marcar, la salida existe solo para vos y podés cargar
+                Sin marcar, la salida existe solo para ti y puedes cargar
                 reservas a mano.
               </span>
             </span>
@@ -293,7 +293,7 @@ export function TripFormSheet({
             Chofer y vehículo (opcional)
           </p>
           <p className="mt-0.5 text-[11px] text-foreground-subtle">
-            Se suele avisar el día antes del viaje. Podés dejarlo vacío y
+            Se suele avisar el día antes del viaje. Puedes dejarlo vacío y
             completarlo después.
           </p>
           <div className="mt-2 grid gap-3 sm:grid-cols-3">
@@ -365,7 +365,7 @@ export function TripFormSheet({
           </div>
         </div>
 
-        <Field label="Notas internas" hint="Solo las ves vos y tu equipo.">
+        <Field label="Notas internas" hint="Solo las ves tú y tu equipo.">
           <textarea
             rows={2}
             value={formData.internal_notes}

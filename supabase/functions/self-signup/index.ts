@@ -82,16 +82,16 @@ Deno.serve(async (req) => {
     // 1. Validaciones
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return json({ error: "Ingresá un email válido" }, 400);
+      return json({ error: "Ingresa un email válido" }, 400);
     }
     if (password.length < 6) {
       return json({ error: "La contraseña debe tener al menos 6 caracteres" }, 400);
     }
     if (!fullName) {
-      return json({ error: "Ingresá tu nombre" }, 400);
+      return json({ error: "Ingresa tu nombre" }, 400);
     }
     if (!orgName) {
-      return json({ error: "Ingresá el nombre de tu negocio" }, 400);
+      return json({ error: "Ingresa el nombre de tu negocio" }, 400);
     }
 
     // 2. Anti-abuso v1: rechazar si el email ya tiene cuenta
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (existing) {
       return json(
-        { error: "Ya existe una cuenta con ese email. Iniciá sesión." },
+        { error: "Ya existe una cuenta con ese email. Inicia sesión." },
         409
       );
     }
@@ -120,12 +120,12 @@ Deno.serve(async (req) => {
       const msg = createError?.message ?? "";
       if (msg.toLowerCase().includes("already")) {
         return json(
-          { error: "Ya existe una cuenta con ese email. Iniciá sesión." },
+          { error: "Ya existe una cuenta con ese email. Inicia sesión." },
           409
         );
       }
       console.error("[self-signup] createUser error:", msg);
-      return json({ error: "No se pudo crear la cuenta. Intentá de nuevo." }, 400);
+      return json({ error: "No se pudo crear la cuenta. Intenta de nuevo." }, 400);
     }
 
     createdUserId = created.user.id;
@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
         console.error("[self-signup] rollback deleteUser failed:", e)
       );
       return json(
-        { error: "No se pudo crear el negocio. Intentá de nuevo." },
+        { error: "No se pudo crear el negocio. Intenta de nuevo." },
         400
       );
     }
@@ -188,7 +188,7 @@ Deno.serve(async (req) => {
     const notifySession = Deno.env.get("ADMIN_NOTIFY_SESSION_ID");
     if (notifyPhone && notifySession) {
       try {
-        const trialHasta = end.toLocaleDateString("es-MX", {
+        const trialHasta = end.toLocaleDateString("es", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",

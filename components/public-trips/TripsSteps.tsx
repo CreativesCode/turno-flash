@@ -65,7 +65,7 @@ export function TripListStep({
           No hay salidas próximas
         </h2>
         <p className="mt-1 text-sm text-foreground-muted">
-          Volvé a mirar en unos días: acá van a aparecer los próximos viajes.
+          Vuelve a mirar en unos días: aquí van a aparecer los próximos viajes.
         </p>
       </Card>
     );
@@ -183,7 +183,7 @@ export function SeatsStep({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (trip.pickup_points.length > 0 && !pickupPointId) {
-      setError("Elegí dónde querés que te recojan.");
+      setError("Elige dónde quieres que te recojan.");
       return;
     }
     if (names.some((name) => !name.trim())) {
@@ -348,7 +348,7 @@ export function SeatsStep({
 
       {deposit > 0 && (
         <p className="-mt-2 text-xs text-foreground-muted">
-          Para guardarte el asiento se paga una seña de{" "}
+          Para guardarte el asiento se paga un anticipo de{" "}
           <strong className="text-foreground">
             {money(deposit * seats, currency)}
           </strong>

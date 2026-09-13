@@ -247,7 +247,7 @@ function parseTimeToMinutes(time: string): number {
 }
 
 function formatNumber(n: number): string {
-  return new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(n);
+  return new Intl.NumberFormat("es", { maximumFractionDigits: 0 }).format(n);
 }
 
 function json(status: number, body: unknown): Response {

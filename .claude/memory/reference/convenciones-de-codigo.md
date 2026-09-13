@@ -61,3 +61,17 @@ Helpers de formato: `utils/format.ts` (`fmtMoney`, `fmtDuration`, `timeToMinutes
 fechas con date-fns/date-fns-tz (`utils/date.ts`). `recharts` siempre via `next/dynamic`.
 
 Relacionado: [[arquitectura-static-export]], [[rediseno-ui-migracion]].
+
+## Primitivas y helpers agregados (2026-09-12)
+
+- **`Select` (`components/ui/select.tsx`)**: todo `<select>` nuevo va con esta primitiva. El
+  select nativo dibuja su flecha pegada al borde ignorando el padding; `Select` la tapa con
+  `appearance-none` y dibuja un `ChevronDown` alineado. Acepta `wrapperClassName` para que el
+  contenedor participe de un flex.
+- **`RichTextEditor` / `RichText`**: texto con marcas de WhatsApp (`*negrita*`, `_cursiva_`,
+  `~tachado~`, `\`\`\`mono\`\`\``). `RichText` renderiza elementos de React, nunca HTML.
+- **`useMoney()`**: formatea en la moneda de la organizacion. **Ningun importe del dashboard se
+  formatea llamando a `fmtMoney` sin moneda**; en las paginas publicas la moneda llega en el
+  payload de la edge function.
+- **`utils/image.ts` (`downscaleImage`)**: toda foto se achica en el navegador antes de subirla
+  a Storage.

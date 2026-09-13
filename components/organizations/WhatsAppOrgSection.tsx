@@ -351,7 +351,7 @@ export function WhatsAppOrgSection({
                 {recent.map((r) => (
                   <tr key={r.id} className="align-top">
                     <td className="whitespace-nowrap px-6 py-2 text-foreground sm:px-0">
-                      {new Date(r.sent_at).toLocaleString("es-AR", {
+                      {new Date(r.sent_at).toLocaleString("es", {
                         dateStyle: "short",
                         timeStyle: "short",
                       })}

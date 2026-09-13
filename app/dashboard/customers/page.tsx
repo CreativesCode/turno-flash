@@ -325,8 +325,8 @@ export default function CustomersPage() {
               </h3>
               <p className="mt-1 text-sm text-foreground-muted">
                 {searchTerm
-                  ? "Probá con otro término."
-                  : "Agregá tu primer cliente para empezar."}
+                  ? "Prueba con otro término."
+                  : "Agrega tu primer cliente para empezar."}
               </p>
               {!searchTerm && (
                 <Button

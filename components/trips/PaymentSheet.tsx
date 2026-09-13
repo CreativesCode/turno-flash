@@ -69,7 +69,7 @@ export function PaymentSheet({
             onClick={() => setAmount(deposit)}
             className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
           >
-            Cobré la seña ({money(deposit)})
+            Cobré el anticipo ({money(deposit)})
           </button>
           <button
             type="button"
@@ -87,7 +87,7 @@ export function PaymentSheet({
           </button>
         </div>
 
-        <Field label="Cobrado" hint="Podés escribir cualquier monto.">
+        <Field label="Cobrado" hint="Puedes escribir cualquier monto.">
           <input
             type="number"
             min={0}

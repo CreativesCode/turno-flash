@@ -27,7 +27,7 @@ import {
   type TripBookingWithCustomer,
 } from "@/types/trips";
 import { downloadCsv, todayForFilename } from "@/utils/csv";
-import { fmtMoney } from "@/utils/format";
+import { useMoney } from "@/hooks/useMoney";
 import { ArrowLeft, Download, Plus, Printer, Users } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -60,7 +60,7 @@ const DEPOSIT_TEXT: Record<string, string> = {
   pending: "Pendiente",
   paid: "Cobrada",
   refunded: "Devuelta",
-  waived: "Sin seña",
+  waived: "Sin anticipo",
 };
 
 function TripDetailsContent() {
@@ -68,6 +68,7 @@ function TripDetailsContent() {
   const tripId = searchParams.get("id");
   const { profile } = useAuth();
   const { modules } = useOrganizationModules();
+  const { format: money } = useMoney();
   const toast = useToast();
 
   const [showManual, setShowManual] = useState(false);
@@ -152,7 +153,7 @@ function TripDetailsContent() {
           bookingId: booking.id,
           status: "confirmed",
         });
-        toast.success("Reserva confirmada", "El cobro de la seña no cambió");
+        toast.success("Reserva confirmada", "El cobro del anticipo no cambió");
       } catch (err) {
         toast.error(
           "Error",
@@ -301,8 +302,8 @@ function TripDetailsContent() {
         "Reserva",
         "Estado",
         "Viaje",
-        "Seña",
-        "Seña por pasajero",
+        "Anticipo",
+        "Anticipo por pasajero",
         "Total por pasajero",
         "Pagado por pasajero",
         "Falta por pasajero",
@@ -361,7 +362,7 @@ function TripDetailsContent() {
     <ProtectedRoute>
       <PageMetadata
         title={`Pasajeros · ${trip.title}`}
-        description="Lista de pasajeros de la salida, con el estado de cada reserva y de su seña."
+        description="Lista de pasajeros de la salida, con el estado de cada reserva y de su anticipo."
       />
 
       <PassengerPrintSheet
@@ -465,12 +466,12 @@ function TripDetailsContent() {
               )}
               {pendingDeposits > 0 && (
                 <span className="rounded-full border border-border-2 bg-muted px-3 py-1 text-foreground-muted">
-                  {pendingDeposits} con seña pendiente
+                  {pendingDeposits} con anticipo pendiente
                 </span>
               )}
               {owed > 0 && (
                 <span className="rounded-full border border-border-2 bg-muted px-3 py-1 text-foreground-muted">
-                  Falta cobrar {fmtMoney(owed)}
+                  Falta cobrar {money(owed)}
                 </span>
               )}
             </div>
@@ -485,8 +486,8 @@ function TripDetailsContent() {
                 Todavía no hay pasajeros
               </h3>
               <p className="mt-1 text-sm text-foreground-muted">
-                Cuando alguien reserve desde tu página vas a verlo acá. También
-                podés cargar una reserva a mano.
+                Cuando alguien reserve desde tu página lo verás aquí. También
+                puedes cargar una reserva a mano.
               </p>
               {canManage && (
                 <Button
@@ -561,9 +562,9 @@ function TripDetailsContent() {
         title="Nombres de los pasajeros"
         subtitle={
           editingNames
-            ? `${editingNames.seats} asiento(s) · ${fmtMoney(
+            ? `${editingNames.seats} asiento(s) · ${money(
                 editingNames.deposit_amount ?? 0
-              )} de seña`
+              )} de anticipo`
             : undefined
         }
       >

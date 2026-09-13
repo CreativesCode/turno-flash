@@ -65,7 +65,7 @@ export function tripShareText(
   if (trip.deposit_per_seat > 0) {
     lines.push(
       "",
-      `💵 Seña de ${money(trip.deposit_per_seat)} por asiento para reservar.`
+      `💵 Anticipo de ${money(trip.deposit_per_seat)} por asiento para reservar.`
     );
   }
 
@@ -77,7 +77,7 @@ export function tripShareText(
     );
   }
 
-  if (bookingUrl) lines.push("", `Reservá acá: ${bookingUrl}`);
+  if (bookingUrl) lines.push("", `Reserva aquí: ${bookingUrl}`);
 
   return lines.join("\n");
 }

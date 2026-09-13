@@ -53,7 +53,7 @@ function daysAgoIso(days: number): string {
 
 function formatDate(value: string | null): string {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("es-AR", {
+  return new Date(value).toLocaleDateString("es", {
     day: "numeric",
     month: "short",
     year: "numeric",

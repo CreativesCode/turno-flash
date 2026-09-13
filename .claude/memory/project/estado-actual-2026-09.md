@@ -75,3 +75,21 @@ dan por pendientes cosas ya hechas, o por hechas cosas que no lo estan).
 **Verificar siempre contra `supabase/migrations/` y el codigo antes de creer un doc.**
 Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY.md`,
 `design/MIGRATION-PLAN.md`.
+
+## Actualizacion 2026-09-12
+
+- **Modulo de viajes casi cerrado** (ver [[modulo-reserva-asientos]]): migraciones 033-045,
+  edge functions `public-trips` y `wa-trip-send`, dashboard de salidas y pasajeros, pagina
+  publica `/trips?b=<slug>`, WhatsApp por evento, foto del autobus en Storage, ida y vuelta,
+  moneda por organizacion y modulos por negocio. Falta **solo** el cron que vence los
+  anticipos impagos (Fase 5), que Roberto dejo fuera a proposito.
+- **Primer bucket de Storage del proyecto**: `trip-photos` (migracion 041). Antes no habia
+  ninguno.
+- **Moneda por organizacion** (`organizations.currency`, migracion 039): es la fuente de
+  verdad para formatear importes. El hook `useMoney()` la aplica en el dashboard; las paginas
+  publicas la reciben en el payload de la edge function.
+- **Copy migrado a espanol internacional** (30+ archivos, 2026-09-12): se elimino el voseo y
+  "sena" paso a "anticipo". Regla permanente en [[copy-espanol-internacional]].
+- Sigue sin haber tests, CI ni Sentry. `npm run lint` sigue roto (usar `npx eslint`), y hay
+  errores de lint **preexistentes** en Drawer, protected-route, theme-context, useCapacitor,
+  useErrorLogs y appointments.service que no son de este trabajo.

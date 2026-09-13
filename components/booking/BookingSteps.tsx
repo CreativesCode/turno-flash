@@ -61,7 +61,7 @@ export function ServiceStep({
                 <span>{fmtDuration(service.duration_minutes)}</span>
                 {service.price != null && (
                   <span className="font-semibold text-foreground">
-                    {fmtMoney(service.price)}
+                    {fmtMoney(service.price, undefined, service.currency ?? undefined)}
                   </span>
                 )}
                 {service.requires_approval && (

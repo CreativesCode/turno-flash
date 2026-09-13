@@ -206,3 +206,11 @@ al borde, ignorando el padding; la primitiva `Select` la tapa con `appearance-no
   desde el detalle de la organización, y la `MobileTabBar` arma sus slots según ellos.
 - Queda pendiente a propósito: el **cron de vencimiento de señas** (Fase 5), que el usuario dejó fuera
   de esta tanda.
+
+## Copy: "anticipo", no "sena" (2026-09-12)
+
+Todo el modulo hablaba en voseo rioplatense y llamaba **"sena"** al pago que reserva el
+asiento. Se migro a espanol internacional: los textos van en tuteo y el pago es el
+**"anticipo"** (masculino: *el* anticipo, *un* anticipo, anticipo *cobrado*). Las columnas de
+la base siguen llamandose `deposit_*`, que es lo correcto en ingles — el cambio es solo de
+copy. Regla completa en [[copy-espanol-internacional]].

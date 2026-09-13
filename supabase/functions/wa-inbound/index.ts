@@ -373,7 +373,7 @@ async function handleMessageReceived(
 
     // NOTA: cancel_ack al cliente lo dispara el DB trigger
     // `trg_wa_on_appointment_cancel` automáticamente cuando el UPDATE de
-    // status='cancelled' se commitea. Acá solo notificamos al negocio.
+    // status='cancelled' se commitea. Aquí solo notificamos al negocio.
     await invokeWaSend(appointmentId, "notify_business_cancel");
   }
 }
@@ -431,7 +431,7 @@ async function handleSessionStatus(supabase: any, env: WebhookEnvelope) {
     user_id: null,
     type: "wa_session_down",
     title: "WhatsApp desconectado",
-    message: `La sesión OpenWA ${env.sessionId} cambió a estado ${derived}. Re-escaneá el QR.`,
+    message: `La sesión OpenWA ${env.sessionId} cambió a estado ${derived}. Vuelve a escanear el QR.`,
   });
 }
 

@@ -101,7 +101,7 @@ export class ServiceService {
           organization_id: organizationId,
           sort_order: data.sort_order ?? nextSortOrder,
           buffer_time_minutes: data.buffer_time_minutes || 0,
-          currency: data.currency || "ARS",
+          currency: data.currency || "USD",
           color: data.color || "#3B82F6",
           is_active: data.is_active !== undefined ? data.is_active : true,
           requires_approval:

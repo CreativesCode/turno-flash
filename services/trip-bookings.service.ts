@@ -147,7 +147,7 @@ export class TripBookingService {
       return { success: false, error: "Falta el nombre de quien reserva" };
     }
     if (seats < 1) {
-      return { success: false, error: "Indicá cuántos asientos reserva" };
+      return { success: false, error: "Indica cuántos asientos reserva" };
     }
     // customers.phone is NOT NULL, and without a phone there is no way to warn
     // the passenger if the trip changes.

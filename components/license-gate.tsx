@@ -58,7 +58,7 @@ export function LicenseGate({ children }: { children: ReactNode }) {
             Acceso Bloqueado
           </h1>
           <p className="mt-4 text-sm text-foreground-muted">
-            La licencia de tu organización ha expirado. Renová tu suscripción
+            La licencia de tu organización ha expirado. Renueva tu suscripción
             para volver a gestionar turnos, clientes y servicios.
           </p>
           {licenseStatus && (

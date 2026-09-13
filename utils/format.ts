@@ -5,7 +5,9 @@
  */
 
 /**
- * Format a number as currency in es-AR locale by default.
+ * Format a number as currency in neutral Spanish by default.
+ * The currency belongs to the organization (migration 039): pass it, or use
+ * the useMoney() hook, which reads it for the business in session.
  * Pass `locale` and `currency` to override (e.g. for multi-org support).
  *
  * For anything money-related inside an organization, prefer `useMoney()`,
@@ -13,8 +15,8 @@
  */
 export function fmtMoney(
   n: number | null | undefined,
-  locale = "es-AR",
-  currency = "ARS"
+  locale = "es",
+  currency = "USD"
 ): string {
   if (n == null) return "—";
   try {

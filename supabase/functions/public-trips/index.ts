@@ -49,7 +49,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   pickup_point_required: "Elige dónde quieres que te recojan.",
   pickup_point_invalid: "Ese punto de recogida ya no está disponible.",
   round_trip_unavailable:
-    "Ese viaje se vende solo de ida. Actualizá la página, por favor.",
+    "Ese viaje se vende solo de ida. Actualiza la página, por favor.",
 };
 
 const slug = z

@@ -400,7 +400,7 @@ export default function HomePageClient() {
               Para tu negocio
             </div>
             <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Todo lo que necesitás, en un solo lugar.
+              Todo lo que necesitas, en un solo lugar.
             </h2>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -605,7 +605,7 @@ export default function HomePageClient() {
               Preguntas Frecuentes
             </h2>
             <p className="mt-3 text-base text-foreground-muted">
-              Todo lo que necesitás saber sobre Turno Flash
+              Todo lo que necesitas saber sobre Turno Flash
             </p>
           </div>
           <div className="mt-10 space-y-3">
@@ -647,8 +647,8 @@ export default function HomePageClient() {
             </h2>
             <p className="mt-3 text-base text-white/85 sm:text-lg">
               {user
-                ? "Tu cuenta está activa. Volvé al panel de control."
-                : "Pedí tu invitación y simplificá la gestión de tu negocio."}
+                ? "Tu cuenta está activa. Vuelve al panel de control."
+                : "Pide tu invitación y simplifica la gestión de tu negocio."}
             </p>
             <div className="mt-7 flex justify-center">
               <Button

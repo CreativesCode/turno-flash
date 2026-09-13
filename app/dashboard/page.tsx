@@ -353,7 +353,7 @@ export default function DashboardPage() {
   const greetName = firstName(profile?.full_name, profile?.email ?? undefined);
   const todayLabel = useMemo(
     () =>
-      new Date().toLocaleDateString("es-AR", TODAY_LABEL_OPTIONS).replace(",", " ·"),
+      new Date().toLocaleDateString("es", TODAY_LABEL_OPTIONS).replace(",", " ·"),
     []
   );
 
@@ -576,7 +576,7 @@ export default function DashboardPage() {
                   Sin organización asignada
                 </h3>
                 <p className="mt-1 text-sm text-warning-800 dark:text-warning-200">
-                  Necesitás que un administrador te asigne a una organización
+                  Necesitas que un administrador te asigne a una organización
                   para acceder al sistema de gestión de turnos.
                 </p>
               </div>

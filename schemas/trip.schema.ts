@@ -52,8 +52,8 @@ export const tripFormSchema = z
       .max(1000000, { message: "El precio no puede superar 1,000,000" }),
     deposit_per_seat: z
       .number()
-      .min(0, { message: "La seña no puede ser negativa" })
-      .max(1000000, { message: "La seña no puede superar 1,000,000" }),
+      .min(0, { message: "El anticipo no puede ser negativa" })
+      .max(1000000, { message: "El anticipo no puede superar 1,000,000" }),
     round_trip_enabled: z.boolean(),
     price_round_trip: z
       .number()
@@ -77,7 +77,7 @@ export const tripFormSchema = z
   .refine(
     (data) => data.price_per_seat === 0 || data.deposit_per_seat <= data.price_per_seat,
     {
-      message: "La seña no puede ser mayor que el precio del asiento",
+      message: "El anticipo no puede ser mayor que el precio del asiento",
       path: ["deposit_per_seat"],
     }
   )

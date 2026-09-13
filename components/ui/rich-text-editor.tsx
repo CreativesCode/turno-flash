@@ -109,7 +109,7 @@ export function RichTextEditor({
 
       <p className="text-[11px] text-foreground-subtle">
         Se escribe como en WhatsApp: *negrita*, _cursiva_, ~tachado~. Lo que
-        escribas acá se pega igual en un chat.
+        escribas aquí se pega igual en un chat.
       </p>
     </div>
   );

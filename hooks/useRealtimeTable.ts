@@ -22,7 +22,7 @@ export interface UseRealtimeTableOptions<T extends Record<string, unknown> = Rec
    * Filtro adicional opcional (formato Supabase, p.ej. "status=eq.pending").
    * Se combina con el filtro por organization_id usando AND lógico,
    * pero Supabase Realtime sólo soporta UN filtro por canal; si lo usás,
-   * dejá `organizationId` aparte y validá en `onEvent`.
+   * deja `organizationId` aparte y valida en `onEvent`.
    */
   filter?: string;
   /** Callback opcional para reaccionar a cada evento (logs, toasts, patch manual) */

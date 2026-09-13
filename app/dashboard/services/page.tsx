@@ -15,6 +15,7 @@ import {
   useToast,
   useUpdateService,
 } from "@/hooks";
+import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { Service, ServiceFormData } from "@/types/appointments";
 import { Package, Plus, Search } from "lucide-react";
 import { FormEvent, useCallback, useMemo, useState } from "react";
@@ -25,7 +26,7 @@ const EMPTY_FORM: ServiceFormData = {
   duration_minutes: 30,
   buffer_time_minutes: 0,
   price: null,
-  currency: "ARS",
+  currency: "USD",
   color: "#3b82f6",
   is_active: true,
   requires_approval: false,
@@ -65,16 +66,19 @@ export default function ServicesPage() {
   const deactivateServiceMutation = useDeactivateService();
   const reactivateServiceMutation = useReactivateService();
 
+  const { modules } = useOrganizationModules();
   const [formData, setFormData] = useState<ServiceFormData>(EMPTY_FORM);
 
   const patchForm = useCallback((patch: Partial<ServiceFormData>) => {
     setFormData((prev) => ({ ...prev, ...patch }));
   }, []);
 
+  // A new service is priced in the currency the business charges in, not in
+  // whatever the form was hardcoded with.
   const resetForm = useCallback(() => {
-    setFormData(EMPTY_FORM);
+    setFormData({ ...EMPTY_FORM, currency: modules.currency });
     setEditingService(null);
-  }, []);
+  }, [modules.currency]);
 
   const handleCreate = useCallback(() => {
     resetForm();
@@ -88,7 +92,7 @@ export default function ServicesPage() {
       duration_minutes: service.duration_minutes,
       buffer_time_minutes: service.buffer_time_minutes ?? 0,
       price: service.price ?? null,
-      currency: service.currency ?? "ARS",
+      currency: service.currency ?? "USD",
       color: service.color ?? "#3b82f6",
       is_active: service.is_active ?? true,
       requires_approval: service.requires_approval ?? false,
@@ -262,8 +266,8 @@ export default function ServicesPage() {
               </h3>
               <p className="mt-1 text-sm text-foreground-muted">
                 {searchTerm
-                  ? "Probá con otro término."
-                  : "Agregá los servicios que ofrecés."}
+                  ? "Prueba con otro término."
+                  : "Agrega los servicios que ofreces."}
               </p>
               {canManageServices && !searchTerm && (
                 <Button

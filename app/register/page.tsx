@@ -120,7 +120,7 @@ export default function RegisterPage() {
       router.push("/dashboard");
     } catch (err) {
       void Logger.error("Error en registro:", err);
-      setError("Error al registrarte. Intentá nuevamente.");
+      setError("Error al registrarte. Intenta nuevamente.");
       setLoading(false);
     }
   };
@@ -129,7 +129,7 @@ export default function RegisterPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <PageMetadata
         title="Crear cuenta"
-        description="Registrá tu negocio en Turno Flash y empezá tu prueba gratis."
+        description="Registra tu negocio en Turno Flash y empieza tu prueba gratis."
       />
 
       <div className="flex flex-1 items-center justify-center px-5 py-12 sm:px-6">
@@ -144,10 +144,10 @@ export default function RegisterPage() {
 
           <Card className="p-6 sm:p-7">
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-              Registrá tu negocio
+              Registra tu negocio
             </h1>
             <p className="mt-1 text-sm text-foreground-muted">
-              Creá tu cuenta y empezá tu prueba gratis de 7 días.
+              Crea tu cuenta y empieza tu prueba gratis de 7 días.
             </p>
 
             <form onSubmit={handleRegister} className="mt-6 space-y-4">
@@ -327,12 +327,12 @@ export default function RegisterPage() {
           </Card>
 
           <div className="mt-5 text-center text-xs text-foreground-muted">
-            ¿Ya tenés cuenta?{" "}
+            ¿Ya tienes cuenta?{" "}
             <Link
               href="/login"
               className="font-semibold text-foreground hover:text-primary"
             >
-              Iniciá sesión
+              Inicia sesión
             </Link>
           </div>
 

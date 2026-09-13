@@ -52,10 +52,10 @@ const DEPOSIT_CHIP: Record<string, string> = {
 };
 
 const DEPOSIT_LABEL: Record<string, string> = {
-  pending: "Seña pendiente",
-  paid: "Seña cobrada",
-  refunded: "Seña devuelta",
-  waived: "Sin seña",
+  pending: "Anticipo pendiente",
+  paid: "Anticipo cobrado",
+  refunded: "Anticipo devuelto",
+  waived: "Sin anticipo",
 };
 
 function fmtDeadline(value: string | null): string | null {

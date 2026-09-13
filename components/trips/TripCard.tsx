@@ -160,7 +160,7 @@ export function TripCard({
           <div className="mt-2 flex flex-wrap gap-1.5">
             {trip.deposit_per_seat > 0 && (
               <span className={chipClasses.muted}>
-                Seña {money(trip.deposit_per_seat)} por asiento
+                Anticipo {money(trip.deposit_per_seat)} por asiento
               </span>
             )}
             {trip.requires_approval && (
