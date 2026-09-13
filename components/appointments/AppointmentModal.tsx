@@ -6,6 +6,7 @@ import {
   Field,
   Sheet,
   StatusBadge,
+  Select,
   sheetInputClasses as inputClasses,
 } from "@/components/ui";
 import type {
@@ -83,11 +84,10 @@ export function AppointmentCreateModal({
         {/* Customer */}
         <Field label="Cliente">
           <div className="flex items-center justify-between gap-2">
-            <select
+            <Select
               required
               value={formData.customer_id}
               onChange={(e) => onChange({ customer_id: e.target.value })}
-              className={inputClasses}
             >
               <option value="">Selecciona un cliente</option>
               {customers.map((c) => (
@@ -95,7 +95,7 @@ export function AppointmentCreateModal({
                   {c.first_name} {c.last_name} — {c.phone}
                 </option>
               ))}
-            </select>
+            </Select>
             <button
               type="button"
               onClick={onToggleNewCustomerForm}

@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, Calendar, Home, Plus, Users } from "lucide-react";
+import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
+import { Bell, Bus, Calendar, Home, Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -11,28 +12,42 @@ interface TabItem {
   icon: typeof Home;
 }
 
-const TABS: readonly TabItem[] = [
-  { key: "home", label: "Inicio", href: "/dashboard", icon: Home },
-  {
-    key: "appointments",
-    label: "Turnos",
-    href: "/dashboard/appointments",
-    icon: Calendar,
-  },
-  // Center "+" tab — handled separately as a primary mesh button.
-  {
-    key: "customers",
-    label: "Clientes",
-    href: "/dashboard/customers",
-    icon: Users,
-  },
-  {
-    key: "reminders",
-    label: "Avisos",
-    href: "/dashboard/reminders",
-    icon: Bell,
-  },
-];
+const HOME: TabItem = { key: "home", label: "Inicio", href: "/dashboard", icon: Home };
+const APPOINTMENTS: TabItem = {
+  key: "appointments",
+  label: "Turnos",
+  href: "/dashboard/appointments",
+  icon: Calendar,
+};
+const TRIPS: TabItem = {
+  key: "trips",
+  label: "Viajes",
+  href: "/dashboard/trips",
+  icon: Bus,
+};
+const CUSTOMERS: TabItem = {
+  key: "customers",
+  label: "Clientes",
+  href: "/dashboard/customers",
+  icon: Users,
+};
+const REMINDERS: TabItem = {
+  key: "reminders",
+  label: "Avisos",
+  href: "/dashboard/reminders",
+  icon: Bell,
+};
+
+/**
+ * The bar has 4 slots plus the central "+", so it shows what this business
+ * actually uses: a bus agency has no appointments to create, and Avisos is
+ * about appointment reminders.
+ */
+function tabsFor(appointments: boolean, trips: boolean): TabItem[] {
+  if (trips && !appointments) return [HOME, TRIPS, CUSTOMERS, REMINDERS];
+  if (trips && appointments) return [HOME, APPOINTMENTS, TRIPS, CUSTOMERS];
+  return [HOME, APPOINTMENTS, CUSTOMERS, REMINDERS];
+}
 
 function isTabActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === href;
@@ -48,6 +63,13 @@ function isTabActive(pathname: string, href: string): boolean {
 export function MobileTabBar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { modules } = useOrganizationModules();
+  const tabs = tabsFor(modules.appointments, modules.trips);
+  // The "+" goes wherever this business creates things. The trips page has
+  // its own "Nueva salida" button, so it needs no create flag.
+  const createHref = modules.appointments
+    ? "/dashboard/appointments?create=1"
+    : "/dashboard/trips";
 
   return (
     <div
@@ -56,21 +78,21 @@ export function MobileTabBar() {
         paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom, 0px))",
       }}
     >
-      {TABS.slice(0, 2).map((t) => (
+      {tabs.slice(0, 2).map((t) => (
         <TabLink key={t.key} tab={t} active={isTabActive(pathname, t.href!)} />
       ))}
 
       <div className="flex items-center justify-center">
         <button
-          onClick={() => router.push("/dashboard/appointments?create=1")}
+          onClick={() => router.push(createHref)}
           className="mesh-primary flex h-12 w-12 -translate-y-2 items-center justify-center rounded-2xl text-white shadow-glow-primary transition-transform active:scale-95"
-          aria-label="Crear turno"
+          aria-label={modules.appointments ? "Crear turno" : "Nueva salida"}
         >
           <Plus className="h-6 w-6" />
         </button>
       </div>
 
-      {TABS.slice(2).map((t) => (
+      {tabs.slice(2).map((t) => (
         <TabLink key={t.key} tab={t} active={isTabActive(pathname, t.href!)} />
       ))}
     </div>

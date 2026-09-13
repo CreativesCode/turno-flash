@@ -38,9 +38,20 @@ adopcion y activacion de negocios si.
 `getBaseUrl()` en `utils/metadata.ts`, asi que el build de Vercel no necesita `NEXT_PUBLIC_SITE_URL`
 (`.env*` esta en .gitignore). En local esa variable si esta en `.env.local`.
 
+## En construccion
+
+- **Modulo de reserva de asientos** (guaguas): Fase 1 de 10 terminada el 2026-09-11, migraciones
+  **033-035** aplicadas. Aparecen dos tablas nuevas (`trips`, `trip_bookings`) y dos columnas de
+  modulo en `organizations`; las 7 orgs existentes quedaron con Turnos on / Viajes off, asi que nada
+  cambio para ellas. Ver [[modulo-reserva-asientos]].
+
 ## Agujeros reales (a septiembre 2026)
 
 - **Testing: cero.** No hay Jest ni Playwright configurados pese a lo que digan los docs.
+- **Un owner puede editar por API las fechas de licencia de su organizacion**: la policy de UPDATE de
+  la migracion 002 se lo permite y no hay trigger que lo impida; la UI simplemente no lo ofrece.
+  Detectado el 2026-09-11 al construir los modulos. Sin arreglar: el trigger
+  `enforce_module_change_is_admin` (033) se puede extender para cubrir esas columnas.
 - **CI/CD: solo** `.github/workflows/keep-supabase-alive.yml`. No hay pipeline de build/lint/test.
 - **Monitoreo:** no hay Sentry; el error tracking es propio, en tabla de Postgres (migracion 011).
 - `npm run lint` roto y errores de ESLint preexistentes ([[turno-flash-tooling]]).

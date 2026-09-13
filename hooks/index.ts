@@ -124,3 +124,29 @@ export { useCapacitor } from "./useCapacitor";
 export { useDebounce } from "./useDebounce";
 export { useLicense } from "./useLicense";
 export { toast, useToast } from "./useToast";
+
+// Trips hooks (seat booking module, PRP-002)
+export {
+  tripKeys,
+  useCancelTrip,
+  useCreateTrip,
+  useDuplicateTrip,
+  useSetTripPublished,
+  useTripsQuery,
+  useUpdateTrip,
+  type TripFilters,
+} from "./useTrips.query";
+export {
+  organizationModuleKeys,
+  useOrganizationModules,
+  type OrganizationModules,
+} from "./useOrganizationModules.query";
+export {
+  tripBookingKeys,
+  useCreateManualBooking,
+  useSetBookingStatus,
+  useSetAmountPaid,
+  useTripBookingsQuery,
+  useUpdatePassengerNames,
+} from "./useTripBookings.query";
+export { useMoney } from "./useMoney";

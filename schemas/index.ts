@@ -16,3 +16,6 @@ export * from "./service.schema";
 
 // Staff schemas
 export * from "./staff.schema";
+
+// Trip schemas
+export * from "./trip.schema";

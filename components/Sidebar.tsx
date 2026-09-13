@@ -2,6 +2,10 @@
 
 import { Avatar, Logo } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
+import {
+  useOrganizationModules,
+  type OrganizationModules,
+} from "@/hooks/useOrganizationModules.query";
 import { useTheme } from "@/contexts/theme-context";
 import { createClient } from "@/utils/supabase/client";
 import {
@@ -10,6 +14,7 @@ import {
   BarChart3,
   Bell,
   Building2,
+  Bus,
   Calendar,
   Crown,
   Home,
@@ -34,6 +39,8 @@ interface NavItem {
   Icon: LucideIcon;
   roles?: string[];
   requiresOrg?: boolean;
+  /** Only shown when the organization has this module enabled (PRP-002). */
+  module?: "appointments" | "trips";
 }
 
 interface NavSeparator {
@@ -50,6 +57,14 @@ const NAV_ITEMS: readonly NavEntry[] = [
     href: "/dashboard/appointments",
     Icon: Calendar,
     requiresOrg: true,
+    module: "appointments",
+  },
+  {
+    name: "Viajes",
+    href: "/dashboard/trips",
+    Icon: Bus,
+    requiresOrg: true,
+    module: "trips",
   },
   {
     name: "Clientes",
@@ -136,11 +151,19 @@ const NAV_ITEMS: readonly NavEntry[] = [
   },
 ];
 
-function isItemVisible(item: NavItem, role?: string, hasOrg?: boolean): boolean {
+function isItemVisible(
+  item: NavItem,
+  role?: string,
+  hasOrg?: boolean,
+  modules?: OrganizationModules
+): boolean {
   if (item.roles && item.roles.length > 0 && (!role || !item.roles.includes(role))) {
     return false;
   }
   if (item.requiresOrg && !hasOrg) {
+    return false;
+  }
+  if (item.module && modules && !modules[item.module]) {
     return false;
   }
   return true;
@@ -166,6 +189,7 @@ function roleLabel(role?: string): string {
  */
 export const Sidebar = React.memo(function Sidebar() {
   const { profile, signOut } = useAuth();
+  const { modules } = useOrganizationModules();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
@@ -202,9 +226,9 @@ export const Sidebar = React.memo(function Sidebar() {
     const hasOrg = !!profile?.organization_id;
     return NAV_ITEMS.filter((entry) => {
       if ("separator" in entry) return true;
-      return isItemVisible(entry, role, hasOrg);
+      return isItemVisible(entry, role, hasOrg, modules);
     });
-  }, [profile?.role, profile?.organization_id]);
+  }, [profile?.role, profile?.organization_id, modules]);
 
   const handleSignOut = async () => {
     await signOut();

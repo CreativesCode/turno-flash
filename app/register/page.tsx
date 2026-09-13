@@ -23,6 +23,23 @@ const TIMEZONES = [
   "UTC",
 ] as const;
 
+/** What the business sells. It maps to the two modules of the app. */
+const BUSINESS_KINDS = [
+  {
+    key: "appointments",
+    title: "Doy turnos o citas",
+    detail: "Peluquería, barbería, clínica, estudio, taller…",
+  },
+  {
+    key: "trips",
+    title: "Vendo asientos de viajes",
+    detail: "Guaguas, excursiones, traslados.",
+  },
+  { key: "both", title: "Las dos cosas", detail: "" },
+] as const;
+
+type BusinessKind = (typeof BUSINESS_KINDS)[number]["key"];
+
 const inputClass =
   "mt-1.5 block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 text-sm text-foreground placeholder-foreground-subtle transition-shadow focus:border-primary-500 focus:outline-none focus:ring-3 focus:ring-primary-500/15";
 const labelClass =
@@ -38,6 +55,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [timezone, setTimezone] = useState<string>("America/Mexico_City");
+  const [kind, setKind] = useState<BusinessKind>("appointments");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +89,7 @@ export default function RegisterPage() {
           org_name: orgName,
           org_timezone: timezone,
           org_whatsapp_phone: whatsapp || undefined,
+          modules: kind,
         }),
       });
 
@@ -163,6 +182,44 @@ export default function RegisterPage() {
                   placeholder="Mi Negocio"
                   className={inputClass}
                 />
+              </div>
+
+              <div>
+                <span className={labelClass}>¿Qué hace tu negocio?</span>
+                <div className="mt-1.5 flex flex-col gap-2">
+                  {BUSINESS_KINDS.map((option) => (
+                    <label
+                      key={option.key}
+                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
+                        kind === option.key
+                          ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                          : "border-border-2 bg-surface hover:bg-muted"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="business-kind"
+                        value={option.key}
+                        checked={kind === option.key}
+                        onChange={() => setKind(option.key)}
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-primary-500"
+                      />
+                      <span className="text-sm">
+                        <span className="block font-semibold text-foreground">
+                          {option.title}
+                        </span>
+                        {option.detail && (
+                          <span className="mt-0.5 block text-xs text-foreground-muted">
+                            {option.detail}
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-1.5 text-xs text-foreground-subtle">
+                  Define qué ves en la app. Se puede cambiar después.
+                </p>
               </div>
 
               <div>

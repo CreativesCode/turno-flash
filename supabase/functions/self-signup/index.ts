@@ -9,7 +9,8 @@
 // vive en el RPC create_organization_with_owner (migración 026), que aquí pasa
 // por usar el service_role.
 //
-// Body: { email, password, full_name, org_name, org_timezone?, org_whatsapp_phone? }
+// Body: { email, password, full_name, org_name, org_timezone?, org_whatsapp_phone?,
+//         modules? }  // 'appointments' (default) | 'trips' | 'both'
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { phoneToChatId, sendText } from "../_shared/openwa.ts";
@@ -76,6 +77,7 @@ Deno.serve(async (req) => {
     const orgName = String(body.org_name ?? "").trim();
     const orgTimezone = String(body.org_timezone ?? "America/Mexico_City").trim();
     const orgWhatsappPhone = String(body.org_whatsapp_phone ?? "").trim();
+    const modules = String(body.modules ?? "appointments").trim();
 
     // 1. Validaciones
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -161,6 +163,24 @@ Deno.serve(async (req) => {
         { error: "No se pudo crear el negocio. Intentá de nuevo." },
         400
       );
+    }
+
+    // 6b. Módulos del negocio (PRP-002). create_organization_with_owner (026)
+    // no se toca a propósito: sumarle un parámetro dejaría ambiguas las
+    // llamadas viejas. El trigger de la 033 deja pasar este UPDATE porque
+    // service_role no tiene auth.uid().
+    if (result.organization_id && modules !== "appointments") {
+      const { error: modulesError } = await admin
+        .from("organizations")
+        .update({
+          appointments_module_enabled: modules !== "trips",
+          trips_module_enabled: modules === "trips" || modules === "both",
+        })
+        .eq("id", result.organization_id);
+      if (modulesError) {
+        // La cuenta ya existe y sirve: un admin puede corregir los módulos.
+        console.error("[self-signup] módulos no aplicados:", modulesError.message);
+      }
     }
 
     // 7. Aviso por WhatsApp al admin (best-effort, no bloquea el registro)

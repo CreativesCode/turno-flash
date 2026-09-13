@@ -7,6 +7,7 @@ import {
   OrganizationEditSheet,
   type OrganizationEditForm,
 } from "@/components/organizations/OrganizationEditSheet";
+import { ModulesCard } from "@/components/organizations/ModulesCard";
 import { WhatsAppOrgSection } from "@/components/organizations/WhatsAppOrgSection";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Avatar, Button, Card } from "@/components/ui";
@@ -281,6 +282,10 @@ function OrganizationDetailsContent() {
         license_status: orgData.license_status || "no_license",
         license_message: orgData.license_message || "",
         is_usable: orgData.is_usable ?? false,
+        currency: orgData.currency || "USD",
+        // The view exposes these as nullable; the table defaults are on/off.
+        appointments_module_enabled: orgData.appointments_module_enabled ?? true,
+        trips_module_enabled: orgData.trips_module_enabled ?? false,
         owner: members.find((m) => m.role === "owner") ?? null,
         members,
       };
@@ -590,6 +595,17 @@ function OrganizationDetailsContent() {
                 dismissible={false}
               />
             )}
+
+          {/* Módulos del negocio — el owner los ve, solo el admin los cambia */}
+          <div className="mb-4">
+            <ModulesCard
+              organizationId={organizationId}
+              appointments={organization.appointments_module_enabled}
+              trips={organization.trips_module_enabled}
+              canEdit={isAdmin}
+              onChanged={loadOrganization}
+            />
+          </div>
 
           {/* Sección WhatsApp — solo admin */}
           {isAdmin && <WhatsAppOrgSection organizationId={organizationId} />}

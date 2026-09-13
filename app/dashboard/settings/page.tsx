@@ -3,16 +3,20 @@
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { BookingPageDetails } from "@/components/settings/BookingPageDetails";
+import { TripBookingDetails } from "@/components/settings/TripBookingDetails";
 import { ExceptionsEditor } from "@/components/staff/ExceptionsEditor";
+import { CurrencyCard } from "@/components/organizations/CurrencyCard";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
+import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import {
   useBusinessSettings,
   useUpdateBusinessSettings,
   type BusinessAutomationSettingsPatch,
 } from "@/hooks/useBusinessSettings.query";
 import {
+  Bus,
   CalendarCheck,
   CalendarOff,
   Loader2,
@@ -33,6 +37,7 @@ export default function SettingsPage() {
   const { profile } = useAuth();
   const toast = useToast();
   const { data: settings, isLoading, error } = useBusinessSettings();
+  const { modules } = useOrganizationModules();
   const updateMutation = useUpdateBusinessSettings();
 
   const canView =
@@ -56,6 +61,12 @@ export default function SettingsPage() {
     settings?.daily_summary_time ??
     "07:00"
   ).slice(0, 5);
+  const seatBookingEnabled =
+    draft.seat_booking_enabled ?? settings?.seat_booking_enabled ?? false;
+  const depositInstructions =
+    draft.deposit_instructions ?? settings?.deposit_instructions ?? "";
+  const holdHours =
+    draft.seat_booking_hold_hours ?? settings?.seat_booking_hold_hours ?? 24;
 
   const patchDraft = (patch: BusinessAutomationSettingsPatch) =>
     setDraft((prev) => ({ ...prev, ...patch }));
@@ -69,6 +80,15 @@ export default function SettingsPage() {
         enable_rating_request: ratingEnabled,
         enable_daily_summary: summaryEnabled,
         daily_summary_time: summaryTime,
+        // Only sent by a business that runs the seat booking module: for the
+        // rest these columns stay untouched at their defaults.
+        ...(modules.trips
+          ? {
+              seat_booking_enabled: seatBookingEnabled,
+              deposit_instructions: depositInstructions.trim() || null,
+              seat_booking_hold_hours: holdHours,
+            }
+          : {}),
       });
       toast.success("Ajustes guardados");
       setDraft({});
@@ -120,6 +140,7 @@ export default function SettingsPage() {
           {canView && !error && (
             <>
               {/* Reservas online */}
+              {modules.appointments && (
               <Card className="mb-4 p-0">
                 <SettingRow
                   icon={CalendarCheck}
@@ -136,6 +157,38 @@ export default function SettingsPage() {
                   }
                 />
               </Card>
+              )}
+
+              {/* Reservas de viajes */}
+              {modules.trips && (
+                <Card className="mb-4 p-0">
+                  <SettingRow
+                    icon={Bus}
+                    title="Página de reservas de viajes"
+                    description="Tus clientes eligen la salida, dónde los recogen y cuántos asientos, y dejan el nombre de cada pasajero. Aparecen solo las salidas que publicaste."
+                    loading={isLoading}
+                    checked={seatBookingEnabled}
+                    onChange={(v) => patchDraft({ seat_booking_enabled: v })}
+                    extra={
+                      <TripBookingDetails
+                        organizationId={organizationId}
+                        enabled={seatBookingEnabled}
+                        depositInstructions={depositInstructions}
+                        holdHours={holdHours}
+                        onChange={patchDraft}
+                      />
+                    }
+                  />
+                </Card>
+              )}
+
+              {/* Moneda del negocio */}
+              {organizationId && (
+                <CurrencyCard
+                  organizationId={organizationId}
+                  currency={modules.currency}
+                />
+              )}
 
               {/* Cierres del negocio */}
               <Card className="mb-4 p-4 sm:p-5">

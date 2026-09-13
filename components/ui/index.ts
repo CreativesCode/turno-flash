@@ -16,6 +16,12 @@ export {
   type KebabMenuProps,
 } from "./kebab-menu";
 export { Logo } from "./logo";
+export { RichText, type RichTextProps } from "./rich-text";
+export {
+  RichTextEditor,
+  type RichTextEditorProps,
+} from "./rich-text-editor";
 export { Field, Sheet, sheetInputClasses, type SheetProps } from "./sheet";
+export { Select, type SelectProps } from "./select";
 export { CalendarSkeleton, ModalSkeleton } from "./skeleton";
 export { StatusBadge, type StatusBadgeProps } from "./status-badge";

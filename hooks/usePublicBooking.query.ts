@@ -20,7 +20,13 @@ export function usePublicBookingInfo(slug: string) {
   });
 }
 
-/** Free times for a service/day; always refetched, availability changes fast. */
+/**
+ * Free times for a service/day; always refetched, availability changes fast.
+ *
+ * Like the trips page, it revalidates on its own while the customer decides:
+ * Realtime is not usable here because anon has no RLS policies on these
+ * tables, and a slot taken by someone else has to stop being offered.
+ */
 export function usePublicSlots(params: {
   slug: string;
   serviceId: string | null;
@@ -39,6 +45,9 @@ export function usePublicSlots(params: {
       }),
     enabled: !!slug && !!serviceId && !!date,
     staleTime: 0,
+    refetchInterval: 1000 * 30,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 }
 

@@ -5,6 +5,7 @@ import { appointmentKeys } from "./useAppointments.query";
 import { customerKeys } from "./useCustomers.query";
 import { serviceKeys } from "./useServices.query";
 import { staffKeys } from "./useStaff.query";
+import { tripKeys } from "./useTrips.query";
 import { useRealtimeTable } from "./useRealtimeTable";
 
 /**
@@ -88,10 +89,32 @@ export function useRealtimeWAOutbound(options?: {
  * operativas. Pensado para usarse en el layout del dashboard, así
  * cualquier página dentro del dashboard recibe actualizaciones en vivo.
  */
+/**
+ * Departures and their bookings (seat booking module, PRP-002). Both feed the
+ * same key set: the trip list shows occupancy, so a new booking has to refresh
+ * it too.
+ */
+export function useRealtimeTrips(enabled = true) {
+  const { profile } = useAuth();
+  useRealtimeTable({
+    table: "trips",
+    organizationId: profile?.organization_id ?? null,
+    invalidateKeys: [tripKeys.all],
+    enabled,
+  });
+  useRealtimeTable({
+    table: "trip_bookings",
+    organizationId: profile?.organization_id ?? null,
+    invalidateKeys: [tripKeys.all],
+    enabled,
+  });
+}
+
 export function useRealtimeAll(enabled = true) {
   useRealtimeAppointments(enabled);
   useRealtimeCustomers(enabled);
   useRealtimeServices(enabled);
   useRealtimeStaff(enabled);
+  useRealtimeTrips(enabled);
   useRealtimeWAOutbound({ enabled });
 }

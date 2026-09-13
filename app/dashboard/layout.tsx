@@ -27,16 +27,24 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
-      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <div className="print:hidden">
+        <Sidebar />
+        <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      </div>
 
-      <div className="flex min-h-screen flex-col lg:pl-60">
-        <MobileTopbar
-          title="TurnoFlash"
-          onMenu={() => setDrawerOpen(true)}
-        />
+      <div className="flex min-h-screen flex-col lg:pl-60 print:block print:min-h-0 print:pl-0">
+        <div className="print:hidden">
+          <MobileTopbar
+            title="TurnoFlash"
+            onMenu={() => setDrawerOpen(true)}
+          />
+        </div>
         <main className="flex-1">{children}</main>
-        {showTabBar && <MobileTabBar />}
+        {showTabBar && (
+          <div className="print:hidden">
+            <MobileTabBar />
+          </div>
+        )}
       </div>
     </div>
   );

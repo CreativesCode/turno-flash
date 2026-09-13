@@ -5,6 +5,7 @@ import {
   Avatar,
   Button,
   Field,
+  Select,
   sheetInputClasses as inputClasses,
 } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
@@ -433,17 +434,16 @@ export default function NewOrganizationPage() {
           </div>
 
           <Field label="Zona horaria">
-            <select
+            <Select
               value={formData.org_timezone}
-              onChange={(e) => patchForm({ org_timezone: e.target.value })}
-              className={inputClasses}
+              onChange={(e) => patchForm({ org_timezone: e.target.value })}
             >
               {TIMEZONES.map((tz) => (
                 <option key={tz} value={tz}>
                   {tz}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
 
           <Field label="WhatsApp del negocio (opcional)">

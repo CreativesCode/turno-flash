@@ -322,6 +322,7 @@ export type Database = {
           created_at: string | null
           daily_summary_time: string | null
           default_appointment_color: string | null
+          deposit_instructions: string | null
           enable_daily_summary: boolean | null
           enable_rating_request: boolean | null
           enable_reminders: boolean | null
@@ -333,6 +334,8 @@ export type Database = {
           organization_id: string
           reminder_settings: Json | null
           require_approval: boolean | null
+          seat_booking_enabled: boolean
+          seat_booking_hold_hours: number
           slot_duration_minutes: number | null
           updated_at: string | null
           whatsapp_bot_number: string | null
@@ -348,6 +351,7 @@ export type Database = {
           created_at?: string | null
           daily_summary_time?: string | null
           default_appointment_color?: string | null
+          deposit_instructions?: string | null
           enable_daily_summary?: boolean | null
           enable_rating_request?: boolean | null
           enable_reminders?: boolean | null
@@ -359,6 +363,8 @@ export type Database = {
           organization_id: string
           reminder_settings?: Json | null
           require_approval?: boolean | null
+          seat_booking_enabled?: boolean
+          seat_booking_hold_hours?: number
           slot_duration_minutes?: number | null
           updated_at?: string | null
           whatsapp_bot_number?: string | null
@@ -374,6 +380,7 @@ export type Database = {
           created_at?: string | null
           daily_summary_time?: string | null
           default_appointment_color?: string | null
+          deposit_instructions?: string | null
           enable_daily_summary?: boolean | null
           enable_rating_request?: boolean | null
           enable_reminders?: boolean | null
@@ -385,6 +392,8 @@ export type Database = {
           organization_id?: string
           reminder_settings?: Json | null
           require_approval?: boolean | null
+          seat_booking_enabled?: boolean
+          seat_booking_hold_hours?: number
           slot_duration_minutes?: number | null
           updated_at?: string | null
           whatsapp_bot_number?: string | null
@@ -714,7 +723,9 @@ export type Database = {
       }
       organizations: {
         Row: {
+          appointments_module_enabled: boolean
           created_at: string
+          currency: string
           id: string
           is_active: boolean
           license_end_date: string | null
@@ -726,10 +737,13 @@ export type Database = {
           subscription_status: string | null
           subscription_updated_at: string | null
           timezone: string
+          trips_module_enabled: boolean
           whatsapp_phone: string | null
         }
         Insert: {
+          appointments_module_enabled?: boolean
           created_at?: string
+          currency?: string
           id?: string
           is_active?: boolean
           license_end_date?: string | null
@@ -741,10 +755,13 @@ export type Database = {
           subscription_status?: string | null
           subscription_updated_at?: string | null
           timezone?: string
+          trips_module_enabled?: boolean
           whatsapp_phone?: string | null
         }
         Update: {
+          appointments_module_enabled?: boolean
           created_at?: string
+          currency?: string
           id?: string
           is_active?: boolean
           license_end_date?: string | null
@@ -756,6 +773,7 @@ export type Database = {
           subscription_status?: string | null
           subscription_updated_at?: string | null
           timezone?: string
+          trips_module_enabled?: boolean
           whatsapp_phone?: string | null
         }
         Relationships: []
@@ -1244,6 +1262,313 @@ export type Database = {
           },
         ]
       }
+      trip_bookings: {
+        Row: {
+          amount_paid: number
+          booking_number: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          deposit_amount: number | null
+          deposit_method: string | null
+          deposit_paid_at: string | null
+          deposit_status: Database["public"]["Enums"]["trip_deposit_status"]
+          extra_amount: number
+          extra_description: string | null
+          hold_expires_at: string | null
+          id: string
+          internal_notes: string | null
+          notes: string | null
+          organization_id: string
+          passenger_names: string[]
+          pickup_point_id: string | null
+          price_total: number | null
+          seats: number
+          source: Database["public"]["Enums"]["appointment_source"]
+          status: Database["public"]["Enums"]["trip_booking_status"]
+          trip_id: string
+          trip_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount_paid?: number
+          booking_number?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          deposit_amount?: number | null
+          deposit_method?: string | null
+          deposit_paid_at?: string | null
+          deposit_status?: Database["public"]["Enums"]["trip_deposit_status"]
+          extra_amount?: number
+          extra_description?: string | null
+          hold_expires_at?: string | null
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          organization_id: string
+          passenger_names?: string[]
+          pickup_point_id?: string | null
+          price_total?: number | null
+          seats: number
+          source?: Database["public"]["Enums"]["appointment_source"]
+          status?: Database["public"]["Enums"]["trip_booking_status"]
+          trip_id: string
+          trip_type?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          booking_number?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          deposit_amount?: number | null
+          deposit_method?: string | null
+          deposit_paid_at?: string | null
+          deposit_status?: Database["public"]["Enums"]["trip_deposit_status"]
+          extra_amount?: number
+          extra_description?: string | null
+          hold_expires_at?: string | null
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          organization_id?: string
+          passenger_names?: string[]
+          pickup_point_id?: string | null
+          price_total?: number | null
+          seats?: number
+          source?: Database["public"]["Enums"]["appointment_source"]
+          status?: Database["public"]["Enums"]["trip_booking_status"]
+          trip_id?: string
+          trip_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_bookings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_bookings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_bookings_pickup_point_id_fkey"
+            columns: ["pickup_point_id"]
+            isOneToOne: false
+            referencedRelation: "trip_pickup_points"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_bookings_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_pickup_points: {
+        Row: {
+          created_at: string
+          deposit_per_seat: number
+          details: string | null
+          id: string
+          name: string
+          organization_id: string
+          pickup_time: string | null
+          price_per_seat: number
+          price_round_trip: number | null
+          sort_order: number
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deposit_per_seat?: number
+          details?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          pickup_time?: string | null
+          price_per_seat?: number
+          price_round_trip?: number | null
+          sort_order?: number
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deposit_per_seat?: number
+          details?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          pickup_time?: string | null
+          price_per_seat?: number
+          price_round_trip?: number | null
+          sort_order?: number
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_pickup_points_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_pickup_points_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_pickup_points_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          booking_closes_at: string | null
+          booking_opens_at: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          departure_date: string
+          departure_time: string
+          deposit_per_seat: number
+          description: string | null
+          driver_name: string | null
+          driver_phone: string | null
+          id: string
+          internal_notes: string | null
+          is_published: boolean
+          max_seats_per_booking: number
+          organization_id: string
+          pickup_location: string | null
+          price_per_seat: number
+          price_round_trip: number | null
+          requires_approval: boolean
+          return_time: string | null
+          round_trip_enabled: boolean
+          timezone: string
+          title: string
+          total_seats: number
+          updated_at: string
+          vehicle_description: string | null
+          vehicle_photo_path: string | null
+        }
+        Insert: {
+          booking_closes_at?: string | null
+          booking_opens_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          departure_date: string
+          departure_time: string
+          deposit_per_seat?: number
+          description?: string | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          id?: string
+          internal_notes?: string | null
+          is_published?: boolean
+          max_seats_per_booking?: number
+          organization_id: string
+          pickup_location?: string | null
+          price_per_seat?: number
+          price_round_trip?: number | null
+          requires_approval?: boolean
+          return_time?: string | null
+          round_trip_enabled?: boolean
+          timezone?: string
+          title: string
+          total_seats: number
+          updated_at?: string
+          vehicle_description?: string | null
+          vehicle_photo_path?: string | null
+        }
+        Update: {
+          booking_closes_at?: string | null
+          booking_opens_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          departure_date?: string
+          departure_time?: string
+          deposit_per_seat?: number
+          description?: string | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          id?: string
+          internal_notes?: string | null
+          is_published?: boolean
+          max_seats_per_booking?: number
+          organization_id?: string
+          pickup_location?: string | null
+          price_per_seat?: number
+          price_round_trip?: number | null
+          requires_approval?: boolean
+          return_time?: string | null
+          round_trip_enabled?: boolean
+          timezone?: string
+          title?: string
+          total_seats?: number
+          updated_at?: string
+          vehicle_description?: string | null
+          vehicle_photo_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           created_at: string
@@ -1310,6 +1635,7 @@ export type Database = {
           read_at: string | null
           sent_at: string | null
           status: Database["public"]["Enums"]["wa_outbound_status"]
+          trip_booking_id: string | null
         }
         Insert: {
           appointment_id?: string | null
@@ -1325,6 +1651,7 @@ export type Database = {
           read_at?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["wa_outbound_status"]
+          trip_booking_id?: string | null
         }
         Update: {
           appointment_id?: string | null
@@ -1340,6 +1667,7 @@ export type Database = {
           read_at?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["wa_outbound_status"]
+          trip_booking_id?: string | null
         }
         Relationships: [
           {
@@ -1368,6 +1696,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_outbound_messages_trip_booking_id_fkey"
+            columns: ["trip_booking_id"]
+            isOneToOne: false
+            referencedRelation: "trip_bookings"
             referencedColumns: ["id"]
           },
         ]
@@ -1586,7 +1921,9 @@ export type Database = {
       }
       organizations_with_license_status: {
         Row: {
+          appointments_module_enabled: boolean | null
           created_at: string | null
+          currency: string | null
           days_remaining: number | null
           id: string | null
           is_active: boolean | null
@@ -1602,6 +1939,7 @@ export type Database = {
           subscription_status: string | null
           subscription_updated_at: string | null
           timezone: string | null
+          trips_module_enabled: boolean | null
           whatsapp_phone: string | null
         }
         Relationships: []
@@ -1666,7 +2004,27 @@ export type Database = {
         }
         Returns: Json
       }
+      create_trip_booking: {
+        Args: {
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_notes: string
+          p_org_id: string
+          p_passenger_names: string[]
+          p_phone: string
+          p_pickup_point_id?: string
+          p_round_trip?: boolean
+          p_seats: number
+          p_trip_id: string
+        }
+        Returns: Json
+      }
       generate_appointment_number: { Args: { org_id: string }; Returns: string }
+      generate_trip_booking_number: {
+        Args: { p_org_id: string }
+        Returns: string
+      }
       get_admin_platform_stats: { Args: never; Returns: Json }
       get_error_stats: {
         Args: { p_days?: number; p_organization_id?: string }
@@ -1735,6 +2093,13 @@ export type Database = {
           staff_id: string
         }[]
       }
+      public_trips_info: { Args: { p_slug: string }; Returns: Json }
+      public_trips_org_open: { Args: { p_org_id: string }; Returns: boolean }
+      queue_wa_trip: {
+        Args: { p_booking_id: string; p_intent: string; p_org_id: string }
+        Returns: undefined
+      }
+      release_expired_trip_holds: { Args: never; Returns: number }
       save_staff_schedule: {
         Args: { p_ranges: Json; p_service_ids: string[]; p_staff_id: string }
         Returns: undefined
@@ -1778,6 +2143,22 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      trip_booking_window_open: {
+        Args: { p_trip_id: string }
+        Returns: boolean
+      }
+      trip_seat_price: {
+        Args: {
+          p_pickup_point_id: string
+          p_round_trip: boolean
+          p_trip_id: string
+        }
+        Returns: {
+          deposit: number
+          price: number
+        }[]
+      }
+      trip_seats_taken: { Args: { p_trip_id: string }; Returns: number }
       wa_appointments_in_window: {
         Args: { p_end: string; p_start: string }
         Returns: {
@@ -1818,6 +2199,13 @@ export type Database = {
         | "special_hours"
         | "blocked"
       time_off_type: "vacation" | "sick_leave" | "personal" | "unpaid" | "other"
+      trip_booking_status:
+        | "pending"
+        | "confirmed"
+        | "cancelled"
+        | "completed"
+        | "no_show"
+      trip_deposit_status: "pending" | "paid" | "refunded" | "waived"
       user_role: "admin" | "owner" | "staff" | "special"
       wa_outbound_intent:
         | "confirm"
@@ -1836,6 +2224,10 @@ export type Database = {
         | "reactivation"
         | "waitlist_slot"
         | "approved"
+        | "trip_booked"
+        | "trip_approved"
+        | "trip_deposit_paid"
+        | "trip_notify_business"
       wa_outbound_status: "pending" | "sent" | "delivered" | "read" | "failed"
       waitlist_status:
         | "active"
@@ -2003,6 +2395,14 @@ export const Constants = {
         "blocked",
       ],
       time_off_type: ["vacation", "sick_leave", "personal", "unpaid", "other"],
+      trip_booking_status: [
+        "pending",
+        "confirmed",
+        "cancelled",
+        "completed",
+        "no_show",
+      ],
+      trip_deposit_status: ["pending", "paid", "refunded", "waived"],
       user_role: ["admin", "owner", "staff", "special"],
       wa_outbound_intent: [
         "confirm",
@@ -2021,6 +2421,10 @@ export const Constants = {
         "reactivation",
         "waitlist_slot",
         "approved",
+        "trip_booked",
+        "trip_approved",
+        "trip_deposit_paid",
+        "trip_notify_business",
       ],
       wa_outbound_status: ["pending", "sent", "delivered", "read", "failed"],
       waitlist_status: ["active", "notified", "booked", "expired", "cancelled"],

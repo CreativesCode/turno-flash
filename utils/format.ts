@@ -7,6 +7,9 @@
 /**
  * Format a number as currency in es-AR locale by default.
  * Pass `locale` and `currency` to override (e.g. for multi-org support).
+ *
+ * For anything money-related inside an organization, prefer `useMoney()`,
+ * which already knows the currency the business charges in.
  */
 export function fmtMoney(
   n: number | null | undefined,

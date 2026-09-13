@@ -16,6 +16,12 @@ export interface BusinessAutomationSettings {
   daily_summary_time: string | null;
   /** Public online booking page (PRP-001). Opt-in per business. */
   booking_page_enabled: boolean | null;
+  /** Public seat booking page (PRP-002). Opt-in per business. */
+  seat_booking_enabled: boolean;
+  /** How the passenger is told to pay the deposit. */
+  deposit_instructions: string | null;
+  /** Hours a seat is held before an unpaid booking expires. */
+  seat_booking_hold_hours: number;
 }
 
 export type BusinessAutomationSettingsPatch = Partial<
@@ -38,7 +44,7 @@ export function useBusinessSettings() {
       const { data, error } = await supabase
         .from("business_settings")
         .select(
-          "organization_id, whatsapp_integration_enabled, enable_rating_request, enable_daily_summary, daily_summary_time, booking_page_enabled"
+          "organization_id, whatsapp_integration_enabled, enable_rating_request, enable_daily_summary, daily_summary_time, booking_page_enabled, seat_booking_enabled, deposit_instructions, seat_booking_hold_hours"
         )
         .eq("organization_id", orgId)
         .maybeSingle();

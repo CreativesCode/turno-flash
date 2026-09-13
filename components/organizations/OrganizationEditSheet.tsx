@@ -4,6 +4,7 @@ import {
   Button,
   Field,
   Sheet,
+  Select,
   sheetInputClasses as inputClasses,
 } from "@/components/ui";
 import { ORGANIZATION_TIMEZONES } from "@/config/constants";
@@ -73,17 +74,16 @@ export function OrganizationEditSheet({
 
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Zona horaria">
-            <select
+            <Select
               value={formData.timezone}
-              onChange={(e) => onChange({ timezone: e.target.value })}
-              className={inputClasses}
+              onChange={(e) => onChange({ timezone: e.target.value })}
             >
               {ORGANIZATION_TIMEZONES.map((tz) => (
                 <option key={tz} value={tz}>
                   {tz}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           <Field label="WhatsApp">
             <input
