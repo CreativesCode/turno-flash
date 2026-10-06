@@ -5,6 +5,7 @@
  */
 
 import { Logger } from "@/utils/logger";
+import { getSiteUrl } from "@/utils/metadata";
 import { createClient } from "@/utils/supabase/client";
 
 const SESSION_EXPIRED = "Sesión expirada. Por favor, vuelve a iniciar sesión.";
@@ -68,7 +69,9 @@ export class InvitationService {
         },
         body: JSON.stringify({
           email,
-          redirectTo: `${window.location.origin}/auth/callback?type=invite`,
+          // Not window.location.origin: in the native app it is
+          // https://localhost, which the invited person can't open (P1-24)
+          redirectTo: `${getSiteUrl()}/auth/callback?type=invite`,
           ...(organizationId ? { organization_id: organizationId } : {}),
         }),
       });
