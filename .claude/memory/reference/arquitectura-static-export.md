@@ -38,3 +38,19 @@ Relacionado: [[producto-y-dominio]], [[convenciones-de-codigo]], [[license-enfor
 - **Funciones nuevas:** `SECURITY INVOKER` salvo que haga falta lo contrario; si son DEFINER, `SET search_path` y `REVOKE … FROM PUBLIC, anon`.
 - **Un miembro inactivo** (`user_profiles.is_active = false`) no ve su propia fila de perfil, y por eso todas las políticas por organización dejan de aplicarse. No reescribir esas políticas: el corte está en `profiles_select_own_active`.
 - Helpers: `is_platform_admin()` y `auth_user_org_id()` (solo perfiles activos).
+
+## Grupo de rutas `(app)` y páginas públicas (2026-10-06, P2-02)
+
+- `AuthProvider` y `NativeBackButton` viven en `app/(app)/layout.tsx`, **no** en el layout raíz.
+  Dentro de `(app)` están la landing, login, registro, `auth/`, `help` y todo `dashboard/` (las URLs no cambian).
+  Fuera quedan `/book`, `/trips`, `privacy`, `terms` y `account-deletion`: **no pueden usar `useAuth`** (no hay provider).
+- **Una ruta nueva que necesite sesión va dentro de `app/(app)/`.** Una página pública nueva va fuera y no debe importar
+  `utils/supabase/client` ni el barril `@/hooks` (arrastran supabase-js y Capacitor).
+- Zod no se puede reducir con Turbopack (ni con `zod/mini`): en las páginas públicas el esquema del cliente se carga con
+  `import()` al abrir el paso "Tus datos" (`components/booking/BookingSteps.tsx`).
+- **Build en Windows (P2-08):** Next escribe los archivos de navegación en subcarpetas (`__next.!KGFwcCk/dashboard.txt`)
+  y el cliente los pide con puntos; sin arreglo, cada toque del menú recarga la página. `scripts/fix-windows-export.mjs`
+  corre después de `next build` en `build` y `build:next` y crea las copias. En Linux (Vercel) no hace nada.
+- Al mover carpetas de `app/` en Windows hay que **parar `npm run dev`** (bloquea los directorios), y después borrar
+  `.next/dev` porque sus tipos generados apuntan a las rutas viejas y rompen `tsc`/el build.
+

@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/ensure-platforms.js",
-    "build:next": "next build",
+    "build": "next build && node scripts/fix-windows-export.mjs && node scripts/ensure-platforms.js",
+    "build:next": "next build && node scripts/fix-windows-export.mjs",
     "start": "next start",
     "lint": "next lint",
     "generate:icons": "node scripts/generate-icons.js",

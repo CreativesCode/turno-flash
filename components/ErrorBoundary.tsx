@@ -1,7 +1,6 @@
 "use client";
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -42,6 +41,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
     // Log a Supabase (gratis, sin límites)
     try {
+      // Loaded only when something broke: the public pages don't ship supabase-js
+      const { createClient } = await import("@/utils/supabase/client");
       const supabase = createClient();
       
       // Obtener información del usuario actual si está autenticado

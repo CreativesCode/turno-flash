@@ -12,7 +12,7 @@
 - [Estado actual (sep 2026)](project/estado-actual-2026-09.md) — que esta hecho, que falta (cero tests, cero CI, sin Sentry), dominio `turno-flash.vercel.app`, fechas de licencia posiblemente corridas (bug ya arreglado) y por que los docs mienten
 - [Rediseno de UI](project/rediseno-ui-migracion.md) — completo (9/9) desde 2026-09-10, incluidos details e invite; decisiones cerradas
 - [Reserva online](project/reserva-online.md) — implementada 2026-09-10 (migraciones 029-031 + edge `public-booking`); horario y servicios por profesional (estricto), aprobacion por servicio, opt-in, vacaciones; `/book?b=<slug>`
-- [QA piloto Cuba](project/qa-piloto-cuba.md) — plan P0-P3 en `.claude/PRPs/qa-piloto-cuba.md`; 2026-10-06: P0 y P1 cerrados salvo P1-26 (Mac); P2 casi cerrado (pendientes 02 resto y 08); guía de primeros pasos con fotos reales; migraciones 048-066; faltan pruebas en teléfono real y SMTP propio; RLS rechaza en silencio (0 filas); roles decididos (staff solo pasajes, sin chofer, special aparcado); qué falta
+- [QA piloto Cuba](project/qa-piloto-cuba.md) — plan P0-P3 en `.claude/PRPs/qa-piloto-cuba.md`; 2026-10-06: P0 y P1 cerrados salvo P1-26 (Mac); P2 cerrado (sigue P3); guía de primeros pasos con fotos reales; migraciones 048-066; faltan pruebas en teléfono real y SMTP propio; RLS rechaza en silencio (0 filas); roles decididos (staff solo pasajes, sin chofer, special aparcado); qué falta
 - [Modulo reserva de asientos](project/modulo-reserva-asientos.md) — 9/10 fases (migraciones 033-047, edges public-trips y wa-trip-send, dashboard, pagina publica /trips, WhatsApp incl. cancelaciones); solo falta el cron de vencimiento (frenado otra vez 2026-09-12); anticipo y confirmacion son ejes independientes
 - [WhatsApp y automatizaciones](project/whatsapp-automatizaciones.md) — OpenWA, edge functions por intent, crons cada 15 min, toggles por negocio; los HTTP 500 de OpenWA NO impiden la entrega; clave de servicio sb_secret en Edge; formato y contacto de los mensajes (`wa-message.ts`)
 - [Enforcement de licencia](project/license-enforcement.md) — bloqueo de trial vencido (RLS de escritura + LicenseGate); gracia de 7d hardcodeada en SQL a sincronizar con el cliente
@@ -24,7 +24,7 @@
 - [Copy en espanol internacional](feedback/copy-espanol-internacional.md) — tuteo, nunca voseo; "anticipo" y no "sena"; locale `es` y la moneda siempre explicita (`useMoney`)
 
 ## reference/ — Donde encontrar cosas
-- [Arquitectura: static export](reference/arquitectura-static-export.md) — **sin API routes ni middleware**; la seguridad real es RLS; lo de servidor va en Edge Functions
+- [Arquitectura: static export](reference/arquitectura-static-export.md) — **sin API routes ni middleware**; la seguridad real es RLS; lo de servidor va en Edge Functions; rutas con sesión dentro de `app/(app)/`; script post-build para Windows
 - [Convenciones de codigo](reference/convenciones-de-codigo.md) — incluye helpers del QA 2026-10-06 (useStepHistory, useBackToClose, utils/phone, isServiceRole, frameCustomerMessage); services estaticos, hooks `.query`, schemas Zod, tokens `st-*`/`mesh-*`, primitivas en `components/ui/` (incl. `KebabMenu`, `ConfirmSheet`, `Select`, `RichTextEditor`), `datetime-local` en hora local, sin N+1
 - [Mapa de docs](reference/mapa-docs.md) — que doc sirve y cuales son de enero y estan obsoletos
 - [Manual de usuario](reference/manual-de-usuario.md) — fuente única en `docs/user-manual/`, servida en `/help` (se lee en build); actualizarla cuando cambie algo visible

@@ -1,7 +1,5 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { NativeBackButton } from "@/components/NativeBackButton";
 import { ThemeProviderWrapper } from "@/components/ThemeProviderWrapper";
-import { AuthProvider } from "@/contexts/auth-context";
 import { QueryProvider } from "@/contexts/query-client-provider";
 import { getAbsoluteUrl, getSiteUrl } from "@/utils/metadata";
 import type { Metadata, Viewport } from "next";
@@ -123,25 +121,25 @@ export default function RootLayout({
       >
         <ErrorBoundary>
           <QueryProvider>
-            <AuthProvider>
-              <ThemeProviderWrapper>
-                {children}
-                <NativeBackButton />
-                <Toaster
-                  position="top-right"
-                  richColors
-                  closeButton
-                  duration={4000}
-                  expand={true}
-                  visibleToasts={5}
-                  toastOptions={{
-                    style: {
-                      zIndex: 9999,
-                    },
-                  }}
-                />
-              </ThemeProviderWrapper>
-            </AuthProvider>
+            {/* No AuthProvider here: the public pages (/book, /trips) don't
+                need a session, and it brought supabase-js and Capacitor to
+                them (P2-02). The app routes get it from app/(app)/layout. */}
+            <ThemeProviderWrapper>
+              {children}
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                duration={4000}
+                expand={true}
+                visibleToasts={5}
+                toastOptions={{
+                  style: {
+                    zIndex: 9999,
+                  },
+                }}
+              />
+            </ThemeProviderWrapper>
           </QueryProvider>
         </ErrorBoundary>
       </body>

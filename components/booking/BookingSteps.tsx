@@ -3,16 +3,21 @@
 import { Avatar, Button, Field, sheetInputClasses } from "@/components/ui";
 import { PHONE_COUNTRIES, dialCodeOf } from "@/config/phone-countries";
 import { usePublicSlots } from "@/hooks/usePublicBooking.query";
-import {
-  publicCustomerSchema,
-  type PublicCustomerInput,
-} from "@/schemas/public-booking.schema";
+import type { PublicCustomerInput } from "@/schemas/public-booking.schema";
 import type { PublicService, PublicSlot, PublicStaff } from "@/types/public-booking";
 import { fmtDuration, fmtMoney } from "@/utils/format";
 import { addDays, format, getDay, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { ChevronDown, ChevronRight, Shuffle } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+
+/**
+ * Zod only travels with the details step: Turbopack can't tree-shake it and
+ * it was ~44 KB compressed on every first visit (P2-02). Asked for as soon
+ * as the step opens, so it is usually there by the time they submit.
+ */
+const loadCustomerSchema = () =>
+  import("@/schemas/public-booking.schema").then((m) => m.publicCustomerSchema);
 
 /** Max day chips shown, even if the service allows booking further ahead. */
 const MAX_VISIBLE_DAYS = 30;
@@ -302,14 +307,25 @@ export function DetailsStep({
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    void loadCustomerSchema().catch(() => undefined);
+  }, []);
+
   const patch = (p: Partial<DetailsDraft>) => {
     const next = { ...form, ...p };
     setForm(next);
     onChange?.(next);
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    let publicCustomerSchema;
+    try {
+      publicCustomerSchema = await loadCustomerSchema();
+    } catch {
+      setErrors({ form: "No pudimos continuar. Revisa tu conexión e inténtalo de nuevo." });
+      return;
+    }
     const parsed = publicCustomerSchema.safeParse({
       ...form,
       country_code: dialCodeOf(form.country),
@@ -433,6 +449,7 @@ export function DetailsStep({
       >
         {isSubmitting ? "Reservando…" : "Confirmar reserva"}
       </Button>
+      {fieldError("form")}
     </form>
   );
 }

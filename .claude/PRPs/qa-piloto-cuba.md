@@ -293,7 +293,7 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 
 **P2-01 · ✅ HECHO 2026-10-06 (persistencia en localStorage con lista blanca, sesión y perfil guardados para abrir sin señal, aviso "Sin conexión"; mutaciones siguen `always` para no encolar escrituras; sin service worker ni guard de enlaces web por D-02) · F35+F33 · TanStack configurado para red buena: nada sobrevive sin conexión** → ver la sección 3. Téc: `contexts/query-client-provider.tsx:16-31`: `networkMode:"offlineFirst"`, `retry:2`, `gcTime:24h`; mutaciones `networkMode:"online"` + banner con `onlineManager`. Persistencia → D-01. Web/PWA: guard `navigator.onLine` en los enlaces de `Sidebar`/`MobileTabBar` (toast "Sin conexión") en vez de dejar la página en blanco; un service worker solo con aprobación (D-02). Verificar: cerrar y abrir sin red muestra la agenda del día.
 
-**P2-02 · PARCIAL 2026-10-06 (useToast directo, URL de foto como string, lazy, una sola fuente: 1473→1301 KB sin comprimir). Falta (b) route group `app/(public)/` sin AuthProvider, (e) y (f) · F50+M11 · Página pública de 440 KB y 1,3 MB de JS: en 3G, 8-37 s hasta ver algo**
+**P2-02 · ✅ HECHO 2026-10-06 (grupo `app/(app)/` con el AuthProvider, ErrorBoundary carga supabase solo al fallar, Zod con `import()` en "Tus datos", texto estático en el fallback; /book: JS 256→157 KB y total 325→226 KB con brotli; queda la fuente Inter, 47 KB) · F50+M11 · Página pública de 440 KB y 1,3 MB de JS: en 3G, 8-37 s hasta ver algo**
 - Téc: (a) importar `useToast` desde `@/hooks/useToast` y no desde el barril `@/hooks` en `BookingFlow.tsx:12`, `TripsFlow.tsx:14` (saca Capacitor y los servicios del panel). (b) Route group `app/(public)/` para book y trips con un layout mínimo, sin `AuthProvider`. (c) Una sola fuente (sin JetBrains_Mono en el root). (d) URL de la foto armada como string (`TripsFlow.tsx:48`), `loading="lazy"` (`TripsSteps.tsx:83-85`). (e) Fallback de Suspense con texto estático. (f) Opcional `zod/mini`.
 - Verificar: /book en frío por debajo de 200 KB y contenido útil en menos de 6 s en regular3g.
 
@@ -317,7 +317,7 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 - Téc: `TripService.getById` + `useTripQuery(id)` (`trips/details/page.tsx:82-87`); invalidaciones dirigidas en `useInvalidateBookings`.
 - Verificar: abrir el detalle hace 3 GET pequeños que no crecen con la historia.
 
-**P2-08 · F32(en disputa)+M67 · Prefetch de rutas con 404 (~90 KB por carga)**
+**P2-08 · ✅ HECHO 2026-10-06 (causa: en Windows los segmentos se escriben en subcarpetas y el cliente los pide con puntos; `scripts/fix-windows-export.mjs` tras `next build`: 15 → 0 respuestas 404 y el menú ya no recarga la página) · F32+M67 · Prefetch de rutas con 404 (~90 KB por carga)**
 - Téc: **construir los builds en Linux, macOS o WSL** (causa: el export de Next en Windows). Si se compila en Windows, `prefetch={false}` en los enlaces de `MobileTabBar`, `Sidebar` y `Drawer`.
 - Verificar: 0 respuestas 404 de `__next.*.txt`.
 
