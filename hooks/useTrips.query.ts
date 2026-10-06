@@ -42,6 +42,7 @@ export function useTripsQuery(filters?: TripFilters) {
     trips: query.data ?? [],
     loading: query.isLoading,
     error: query.error ? (query.error as Error).message : null,
+    refetch: query.refetch,
   };
 }
 

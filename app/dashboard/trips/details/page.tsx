@@ -21,6 +21,7 @@ import {
   useSetAmountPaid,
   useSetBookingStatus,
   useToast,
+  tripKeys,
   useTripBookingsQuery,
   useTripsQuery,
   useUpdatePassengerNames,
@@ -31,6 +32,7 @@ import {
   seatPrice,
   type ManualBookingFormState,
   type TripBookingWithCustomer,
+  type TripWithOccupancy,
 } from "@/types/trips";
 import { downloadCsv, todayForFilename } from "@/utils/csv";
 import { useMoney } from "@/hooks/useMoney";
@@ -43,7 +45,9 @@ import {
   Printer,
   Share2,
   Users,
+  WifiOff,
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -112,11 +116,26 @@ function TripDetailsContent() {
   const [paying, setPaying] = useState<TripBookingWithCustomer | null>(null);
 
   // The trip comes from the list the dashboard already has in cache.
-  const { trips, loading: tripsLoading } = useTripsQuery({ includePast: true });
-  const trip = useMemo(
-    () => trips.find((candidate) => candidate.id === tripId) ?? null,
-    [trips, tripId]
-  );
+  const {
+    trips,
+    loading: tripsLoading,
+    error: tripsError,
+    refetch: refetchTrips,
+  } = useTripsQuery({ includePast: true });
+  const queryClient = useQueryClient();
+  // Offline, fall back to any trip list already in the cache (the Viajes list
+  // the owner just came from) instead of saying the trip doesn't exist
+  const trip = useMemo(() => {
+    const found = trips.find((candidate) => candidate.id === tripId);
+    if (found) return found;
+    for (const [, cached] of queryClient.getQueriesData<TripWithOccupancy[]>({
+      queryKey: tripKeys.lists(),
+    })) {
+      const hit = cached?.find((candidate) => candidate.id === tripId);
+      if (hit) return hit;
+    }
+    return null;
+  }, [trips, tripId, queryClient]);
 
   const { bookings, loading, error } = useTripBookingsQuery(tripId);
 
@@ -407,6 +426,29 @@ function TripDetailsContent() {
             <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
             <p className="text-sm text-foreground-muted">Cargando pasajeros...</p>
           </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!trip && tripsError) {
+    return (
+      <ProtectedRoute>
+        <div className="mx-auto max-w-3xl px-4 py-10 text-center">
+          <WifiOff className="mx-auto h-10 w-10 text-foreground-subtle" />
+          <h1 className="mt-3 text-base font-bold text-foreground">
+            Sin conexión
+          </h1>
+          <p className="mt-1 text-sm text-foreground-muted">
+            No pudimos cargar la salida. Revisa tu conexión.
+          </p>
+          <Button
+            variant="soft"
+            onClick={() => void refetchTrips()}
+            className="mt-4"
+          >
+            Reintentar
+          </Button>
         </div>
       </ProtectedRoute>
     );
