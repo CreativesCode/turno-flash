@@ -22,6 +22,8 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  // The page polls every 30 s: without this, every poll paid a preflight
+  "Access-Control-Max-Age": "86400",
 };
 
 function json(body: unknown, status = 200) {
