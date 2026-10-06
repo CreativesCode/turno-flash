@@ -2,10 +2,14 @@
 
 import { useMoney } from "@/hooks/useMoney";
 
+import { RichText } from "@/components/ui";
 import type { TripWithOccupancy } from "@/types/trips";
+import { departureDateLabel } from "@/utils/driver-list";
 
 export interface PassengerPrintRow {
   passenger: string;
+  /** Stop and time, empty for the meeting point. */
+  pickup: string;
   bookedBy: string;
   phone: string;
   bookingNumber: string;
@@ -55,7 +59,8 @@ export function PassengerPrintSheet({
         <h1 className="text-lg font-bold">{organizationName || "Lista de pasajeros"}</h1>
         <p className="text-base font-semibold">{trip.title}</p>
         <p className="text-xs">
-          Salida: {trip.departure_date} a las {trip.departure_time.slice(0, 5)}
+          Salida: {departureDateLabel(trip.departure_date)} a las{" "}
+          {trip.departure_time.slice(0, 5)}
           {trip.return_time ? ` · Regreso: ${trip.return_time.slice(0, 5)}` : ""}
         </p>
         {(trip.driver_name || trip.vehicle_description) && (
@@ -68,7 +73,7 @@ export function PassengerPrintSheet({
         )}
         {trip.pickup_location && (
           <p className="whitespace-pre-line text-xs">
-            Punto de encuentro: {trip.pickup_location}
+            Punto de encuentro: <RichText text={trip.pickup_location} />
           </p>
         )}
         <p className="text-xs">
@@ -82,6 +87,7 @@ export function PassengerPrintSheet({
           <tr className="border-b border-black text-left">
             <th className="py-1 pr-2 font-bold">#</th>
             <th className="py-1 pr-2 font-bold">Pasajero</th>
+            <th className="py-1 pr-2 font-bold">Recogida</th>
             <th className="py-1 pr-2 font-bold">Reservó</th>
             <th className="py-1 pr-2 font-bold">Teléfono</th>
             <th className="py-1 pr-2 font-bold">Reserva</th>
@@ -97,6 +103,7 @@ export function PassengerPrintSheet({
             <tr key={`${row.bookingNumber}-${index}`} className="border-b border-gray-300">
               <td className="py-1 pr-2">{index + 1}</td>
               <td className="py-1 pr-2">{row.passenger}</td>
+              <td className="py-1 pr-2">{row.pickup || "Punto de encuentro"}</td>
               <td className="py-1 pr-2">{row.bookedBy}</td>
               <td className="py-1 pr-2">{row.phone}</td>
               <td className="py-1 pr-2">{row.bookingNumber}</td>
@@ -119,7 +126,7 @@ export function PassengerPrintSheet({
         </tbody>
         <tfoot>
           <tr className="border-t-2 border-black font-bold">
-            <td className="py-1 pr-2" colSpan={7}>
+            <td className="py-1 pr-2" colSpan={8}>
               Totales
             </td>
             <td className="py-1 pr-2 text-right">{money(totalPrice)}</td>

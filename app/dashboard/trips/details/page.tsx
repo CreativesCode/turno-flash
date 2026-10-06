@@ -34,10 +34,26 @@ import {
 } from "@/types/trips";
 import { downloadCsv, todayForFilename } from "@/utils/csv";
 import { useMoney } from "@/hooks/useMoney";
-import { ArrowLeft, Download, Plus, Printer, Users } from "lucide-react";
+import { driverListText, pickupLabel, shareText } from "@/utils/driver-list";
+import { Capacitor } from "@capacitor/core";
+import {
+  ArrowLeft,
+  Download,
+  Plus,
+  Printer,
+  Share2,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { FormEvent, Suspense, useCallback, useMemo, useState } from "react";
+import {
+  FormEvent,
+  Suspense,
+  useCallback,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 const EMPTY_BOOKING: ManualBookingFormState = {
   first_name: "",
@@ -69,6 +85,15 @@ const DEPOSIT_TEXT: Record<string, string> = {
   waived: "Sin anticipo",
 };
 
+// False while prerendering, the real value on the device: no hydration mismatch
+const subscribeNever = () => () => {};
+const useIsNative = () =>
+  useSyncExternalStore(
+    subscribeNever,
+    () => Capacitor.isNativePlatform(),
+    () => false
+  );
+
 function TripDetailsContent() {
   const searchParams = useSearchParams();
   const tripId = searchParams.get("id");
@@ -76,6 +101,7 @@ function TripDetailsContent() {
   const { modules } = useOrganizationModules();
   const { format: money } = useMoney();
   const toast = useToast();
+  const isNative = useIsNative();
 
   const [showManual, setShowManual] = useState(false);
   const [manualForm, setManualForm] =
@@ -266,6 +292,8 @@ function TripDetailsContent() {
     if (!trip) return [];
     const rows: {
       passenger: string;
+      pickup: string;
+      pickupOrder: number;
       bookedBy: string;
       phone: string;
       bookingNumber: string;
@@ -287,9 +315,15 @@ function TripDetailsContent() {
       const priceEach = bookingTotal(booking) / seats;
       const paidEach = (booking.amount_paid ?? 0) / seats;
       const pendingEach = bookingPending(booking) / seats;
+      const point = trip.pickup_points.find(
+        (stop) => stop.id === booking.pickup_point?.id
+      );
       for (let seat = 0; seat < booking.seats; seat += 1) {
         rows.push({
           passenger: booking.passenger_names[seat] ?? "(sin nombre)",
+          pickup: pickupLabel(point),
+          // Meeting point first, then the stops in the order the bus passes
+          pickupOrder: point ? point.sort_order + 1 : 0,
           bookedBy,
           phone: booking.customer?.phone ?? "",
           bookingNumber: booking.booking_number ?? "",
@@ -305,7 +339,8 @@ function TripDetailsContent() {
         });
       }
     }
-    return rows;
+    // Stable sort: within a stop, passengers keep their booking order
+    return rows.sort((a, b) => a.pickupOrder - b.pickupOrder);
   }, [liveBookings, trip]);
 
   const handleExport = useCallback(() => {
@@ -314,6 +349,7 @@ function TripDetailsContent() {
       `pasajeros-${trip.departure_date}-${todayForFilename()}`,
       [
         "Pasajero",
+        "Recogida",
         "Reservó",
         "Teléfono",
         "Reserva",
@@ -328,6 +364,7 @@ function TripDetailsContent() {
       ],
       passengerRows.map((row) => [
         row.passenger,
+        row.pickup,
         row.bookedBy,
         row.phone,
         row.bookingNumber,
@@ -342,6 +379,25 @@ function TripDetailsContent() {
       ])
     );
   }, [passengerRows, trip]);
+
+  const handleShare = useCallback(async () => {
+    if (!trip) return;
+    try {
+      await shareText(
+        driverListText({
+          organizationName: modules.name,
+          title: trip.title,
+          date: trip.departure_date,
+          time: trip.departure_time,
+          driver: trip.driver_name,
+          rows: passengerRows,
+          money,
+        })
+      );
+    } catch {
+      toast.error("No se pudo compartir", "Inténtalo de nuevo");
+    }
+  }, [modules.name, money, passengerRows, toast, trip]);
 
   if (tripsLoading || loading) {
     return (
@@ -426,14 +482,23 @@ function TripDetailsContent() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button variant="ghost" onClick={handleExport}>
-                <Download className="h-4 w-4" />
-                Exportar CSV
+              <Button variant="ghost" onClick={() => void handleShare()}>
+                <Share2 className="h-4 w-4" />
+                Compartir lista
               </Button>
-              <Button variant="ghost" onClick={() => window.print()}>
-                <Printer className="h-4 w-4" />
-                Imprimir
-              </Button>
+              {/* Downloads and printing don't work inside the native app */}
+              {!isNative && (
+                <>
+                  <Button variant="ghost" onClick={handleExport}>
+                    <Download className="h-4 w-4" />
+                    Exportar CSV
+                  </Button>
+                  <Button variant="ghost" onClick={() => window.print()}>
+                    <Printer className="h-4 w-4" />
+                    Imprimir
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
