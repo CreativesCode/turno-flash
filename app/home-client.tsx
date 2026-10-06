@@ -491,9 +491,10 @@ export default function HomePageClient() {
                 className="relative aspect-video overflow-hidden rounded-2xl bg-white shadow-sm"
               >
                 <Image
-                  src={`/images/tf-${item}.png`}
+                  src={`/images/tf-${item}.webp`}
                   alt={`Vista previa de la aplicación ${item}`}
                   fill
+                  loading="lazy"
                   className="object-contain"
                 />
               </div>
