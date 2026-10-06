@@ -7,6 +7,7 @@ import {
   type OrganizationModules,
 } from "@/hooks/useOrganizationModules.query";
 import { useTheme } from "@/contexts/theme-context";
+import { useBackToClose } from "@/hooks/useBackToClose";
 import { createClient } from "@/utils/supabase/client";
 import {
   Activity,
@@ -195,6 +196,12 @@ export function Drawer({ open, onClose }: DrawerProps) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
+  const releaseBack = useBackToClose(open, onClose);
+  // Leaving to another screen: the back entry must stay put (see the hook)
+  const closeToNavigate = () => {
+    releaseBack();
+    onClose();
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -230,6 +237,7 @@ export function Drawer({ open, onClose }: DrawerProps) {
   }, [profile?.role, profile?.organization_id, modules]);
 
   const handleSignOut = async () => {
+    releaseBack();
     await signOut();
     router.push("/login");
   };
@@ -303,7 +311,7 @@ export function Drawer({ open, onClose }: DrawerProps) {
               <Link
                 key={entry.href}
                 href={entry.href}
-                onClick={onClose}
+                onClick={closeToNavigate}
                 className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                   active
                     ? "bg-primary-50 font-bold text-primary-500 dark:bg-primary-900/30"

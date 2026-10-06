@@ -1,5 +1,6 @@
 "use client";
 
+import { useBackToClose } from "@/hooks/useBackToClose";
 import { X } from "lucide-react";
 import { ReactNode, useEffect } from "react";
 
@@ -32,6 +33,8 @@ export function Sheet({
   children,
   maxWidthClass = "sm:max-w-lg",
 }: SheetProps) {
+  useBackToClose(open, onClose);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {

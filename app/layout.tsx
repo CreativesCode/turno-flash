@@ -1,4 +1,5 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { NativeBackButton } from "@/components/NativeBackButton";
 import { ThemeProviderWrapper } from "@/components/ThemeProviderWrapper";
 import { AuthProvider } from "@/contexts/auth-context";
 import { QueryProvider } from "@/contexts/query-client-provider";
@@ -132,6 +133,7 @@ export default function RootLayout({
             <AuthProvider>
               <ThemeProviderWrapper>
                 {children}
+                <NativeBackButton />
                 <Toaster
                   position="top-right"
                   richColors
