@@ -19,6 +19,9 @@ export function capacityError(error: unknown): string | null {
       ? `Solo quedan ${left[1]} asientos en esta salida.`
       : "Esta salida ya no tiene asientos libres.";
   }
+  if (message.includes("trip_cancelled")) {
+    return "Esta salida está cancelada: ya no acepta reservas.";
+  }
   return null;
 }
 

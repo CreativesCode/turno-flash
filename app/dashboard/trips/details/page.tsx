@@ -106,6 +106,8 @@ function TripDetailsContent() {
     profile?.role === "owner" ||
     profile?.role === "staff";
   const organizationId = profile?.organization_id ?? null;
+  // A cancelled departure takes no new bookings (migration 064 enforces it)
+  const canLoadBookings = canManage && !trip?.cancelled_at;
 
   const liveBookings = useMemo(
     () => bookings.filter((booking) => booking.status !== "cancelled"),
@@ -408,7 +410,7 @@ function TripDetailsContent() {
                 </p>
               </div>
 
-              {canManage && (
+              {canLoadBookings && (
                 <Button
                   variant="mesh-primary"
                   onClick={() => {
@@ -472,6 +474,12 @@ function TripDetailsContent() {
             </div>
           )}
 
+          {trip.cancelled_at && (
+            <div className="mb-4 rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm font-semibold text-danger-700 dark:border-danger-900/40 dark:bg-danger-900/20 dark:text-danger-300 print:hidden">
+              Salida cancelada: ya no acepta reservas.
+            </div>
+          )}
+
           {(pendingApproval > 0 || pendingDeposits > 0 || owed > 0) && (
             <div className="mb-4 flex flex-wrap gap-2 text-xs font-semibold print:hidden">
               {pendingApproval > 0 && (
@@ -504,7 +512,7 @@ function TripDetailsContent() {
                 Cuando alguien reserve desde tu página lo verás aquí. También
                 puedes cargar una reserva a mano.
               </p>
-              {canManage && (
+              {canLoadBookings && (
                 <Button
                   variant="mesh-primary"
                   onClick={() => {
@@ -536,7 +544,7 @@ function TripDetailsContent() {
           )}
         </div>
 
-        {canManage && (
+        {canLoadBookings && (
           <button
             type="button"
             onClick={() => {
