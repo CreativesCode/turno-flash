@@ -75,3 +75,26 @@ Relacionado: [[arquitectura-static-export]], [[rediseno-ui-migracion]].
   payload de la edge function.
 - **`utils/image.ts` (`downscaleImage`)**: toda foto se achica en el navegador antes de subirla
   a Storage.
+
+## Helpers agregados en la campaña QA del piloto (2026-10-06)
+
+- **`useStepHistory(initial)`** (`hooks/`): flujos de varios pasos en los que el botón Atrás del
+  teléfono vuelve un paso. `go()` avanza, `replace()` cambia sin crear entrada (resultados) y
+  `back(n)`. Lo usan `/book` y `/trips`.
+- **`useBackToClose(open, onClose)`** (`hooks/`): ya está dentro de `Sheet` y `Drawer`, así que
+  Atrás cierra la hoja de arriba. Si una hoja **navega** a otra pantalla, hay que llamar antes al
+  `release` que devuelve el hook.
+- **`useRequestKey()`** (`hooks/`): clave de idempotencia para una reserva pública; se reutiliza
+  mientras no cambie la elección.
+- **`utils/phone.ts`** (`toInternationalPhone`, `nationalDigits`, `DEFAULT_COUNTRY_CODE = "+53"`):
+  todo teléfono que se guarda pasa por aquí. Es la misma regla que `booking_phone_key` (SQL) y
+  `phoneToChatId` (Edge).
+- **`capacityError()`** (`services/trip-bookings.service.ts`): traduce los errores de cupo de la
+  migración 053.
+- **Guardas de doble toque**: un `savingRef` que se comprueba antes del primer `await` en los
+  `handleSave` de los formularios que crean filas.
+- **Edge Functions**: `isServiceRole()` (`_shared/auth.ts`) en toda función que no deba llamar un
+  anónimo, y `frameCustomerMessage()` (`_shared/wa-message.ts`) en todo mensaje de WhatsApp a un
+  cliente.
+- **Errores de restricciones de la BD** que se traducen en la app: `23P01` = turno solapado (049),
+  `seats_below_taken:N` / `no_seats_left:N` (053), `booking_window_closed` (039).

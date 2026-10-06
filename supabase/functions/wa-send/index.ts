@@ -510,7 +510,6 @@ function buildMessage(
   const hora = appt.start_time.slice(0, 5);
   const numero = appt.appointment_number ?? appt.id.slice(0, 8);
   const cliente = appt.customer_first_name;
-  const negocio = appt.organization_name;
   const servicio = appt.service_name;
   const staff = appt.staff_first_name
     ? `\n👤 *Con:* ${appt.staff_first_name}`
@@ -524,7 +523,7 @@ function buildMessage(
         return [
           `Hola ${cliente}! 👋`,
           ``,
-          `Recibimos tu solicitud de turno en *${negocio}*:`,
+          `Recibimos tu solicitud de turno:`,
           ``,
           `📅 ${fechaLarga}`,
           `⏰ ${hora}`,
@@ -538,7 +537,7 @@ function buildMessage(
       return [
         `Hola ${cliente}! 👋`,
         ``,
-        `Tu turno en *${negocio}* está reservado:`,
+        `Tu turno está reservado:`,
         ``,
         `📅 ${fechaLarga}`,
         `⏰ ${hora}`,
@@ -552,7 +551,7 @@ function buildMessage(
 
     case "approved":
       return [
-        `✅ Hola ${cliente}! *${negocio}* aprobó tu solicitud. Tu turno está confirmado:`,
+        `✅ Hola ${cliente}! Aprobamos tu solicitud. Tu turno está confirmado:`,
         ``,
         `📅 ${fechaLarga}`,
         `⏰ ${hora}`,
@@ -567,7 +566,7 @@ function buildMessage(
       return [
         `🔔 *Recordatorio* — Hola ${cliente}!`,
         ``,
-        `Mañana ${fechaLarga} a las ${hora} te esperamos en *${negocio}*.`,
+        `Mañana ${fechaLarga} a las ${hora} te esperamos.`,
         ``,
         `💇 ${servicio}${staff}`,
         ``,
@@ -576,7 +575,7 @@ function buildMessage(
 
     case "reminder_1h":
       return [
-        `⏰ Tu turno en *${negocio}* es en 1 hora (${hora}).`,
+        `⏰ Tu turno es en 1 hora (${hora}).`,
         ``,
         `💇 ${servicio}${staff}`,
         ``,
@@ -601,7 +600,7 @@ function buildMessage(
       return [
         `🔔 Hola ${cliente}!`,
         ``,
-        `Te recordamos tu turno en *${negocio}* ${whenLabel}.`,
+        `Te recordamos tu turno ${whenLabel}.`,
         ``,
         `💇 ${servicio}${staff}`,
         `🎫 N° ${numero}`,
@@ -639,7 +638,7 @@ function buildMessage(
 
     case "rating_request":
       return [
-        `Hola ${cliente}! Gracias por visitarnos en *${negocio}* 🙌`,
+        `Hola ${cliente}! Gracias por visitarnos 🙌`,
         ``,
         `¿Cómo calificarías tu experiencia con *${servicio}*?`,
         ``,
@@ -651,12 +650,12 @@ function buildMessage(
       ].join("\n");
 
     case "rating_ack":
-      return `¡Gracias por tu valoración, ${cliente}! 💚 Te esperamos pronto en *${negocio}*.`;
+      return `¡Gracias por tu valoración, ${cliente}! 💚 Te esperamos pronto.`;
 
     case "waitlist_slot": {
       const hola = waitlistCustomerName ? `Hola ${waitlistCustomerName}! ` : "";
       return [
-        `${hola}📣 *Se liberó un lugar en ${negocio}*`,
+        `${hola}📣 *Se liberó un lugar*`,
         ``,
         `💇 ${servicio}`,
         `📅 ${fechaLarga}`,

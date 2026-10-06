@@ -170,7 +170,7 @@ Deno.serve(async (req) => {
           contactName: orgRow?.contact_name ?? null,
           phone: orgRow?.whatsapp_phone ?? null,
         },
-        buildMessage(customer.first_name, orgName, message),
+        buildMessage(customer.first_name, message),
         { contact: true, reply: "none" }
       );
 
@@ -232,7 +232,6 @@ Deno.serve(async (req) => {
 
 function buildMessage(
   customerName: string,
-  orgName: string,
   custom?: string
 ): string {
   if (custom && custom.trim()) {
@@ -241,7 +240,7 @@ function buildMessage(
   return [
     `Hola ${customerName}! 👋`,
     ``,
-    `Hace tiempo que no te vemos por *${orgName}* y te extrañamos 💈`,
+    `Hace tiempo que no te vemos y te extrañamos 💈`,
     ``,
     `¿Te gustaría agendar un turno? Escríbele al negocio y te reservamos un lugar.`,
   ].join("\n");
