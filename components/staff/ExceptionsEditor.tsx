@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, sheetInputClasses } from "@/components/ui";
+import { Button, ConfirmSheet, sheetInputClasses } from "@/components/ui";
 import { useToast } from "@/hooks";
 import { useOrganizationBasics } from "@/hooks/useBookingSetup.query";
 import {
@@ -9,6 +9,7 @@ import {
   useStaffExceptions,
 } from "@/hooks/useStaffExceptions.query";
 import { staffExceptionSchema } from "@/schemas/staff-exception.schema";
+import { AppointmentService } from "@/services/appointments.service";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import { Plus, X } from "lucide-react";
@@ -44,17 +45,44 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
   const [title, setTitle] = useState("");
 
   const timezone = basics?.timezone ?? "UTC";
+  // Closing days that already have appointments asks first (P1-33)
+  const [pendingClose, setPendingClose] = useState<number | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
-  const handleAdd = async () => {
-    const parsed = staffExceptionSchema.safeParse({
+  const parseForm = () =>
+    staffExceptionSchema.safeParse({
       from,
       to: to || from,
       title: title || undefined,
     });
+
+  const handleAdd = async () => {
+    const parsed = parseForm();
     if (!parsed.success) {
       toast.error("Revisa las fechas", parsed.error.issues[0]?.message);
       return;
     }
+    try {
+      const booked = await AppointmentService.countLiveInRange(
+        organizationId,
+        parsed.data.from,
+        parsed.data.to,
+        staffId
+      );
+      if (booked > 0) {
+        setPendingClose(booked);
+        return;
+      }
+    } catch {
+      toast.error("Error", "No pudimos revisar los turnos de esos días");
+      return;
+    }
+    await saveClosure();
+  };
+
+  const saveClosure = async () => {
+    const parsed = parseForm();
+    if (!parsed.success) return;
     try {
       await createMutation.mutateAsync({
         organizationId,
@@ -65,15 +93,18 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
       setFrom("");
       setTo("");
       setTitle("");
+      setPendingClose(null);
       toast.success("Guardado", "Esos días ya no se ofrecen en la reserva online");
     } catch (err) {
       toast.error("Error al guardar", err instanceof Error ? err.message : undefined);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async () => {
+    if (!pendingDelete) return;
     try {
-      await deleteMutation.mutateAsync(id);
+      await deleteMutation.mutateAsync(pendingDelete);
+      setPendingDelete(null);
     } catch (err) {
       toast.error("Error al eliminar", err instanceof Error ? err.message : undefined);
     }
@@ -104,10 +135,10 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
               </div>
               <button
                 type="button"
-                onClick={() => handleDelete(exception.id)}
+                onClick={() => setPendingDelete(exception.id)}
                 disabled={deleteMutation.isPending}
                 aria-label="Eliminar"
-                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -157,6 +188,36 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
           Agregar
         </Button>
       </div>
+
+      <ConfirmSheet
+        open={pendingClose !== null}
+        onClose={() => setPendingClose(null)}
+        onConfirm={saveClosure}
+        title="Hay turnos esos días"
+        confirmLabel="Cerrar igual"
+        busyLabel="Guardando…"
+        busy={createMutation.isPending}
+      >
+        <p className="text-sm text-foreground-muted">
+          Hay {pendingClose} turno{pendingClose === 1 ? "" : "s"} reservado
+          {pendingClose === 1 ? "" : "s"} en esos días. El cierre no los
+          cancela: tendrás que moverlos o cancelarlos tú.
+        </p>
+      </ConfirmSheet>
+
+      <ConfirmSheet
+        open={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={handleDelete}
+        title="Quitar cierre"
+        confirmLabel="Quitar"
+        busyLabel="Quitando…"
+        busy={deleteMutation.isPending}
+      >
+        <p className="text-sm text-foreground-muted">
+          Esos días vuelven a ofrecerse en la reserva online.
+        </p>
+      </ConfirmSheet>
     </div>
   );
 }

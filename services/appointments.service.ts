@@ -6,6 +6,7 @@ import {
   Service,
 } from "@/types/appointments";
 import { getTimestamp } from "@/utils/date";
+import { fromZonedTime } from "date-fns-tz";
 import { createClient } from "@/utils/supabase/client";
 import { Logger } from "@/utils/logger";
 
@@ -476,7 +477,37 @@ export class AppointmentService {
       }
 
       // TODO: Check staff availability schedule
-      // TODO: Check staff exceptions (time off, holidays, etc.)
+
+      // Days off of this professional or of the whole business (P1-33)
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("timezone")
+        .eq("id", organizationId)
+        .single();
+      const timezone = org?.timezone || "UTC";
+      const startAt = fromZonedTime(`${date}T${startTime.slice(0, 5)}:00`, timezone);
+      const endAt = fromZonedTime(`${date}T${endTime.slice(0, 5)}:00`, timezone);
+      const { data: closures, error: closuresError } = await supabase
+        .from("staff_exceptions")
+        .select("id")
+        .eq("organization_id", organizationId)
+        .or(`staff_id.eq.${staffId},staff_id.is.null`)
+        .lt("start_datetime", endAt.toISOString())
+        .gt("end_datetime", startAt.toISOString())
+        .limit(1);
+      if (closuresError) {
+        void Logger.error("Error checking closures:", closuresError);
+        return {
+          available: false,
+          reason: "Error al verificar disponibilidad",
+        };
+      }
+      if (closures && closures.length > 0) {
+        return {
+          available: false,
+          reason: "Ese día está cerrado para este profesional",
+        };
+      }
 
       return { available: true };
     } catch (error) {
@@ -486,6 +517,36 @@ export class AppointmentService {
         reason: "Error inesperado al verificar disponibilidad",
       };
     }
+  }
+
+  /**
+   * Appointments still to be attended between two dates (inclusive), of one
+   * professional or of the whole business: closing those days must warn
+   * about them (P1-33).
+   */
+  static async countLiveInRange(
+    organizationId: string,
+    from: string,
+    to: string,
+    staffId: string | null
+  ): Promise<number> {
+    const supabase = createClient();
+    let query = supabase
+      .from("appointments")
+      .select("id", { count: "exact", head: true })
+      .eq("organization_id", organizationId)
+      .gte("appointment_date", from)
+      .lte("appointment_date", to)
+      .in("status", [
+        APPOINTMENT_STATUS.PENDING,
+        APPOINTMENT_STATUS.CONFIRMED,
+        APPOINTMENT_STATUS.REMINDED,
+        APPOINTMENT_STATUS.CLIENT_CONFIRMED,
+      ]);
+    if (staffId) query = query.eq("staff_id", staffId);
+    const { count, error } = await query;
+    if (error) throw error;
+    return count ?? 0;
   }
 
   /**
