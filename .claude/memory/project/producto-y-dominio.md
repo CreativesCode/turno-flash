@@ -49,3 +49,6 @@ Licencia por organizacion con trial y periodo de gracia, alimentada por RevenueC
 Detalle del bloqueo: [[license-enforcement]].
 
 Relacionado: [[arquitectura-static-export]], [[whatsapp-automatizaciones]], [[estado-actual-2026-09]].
+
+
+**Mercado (2026-10-06):** todos los negocios de la plataforma están en **Cuba** (zona America/Havana). Es el valor por defecto del registro. No asumir Argentina ni México en zonas, prefijos ni ejemplos.

@@ -37,7 +37,7 @@ export default function SettingsPage() {
   const { profile } = useAuth();
   const toast = useToast();
   const { data: settings, isLoading, error } = useBusinessSettings();
-  const { modules } = useOrganizationModules();
+  const { modules, loading: modulesLoading } = useOrganizationModules();
   const updateMutation = useUpdateBusinessSettings();
 
   const canView =
@@ -183,8 +183,11 @@ export default function SettingsPage() {
               )}
 
               {/* Moneda del negocio */}
-              {organizationId && (
+              {/* Mounted once the real currency is known: before that the
+                  hook returns its USD default, which froze the select on USD */}
+              {organizationId && !modulesLoading && (
                 <CurrencyCard
+                  key={modules.currency}
                   organizationId={organizationId}
                   currency={modules.currency}
                 />
