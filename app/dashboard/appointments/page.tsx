@@ -805,7 +805,8 @@ function AppointmentsContent() {
           {view === "day" && (
             <DayCalendar
               date={selectedDate}
-              appointments={filteredAppointments}
+              // The status filter and search only show in the List view
+              appointments={appointments}
               onDateChange={setSelectedDate}
               onAppointmentClick={handleAppointmentClick}
               onTimeSlotClick={

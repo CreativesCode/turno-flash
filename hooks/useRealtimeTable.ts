@@ -75,6 +75,7 @@ export function useRealtimeTable<T extends Record<string, unknown> = Record<stri
 
     const effectiveFilter = filter ?? `organization_id=eq.${organizationId}`;
     const channelName = `rt:${table}:${organizationId}`;
+    let subscribedOnce = false;
 
     const channel = supabase
       .channel(channelName)
@@ -95,7 +96,17 @@ export function useRealtimeTable<T extends Record<string, unknown> = Record<stri
           onEventRef.current?.(payload);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        // After a dropped connection (common on Cuban networks) the changes
+        // made meanwhile never arrive as events: refetch on every resubscribe
+        if (status !== "SUBSCRIBED") return;
+        if (subscribedOnce) {
+          for (const key of invalidateKeysRef.current) {
+            queryClient.invalidateQueries({ queryKey: key });
+          }
+        }
+        subscribedOnce = true;
+      });
 
     channelRef.current = channel;
 

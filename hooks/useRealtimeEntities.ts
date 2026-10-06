@@ -5,6 +5,7 @@ import { appointmentKeys } from "./useAppointments.query";
 import { customerKeys } from "./useCustomers.query";
 import { serviceKeys } from "./useServices.query";
 import { staffKeys } from "./useStaff.query";
+import { tripBookingKeys } from "./useTripBookings.query";
 import { tripKeys } from "./useTrips.query";
 import { useRealtimeTable } from "./useRealtimeTable";
 
@@ -105,7 +106,8 @@ export function useRealtimeTrips(enabled = true) {
   useRealtimeTable({
     table: "trip_bookings",
     organizationId: profile?.organization_id ?? null,
-    invalidateKeys: [tripKeys.all],
+    // The open departure's passenger list too, not only the occupancy
+    invalidateKeys: [tripKeys.all, tripBookingKeys.all],
     enabled,
   });
 }
