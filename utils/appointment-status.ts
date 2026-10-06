@@ -59,11 +59,13 @@ export interface NextAction {
 }
 
 export const NEXT_ACTIONS: Record<AppointmentStatus, NextAction | null> = {
+  // When the customer arrives: check-in, then complete. Reminders and the
+  // customer's own confirmation happen by WhatsApp, not from this button.
   pending: { label: "Confirmar", to: "confirmed" },
-  confirmed: { label: "Enviar recordatorio", to: "reminded" },
-  reminded: { label: "Marcar confirmado por cliente", to: "client_confirmed" },
+  confirmed: { label: "Hacer check-in", to: "checked_in" },
+  reminded: { label: "Hacer check-in", to: "checked_in" },
   client_confirmed: { label: "Hacer check-in", to: "checked_in" },
-  checked_in: { label: "Empezar", to: "in_progress" },
+  checked_in: { label: "Completar", to: "completed" },
   in_progress: { label: "Completar", to: "completed" },
   completed: null,
   cancelled: null,

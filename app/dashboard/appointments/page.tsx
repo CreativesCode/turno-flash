@@ -22,7 +22,6 @@ import {
   useInfiniteAppointments,
   useNormalizedData,
   useRescheduleAppointment,
-  useSendReminder,
   useToast,
   useUpdateAppointmentStatus,
 } from "@/hooks";
@@ -203,7 +202,6 @@ function AppointmentsContent() {
   const createAppointmentMutation = useCreateAppointment();
   const updateAppointmentStatusMutation = useUpdateAppointmentStatus();
   const rescheduleMutation = useRescheduleAppointment();
-  const sendReminderMutation = useSendReminder();
   const createCustomerMutation = useCreateCustomer();
 
   const loading = appointmentsLoading || normalizedData.loading;
@@ -411,37 +409,6 @@ function AppointmentsContent() {
       }
     }
   }, [newCustomerData, createCustomerMutation, toast]);
-
-  const handleSendReminder = useCallback(
-    async (appointment: AppointmentWithDetails) => {
-      const loadingToast = toast.loading("Enviando recordatorio...");
-      try {
-        await sendReminderMutation.mutateAsync({
-          appointmentId: appointment.id,
-          method: "whatsapp",
-        });
-        toast.dismiss(loadingToast);
-        toast.success(
-          "Recordatorio enviado",
-          `WhatsApp en camino a ${appointment.customer_first_name}`
-        );
-        if (selectedAppointment?.id === appointment.id) {
-          setSelectedAppointment({
-            ...selectedAppointment,
-            status: "reminded" as AppointmentStatus,
-          });
-        }
-      } catch (err) {
-        toast.dismiss(loadingToast);
-        if (err instanceof Error) {
-          toast.error("Error al enviar recordatorio", err.message);
-        } else {
-          toast.error("Error inesperado", "No se pudo enviar el recordatorio");
-        }
-      }
-    },
-    [sendReminderMutation, toast, selectedAppointment]
-  );
 
   const updateStatus = useCallback(
     async (appointmentId: string, newStatus: AppointmentStatus) => {
@@ -899,7 +866,6 @@ function AppointmentsContent() {
                 }
               : undefined
           }
-          onSendReminder={() => handleSendReminder(selectedAppointment)}
           onMarkNoShow={() =>
             updateStatus(
               selectedAppointment.id,

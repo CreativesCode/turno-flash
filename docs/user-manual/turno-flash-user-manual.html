@@ -537,10 +537,10 @@
   </div>
 
   <h3>Atender un turno: avanzar de estado</h3>
-  <p>Cada turno de la lista tiene un botón con el <strong>siguiente paso</strong> (por ejemplo <span class="ui">Confirmar</span> o <span class="ui">Empezar</span>). Tócalo para avanzar sin abrir el turno. Si tocas el turno, se abre su detalle con fecha, hora, servicio, profesional, duración, precio y notas, más estas acciones:</p>
+  <p>Cada turno de la lista tiene un botón con el <strong>siguiente paso</strong> (por ejemplo <span class="ui">Hacer check-in</span> cuando llega el cliente y luego <span class="ui">Completar</span>). Tócalo para avanzar sin abrir el turno. Si tocas el turno, se abre su detalle con fecha, hora, servicio, profesional, duración, precio y notas, más estas acciones:</p>
   <ul>
-    <li>El botón principal con el siguiente paso.</li>
-    <li><span class="ui">WhatsApp</span>: envía un recordatorio al cliente en ese momento.</li>
+    <li>El botón principal con el siguiente paso, y <span class="ui">Completar</span> para cerrarlo de una vez.</li>
+    <li><span class="ui">WhatsApp</span>: abre un chat con el cliente. Toca su teléfono para llamarlo.</li>
     <li><span class="ui">No vino</span>: marca que el cliente no se presentó.</li>
     <li><span class="ui">Cancelar</span>: cancela el turno. Con WhatsApp conectado, el cliente recibe <em>Tu turno N° … fue cancelado</em>.</li>
   </ul>
@@ -555,10 +555,10 @@
       <thead><tr><th>Estado</th><th>Qué significa</th><th>Botón para avanzar</th></tr></thead>
       <tbody>
         <tr><td><span class="chip st-pending">Pendiente</span></td><td class="wrap">Solicitud que el negocio todavía no aprobó.</td><td><span class="ui">Confirmar</span></td></tr>
-        <tr><td><span class="chip st-confirmed">Confirmado</span></td><td class="wrap">El turno está reservado.</td><td><span class="ui">Enviar recordatorio</span></td></tr>
-        <tr><td><span class="chip st-reminded">Recordatorio enviado</span></td><td class="wrap">Se le mandó el recordatorio al cliente.</td><td><span class="ui">Marcar confirmado por cliente</span></td></tr>
-        <tr><td><span class="chip st-client_confirmed">Cliente confirmó</span></td><td class="wrap">El cliente dijo que viene (respondiendo OK o porque lo marcaste tú).</td><td><span class="ui">Hacer check-in</span></td></tr>
-        <tr><td><span class="chip st-checked_in">Check-in</span></td><td class="wrap">El cliente llegó al local.</td><td><span class="ui">Empezar</span></td></tr>
+        <tr><td><span class="chip st-confirmed">Confirmado</span></td><td class="wrap">El turno está reservado.</td><td><span class="ui">Hacer check-in</span></td></tr>
+        <tr><td><span class="chip st-reminded">Recordatorio enviado</span></td><td class="wrap">Se le mandó el recordatorio al cliente.</td><td><span class="ui">Hacer check-in</span></td></tr>
+        <tr><td><span class="chip st-client_confirmed">Cliente confirmó</span></td><td class="wrap">El cliente respondió OK al WhatsApp.</td><td><span class="ui">Hacer check-in</span></td></tr>
+        <tr><td><span class="chip st-checked_in">Check-in</span></td><td class="wrap">El cliente llegó al local.</td><td><span class="ui">Completar</span></td></tr>
         <tr><td><span class="chip st-in_progress">En curso</span></td><td class="wrap">Lo están atendiendo.</td><td><span class="ui">Completar</span></td></tr>
         <tr><td><span class="chip st-completed">Completado</span></td><td class="wrap">Terminado. Cuenta como ingreso en los reportes.</td><td>—</td></tr>
         <tr><td><span class="chip st-cancelled">Cancelado</span></td><td class="wrap">Lo canceló el negocio o el cliente.</td><td>—</td></tr>
@@ -869,10 +869,9 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
   </div>
   <ol class="steps">
     <li>Cuando llega el cliente, pulsa <span class="ui">Hacer check-in</span>.</li>
-    <li>Cuando empiezas a atenderlo, <span class="ui">Empezar</span>.</li>
     <li>Al terminar, <span class="ui">Completar</span>. Esto es importante: <strong>solo los turnos completados cuentan como ingreso</strong> en los reportes del negocio, y es el momento en que al cliente se le pide una valoración.</li>
   </ol>
-  <p>Tocando el turno abres su detalle, con los botones <span class="ui">WhatsApp</span> (envía un recordatorio ahora), <span class="ui">No vino</span> y <span class="ui">Cancelar</span>. Un turno ya <span class="chip st-in_progress">En curso</span> no se puede marcar como No vino, y los turnos completados, cancelados o no asistidos ya no cambian.</p>
+  <p>Tocando el turno abres su detalle, con los botones <span class="ui">WhatsApp</span> (abre un chat con el cliente), <span class="ui">No vino</span> y <span class="ui">Cancelar</span>. Un turno ya <span class="chip st-in_progress">En curso</span> no se puede marcar como No vino, y los turnos completados, cancelados o no asistidos ya no cambian.</p>
 
   <h2 id="tp-recordatorios">Recordatorios</h2>
   <p>La app envía sola un recordatorio <strong>24 horas</strong> y otro <strong>1 hora</strong> antes de cada turno. Además, en <span class="path">Recordatorios</span> puedes avisar a mano:</p>

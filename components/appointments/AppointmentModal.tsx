@@ -20,6 +20,7 @@ import type {
 } from "@/types/appointments";
 import { NEXT_ACTIONS } from "@/utils/appointment-status";
 import { formatDateForDisplay, parseLocalDate } from "@/utils/date";
+import { toInternationalPhone } from "@/utils/phone";
 import { useMoney } from "@/hooks/useMoney";
 import { fmtDuration } from "@/utils/format";
 import {
@@ -359,7 +360,6 @@ export interface AppointmentDetailModalProps {
   onClose: () => void;
   appointment: AppointmentWithDetails;
   onAdvance: (toStatus: AppointmentStatus) => void | Promise<void>;
-  onSendReminder: () => void | Promise<void>;
   onCancel: () => void | Promise<void>;
   onMarkNoShow?: () => void | Promise<void>;
   onEdit?: () => void;
@@ -375,7 +375,6 @@ export function AppointmentDetailModal({
   onClose,
   appointment: a,
   onAdvance,
-  onSendReminder,
   onCancel,
   onMarkNoShow,
   onEdit,
@@ -386,6 +385,10 @@ export function AppointmentDetailModal({
   const { format: money } = useMoney();
   const status = (a.status ?? "pending") as AppointmentStatus;
   const next = NEXT_ACTIONS[status];
+  // Opens a chat with the customer; the automatic reminders go on their own
+  const whatsappUrl = a.customer_phone
+    ? `https://wa.me/${toInternationalPhone(a.customer_phone).slice(1)}`
+    : null;
   const customerName =
     `${a.customer_first_name} ${a.customer_last_name}`.trim() || "Sin nombre";
   const staffName = a.staff_nickname
@@ -415,7 +418,16 @@ export function AppointmentDetailModal({
             </div>
             <div className="mt-0.5 flex items-center gap-1.5 text-xs text-foreground-muted">
               <Phone className="h-3 w-3" />
-              <span className="truncate">{a.customer_phone || "—"}</span>
+              {a.customer_phone ? (
+                <a
+                  href={`tel:${toInternationalPhone(a.customer_phone)}`}
+                  className="truncate underline-offset-2 hover:underline"
+                >
+                  {a.customer_phone}
+                </a>
+              ) : (
+                <span>—</span>
+              )}
             </div>
           </div>
           <StatusBadge status={status} />
@@ -461,11 +473,7 @@ export function AppointmentDetailModal({
             {next && (
               <Button
                 variant="mesh-primary"
-                onClick={() =>
-                  next.to === "reminded"
-                    ? onSendReminder()
-                    : onAdvance(next.to)
-                }
+                onClick={() => onAdvance(next.to)}
                 disabled={isProcessing}
                 className="w-full justify-center"
               >
@@ -473,13 +481,28 @@ export function AppointmentDetailModal({
                 <ChevronRight className="h-4 w-4" />
               </Button>
             )}
-            <div className="grid grid-cols-3 gap-2">
-              <ActionTile
-                icon={<MessageCircle className="h-4 w-4" />}
-                label="WhatsApp"
-                onClick={onSendReminder}
+            {next && next.to !== "completed" && status !== "pending" && (
+              <Button
+                variant="ghost"
+                onClick={() => onAdvance("completed")}
                 disabled={isProcessing}
-              />
+                className="w-full justify-center"
+              >
+                Completar
+              </Button>
+            )}
+            <div className="grid grid-cols-4 gap-2">
+              {whatsappUrl && (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-1 rounded-xl border border-border bg-surface px-2 py-2.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp
+                </a>
+              )}
               {onEdit && (
                 <ActionTile
                   icon={<Edit3 className="h-4 w-4" />}
