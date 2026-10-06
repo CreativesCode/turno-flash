@@ -12,3 +12,11 @@ El bloqueo por trial/licencia vencida es de dos capas:
 **Acoplamiento a vigilar:** el período de gracia está **hardcodeado en 7 días** dentro de `org_license_usable` (llama a `check_license_status(org, 7)`). Debe mantenerse en sync con `NEXT_PUBLIC_LICENSE_GRACE_PERIOD_DAYS` (default 7) del cliente. Si cambia uno, cambiar el otro. El corte duro real es trial (7d) + gracia (7d) ≈ 14 días.
 
 Relacionado: [[turno-flash-tooling]].
+
+**Migración 048 (2026-10-06):** un owner ya no puede cambiar por API `license_*`, `subscription_*` ni
+`is_active` de su organización. El trigger `enforce_module_change_is_admin` lo bloquea para quien no sea
+admin; `service_role` (webhook de RevenueCat, self-signup) sigue pasando.
+**Decisión D-10 (Roberto, 2026-10-06):** con la licencia vencida el negocio queda **bloqueado del todo**,
+no en solo lectura. Hoy las lecturas siguen abiertas: hay que cerrarlas (punto pendiente del plan
+`qa-piloto-cuba`). El cobro en Cuba será por transferencia más WhatsApp a soporte, y el admin extiende la
+licencia a mano. No hay licencias largas para los negocios piloto.

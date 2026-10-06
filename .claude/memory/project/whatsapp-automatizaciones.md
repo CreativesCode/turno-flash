@@ -64,3 +64,16 @@ Relacionado: [[producto-y-dominio]], [[arquitectura-static-export]].
 **Viajes (`wa-trip-send`, migraciones 043-047):** reserva recibida, aviso al negocio (solo reservas
 web), aprobada, anticipo cobrado, reserva cancelada y salida cancelada. Un envío por intent por
 reserva. Detalle en [[modulo-reserva-asientos]].
+
+**HTTP 500 de OpenWA no es fallo de entrega (confirmado por Roberto 2026-10-06):** el servidor OpenWA
+responde 500 por un error propio, pero **los mensajes llegan todos**. Por eso `wa_messages` puede
+mostrar `HTTP_500` aunque el cliente si recibio el WhatsApp.
+**How to apply:** no reportar esos 500 como "WhatsApp no entrega" ni agregar reintentos por ese codigo
+(reintentar duplicaria mensajes). Para verificar entrega, preguntar a Roberto o mirar el telefono.
+
+**Quién puede llamar a las funciones de WhatsApp (2026-10-06, P0-02):** `wa-trip-send`, `send-reminders`
+y `daily-summary` solo aceptan el **service role** (triggers por pg_net y crons, que ya envían la clave
+de `app_config`). `wa-send` acepta el service role para todos los intents, y el JWT de un usuario **solo
+para `reminder_manual`** de un turno que ese usuario puede ver por RLS. El control está en
+`supabase/functions/_shared/auth.ts` (lee el `role` del JWT; la firma ya la verificó el gateway con
+`verify_jwt = true`). **Una función nueva que mande WhatsApp debe usar el mismo control.**

@@ -30,3 +30,11 @@ antes de guardar", la respuesta correcta es *ademas, RLS*.
 
 Ver [docs/CORRECCION-capacitor.md](../../docs/CORRECCION-capacitor.md).
 Relacionado: [[producto-y-dominio]], [[convenciones-de-codigo]], [[license-enforcement]].
+
+
+## Reglas de seguridad de la migración 048 (2026-10-06)
+
+- **Vistas siempre con `security_invoker = true`** y sin GRANT a `anon`. Al recrear `organizations_with_license_status` (el patrón 023/035/040 de "recrear la vista al agregar una columna") hay que repetir el `ALTER VIEW … SET (security_invoker = true)`, o la vista vuelve a saltarse RLS.
+- **Funciones nuevas:** `SECURITY INVOKER` salvo que haga falta lo contrario; si son DEFINER, `SET search_path` y `REVOKE … FROM PUBLIC, anon`.
+- **Un miembro inactivo** (`user_profiles.is_active = false`) no ve su propia fila de perfil, y por eso todas las políticas por organización dejan de aplicarse. No reescribir esas políticas: el corte está en `profiles_select_own_active`.
+- Helpers: `is_platform_admin()` y `auth_user_org_id()` (solo perfiles activos).

@@ -12,13 +12,15 @@
 - [Estado actual (sep 2026)](project/estado-actual-2026-09.md) — que esta hecho, que falta (cero tests, cero CI, sin Sentry), dominio `turno-flash.vercel.app`, fechas de licencia posiblemente corridas (bug ya arreglado) y por que los docs mienten
 - [Rediseno de UI](project/rediseno-ui-migracion.md) — completo (9/9) desde 2026-09-10, incluidos details e invite; decisiones cerradas
 - [Reserva online](project/reserva-online.md) — implementada 2026-09-10 (migraciones 029-031 + edge `public-booking`); horario y servicios por profesional (estricto), aprobacion por servicio, opt-in, vacaciones; `/book?b=<slug>`
+- [QA piloto Cuba](project/qa-piloto-cuba.md) — campaña QA 2026-10-06 (web + móvil); plan priorizado P0-P3 en `.claude/PRPs/qa-piloto-cuba.md`
 - [Modulo reserva de asientos](project/modulo-reserva-asientos.md) — 9/10 fases (migraciones 033-047, edges public-trips y wa-trip-send, dashboard, pagina publica /trips, WhatsApp incl. cancelaciones); solo falta el cron de vencimiento (frenado otra vez 2026-09-12); anticipo y confirmacion son ejes independientes
-- [WhatsApp y automatizaciones](project/whatsapp-automatizaciones.md) — OpenWA, edge functions por intent, crons cada 15 min, toggles por negocio
+- [WhatsApp y automatizaciones](project/whatsapp-automatizaciones.md) — OpenWA, edge functions por intent, crons cada 15 min, toggles por negocio; los HTTP 500 de OpenWA NO impiden la entrega
 - [Enforcement de licencia](project/license-enforcement.md) — bloqueo de trial vencido (RLS de escritura + LicenseGate); gracia de 7d hardcodeada en SQL a sincronizar con el cliente
 - [Tooling](project/turno-flash-tooling.md) — CLI de Supabase via scoop v2.117 (sin npx); `npm run lint` roto (usar `npx eslint`); regenerar tipos via Bash; pg_cron en migracion 025
 
 ## feedback/ — Correcciones y preferencias
 - [Preferencias de Roberto](feedback/preferencias-roberto.md) — espanol para hablar, ingles para el codigo; landing solo al cerrar un plan completo; nada de refactors ni dependencias sorpresa
+- [Migraciones a produccion](feedback/migraciones-a-produccion.md) — autorizado aplicar migraciones sin pedir permiso; siempre ensayar en BEGIN/ROLLBACK por rol antes
 - [Copy en espanol internacional](feedback/copy-espanol-internacional.md) — tuteo, nunca voseo; "anticipo" y no "sena"; locale `es` y la moneda siempre explicita (`useMoney`)
 
 ## reference/ — Donde encontrar cosas

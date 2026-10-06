@@ -46,9 +46,7 @@ que esconder los switches en la UI no alcanzaba.
 `self-signup` en la Fase 6 — `create_organization_with_owner` NO se toca para no duplicar sus 130
 lineas ni crear una firma ambigua.
 
-**Ojo, agujero preexistente detectado y NO arreglado:** esa misma policy permite hoy que un owner
-edite por API `license_start_date` / `license_end_date` de su organizacion. El trigger de modulos se
-puede extender para cubrirlas; el usuario aun no decidio. Ver [[license-enforcement]].
+**Agujero de licencias: CERRADO en la migración 048 (2026-10-06).** El trigger `enforce_module_change_is_admin` ahora también bloquea, para quien no sea admin, los cambios de `license_*`, `subscription_*` e `is_active` de la organización. Ver [[license-enforcement]].
 
 ## Que quiere el usuario
 
