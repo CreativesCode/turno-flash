@@ -406,7 +406,7 @@ function TripDetailsContent() {
                     setManualForm(EMPTY_BOOKING);
                     setShowManual(true);
                   }}
-                  className="hidden sm:inline-flex"
+                  className="max-sm:hidden"
                 >
                   <Plus className="h-4 w-4" />
                   Cargar reserva

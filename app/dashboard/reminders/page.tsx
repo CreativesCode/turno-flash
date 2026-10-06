@@ -249,7 +249,7 @@ export default function RemindersPage() {
               <Button
                 variant="ghost"
                 onClick={() => router.push("/dashboard/appointments")}
-                className="hidden sm:inline-flex"
+                className="max-sm:hidden"
               >
                 Ver turnos
               </Button>

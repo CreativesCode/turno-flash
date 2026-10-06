@@ -458,7 +458,7 @@ export default function DashboardPage() {
                   onClick={() =>
                     router.push("/dashboard/appointments?create=1")
                   }
-                  className="hidden sm:inline-flex"
+                  className="max-sm:hidden"
                 >
                   <Plus className="h-4 w-4" /> Nuevo turno
                 </Button>

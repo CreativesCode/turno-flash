@@ -46,11 +46,13 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
   FormEvent,
+  Suspense,
   useCallback,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { useCreateParam } from "@/hooks/useCreateParam";
 
 const DayCalendar = dynamic(
   () =>
@@ -79,7 +81,7 @@ const FILTER_CHIPS: { key: FilterStatus; label: string }[] = [
   { key: "cancelled", label: "Cancelados" },
 ];
 
-export default function AppointmentsPage() {
+function AppointmentsContent() {
   const { profile } = useAuth();
   const router = useRouter();
 
@@ -324,6 +326,8 @@ export default function AppointmentsPage() {
     resetForm();
     setShowCreateModal(true);
   }, [canManageAppointments, resetForm]);
+
+  useCreateParam(handleCreate, !!profile);
 
   const savingRef = useRef(false);
   const handleSave = useCallback(
@@ -639,7 +643,7 @@ export default function AppointmentsPage() {
                   <Button
                     variant="mesh-primary"
                     onClick={handleCreate}
-                    className="hidden sm:inline-flex"
+                    className="max-sm:hidden"
                   >
                     <Plus className="h-4 w-4" />
                     Nuevo turno
@@ -968,4 +972,23 @@ function formatSectionDate(date: string): string {
     day: "numeric",
     month: "short",
   });
+}
+
+export default function AppointmentsPage() {
+  return (
+    <Suspense
+      fallback={
+        <ProtectedRoute>
+          <div className="flex min-h-screen w-full items-center justify-center bg-background">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <p className="text-sm text-foreground-muted">Cargando turnos...</p>
+            </div>
+          </div>
+        </ProtectedRoute>
+      }
+    >
+      <AppointmentsContent />
+    </Suspense>
+  );
 }

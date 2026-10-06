@@ -234,7 +234,7 @@ export default function ServicesPage() {
                 <Button
                   variant="mesh-primary"
                   onClick={handleCreate}
-                  className="hidden sm:inline-flex"
+                  className="max-sm:hidden"
                 >
                   <Plus className="h-4 w-4" />
                   Nuevo servicio

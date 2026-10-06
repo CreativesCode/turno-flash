@@ -27,7 +27,8 @@ import { getSiteUrl } from "@/utils/metadata";
 import { tripShareText, tripShareUrl } from "@/utils/trip-share";
 import { Bus, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { FormEvent, Suspense, useCallback, useMemo, useState } from "react";
+import { useCreateParam } from "@/hooks/useCreateParam";
 import { getLocalDateString } from "@/utils/date";
 
 /** Tomorrow, so a new departure never starts in the past. */
@@ -88,7 +89,7 @@ function toFormData(state: TripFormState): TripFormData {
   };
 }
 
-export default function TripsPage() {
+function TripsContent() {
   const { profile } = useAuth();
   const router = useRouter();
   const {
@@ -161,6 +162,8 @@ export default function TripsPage() {
     setPickupPoints([]);
     setShowForm(true);
   }, []);
+
+  useCreateParam(handleCreate, canManage);
 
   const handleEdit = useCallback((trip: TripWithOccupancy) => {
     setEditing(trip);
@@ -328,7 +331,7 @@ export default function TripsPage() {
                 <Button
                   variant="mesh-primary"
                   onClick={handleCreate}
-                  className="hidden sm:inline-flex"
+                  className="max-sm:hidden"
                 >
                   <Plus className="h-4 w-4" />
                   Nueva salida
@@ -481,5 +484,24 @@ export default function TripsPage() {
         />
       </ConfirmSheet>
     </ProtectedRoute>
+  );
+}
+
+export default function TripsPage() {
+  return (
+    <Suspense
+      fallback={
+        <ProtectedRoute>
+          <div className="flex min-h-screen w-full items-center justify-center bg-background">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <p className="text-sm text-foreground-muted">Cargando viajes...</p>
+            </div>
+          </div>
+        </ProtectedRoute>
+      }
+    >
+      <TripsContent />
+    </Suspense>
   );
 }

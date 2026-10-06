@@ -25,7 +25,7 @@ export function MobileTopbar({
 }: MobileTopbarProps) {
   return (
     <nav
-      className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-surface px-4 lg:hidden"
+      className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-surface px-4 lg:hidden print:hidden"
       style={{
         paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.875rem)",
         paddingBottom: "0.625rem",

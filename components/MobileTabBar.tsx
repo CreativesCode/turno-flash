@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/contexts/auth-context";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { Bell, Bus, Calendar, Home, Plus, UserCircle, Users } from "lucide-react";
 import Link from "next/link";
@@ -62,24 +63,32 @@ function isTabActive(pathname: string, href: string): boolean {
 
 /**
  * Bottom tab bar (mobile only). 5 slots: Inicio, Turnos, central "+", Clientes,
- * Avisos. The "+" jumps to the appointments page with a `create=1` flag — the
- * appointments page can read it to open the create modal once that lands in
- * step 6. For now it just navigates.
+ * Avisos. The "+" lands on a list page with `create=1`, which opens its create
+ * form (useCreateParam).
  */
 export function MobileTabBar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { profile } = useAuth();
   const { modules } = useOrganizationModules();
   const tabs = tabsFor(modules.appointments, modules.trips);
-  // The "+" goes wherever this business creates things. The trips page has
-  // its own "Nueva salida" button, so it needs no create flag.
-  const createHref = modules.appointments
-    ? "/dashboard/appointments?create=1"
-    : "/dashboard/trips";
+  // In Viajes (or a trips-only business) the "+" creates a departure, which
+  // only the owner can do (D-14); everywhere else it creates an appointment.
+  const canCreateTrips = profile?.role === "admin" || profile?.role === "owner";
+  const createsTrip =
+    modules.trips &&
+    canCreateTrips &&
+    (!modules.appointments || pathname.startsWith("/dashboard/trips"));
+  // Staff of a trips-only business can't create departures: just go to Viajes.
+  const createHref = createsTrip
+    ? "/dashboard/trips?create=1"
+    : modules.appointments
+      ? "/dashboard/appointments?create=1"
+      : "/dashboard/trips";
 
   return (
     <div
-      className="sticky bottom-0 z-30 grid grid-cols-5 border-t border-border bg-surface px-1 pt-1.5 lg:hidden"
+      className="sticky bottom-0 z-30 grid grid-cols-5 border-t border-border bg-surface px-1 pt-1.5 lg:hidden print:hidden"
       style={{
         paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom, 0px))",
       }}
@@ -92,7 +101,7 @@ export function MobileTabBar() {
         <button
           onClick={() => router.push(createHref)}
           className="mesh-primary flex h-12 w-12 -translate-y-2 items-center justify-center rounded-2xl text-white shadow-glow-primary transition-transform active:scale-95"
-          aria-label={modules.appointments ? "Crear turno" : "Nueva salida"}
+          aria-label={createsTrip ? "Nueva salida" : "Crear turno"}
         >
           <Plus className="h-6 w-6" />
         </button>
