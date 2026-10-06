@@ -596,13 +596,27 @@ export default function DashboardPage() {
                 />
               </svg>
               <div>
-                <h3 className="text-base font-bold text-warning-900 dark:text-warning-100">
-                  Sin organización asignada
-                </h3>
-                <p className="mt-1 text-sm text-warning-800 dark:text-warning-200">
-                  Necesitas que un administrador te asigne a una organización
-                  para acceder al sistema de gestión de turnos.
-                </p>
+                {profile?.is_active === false ? (
+                  <>
+                    <h3 className="text-base font-bold text-warning-900 dark:text-warning-100">
+                      Tu acceso fue desactivado
+                    </h3>
+                    <p className="mt-1 text-sm text-warning-800 dark:text-warning-200">
+                      Ya no tienes acceso a este negocio. Si crees que es un
+                      error, habla con quien lo administra.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-base font-bold text-warning-900 dark:text-warning-100">
+                      Sin organización asignada
+                    </h3>
+                    <p className="mt-1 text-sm text-warning-800 dark:text-warning-200">
+                      Necesitas que un administrador te asigne a una
+                      organización para acceder al sistema de gestión de turnos.
+                    </p>
+                  </>
+                )}
               </div>
             </Card>
           )}

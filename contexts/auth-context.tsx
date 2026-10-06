@@ -82,6 +82,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // PGRST116 significa que no se encontró ninguna fila (usuario nuevo sin perfil)
           // Esto es normal para usuarios que vienen de una invitación por primera vez
           if (error.code === "PGRST116") {
+            // RLS also hides the profile of a member whose access was removed;
+            // ask so the panel can say so instead of "Sin organización".
+            const { data: revoked, error: revokedError } = await supabase.rpc(
+              "my_access_revoked"
+            );
+            if (abortSignal?.aborted || !isMountedRef.current) return;
+            if (revokedError) {
+              if (!hasProfileRef.current) setConnectionError(true);
+              return;
+            }
             console.log("User profile not found (new user from invitation)");
             // Crear un perfil básico basado en la info del auth user
             setProfile({
@@ -91,7 +101,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
               full_name: authUser.user_metadata?.full_name || "",
               role: "staff",
               organization_id: null,
-              is_active: true,
+              is_active: !revoked,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             } as UserProfile);

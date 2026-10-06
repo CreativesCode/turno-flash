@@ -2115,6 +2115,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      my_access_revoked: { Args: never; Returns: boolean }
       org_license_usable: { Args: { p_org_id: string }; Returns: boolean }
       ping: { Args: never; Returns: string }
       public_booking_info: { Args: { p_slug: string }; Returns: Json }
