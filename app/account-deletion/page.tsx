@@ -48,8 +48,8 @@ export default function AccountDeletionPage() {
             </ol>
             <p className="mt-2">
               La eliminación es inmediata e irreversible. Si eres dueño de una
-              organización con otros miembros, primero deberás transferir la
-              propiedad o eliminar a los miembros.
+              organización con otros miembros, primero deberás quitarles el
+              acceso desde Invitar usuario › Tu equipo.
             </p>
           </section>
 
