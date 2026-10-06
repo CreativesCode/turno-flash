@@ -76,6 +76,8 @@ const BookSchema = SlotsSchema.extend({
   email: z.string().trim().email().max(254).optional().or(z.literal("")),
   notes: z.string().trim().max(500).optional(),
   website: z.string().optional(),
+  // Same key on a retry returns the booking already made (migration 050)
+  request_key: uuid.optional(),
 });
 
 const RequestSchema = z.discriminatedUnion("action", [
@@ -154,7 +156,8 @@ Deno.serve(async (req) => {
       return json({ success: true, status: "pending" });
     }
 
-    const { data, error } = await admin.rpc("create_public_booking", {
+    const { data, error } = await admin.rpc("create_public_booking_once", {
+      p_request_key: body.request_key ?? null,
       p_org_id: org.id,
       p_service_id: body.service_id,
       p_staff_id: body.staff_id ?? null,

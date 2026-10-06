@@ -36,4 +36,5 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
   Invitar usuario. 
 - Datos de prueba: el empleado `qa.staff.2@example.com` / `QaStaff*2026` (activo, "QA Empleado") sirve
   para probar el rol staff en "Organización test". `qa.verifier.g04@example.com` queda sin acceso.
-- **2026-10-06:** P0-06, P0-07 y P0-08 hechos: turno para hoy, turnos seguidos y doble toque. La migración 049 agrega la restricción `appointments_staff_no_overlap` (EXCLUDE gist, rango semiabierto) y el error 23P01 se traduce en el servicio y en `public-booking`. Lo siguiente es **P0-09** (reserva pública idempotente con `booking_request_key`).
+- **2026-10-06:** P0-06, P0-07 y P0-08 hechos: turno para hoy, turnos seguidos y doble toque. La migración 049 agrega la restricción `appointments_staff_no_overlap` (EXCLUDE gist, rango semiabierto) y el error 23P01 se traduce en el servicio y en `public-booking`. 
+- **2026-10-06:** P0-09 hecho. Las reservas públicas son idempotentes: la página manda `request_key` (`hooks/useRequestKey.ts`) y las edge functions llaman a `create_public_booking_once` / `create_trip_booking_once` (050), que **envuelven** a las RPC originales sin copiarlas. **Toda regla nueva de reserva va en las RPC originales, no en los wrappers.** Lo siguiente es **P0-10 + P0-11** (red caída y botón Atrás en /book y /trips; mismos archivos).

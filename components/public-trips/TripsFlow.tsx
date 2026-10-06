@@ -16,6 +16,7 @@ import {
   useCreatePublicTripBooking,
   usePublicTripsInfo,
 } from "@/hooks/usePublicTrips.query";
+import { useRequestKey } from "@/hooks/useRequestKey";
 import { PublicTripsError } from "@/services/public-trips.service";
 import type {
   PublicTrip,
@@ -56,6 +57,7 @@ function vehiclePhotoUrl(path: string | null): string | null {
 export function TripsFlow({ slug }: { slug: string }) {
   const { data: info, isLoading, error, refetch } = usePublicTripsInfo(slug);
   const bookMutation = useCreatePublicTripBooking();
+  const requestKey = useRequestKey();
   const toast = useToast();
 
   const [step, setStep] = useState<Step>("trips");
@@ -153,7 +155,11 @@ export function TripsFlow({ slug }: { slug: string }) {
         email: customer.email || undefined,
         notes: customer.notes || undefined,
         website: customer.website,
+        request_key: requestKey.keyFor(
+          JSON.stringify([trip.id, seatsData])
+        ),
       });
+      requestKey.reset();
       setConfirmation(result);
       setStep("done");
     } catch (err) {

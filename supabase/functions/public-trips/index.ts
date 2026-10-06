@@ -87,6 +87,8 @@ const BookSchema = z
     email: z.string().trim().email().max(254).optional().or(z.literal("")),
     notes: z.string().trim().max(500).optional(),
     website: z.string().optional(),
+    // Same key on a retry returns the booking already made (migration 050)
+    request_key: uuid.optional(),
   })
   .refine((b) => b.passenger_names.length === b.seats, {
     path: ["passenger_names"],
@@ -146,7 +148,8 @@ Deno.serve(async (req) => {
       return json({ success: true, status: "pending" });
     }
 
-    const { data, error } = await admin.rpc("create_trip_booking", {
+    const { data, error } = await admin.rpc("create_trip_booking_once", {
+      p_request_key: body.request_key ?? null,
       p_org_id: org.id,
       p_trip_id: body.trip_id,
       p_seats: body.seats,

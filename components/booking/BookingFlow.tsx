@@ -14,6 +14,7 @@ import {
   useCreatePublicBooking,
   usePublicBookingInfo,
 } from "@/hooks/usePublicBooking.query";
+import { useRequestKey } from "@/hooks/useRequestKey";
 import { PublicBookingError } from "@/services/public-booking.service";
 import type {
   PublicBookingConfirmation,
@@ -49,6 +50,7 @@ function longDate(date: string): string {
 export function BookingFlow({ slug }: { slug: string }) {
   const { data: info, isLoading, error } = usePublicBookingInfo(slug);
   const bookMutation = useCreatePublicBooking();
+  const requestKey = useRequestKey();
   const toast = useToast();
 
   const [step, setStep] = useState<Step>("service");
@@ -117,7 +119,11 @@ export function BookingFlow({ slug }: { slug: string }) {
         email: customer.email || undefined,
         notes: customer.notes || undefined,
         website: customer.website,
+        request_key: requestKey.keyFor(
+          [service.id, staffId, date, slot.start_time].join("|")
+        ),
       });
+      requestKey.reset();
       setConfirmation(result);
       setStep("done");
     } catch (err) {

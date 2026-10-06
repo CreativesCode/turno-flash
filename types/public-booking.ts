@@ -55,6 +55,8 @@ export interface PublicBookingRequest {
   notes?: string;
   /** Honeypot: must stay empty */
   website?: string;
+  /** Idempotency key: a retry with the same key returns the same booking */
+  request_key?: string;
 }
 
 export interface PublicBookingConfirmation {
