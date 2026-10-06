@@ -25,9 +25,16 @@ export interface CustomerCardProps {
   customer: Customer;
   onEdit: (c: Customer) => void;
   onDelete: (c: Customer) => void;
+  /** Inactive customers get "Reactivar" instead of "Desactivar" (P2-14). */
+  onReactivate?: (c: Customer) => void;
 }
 
-export function CustomerCard({ customer, onEdit, onDelete }: CustomerCardProps) {
+export function CustomerCard({
+  customer,
+  onEdit,
+  onDelete,
+  onReactivate,
+}: CustomerCardProps) {
   const fullName =
     `${customer.first_name} ${customer.last_name}`.trim() || "Sin nombre";
   const color = useMemo(() => pickColor(customer.id), [customer.id]);
@@ -77,11 +84,13 @@ export function CustomerCard({ customer, onEdit, onDelete }: CustomerCardProps) 
       <KebabMenu
         items={[
           { label: "Editar", onClick: () => onEdit(customer) },
-          {
-            label: customer.is_active ? "Desactivar" : "Eliminar",
-            danger: true,
-            onClick: () => onDelete(customer),
-          },
+          customer.is_active || !onReactivate
+            ? {
+                label: "Desactivar",
+                danger: true,
+                onClick: () => onDelete(customer),
+              }
+            : { label: "Reactivar", onClick: () => onReactivate(customer) },
         ]}
       />
     </Card>

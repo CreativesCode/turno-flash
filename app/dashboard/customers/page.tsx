@@ -8,6 +8,7 @@ import { Button, ConfirmSheet } from "@/components/ui";
 import {
   useCreateCustomer,
   useDeactivateCustomer,
+  useReactivateCustomer,
   useDebounce,
   useInfiniteCustomers,
   useToast,
@@ -96,6 +97,8 @@ export default function CustomersPage() {
   }, [profile?.organization_id, toast]);
 
   const parentRef = useRef<HTMLDivElement>(null);
+  // Deactivated customers live in their own list, where they can come back
+  const [showInactive, setShowInactive] = useState(false);
 
   const {
     data,
@@ -104,7 +107,10 @@ export default function CustomersPage() {
     isFetchingNextPage,
     isLoading: loading,
     error: queryError,
-  } = useInfiniteCustomers({ search: debouncedSearch, isActive: true }, 50);
+  } = useInfiniteCustomers(
+    { search: debouncedSearch, isActive: !showInactive },
+    50
+  );
 
   const customers = useMemo(() => data?.pages.flat() ?? [], [data]);
   const error = queryError?.message ?? null;
@@ -112,6 +118,7 @@ export default function CustomersPage() {
   const createCustomerMutation = useCreateCustomer();
   const updateCustomerMutation = useUpdateCustomer();
   const deactivateCustomerMutation = useDeactivateCustomer();
+  const reactivateCustomerMutation = useReactivateCustomer();
 
   const [formData, setFormData] = useState<CustomerFormData>(EMPTY_FORM);
 
@@ -196,6 +203,24 @@ export default function CustomersPage() {
 
   const [customerToDeactivate, setCustomerToDeactivate] =
     useState<Customer | null>(null);
+
+  const handleReactivate = useCallback(
+    async (customer: Customer) => {
+      try {
+        await reactivateCustomerMutation.mutateAsync(customer.id);
+        toast.success(
+          "Cliente reactivado",
+          `${customer.first_name} ${customer.last_name} vuelve a estar en la lista`
+        );
+      } catch (err) {
+        toast.error(
+          "Error al reactivar cliente",
+          err instanceof Error ? err.message : undefined
+        );
+      }
+    },
+    [reactivateCustomerMutation, toast]
+  );
 
   const handleDelete = useCallback(
     async (customer: Customer) => {
@@ -304,6 +329,22 @@ export default function CustomersPage() {
                 className="block w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-foreground shadow-xs transition-colors focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
               />
             </div>
+            <div className="mt-2 flex gap-2">
+              {[false, true].map((inactive) => (
+                <button
+                  key={String(inactive)}
+                  type="button"
+                  onClick={() => setShowInactive(inactive)}
+                  className={`min-h-11 rounded-full border px-3 text-xs font-semibold transition-colors ${
+                    showInactive === inactive
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-surface text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {inactive ? "Inactivos" : "Activos"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -373,6 +414,7 @@ export default function CustomersPage() {
                         customer={customer}
                         onEdit={handleEdit}
                         onDelete={setCustomerToDeactivate}
+                        onReactivate={handleReactivate}
                       />
                     </div>
                   );
@@ -432,7 +474,7 @@ export default function CustomersPage() {
         <span className="font-semibold text-foreground">
           {customerToDeactivate?.first_name} {customerToDeactivate?.last_name}
         </span>
-        ? Podrás reactivarlo desde su ficha.
+        ? Podrás reactivarlo desde la lista de inactivos.
       </ConfirmSheet>
     </ProtectedRoute>
   );
