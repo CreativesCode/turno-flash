@@ -97,3 +97,20 @@ export const tripFormSchema = z
   );
 
 export type TripFormSchema = z.infer<typeof tripFormSchema>;
+
+/**
+ * One pickup point. Same rule as the 037 CHECK (a price of 0 means "the trip's
+ * price"), checked here so the owner gets a message instead of a stop that
+ * silently fails to save.
+ */
+export const pickupPointSchema = z
+  .object({
+    name: z.string().trim().min(1),
+    price_per_seat: z.number().min(0, "El precio no puede ser negativo"),
+    deposit_per_seat: z.number().min(0, "El anticipo no puede ser negativo"),
+  })
+  .refine(
+    (point) =>
+      point.price_per_seat === 0 || point.deposit_per_seat <= point.price_per_seat,
+    { message: "El anticipo no puede ser mayor que el precio" }
+  );

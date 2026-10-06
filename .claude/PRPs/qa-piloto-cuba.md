@@ -106,7 +106,7 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 - Téc: migración: trigger BEFORE UPDATE OF total_seats en `trips` (`seats_below_taken`) y BEFORE INSERT/UPDATE en `trip_bookings` para `source<>'web'` con `pg_advisory_xact_lock(hashtextextended('trip_booking:'||trip_id,0))` (`no_seats_left`). Mapear los mensajes en `TripService.update` y `createManual`. `ManualBookingSheet.tsx:181` → `max={trip.seats_left}` y deshabilitar el envío si es 0.
 - Verificar: bajar el cupo por debajo de lo vendido da "Ya hay N asientos reservados"; una reserva manual en una salida llena se rechaza.
 
-**P0-16 · F22+F59+M45 · Los puntos de recogida (con precio y anticipo) se pierden sin aviso y la app dice "Salida creada/actualizada"**
+**P0-16 · ✅ HECHO 2026-10-06 (`pickupPointSchema` + cada escritura de paradas revisa su error; si fallan al crear o duplicar, la salida se borra) · F22+F59+M45 · Los puntos de recogida (con precio y anticipo) se pierden sin aviso y la app dice "Salida creada/actualizada"**
 - Quién: dueño de guaguas (cree que el precio está publicado y no lo está) y pasajeros (salida sin paradas).
 - Téc: `services/trips.service.ts:236-279` `savePickupPoints`: revisar `{error}` en el select, el delete y cada update/insert y hacer `throw`; insertar en bloque (`.insert(rows)`) y en paralelo (`Promise.all`). Validar antes `deposit_per_seat <= price_per_seat` por punto con un schema Zod en `schemas/trip.schema.ts`. Hacer lo mismo en `copyPickupPoints:296`. Si falla al crear, despublicar la salida. Opcional: RPC transaccional `save_trip_pickup_points`.
 - Verificar: un punto con anticipo mayor que el precio da un error claro; cortar la red a mitad no muestra "creada".

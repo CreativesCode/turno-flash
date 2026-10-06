@@ -1,4 +1,4 @@
-import { tripFormSchema } from "@/schemas/trip.schema";
+import { pickupPointSchema, tripFormSchema } from "@/schemas/trip.schema";
 import type {
   PickupPointFormState,
   Trip,
@@ -243,10 +243,11 @@ export class TripService {
     const supabase = createClient();
     const kept = points.filter((point) => point.name.trim());
 
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from("trip_pickup_points")
       .select("id")
       .eq("trip_id", tripId);
+    if (existingError) throw existingError;
 
     const keptIds = new Set(kept.map((point) => point.id).filter(Boolean));
     const toDelete = (existing ?? [])
@@ -254,11 +255,16 @@ export class TripService {
       .filter((id) => !keptIds.has(id));
 
     if (toDelete.length > 0) {
-      await supabase.from("trip_pickup_points").delete().in("id", toDelete);
+      const { error } = await supabase
+        .from("trip_pickup_points")
+        .delete()
+        .in("id", toDelete);
+      if (error) throw error;
     }
 
-    for (const [index, point] of kept.entries()) {
-      const row = {
+    const rows = kept.map((point, index) => ({
+      id: point.id,
+      row: {
         organization_id: organizationId,
         trip_id: tripId,
         name: point.name.trim(),
@@ -271,13 +277,41 @@ export class TripService {
         deposit_per_seat:
           point.deposit_per_seat === "" ? 0 : point.deposit_per_seat,
         sort_order: index,
-      };
-      if (point.id) {
-        await supabase.from("trip_pickup_points").update(row).eq("id", point.id);
-      } else {
-        await supabase.from("trip_pickup_points").insert(row);
+      },
+    }));
+
+    const results = await Promise.all([
+      ...rows
+        .filter((item) => item.id)
+        .map((item) =>
+          supabase.from("trip_pickup_points").update(item.row).eq("id", item.id)
+        ),
+      ...(rows.some((item) => !item.id)
+        ? [
+            supabase
+              .from("trip_pickup_points")
+              .insert(rows.filter((item) => !item.id).map((item) => item.row)),
+          ]
+        : []),
+    ]);
+    const failed = results.find((result) => result.error);
+    if (failed?.error) throw failed.error;
+  }
+
+  /** First invalid stop as a message for the owner, or null. */
+  private static pickupPointsError(points: PickupPointFormState[]): string | null {
+    for (const point of points) {
+      if (!point.name.trim()) continue;
+      const parsed = pickupPointSchema.safeParse({
+        name: point.name,
+        price_per_seat: point.price_per_seat === "" ? 0 : point.price_per_seat,
+        deposit_per_seat: point.deposit_per_seat === "" ? 0 : point.deposit_per_seat,
+      });
+      if (!parsed.success) {
+        return `Parada "${point.name.trim()}": ${parsed.error.issues[0].message}`;
       }
     }
+    return null;
   }
 
   /** A duplicate without its stops has no prices: they live on the stops. */
@@ -287,15 +321,16 @@ export class TripService {
     organizationId: string
   ): Promise<void> {
     const supabase = createClient();
-    const { data: points } = await supabase
+    const { data: points, error: readError } = await supabase
       .from("trip_pickup_points")
       .select("*")
       .eq("trip_id", fromTripId)
       .order("sort_order", { ascending: true });
+    if (readError) throw readError;
 
     if (!points || points.length === 0) return;
 
-    await supabase.from("trip_pickup_points").insert(
+    const { error } = await supabase.from("trip_pickup_points").insert(
       (points as TripPickupPoint[]).map((point) => ({
         organization_id: organizationId,
         trip_id: toTripId,
@@ -308,6 +343,7 @@ export class TripService {
         sort_order: point.sort_order,
       }))
     );
+    if (error) throw error;
   }
 
   static async create(
@@ -320,6 +356,8 @@ export class TripService {
     if (!validation.valid) {
       return { success: false, error: validation.errors[0] };
     }
+    const pointsError = this.pickupPointsError(pickupPoints);
+    if (pointsError) return { success: false, error: pointsError };
 
     try {
       const supabase = createClient();
@@ -333,7 +371,14 @@ export class TripService {
         .select()
         .single();
       if (error) throw error;
-      await this.savePickupPoints(created.id, organizationId, pickupPoints);
+      try {
+        await this.savePickupPoints(created.id, organizationId, pickupPoints);
+      } catch (pointsSaveError) {
+        // A departure without its stops has no prices: remove it so the
+        // owner retries without leaving a half-created duplicate behind.
+        await supabase.from("trips").delete().eq("id", created.id);
+        throw pointsSaveError;
+      }
       return { success: true, trip: created as Trip };
     } catch (error) {
       void Logger.error("Error creating trip", error, { organizationId });
@@ -351,6 +396,8 @@ export class TripService {
     if (!validation.valid) {
       return { success: false, error: validation.errors[0] };
     }
+    const pointsError = pickupPoints && this.pickupPointsError(pickupPoints);
+    if (pointsError) return { success: false, error: pointsError };
 
     try {
       const supabase = createClient();
@@ -464,7 +511,13 @@ export class TripService {
         .select()
         .single();
       if (error) throw error;
-      await this.copyPickupPoints(trip.id, created.id, trip.organization_id);
+      try {
+        await this.copyPickupPoints(trip.id, created.id, trip.organization_id);
+      } catch (pointsCopyError) {
+        // Same as create: a copy without its stops has no prices
+        await supabase.from("trips").delete().eq("id", created.id);
+        throw pointsCopyError;
+      }
       return { success: true, trip: created as Trip };
     } catch (error) {
       void Logger.error("Error duplicating trip", error, { tripId: trip.id });
