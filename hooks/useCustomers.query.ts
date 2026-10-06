@@ -147,7 +147,6 @@ export function useCreateCustomer() {
     },
     onSuccess: () => {
       // Invalidate and refetch customers queries
-      queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
     },
   });
@@ -256,7 +255,6 @@ export function useUpdateCustomer() {
     },
     // Refetch to ensure consistency
     onSettled: (_, __, variables) => {
-      queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
       queryClient.invalidateQueries({
         queryKey: customerKeys.detail(
@@ -294,7 +292,6 @@ export function useDeactivateCustomer() {
     },
     onSuccess: () => {
       // Invalidate customers queries
-      queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
     },
   });
@@ -326,7 +323,6 @@ export function useReactivateCustomer() {
     },
     onSuccess: () => {
       // Invalidate customers queries
-      queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
     },
   });

@@ -118,5 +118,6 @@ export function useRealtimeAll(enabled = true) {
   useRealtimeServices(enabled);
   useRealtimeStaff(enabled);
   useRealtimeTrips(enabled);
-  useRealtimeWAOutbound({ enabled });
+  // No wa_outbound_messages here: no query reads it, every message sent
+  // was downloaded for nothing (P2-05). WhatsAppOrgSection subscribes itself.
 }

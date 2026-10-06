@@ -116,7 +116,6 @@ export function useCreateService() {
     },
     onSuccess: () => {
       // Invalidate and refetch services queries
-      queryClient.invalidateQueries({ queryKey: serviceKeys.lists() });
       queryClient.invalidateQueries({ queryKey: serviceKeys.all });
     },
   });
@@ -226,7 +225,6 @@ export function useUpdateService() {
     },
     // Refetch to ensure consistency
     onSettled: (_, __, variables) => {
-      queryClient.invalidateQueries({ queryKey: serviceKeys.lists() });
       queryClient.invalidateQueries({ queryKey: serviceKeys.all });
       queryClient.invalidateQueries({
         queryKey: serviceKeys.detail(
@@ -264,7 +262,6 @@ export function useDeactivateService() {
     },
     onSuccess: () => {
       // Invalidate services queries
-      queryClient.invalidateQueries({ queryKey: serviceKeys.lists() });
       queryClient.invalidateQueries({ queryKey: serviceKeys.all });
     },
   });
@@ -296,7 +293,6 @@ export function useReactivateService() {
     },
     onSuccess: () => {
       // Invalidate services queries
-      queryClient.invalidateQueries({ queryKey: serviceKeys.lists() });
       queryClient.invalidateQueries({ queryKey: serviceKeys.all });
     },
   });
@@ -357,7 +353,6 @@ export function useReorderServices() {
     },
     onSuccess: () => {
       // Invalidate services queries to update order
-      queryClient.invalidateQueries({ queryKey: serviceKeys.lists() });
       queryClient.invalidateQueries({ queryKey: serviceKeys.all });
     },
   });

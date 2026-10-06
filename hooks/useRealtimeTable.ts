@@ -29,6 +29,8 @@ export interface UseRealtimeTableOptions<T extends Record<string, unknown> = Rec
   onEvent?: (payload: RealtimePostgresChangesPayload<T>) => void;
 }
 
+const INVALIDATE_DEBOUNCE_MS = 500;
+
 /**
  * Hook genérico que se suscribe a postgres_changes de una tabla y, en cada
  * evento INSERT/UPDATE/DELETE, invalida los query keys de React Query
@@ -36,8 +38,9 @@ export interface UseRealtimeTableOptions<T extends Record<string, unknown> = Rec
  *
  * Comportamiento:
  *   - Filtra por `organization_id=eq.<organizationId>` por defecto.
- *   - Si Supabase Realtime no entrega organization_id en el payload (DELETE
- *     sin REPLICA IDENTITY FULL), el filtro server-side igual aplica.
+ *   - Los DELETE no pasan por el filtro y, sin REPLICA IDENTITY FULL, solo
+ *     traen la clave: se ignoran los que no son de esta organización.
+ *   - Varias filas seguidas invalidan una sola vez (500 ms).
  *   - Limpia el canal al desmontar o al cambiar organizationId.
  */
 export function useRealtimeTable<T extends Record<string, unknown> = Record<string, unknown>>(
@@ -76,6 +79,7 @@ export function useRealtimeTable<T extends Record<string, unknown> = Record<stri
     const effectiveFilter = filter ?? `organization_id=eq.${organizationId}`;
     const channelName = `rt:${table}:${organizationId}`;
     let subscribedOnce = false;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
     const channel = supabase
       .channel(channelName)
@@ -89,10 +93,23 @@ export function useRealtimeTable<T extends Record<string, unknown> = Record<stri
           filter: effectiveFilter,
         },
         (payload: RealtimePostgresChangesPayload<T>) => {
-          // Invalidar todos los query keys configurados
-          for (const key of invalidateKeysRef.current) {
-            queryClient.invalidateQueries({ queryKey: key });
+          // Postgres DELETE events skip the filter and carry only the old
+          // primary key unless it says otherwise: ignore other businesses'
+          const old = payload.old as { organization_id?: string } | undefined;
+          if (
+            payload.eventType === "DELETE" &&
+            old?.organization_id !== organizationId
+          ) {
+            return;
           }
+          // A burst of changes (a batch of reminders, a bulk update) refetches
+          // once instead of once per row (P2-05)
+          if (debounceTimer) clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            for (const key of invalidateKeysRef.current) {
+              queryClient.invalidateQueries({ queryKey: key });
+            }
+          }, INVALIDATE_DEBOUNCE_MS);
           onEventRef.current?.(payload);
         }
       )
@@ -111,6 +128,7 @@ export function useRealtimeTable<T extends Record<string, unknown> = Record<stri
     channelRef.current = channel;
 
     return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
       channelRef.current = null;
     };

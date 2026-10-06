@@ -197,7 +197,6 @@ export function useCreateAppointment() {
     // "Sin nombre · 0 min", and in lists whose date range didn't include it
     // Refetch to get real data from server
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },
   });
@@ -294,7 +293,6 @@ export function useUpdateAppointmentStatus() {
     },
     // Refetch from server to ensure consistency
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },
   });
@@ -408,7 +406,6 @@ export function useDeleteAppointment() {
     },
     // Refetch to ensure consistency
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },
   });
@@ -466,7 +463,6 @@ export function useSendReminder() {
     },
     onSuccess: () => {
       // Invalidate appointments queries to update reminder status
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },
   });

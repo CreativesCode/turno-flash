@@ -118,7 +118,6 @@ export function useCreateStaffMember() {
     },
     onSuccess: () => {
       // Invalidate and refetch staff queries
-      queryClient.invalidateQueries({ queryKey: staffKeys.lists() });
       queryClient.invalidateQueries({ queryKey: staffKeys.all });
     },
   });
@@ -230,7 +229,6 @@ export function useUpdateStaffMember() {
     },
     // Refetch to ensure consistency
     onSettled: (_, __, variables) => {
-      queryClient.invalidateQueries({ queryKey: staffKeys.lists() });
       queryClient.invalidateQueries({ queryKey: staffKeys.all });
       queryClient.invalidateQueries({
         queryKey: staffKeys.detail(
@@ -270,7 +268,6 @@ export function useDeactivateStaffMember() {
     },
     onSuccess: () => {
       // Invalidate staff queries
-      queryClient.invalidateQueries({ queryKey: staffKeys.lists() });
       queryClient.invalidateQueries({ queryKey: staffKeys.all });
     },
   });
@@ -304,7 +301,6 @@ export function useReactivateStaffMember() {
     },
     onSuccess: () => {
       // Invalidate staff queries
-      queryClient.invalidateQueries({ queryKey: staffKeys.lists() });
       queryClient.invalidateQueries({ queryKey: staffKeys.all });
     },
   });
@@ -367,7 +363,6 @@ export function useReorderStaff() {
     },
     onSuccess: () => {
       // Invalidate staff queries to update order
-      queryClient.invalidateQueries({ queryKey: staffKeys.lists() });
       queryClient.invalidateQueries({ queryKey: staffKeys.all });
     },
   });
