@@ -68,7 +68,7 @@ export function CustomerFormModal({
               value={formData.phone}
               onChange={(e) => onChange({ phone: e.target.value })}
               className={inputClasses}
-              placeholder="+54 11 1234-5678"
+              placeholder="+53 5 123 4567"
             />
           </Field>
           <Field label="WhatsApp (opcional)">
@@ -77,7 +77,7 @@ export function CustomerFormModal({
               value={formData.whatsapp_number ?? ""}
               onChange={(e) => onChange({ whatsapp_number: e.target.value })}
               className={inputClasses}
-              placeholder="+54 9 11 1234-5678"
+              placeholder="+53 5 123 4567"
             />
           </Field>
         </div>

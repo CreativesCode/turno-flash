@@ -1,5 +1,6 @@
 import { APPOINTMENT_STATUS } from "@/config/constants";
 import { Customer, CustomerFormData } from "@/types/appointments";
+import { DEFAULT_COUNTRY_CODE, toInternationalPhone } from "@/utils/phone";
 import { createClient } from "@/utils/supabase/client";
 import { Logger } from "@/utils/logger";
 
@@ -71,14 +72,18 @@ export class CustomerService {
       }
 
       const supabase = createClient();
+      // Stored in one canonical form, so the same person is found again
+      const countryCode = data.phone_country_code || DEFAULT_COUNTRY_CODE;
+      const phone = toInternationalPhone(data.phone, countryCode);
 
       // Check if customer with same phone already exists
       const { data: existingCustomer } = await supabase
         .from("customers")
         .select("id")
         .eq("organization_id", organizationId)
-        .eq("phone", data.phone)
-        .single();
+        .eq("phone", phone)
+        .limit(1)
+        .maybeSingle();
 
       if (existingCustomer) {
         return {
@@ -92,9 +97,10 @@ export class CustomerService {
         .from("customers")
         .insert({
           ...data,
+          phone,
           organization_id: organizationId,
           created_by: userId,
-          phone_country_code: data.phone_country_code || "+54",
+          phone_country_code: countryCode,
           is_active: data.is_active !== undefined ? data.is_active : true,
         })
         .select()
@@ -147,6 +153,16 @@ export class CustomerService {
         };
       }
 
+      if (data.phone) {
+        data = {
+          ...data,
+          phone: toInternationalPhone(
+            data.phone,
+            data.phone_country_code || DEFAULT_COUNTRY_CODE
+          ),
+        };
+      }
+
       // If phone is being updated, check for duplicates
       if (data.phone && data.phone !== existingCustomer.phone) {
         const { data: duplicateCustomer } = await supabase
@@ -155,7 +171,8 @@ export class CustomerService {
           .eq("organization_id", organizationId)
           .eq("phone", data.phone)
           .neq("id", customerId)
-          .single();
+          .limit(1)
+          .maybeSingle();
 
         if (duplicateCustomer) {
           return {

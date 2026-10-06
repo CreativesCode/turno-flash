@@ -3,6 +3,7 @@ import type {
   TripBookingWithCustomer,
 } from "@/types/trips";
 import { Logger } from "@/utils/logger";
+import { DEFAULT_COUNTRY_CODE, toInternationalPhone } from "@/utils/phone";
 import { createClient } from "@/utils/supabase/client";
 
 /** Readable message for the capacity guards of migration 053, or null. */
@@ -178,7 +179,7 @@ export class TripBookingService {
       const supabase = createClient();
 
       // Reuse the customer by phone, same idea as the public flow.
-      const phone = form.phone.trim();
+      const phone = toInternationalPhone(form.phone);
       const { data: existing } = await supabase
         .from("customers")
         .select("id")
@@ -197,6 +198,7 @@ export class TripBookingService {
             first_name: form.first_name.trim(),
             last_name: form.last_name.trim(),
             phone,
+            phone_country_code: DEFAULT_COUNTRY_CODE,
             email: form.email.trim() || null,
             is_active: true,
           })

@@ -34,21 +34,25 @@ export interface SendTextData {
   timestamp: string;
 }
 
-/** Convierte un teléfono a chatId WhatsApp.
- *  - Si el número empieza con `+` → es internacional explícito, se ignora `countryCode`.
- *  - Si ya empieza con el `countryCode` → no se duplica.
- *  - Si no, se prepende el `countryCode`.
+/** Convierte un teléfono a chatId WhatsApp. Misma regla que booking_phone_key
+ *  (migración 054) y utils/phone.ts:
+ *  - `+...` o `00...` → internacional tal cual, se ignora `countryCode`.
+ *  - Ya trae el `countryCode` solo si empieza con él Y tiene más de 8 dígitos:
+ *    los móviles cubanos tienen 8 y muchos empiezan por 53 (53077035).
+ *  - Si no, se prepende el `countryCode` (sin ceros iniciales).
  */
 export function phoneToChatId(phone: string, countryCode?: string): string {
   const raw = (phone ?? "").trim();
-
-  if (raw.startsWith("+")) {
-    return `${raw.slice(1).replace(/[^\d]/g, "")}@c.us`;
-  }
-
   const num = raw.replace(/[^\d]/g, "");
+
+  if (raw.startsWith("+")) return `${num}@c.us`;
+  if (num.startsWith("00")) return `${num.slice(2)}@c.us`;
+
   const cc = (countryCode ?? "").replace(/[^\d]/g, "");
-  const full = !cc || num.startsWith(cc) ? num : `${cc}${num}`;
+  const full =
+    !cc || (num.startsWith(cc) && num.length > 8)
+      ? num
+      : `${cc}${num.replace(/^0+/, "")}`;
   return `${full}@c.us`;
 }
 

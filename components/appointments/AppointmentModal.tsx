@@ -145,7 +145,7 @@ export function AppointmentCreateModal({
                   <input
                     type="tel"
                     required
-                    placeholder="+54 11 1234-5678"
+                    placeholder="+53 5 123 4567"
                     value={newCustomerData.phone}
                     onChange={(e) =>
                       onChangeNewCustomer({ phone: e.target.value })

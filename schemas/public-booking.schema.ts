@@ -1,3 +1,4 @@
+import { nationalDigits } from "@/utils/phone";
 import { z } from "zod";
 
 /** Customer data of the public booking form (the edge function re-validates). */
@@ -15,10 +16,22 @@ export const publicCustomerSchema = z
   })
   .refine(
     (d) => {
-      const digits = `${d.country_code}${d.phone}`.replace(/\D/g, "").length;
+      const national = nationalDigits(d.phone, d.country_code);
+      const digits = d.country_code.replace(/\D/g, "").length + national.length;
       return digits >= 8 && digits <= 15;
     },
     { message: "El teléfono no parece completo", path: ["phone"] }
-  );
+  )
+  // WhatsApp needs a mobile: in Cuba 8 digits starting with 5
+  .refine(
+    (d) => d.country_code !== "+53" || /^5\d{7}$/.test(nationalDigits(d.phone, d.country_code)),
+    {
+      message: "Escribe tu móvil cubano: 8 dígitos que empiezan por 5",
+      path: ["phone"],
+    }
+  )
+  // Typing the country code again ("53 5..." with +53 picked) or a leading 0
+  // no longer produces a wrong number
+  .transform((d) => ({ ...d, phone: nationalDigits(d.phone, d.country_code) }));
 
 export type PublicCustomerInput = z.infer<typeof publicCustomerSchema>;

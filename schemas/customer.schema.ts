@@ -53,7 +53,7 @@ export const customerFormSchema = z.object({
       message: "Código de país inválido",
     })
     .optional()
-    .default("+54"),
+    .default("+53"),
   whatsapp_number: z
     .string()
     .regex(phoneRegex, {
