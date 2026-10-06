@@ -2,11 +2,12 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { Button, Card, Logo } from "@/components/ui";
+import { useAuth } from "@/contexts/auth-context";
 import { createClient } from "@/utils/supabase/client";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { user } = useAuth();
+
+  // A session restored in the background (e.g. the network came back) goes
+  // straight to the panel, without typing the password again.
+  useEffect(() => {
+    if (user) router.replace("/dashboard");
+  }, [user, router]);
 
   const supabase = useMemo(() => createClient(), []);
 

@@ -3,7 +3,7 @@
 import { UserProfile } from "@/types/auth";
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { User, isAuthRetryableFetchError } from "@supabase/supabase-js";
 import {
   ReactNode,
   createContext,
@@ -15,13 +15,19 @@ import {
   useState,
 } from "react";
 
-// Timeout máximo para la verificación inicial de autenticación (10 segundos)
-const AUTH_TIMEOUT_MS = 10000;
+// While the session or profile can't be loaded for network reasons, retry this often.
+// Cuban networks often stay "online" without reaching the server, so the
+// browser's `online` event alone is not enough.
+const CONNECTION_RETRY_MS = 10000;
 
 interface AuthContextType {
   user: User | null;
   profile: UserProfile | null;
   loading: boolean;
+  /** The session or profile could not be checked because of the network. */
+  connectionError: boolean;
+  /** Try again to restore the session and load the profile. */
+  retry: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -40,12 +46,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
 
   // Memoizar el cliente de Supabase para evitar crear una nueva instancia en cada render
   const supabase = useMemo(() => createClient(), []);
 
-  // Ref para el timeout de seguridad
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // A network failure must never wipe a profile that already loaded
+  const hasProfileRef = useRef(false);
+  // Avoid piling up retries when a request takes longer than the retry interval
+  const restoringRef = useRef(false);
   // Ref para controlar si el componente está montado (previene actualizaciones en componentes desmontados)
   const isMountedRef = useRef(true);
   // Ref para evitar procesar el mismo evento de autenticación múltiples veces
@@ -86,73 +95,50 @@ export function AuthProvider({ children }: AuthProviderProps) {
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             } as UserProfile);
+            hasProfileRef.current = true;
           } else {
-            void Logger.error("Error loading user profile", error, {
-              context: "auth-context.loadUserProfile",
-            });
-            setProfile(null);
+            // Network or expired token: keep the profile we had and retry later.
+            // Showing "Sin organización asignada" here would be a lie.
+            if (!hasProfileRef.current) setConnectionError(true);
+            return;
           }
         } else {
+          hasProfileRef.current = true;
           setProfile(userProfile);
         }
-      } catch (err) {
-        if (!isMountedRef.current) return;
-        void Logger.error("Exception loading user profile", err, {
-          context: "auth-context.loadUserProfile",
-        });
-        setProfile(null);
-      } finally {
-        if (!isMountedRef.current) return;
-        // Limpiar timeout si existe
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-          timeoutRef.current = null;
-        }
+        setConnectionError(false);
         setLoading(false);
+      } catch {
+        if (!isMountedRef.current) return;
+        if (!hasProfileRef.current) setConnectionError(true);
       }
     },
     [supabase]
   );
 
-  useEffect(() => {
-    // Marcar como montado
-    isMountedRef.current = true;
-    
-    // Crear AbortController para cancelar operaciones si el componente se desmonta
-    const abortController = new AbortController();
-
-    // Establecer un timeout de seguridad para evitar quedarse colgado indefinidamente
-    timeoutRef.current = setTimeout(() => {
-      if (isMountedRef.current) {
-        console.warn("Auth timeout reached - forcing loading to false");
-        setLoading(false);
-      }
-    }, AUTH_TIMEOUT_MS);
-
-    // Función async para la inicialización
-    const initAuth = async () => {
+  const restoreSession = useCallback(
+    async (abortSignal?: AbortSignal) => {
       try {
-        // Verificar si fue cancelado
-        if (abortController.signal.aborted) return;
+        if (abortSignal?.aborted) return;
 
-        // Obtener sesión inicial
         const {
           data: { session },
           error,
         } = await supabase.auth.getSession();
 
-        // Verificar de nuevo después de la llamada async
-        if (abortController.signal.aborted || !isMountedRef.current) return;
+        if (abortSignal?.aborted || !isMountedRef.current) return;
 
         if (error) {
-          void Logger.error("Error getting session", error, {
-            context: "auth-context.initializeAuth",
-          });
-          // Limpiar timeout y terminar loading
-          if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-            timeoutRef.current = null;
+          // The token refresh could not reach the server. Supabase keeps the
+          // stored session in that case, so wait and retry instead of
+          // treating the owner as logged out.
+          if (isAuthRetryableFetchError(error)) {
+            setConnectionError(true);
+            return;
           }
+          void Logger.error("Error getting session", error, {
+            context: "auth-context.restoreSession",
+          });
           setLoading(false);
           return;
         }
@@ -163,30 +149,54 @@ export function AuthProvider({ children }: AuthProviderProps) {
             userId: session.user.id,
             event: "INIT_SESSION",
           };
-          await loadUserProfile(session.user, abortController.signal);
+          await loadUserProfile(session.user, abortSignal);
         } else {
-          // Limpiar timeout y terminar loading
-          if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-            timeoutRef.current = null;
-          }
+          setConnectionError(false);
           setLoading(false);
         }
-      } catch (err) {
+      } catch {
         if (!isMountedRef.current) return;
-        void Logger.error("Error in auth initialization", err, {
-          context: "auth-context.initializeAuth",
-        });
-        // Limpiar timeout y terminar loading en caso de error
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-          timeoutRef.current = null;
-        }
-        setLoading(false);
+        setConnectionError(true);
       }
-    };
+    },
+    [supabase, loadUserProfile]
+  );
 
-    initAuth();
+  const retry = useCallback(async () => {
+    if (restoringRef.current) return;
+    restoringRef.current = true;
+    try {
+      await restoreSession();
+    } finally {
+      restoringRef.current = false;
+    }
+  }, [restoreSession]);
+
+  // Keep retrying while the network is the only thing between the owner and the panel
+  useEffect(() => {
+    if (!connectionError) return;
+    const tryAgain = () => void retry();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") tryAgain();
+    };
+    const interval = setInterval(tryAgain, CONNECTION_RETRY_MS);
+    window.addEventListener("online", tryAgain);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("online", tryAgain);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [connectionError, retry]);
+
+  useEffect(() => {
+    // Marcar como montado
+    isMountedRef.current = true;
+    
+    // Crear AbortController para cancelar operaciones si el componente se desmonta
+    const abortController = new AbortController();
+
+    void restoreSession(abortController.signal);
 
     // Escuchar cambios en la autenticación
     // IMPORTANTE: este callback DEBE ser síncrono respecto a llamadas a Supabase.
@@ -232,7 +242,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           void loadUserProfile(sessionUser, abortController.signal);
         }, 0);
       } else {
+        hasProfileRef.current = false;
         setProfile(null);
+        setConnectionError(false);
         setLoading(false);
         // Resetear ref cuando no hay sesión
         processingRef.current = { userId: null, event: null };
@@ -248,19 +260,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Limpiar suscripción
       subscription.unsubscribe();
-      
-      // Limpiar timeout al desmontar
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
     };
-  }, [supabase, loadUserProfile]);
+  }, [supabase, loadUserProfile, restoreSession]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
+    hasProfileRef.current = false;
     setUser(null);
     setProfile(null);
+    setConnectionError(false);
   }, [supabase]);
 
   const refreshProfile = useCallback(async () => {
@@ -271,16 +279,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await loadUserProfile(user);
     }
   }, [supabase, loadUserProfile]);
-
   const value: AuthContextType = useMemo(
     () => ({
       user,
       profile,
       loading,
+      connectionError,
+      retry,
       signOut,
       refreshProfile,
     }),
-    [user, profile, loading, signOut, refreshProfile]
+    [user, profile, loading, connectionError, retry, signOut, refreshProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

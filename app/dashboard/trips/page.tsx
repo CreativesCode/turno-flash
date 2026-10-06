@@ -91,7 +91,11 @@ function toFormData(state: TripFormState): TripFormData {
 export default function TripsPage() {
   const { profile } = useAuth();
   const router = useRouter();
-  const { modules, loading: modulesLoading } = useOrganizationModules();
+  const {
+    modules,
+    loading: modulesLoading,
+    ready: modulesReady,
+  } = useOrganizationModules();
   const toast = useToast();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -282,7 +286,7 @@ export default function TripsPage() {
     }
   }, [duplicateDate, duplicateTrip, duplicating, toast]);
 
-  const moduleOff = !modulesLoading && !modules.trips;
+  const moduleOff = modulesReady && !modules.trips;
 
   if (loading || modulesLoading) {
     return (

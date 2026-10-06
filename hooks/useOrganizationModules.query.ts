@@ -68,5 +68,7 @@ export function useOrganizationModules() {
   return {
     modules: query.data ?? FALLBACK,
     loading: query.isLoading,
+    /** True once the real data arrived; until then `modules` is only the fallback. */
+    ready: query.isSuccess,
   };
 }
