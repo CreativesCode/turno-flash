@@ -213,7 +213,7 @@ export function DateTimeStep({
       ) : error && slots.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-foreground-muted">
           No pudimos cargar los horarios. Revisa tu conexión.
-          <Button
+          <Button size="lg"
             variant="soft"
             onClick={() => void refetch()}
             className="mt-3 w-full justify-center"

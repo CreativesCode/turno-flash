@@ -96,7 +96,7 @@ export function BookingFlow({ slug }: { slug: string }) {
               : "Este negocio no está recibiendo reservas online en este momento."}
           </p>
           {offline && (
-            <Button
+            <Button size="lg"
               variant="soft"
               onClick={() => void refetch()}
               className="mt-4 w-full justify-center"
@@ -282,7 +282,7 @@ export function BookingFlow({ slug }: { slug: string }) {
             )}
           </dl>
 
-          <Button variant="soft" onClick={reset} className="mt-5 w-full justify-center">
+          <Button size="lg" variant="soft" onClick={reset} className="mt-5 w-full justify-center">
             Hacer otra reserva
           </Button>
         </Card>
@@ -312,7 +312,7 @@ function Shell({
                 type="button"
                 onClick={onBack}
                 aria-label="Volver"
-                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
+                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>

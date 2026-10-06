@@ -117,7 +117,7 @@ export function TripListStep({
                     : "Las reservas de esta salida ya cerraron."}
                 </div>
               ) : (
-                <Button
+                <Button size="lg"
                   variant="mesh-primary"
                   onClick={() => onSelect(trip)}
                   disabled={soldOut}
@@ -292,7 +292,7 @@ export function SeatsStep({
             onClick={() => changeSeats(seats - 1)}
             disabled={seats <= 1}
             aria-label="Un asiento menos"
-            className="h-10 w-10 shrink-0 rounded-lg border border-border bg-surface text-lg font-bold text-foreground disabled:opacity-40"
+            className="h-11 w-11 shrink-0 rounded-lg border border-border bg-surface text-lg font-bold text-foreground disabled:opacity-40"
           >
             −
           </button>
@@ -304,7 +304,7 @@ export function SeatsStep({
             onClick={() => changeSeats(seats + 1)}
             disabled={seats >= maxSeats}
             aria-label="Un asiento más"
-            className="h-10 w-10 shrink-0 rounded-lg border border-border bg-surface text-lg font-bold text-foreground disabled:opacity-40"
+            className="h-11 w-11 shrink-0 rounded-lg border border-border bg-surface text-lg font-bold text-foreground disabled:opacity-40"
           >
             +
           </button>
@@ -362,7 +362,7 @@ export function SeatsStep({
 
       {error && <p className="text-sm text-danger-600">{error}</p>}
 
-      <Button type="submit" variant="mesh-primary" className="w-full justify-center">
+      <Button size="lg" type="submit" variant="mesh-primary" className="w-full justify-center">
         Continuar
       </Button>
     </form>

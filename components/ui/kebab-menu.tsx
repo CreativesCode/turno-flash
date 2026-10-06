@@ -53,7 +53,7 @@ export function KebabMenu({ items, label = "Más acciones" }: KebabMenuProps) {
         aria-label={label}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
+        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
       >
         <MoreVertical className="h-4 w-4" />
       </button>

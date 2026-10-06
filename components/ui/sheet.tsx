@@ -88,7 +88,7 @@ export function Sheet({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -112,7 +112,7 @@ export function Sheet({
  */
 export function SheetFooter({ children }: { children: ReactNode }) {
   return (
-    <div className="sticky -bottom-5 -mx-5 -mb-5 flex gap-2 border-t border-border bg-surface px-5 py-3">
+    <div className="sticky -bottom-5 -mx-5 -mb-5 flex gap-2 border-t border-border bg-surface px-5 py-3 [&>button]:min-h-11">
       {children}
     </div>
   );
@@ -133,7 +133,7 @@ export function Field({
 }) {
   return (
     <div>
-      <label className="block text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+      <label className="block text-xs font-bold uppercase tracking-[0.05em] text-foreground-muted">
         {label}
       </label>
       <div className="mt-1.5">{children}</div>

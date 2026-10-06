@@ -102,7 +102,7 @@ export function AppointmentCreateModal({
             <button
               type="button"
               onClick={onToggleNewCustomerForm}
-              className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-xs font-semibold text-secondary-500 transition-colors hover:bg-secondary-50 dark:hover:bg-secondary-900/20"
+              className="flex min-h-11 shrink-0 items-center gap-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-xs font-semibold text-secondary-500 transition-colors hover:bg-secondary-50 dark:hover:bg-secondary-900/20"
             >
               <Plus className="h-3.5 w-3.5" />
               {showNewCustomerForm ? "Cerrar" : "Nuevo"}
@@ -335,7 +335,7 @@ export function ChipButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+      className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
         selected
           ? "border-foreground bg-foreground text-background"
           : "border-border bg-surface text-foreground hover:bg-muted"

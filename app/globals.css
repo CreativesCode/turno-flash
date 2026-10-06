@@ -320,3 +320,13 @@ body {
 .dark .st-cancelled        { --st-bg: #450a0a; }
 .dark .st-no_show          { --st-bg: #18181b; }
 .dark .st-rescheduled      { --st-bg: #082f49; }
+
+/* iOS zooms into any field under 16px when it gets focus (P1-10). Unlayered,
+   so it wins over the text-sm utilities on phones only. */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
