@@ -325,7 +325,16 @@ export default function DashboardPage() {
 
   // Today's appointments (only fetched if user has org). The hook already
   // returns [] when profile.organization_id is missing.
-  const todayString = useMemo(() => getTodayString(), []);
+  // Recomputed when the app comes back: left open overnight, "Hoy" was
+  // still yesterday
+  const [todayString, setTodayString] = useState(getTodayString);
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") setTodayString(getTodayString());
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
   const { appointments } = useAppointments({
     startDate: todayString,
     endDate: todayString,
@@ -333,7 +342,6 @@ export default function DashboardPage() {
 
   // Group counts by status — used by both the hero stat and shortcut subtitles.
   const stats = useMemo(() => {
-    const total = appointments.length;
     const counts: Record<string, number> = {};
     for (const a of appointments) {
       const k = a.status ?? "pending";
@@ -342,7 +350,9 @@ export default function DashboardPage() {
     const statusCount = (...keys: AppointmentStatus[]) =>
       keys.reduce((sum, k) => sum + (counts[k] ?? 0), 0);
     return {
-      total,
+      // Cancelled and no-shows are not part of the day's work
+      total:
+        appointments.length - statusCount("cancelled", "no_show"),
       confirmed: statusCount("confirmed", "client_confirmed", "reminded"),
       pending: counts.pending ?? 0,
       inProgress: statusCount("checked_in", "in_progress"),
