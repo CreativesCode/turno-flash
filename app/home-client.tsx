@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Capacitor } from "@capacitor/core";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -241,6 +242,12 @@ export default function HomePageClient() {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // The app is for owners already signed up: skip the marketing page (P2-12).
+  // The panel sends to /login without a session and waits on a bad network.
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) router.replace("/dashboard");
+  }, [router]);
 
   useEffect(() => {
     // Si hay tokens de autenticación en el hash, redirigir al callback
