@@ -16,6 +16,7 @@ import {
 import {
   InfiniteData,
   UseQueryOptions,
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -638,6 +639,9 @@ export function useInfiniteAppointments(
     initialPageParam: 0,
     enabled: !!profile?.organization_id,
     staleTime: 1000 * 60, // 1 minuto
+    // Changing day or view keeps the screen (and its controls) while the
+    // new range loads, instead of a full-page spinner (P1-32)
+    placeholderData: keepPreviousData,
     ...options,
   });
 }

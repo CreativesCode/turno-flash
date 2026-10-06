@@ -185,6 +185,7 @@ function AppointmentsContent() {
     fetchNextPage: fetchNextAppointmentsPage,
     hasNextPage: hasNextAppointmentsPage,
     isFetchingNextPage: isFetchingNextAppointmentsPage,
+    isFetching: appointmentsFetching,
     isLoading: appointmentsLoading,
     error: appointmentsError,
   } = useInfiniteAppointments(
@@ -592,6 +593,8 @@ function AppointmentsContent() {
           appointments.length !== 1 ? "s" : ""
         }`
       : `${appointments.length} turno${appointments.length !== 1 ? "s" : ""}`;
+  // The previous range stays on screen while the new one loads
+  const refreshing = appointmentsFetching && !isFetchingNextAppointmentsPage;
 
   return (
     <ProtectedRoute>
@@ -610,7 +613,10 @@ function AppointmentsContent() {
                 <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
                   Turnos
                 </h1>
-                <p className="text-xs text-foreground-muted">{subtitle}</p>
+                <p className="text-xs text-foreground-muted">
+                  {subtitle}
+                  {refreshing && " · Actualizando…"}
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
