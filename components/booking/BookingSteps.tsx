@@ -267,6 +267,7 @@ export function DetailsStep({
   onSubmit,
   initial,
   onChange,
+  defaultName,
 }: {
   /** ISO code preselected in the phone country picker */
   defaultCountry: string;
@@ -274,11 +275,16 @@ export function DetailsStep({
   onSubmit: (data: CustomerSubmit) => void;
   initial?: DetailsDraft | null;
   onChange?: (draft: DetailsDraft) => void;
+  /** Already typed earlier (first passenger on /trips): split into name parts. */
+  defaultName?: string;
 }) {
+  const [defaultFirst = "", ...defaultLast] = (defaultName ?? "")
+    .trim()
+    .split(/\s+/);
   const [form, setForm] = useState<DetailsDraft>(
     initial ?? {
-      first_name: "",
-      last_name: "",
+      first_name: defaultFirst,
+      last_name: defaultLast.join(" "),
       country: defaultCountry,
       phone: "",
       email: "",

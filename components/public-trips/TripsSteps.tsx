@@ -338,6 +338,7 @@ export function SeatsStep({
                 })
               }
               className={sheetInputClasses}
+              autoComplete={index === 0 ? "name" : "off"}
               placeholder={index === 0 ? "Tu nombre" : `Pasajero ${index + 1}`}
             />
           ))}

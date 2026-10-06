@@ -307,6 +307,7 @@ export function TripsFlow({ slug }: { slug: string }) {
           onSubmit={handleBook}
           initial={draft}
           onChange={setDraft}
+          defaultName={seatsData?.passengerNames[0]}
         />
       )}
 
