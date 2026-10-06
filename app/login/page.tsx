@@ -9,6 +9,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+/** Supabase answers in English: show the owner something they can act on. */
+function loginErrorMessage(error: { code?: string; message: string }): string {
+  if (error.code === "invalid_credentials") {
+    return "Email o contraseña incorrectos.";
+  }
+  if (error.code === "email_not_confirmed") {
+    return "Todavía no confirmaste tu email. Revisa tu correo.";
+  }
+  if (error.code === "over_request_rate_limit") {
+    return "Demasiados intentos. Espera unos minutos y vuelve a probar.";
+  }
+  return "No pudimos iniciar sesión. Revisa tu conexión e intenta de nuevo.";
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +52,7 @@ export default function LoginPage() {
       });
 
       if (signInError) {
-        setError(signInError.message);
+        setError(loginErrorMessage(signInError));
         setLoading(false);
         return;
       }
@@ -71,10 +85,10 @@ export default function LoginPage() {
           {/* Card */}
           <Card className="p-6 sm:p-7">
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-              Bienvenida
+              Hola de nuevo
             </h1>
             <p className="mt-1 text-sm text-foreground-muted">
-              Ingresa con tu cuenta para administrar tu agenda.
+              Entra con tu cuenta para administrar tu negocio.
             </p>
 
             <form onSubmit={handleLogin} className="mt-6 space-y-4">
