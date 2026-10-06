@@ -133,6 +133,7 @@ export {
   useCreateTrip,
   useDuplicateTrip,
   useSetTripPublished,
+  useTripQuery,
   useTripsQuery,
   useUpdateTrip,
   type TripFilters,

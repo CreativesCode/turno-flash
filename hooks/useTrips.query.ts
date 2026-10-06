@@ -19,6 +19,7 @@ export const tripKeys = {
   lists: () => [...tripKeys.all, "list"] as const,
   list: (orgId: string, filters?: TripFilters) =>
     [...tripKeys.lists(), { orgId, ...(filters || {}) }] as const,
+  detail: (tripId: string) => [...tripKeys.all, "detail", tripId] as const,
 };
 
 export function useTripsQuery(filters?: TripFilters) {
@@ -40,6 +41,29 @@ export function useTripsQuery(filters?: TripFilters) {
 
   return {
     trips: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error ? (query.error as Error).message : null,
+    refetch: query.refetch,
+  };
+}
+
+/** One departure for its detail page (P2-07), under tripKeys.all for realtime. */
+export function useTripQuery(tripId: string | null) {
+  const query = useQuery({
+    queryKey: tripKeys.detail(tripId ?? ""),
+    queryFn: async (): Promise<TripWithOccupancy | null> => {
+      const result = await TripService.getById(tripId!);
+      if (!result.success) {
+        throw new Error(result.error || "Error al cargar la salida");
+      }
+      return result.trip ?? null;
+    },
+    enabled: !!tripId,
+    staleTime: 1000 * 30,
+  });
+
+  return {
+    trip: query.data ?? null,
     loading: query.isLoading,
     error: query.error ? (query.error as Error).message : null,
     refetch: query.refetch,

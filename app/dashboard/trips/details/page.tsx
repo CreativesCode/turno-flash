@@ -23,7 +23,7 @@ import {
   useToast,
   tripKeys,
   useTripBookingsQuery,
-  useTripsQuery,
+  useTripQuery,
   useUpdatePassengerNames,
 } from "@/hooks";
 import {
@@ -117,17 +117,16 @@ function TripDetailsContent() {
 
   // The trip comes from the list the dashboard already has in cache.
   const {
-    trips,
+    trip: fetchedTrip,
     loading: tripsLoading,
     error: tripsError,
     refetch: refetchTrips,
-  } = useTripsQuery({ includePast: true });
+  } = useTripQuery(tripId);
   const queryClient = useQueryClient();
   // Offline, fall back to any trip list already in the cache (the Viajes list
   // the owner just came from) instead of saying the trip doesn't exist
   const trip = useMemo(() => {
-    const found = trips.find((candidate) => candidate.id === tripId);
-    if (found) return found;
+    if (fetchedTrip) return fetchedTrip;
     for (const [, cached] of queryClient.getQueriesData<TripWithOccupancy[]>({
       queryKey: tripKeys.lists(),
     })) {
@@ -135,7 +134,7 @@ function TripDetailsContent() {
       if (hit) return hit;
     }
     return null;
-  }, [trips, tripId, queryClient]);
+  }, [fetchedTrip, tripId, queryClient]);
 
   const { bookings, loading, error } = useTripBookingsQuery(tripId);
 

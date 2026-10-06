@@ -151,6 +151,94 @@ export class TripService {
   }
 
   /**
+   * Stops and live occupancy for a set of departures. Two queries for the
+   * whole set, never one per trip.
+   */
+  private static async withOccupancy(
+    rows: Trip[]
+  ): Promise<TripWithOccupancy[]> {
+    const supabase = createClient();
+    const { data: points, error: pointsError } = await supabase
+      .from("trip_pickup_points")
+      .select("*")
+      .in(
+        "trip_id",
+        rows.map((trip) => trip.id)
+      )
+      .order("sort_order", { ascending: true });
+    if (pointsError) throw pointsError;
+
+    const pointsByTrip = new Map<string, TripPickupPoint[]>();
+    for (const point of (points ?? []) as TripPickupPoint[]) {
+      const list = pointsByTrip.get(point.trip_id) ?? [];
+      list.push(point);
+      pointsByTrip.set(point.trip_id, list);
+    }
+
+    const { data: bookings, error: bookingsError } = await supabase
+      .from("trip_bookings")
+      .select("trip_id, seats, status")
+      .in(
+        "trip_id",
+        rows.map((trip) => trip.id)
+      )
+      .neq("status", "cancelled");
+    if (bookingsError) throw bookingsError;
+
+    const takenByTrip = new Map<string, number>();
+    const pendingByTrip = new Map<string, number>();
+    for (const booking of bookings ?? []) {
+      takenByTrip.set(
+        booking.trip_id,
+        (takenByTrip.get(booking.trip_id) ?? 0) + booking.seats
+      );
+      if (booking.status === "pending") {
+        pendingByTrip.set(
+          booking.trip_id,
+          (pendingByTrip.get(booking.trip_id) ?? 0) + 1
+        );
+      }
+    }
+
+    return rows.map((trip) => {
+      const seatsTaken = takenByTrip.get(trip.id) ?? 0;
+      return {
+        ...trip,
+        seats_taken: seatsTaken,
+        seats_left: Math.max(trip.total_seats - seatsTaken, 0),
+        pending_approval: pendingByTrip.get(trip.id) ?? 0,
+        pickup_points: pointsByTrip.get(trip.id) ?? [],
+      };
+    });
+  }
+
+  /**
+   * One departure with its stops and occupancy (P2-07): the detail page
+   * used to download every trip in the history to show one.
+   */
+  static async getById(tripId: string): Promise<{
+    success: boolean;
+    error?: string;
+    trip?: TripWithOccupancy | null;
+  }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("trips")
+        .select("*")
+        .eq("id", tripId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return { success: true, trip: null };
+      const [trip] = await this.withOccupancy([data as Trip]);
+      return { success: true, trip };
+    } catch (error) {
+      void Logger.error("Error loading trip", error, { tripId });
+      return { success: false, error: "No se pudo cargar la salida" };
+    }
+  }
+
+  /**
    * Departures with their live occupancy. Two queries, never one per trip:
    * the seats taken come from a single grouped read of the live bookings.
    */
@@ -182,61 +270,7 @@ export class TripService {
       const rows = (trips ?? []) as Trip[];
       if (rows.length === 0) return { success: true, trips: [] };
 
-      const { data: points, error: pointsError } = await supabase
-        .from("trip_pickup_points")
-        .select("*")
-        .in(
-          "trip_id",
-          rows.map((trip) => trip.id)
-        )
-        .order("sort_order", { ascending: true });
-      if (pointsError) throw pointsError;
-
-      const pointsByTrip = new Map<string, TripPickupPoint[]>();
-      for (const point of (points ?? []) as TripPickupPoint[]) {
-        const list = pointsByTrip.get(point.trip_id) ?? [];
-        list.push(point);
-        pointsByTrip.set(point.trip_id, list);
-      }
-
-      const { data: bookings, error: bookingsError } = await supabase
-        .from("trip_bookings")
-        .select("trip_id, seats, status")
-        .in(
-          "trip_id",
-          rows.map((trip) => trip.id)
-        )
-        .neq("status", "cancelled");
-      if (bookingsError) throw bookingsError;
-
-      const takenByTrip = new Map<string, number>();
-      const pendingByTrip = new Map<string, number>();
-      for (const booking of bookings ?? []) {
-        takenByTrip.set(
-          booking.trip_id,
-          (takenByTrip.get(booking.trip_id) ?? 0) + booking.seats
-        );
-        if (booking.status === "pending") {
-          pendingByTrip.set(
-            booking.trip_id,
-            (pendingByTrip.get(booking.trip_id) ?? 0) + 1
-          );
-        }
-      }
-
-      return {
-        success: true,
-        trips: rows.map((trip) => {
-          const seatsTaken = takenByTrip.get(trip.id) ?? 0;
-          return {
-            ...trip,
-            seats_taken: seatsTaken,
-            seats_left: Math.max(trip.total_seats - seatsTaken, 0),
-            pending_approval: pendingByTrip.get(trip.id) ?? 0,
-            pickup_points: pointsByTrip.get(trip.id) ?? [],
-          };
-        }),
-      };
+      return { success: true, trips: await this.withOccupancy(rows) };
     } catch (error) {
       void Logger.error("Error loading trips", error, { organizationId });
       return { success: false, error: "No se pudieron cargar los viajes" };
