@@ -5,6 +5,22 @@ import type {
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
 
+/** Readable message for the capacity guards of migration 053, or null. */
+export function capacityError(error: unknown): string | null {
+  const message = (error as { message?: string } | null)?.message ?? "";
+  const below = message.match(/seats_below_taken:(\d+)/);
+  if (below) {
+    return `Ya hay ${below[1]} asientos reservados: el cupo no puede ser menor.`;
+  }
+  const left = message.match(/no_seats_left:(\d+)/);
+  if (left) {
+    return Number(left[1]) > 0
+      ? `Solo quedan ${left[1]} asientos en esta salida.`
+      : "Esta salida ya no tiene asientos libres.";
+  }
+  return null;
+}
+
 /**
  * Service Layer for trip bookings (PRP-002).
  *
@@ -99,7 +115,10 @@ export class TripBookingService {
       void Logger.error("Error updating trip booking status", error, {
         bookingId,
       });
-      return { success: false, error: "No se pudo actualizar la reserva" };
+      return {
+        success: false,
+        error: capacityError(error) ?? "No se pudo actualizar la reserva",
+      };
     }
   }
 
@@ -213,7 +232,10 @@ export class TripBookingService {
       return { success: true };
     } catch (error) {
       void Logger.error("Error creating manual trip booking", error, { tripId });
-      return { success: false, error: "No se pudo cargar la reserva" };
+      return {
+        success: false,
+        error: capacityError(error) ?? "No se pudo cargar la reserva",
+      };
     }
   }
 }

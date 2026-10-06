@@ -293,10 +293,14 @@ export function ManualBookingSheet({
           <Button
             type="submit"
             variant="mesh-primary"
-            disabled={isSubmitting}
+            disabled={isSubmitting || trip.seats_left <= 0}
             className="flex-2 justify-center"
           >
-            {isSubmitting ? "Guardando…" : "Cargar reserva"}
+            {isSubmitting
+              ? "Guardando…"
+              : trip.seats_left <= 0
+                ? "Sin asientos libres"
+                : "Cargar reserva"}
           </Button>
         </div>
       </form>

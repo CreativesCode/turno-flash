@@ -6,6 +6,7 @@ import type {
   TripPickupPoint,
   TripWithOccupancy,
 } from "@/types/trips";
+import { capacityError } from "@/services/trip-bookings.service";
 import { getLocalDateString } from "@/utils/date";
 import { downscaleImage } from "@/utils/image";
 import { Logger } from "@/utils/logger";
@@ -366,7 +367,10 @@ export class TripService {
       return { success: true, trip: updated as Trip };
     } catch (error) {
       void Logger.error("Error updating trip", error, { tripId });
-      return { success: false, error: "No se pudo actualizar el viaje" };
+      return {
+        success: false,
+        error: capacityError(error) ?? "No se pudo actualizar el viaje",
+      };
     }
   }
 

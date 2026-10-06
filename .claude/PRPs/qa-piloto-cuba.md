@@ -101,7 +101,7 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 - Téc: migración: `public_booking_info` devuelve `organization.currency` y backfill `UPDATE services s SET currency=o.currency FROM organizations o WHERE …` (`029:337`). `components/booking/BookingSteps.tsx:64` usar la moneda de la organización; `components/services/ServiceCard.tsx:51` → `useMoney().format`; `services/services.service.ts:104` guardar la moneda de la organización. `app/dashboard/settings/page.tsx:186`: `{organizationId && !modulesLoading && <CurrencyCard key={modules.currency} …/>}`.
 - Verificar: "Masaje" muestra CUP en /book y en Servicios; al recargar Ajustes de golpe se ve "Peso cubano (CUP)" y Guardar está deshabilitado.
 
-**P0-15 · F24 · Se puede sobrevender una salida desde el panel**
+**P0-15 · ✅ HECHO 2026-10-06 (migración 053: guardas de cupo con el mismo advisory lock que la reserva web; `capacityError()` traduce los mensajes) · F24 · Se puede sobrevender una salida desde el panel**
 - Quién: dueño de guaguas y pasajeros (más gente que asientos en el ómnibus).
 - Téc: migración: trigger BEFORE UPDATE OF total_seats en `trips` (`seats_below_taken`) y BEFORE INSERT/UPDATE en `trip_bookings` para `source<>'web'` con `pg_advisory_xact_lock(hashtextextended('trip_booking:'||trip_id,0))` (`no_seats_left`). Mapear los mensajes en `TripService.update` y `createManual`. `ManualBookingSheet.tsx:181` → `max={trip.seats_left}` y deshabilitar el envío si es 0.
 - Verificar: bajar el cupo por debajo de lo vendido da "Ya hay N asientos reservados"; una reserva manual en una salida llena se rechaza.
