@@ -152,140 +152,140 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 
 ### P1 — Fricción en los dos flujos clave + datos desactualizados
 
-**P1-01 · M04 · La barra de pestañas y la barra superior del panel no quedan fijas en el móvil**
+**P1-01 · ✅ HECHO 2026-10-06 (barras con print:hidden propio) · M04 · La barra de pestañas y la barra superior del panel no quedan fijas en el móvil**
 - Quién: todo dueño en el teléfono (para cambiar de sección hay que bajar hasta el final de la lista).
 - Téc: `app/dashboard/layout.tsx:35-46`: quitar los dos `<div className="print:hidden">` envoltorios y poner `print:hidden` en `MobileTopbar.tsx:28` y `MobileTabBar.tsx:82`.
 - Verificar: en Pixel 7 la barra inferior está visible con scroll a mitad de Turnos.
 
-**P1-02 · M05+M58 · El '+' central y "Nuevo turno" de Inicio no abren el formulario; hay tres botones de crear y el FAB tapa contenido**
+**P1-02 · ✅ HECHO 2026-10-06 (useCreateParam + max-sm:hidden + sin FAB duplicado) · M05+M58 · El '+' central y "Nuevo turno" de Inicio no abren el formulario; hay tres botones de crear y el FAB tapa contenido**
 - Téc: `app/dashboard/appointments/page.tsx`: un efecto que lea `?create=1`, llame a `handleCreate()` y haga `router.replace`. `MobileTabBar.tsx`: el destino según la ruta (en Viajes, nueva salida). Bug de clases: `components/ui/button.tsx:61-66` no fusiona clases, así que `hidden sm:inline-flex` no oculta. Cambiar a `max-sm:hidden` en las 9 llamadas (trips/page.tsx:326, trips/details:404, appointments:635, customers:289, staff:272, services:231, organizations:208, reminders:252, dashboard/page.tsx:461). Esto también arregla M61, M68 y F103 (CTA duplicado).
 - Verificar: tocar el '+' abre "Nuevo turno" en un toque; en móvil queda un solo botón de crear por pantalla.
 
-**P1-03 · F18+M17 · No se puede reprogramar un turno**
+**P1-03 · ✅ HECHO 2026-10-06 (migración 062 + intent rescheduled + hoja Mover turno) · F18+M17 · No se puede reprogramar un turno**
 - Quién: dueño (el cliente llama para cambiar la hora) y cliente (recibe un falso "fue cancelado").
 - Téc: `AppointmentService.reschedule(id,{date,startTime,staffId?,serviceId?})` con `checkAvailability(excludeAppointmentId)` y un solo `.update` sin tocar el estado. Hook `useRescheduleAppointment`. Pasar `onEdit` en `app/dashboard/appointments/page.tsx:875-896` reutilizando el formulario. WhatsApp "reschedule_ack" → decisión D-05.
 - Verificar: mover un turno de 10:00 a 11:00 no envía WhatsApp de cancelación.
 
-**P1-04 · M15+G26+F17+F89 · Completar un turno exige 5 pasos y un WhatsApp; "Enviar recordatorio" de la fila no envía nada; "WhatsApp" del detalle manda recordatorio y hace retroceder el estado**
+**P1-04 · ✅ HECHO 2026-10-06 (check-in → completar; WhatsApp abre chat) · M15+G26+F17+F89 · Completar un turno exige 5 pasos y un WhatsApp; "Enviar recordatorio" de la fila no envía nada; "WhatsApp" del detalle manda recordatorio y hace retroceder el estado**
 - Quién: dueño y personal en el local cuando llega el cliente.
 - Téc: `utils/appointment-status.ts:61-71`: confirmed/reminded/client_confirmed → "Hacer check-in" (`checked_in`), checked_in → "Completar". `AppointmentModal.tsx:461-468`: quitar el caso especial `next.to==='reminded'` y agregar un botón secundario "Completar". Fila: `page.tsx:746-750,773-777` → si `to==='reminded'`, `handleSendReminder`. Tile WhatsApp (`AppointmentModal.tsx:477-482`): `<a href="https://wa.me/<dígitos>">` y `tel:` en el teléfono (`:418`).
 - Verificar: de Confirmado a Completado en 2 toques sin WhatsApp; el tile WhatsApp abre el chat.
 
-**P1-05 · F40+F39+M40 · Cancelar turno, "No vino" y cancelar reserva de viaje: un solo toque, sin confirmación y avisan al cliente**
+**P1-05 · ✅ HECHO 2026-10-06 (ConfirmSheet en cancelar, no vino y cancelar reserva) · F40+F39+M40 · Cancelar turno, "No vino" y cancelar reserva de viaje: un solo toque, sin confirmación y avisan al cliente**
 - Téc: `ConfirmSheet` en `app/dashboard/appointments/page.tsx` (estado `pendingTerminal`) y en `trips/details/page.tsx:167-183` (`rejecting`), con el patrón de `trips/page.tsx:442-456`. Texto: "El horario queda libre y le avisamos al cliente por WhatsApp. No se puede deshacer." "No vino" no se ofrece en turnos futuros. `PassengerRow.tsx:170`: el chip de anticipo solo si está pagado (para que se vea lo que hay que devolver).
 - Verificar: tocar Cancelar abre una confirmación.
 
-**P1-06 · F55+M57 · Lo que carga el propio dueño queda "pendiente" y manda dos WhatsApp**
+**P1-06 · ✅ HECHO 2026-10-06 (lo cargado por el negocio nace confirmado) · F55+M57 · Lo que carga el propio dueño queda "pendiente" y manda dos WhatsApp**
 - Téc: `services/trip-bookings.service.ts:200` → `status:"confirmed"` (quitar el param `requiresApproval`, `trips/details/page.tsx:229`, `useTripBookings.query.ts:134`). `services/appointments.service.ts:200-203` → `data.status || CONFIRMED`.
 - Verificar: una reserva telefónica nace confirmada, con un solo WhatsApp.
 
-**P1-07 · M12+F58+M26+F103+M27 · Listas del panel más anchas que la pantalla (Viajes 480 px; Organizaciones, Usuarios, Reportes)**
+**P1-07 · ✅ HECHO 2026-10-06 (grid-cols-1 y truncados) · M12+F58+M26+F103+M27 · Listas del panel más anchas que la pantalla (Viajes 480 px; Organizaciones, Usuarios, Reportes)**
 - Quién: dueño de guaguas (precio cortado, ⋮ fuera de la pantalla) y admin.
 - Téc: `grid-cols-1` en `trips/page.tsx:383,394`, `organizations/page.tsx:244`, `users/page.tsx:271`, `organizations/details/page.tsx:613`, `reports/page.tsx:~261,~304` (y revisar services:284, staff:325). `min-w-0` en `TripCard.tsx:117,128`, `OrganizationCard.tsx:76`, `UserCard.tsx:210`. `TripCard.tsx:149` `<RichText>` para el punto de encuentro. `trips/page.tsx:312` `pb-40 sm:pb-24`. Heatmap `widgets.tsx:141-166`: `minmax(1.25rem,2rem)` y `w-max`.
 - Verificar: `scrollWidth == innerWidth` a 320/360/390 en esas rutas.
 
-**P1-08 · M38 · A la salida solo se entra por un enlace de 16 px**
+**P1-08 · ✅ HECHO 2026-10-06 (tarjeta entera clicable) · M38 · A la salida solo se entra por un enlace de 16 px**
 - Téc: `TripCard.tsx:188` → `after:absolute after:inset-0 after:content-['']`; el kebab en `relative z-10`.
 - Verificar: tocar en cualquier parte de la tarjeta abre el detalle.
 
-**P1-09 · M13+M24+M25 · En las hojas del panel el botón "Crear salida"/"Cargar reserva" queda cortado; el teclado lo tapa; el fondo se desplaza**
+**P1-09 · ✅ HECHO 2026-10-06 (dvh + SheetFooter + bloqueo de scroll + Más opciones) · M13+M24+M25 · En las hojas del panel el botón "Crear salida"/"Cargar reserva" queda cortado; el teclado lo tapa; el fondo se desplaza**
 - Téc: `components/ui/sheet.tsx:58` `flex flex-col max-h-[85dvh]`; `:90` `min-h-0 flex-1 overscroll-contain`; prop `footer` sticky para los botones (TripFormSheet, AppointmentModal); bloquear el scroll del `body` en el efecto `:35`; `touch-none` en el overlay `:51`. Agrupar los opcionales de "Nueva salida" en un desplegable.
 - Verificar: en iPhone SE, con el teclado al 55%, "Crear salida" sigue visible.
 
-**P1-10 · M22+M23 · Inputs de 14 px (zoom en iOS), zoom bloqueado y botones de 36 px**
+**P1-10 · ✅ HECHO 2026-10-06 (regla global 16 px, zoom permitido, 44 px) · M22+M23 · Inputs de 14 px (zoom en iOS), zoom bloqueado y botones de 36 px**
 - Téc: `sheet.tsx:126` `text-base sm:text-sm` (también en el login y los buscadores); etiquetas `:113,118` a `text-xs`; `app/layout.tsx:100-101` quitar `maximumScale`/`userScalable`. CTAs públicos `size="lg"`; `BookingFlow.tsx:267` Volver `h-11 w-11`; cierre de hoja y kebab `min-h-11 min-w-11`.
 - Verificar: el barrido automático no encuentra controles < 44 px ni inputs < 16 px en /book, /trips y Nuevo turno.
 
-**P1-11 · F45+M42+G29+M18 · Elegir o buscar un cliente: select sin búsqueda, búsqueda que no encuentra parciales y teclado que se cierra**
+**P1-11 · ✅ HECHO 2026-10-06 (CustomerPicker + migración 063 + keepPreviousData) · F45+M42+G29+M18 · Elegir o buscar un cliente: select sin búsqueda, búsqueda que no encuentra parciales y teclado que se cierra**
 - Téc: `AppointmentModal.tsx:87-100`: input `type="search" inputMode="tel"` que filtra `customers` por dígitos o nombre; si no hay resultado, alta rápida con el teléfono precargado. Migración `search_customers_fulltext` (después de P0-01): ILIKE siempre + coincidencia por dígitos normalizados. `hooks/useCustomers.query.ts` `placeholderData: keepPreviousData`; `customers/page.tsx:230` spinner solo en la primera carga.
 - Verificar: escribir "5256" encuentra a Client Two sin perder el foco.
 
-**P1-12 · F23+F81+F42+F43 · Datos desactualizados en el panel**
+**P1-12 · ✅ HECHO 2026-10-06 (realtime de pasajes, re-suscripción, sin turno optimista) · F23+F81+F42+F43 · Datos desactualizados en el panel**
 - Qué pasa: la lista de pasajeros no se actualiza cuando entra una reserva web; al reconectar el websocket no se recuperan los cambios; el turno optimista aparece como "Sin nombre · 0 min"; el filtro de la Lista se aplica sin verse en la vista Día.
 - Téc: `hooks/useRealtimeEntities.ts:105-110` `invalidateKeys:[tripKeys.all, tripBookingKeys.all]`. `hooks/useRealtimeTable.ts:98` callback de `subscribe` que invalida en el re-SUBSCRIBED. `hooks/useAppointments.query.ts:241-271` completar desde las cachés y agregar solo en las listas cuyo rango coincide (o quitar el insert optimista). `appointments/page.tsx:814` `appointments={appointments}`.
 - Verificar: una reserva web aparece en el detalle de la salida abierta en menos de 5 s.
 
-**P1-13 · F25+F52+M41+G06 · Montos pendientes incorrectos o "Cobro registrado" sin guardar**
+**P1-13 · ✅ HECHO 2026-10-06 (bookingPending en fila, filas 0 = error, licencia en visibilitychange) · F25+F52+M41+G06 · Montos pendientes incorrectos o "Cobro registrado" sin guardar**
 - Téc: `PassengerRow.tsx:87-88` → `bookingTotal`/`bookingPending`. `trips/details/page.tsx:461` agregar `|| owed > 0`. En los UPDATE de `trip-bookings.service.ts:55-118`, `trips.service.ts:379-406` y `appointments.service.ts:307`: `.select('id')` y error si vuelven 0 filas. `useLicense` revalida en `visibilitychange`.
 - Verificar: con un extra de 1000, la fila y el chip muestran el mismo "Falta"; con la licencia vencida a mitad de sesión aparece un error y no "Cobro registrado".
 
-**P1-14 · F57 · Una salida cancelada sigue aceptando reservas manuales y sus reservas cuentan para el límite por teléfono**
+**P1-14 · ✅ HECHO 2026-10-06 (migración 064) · F57 · Una salida cancelada sigue aceptando reservas manuales y sus reservas cuentan para el límite por teléfono**
 - Téc: migración: `AND tr.cancelled_at IS NULL` en el conteo de `create_trip_booking` (`042:~215`) + `RAISE 'trip_cancelled'` en el trigger BEFORE INSERT (039). `trips/details/page.tsx`: banner "Salida cancelada" y ocultar "Cargar reserva".
 - Verificar: después de cancelar la salida, el pasajero puede reservar otra.
 
-**P1-15 · F31 · Las reservas por aprobar no se ven en la lista ni en Inicio**
+**P1-15 · ✅ HECHO 2026-10-06 (chip por aprobar + atajo de Inicio) · F31 · Las reservas por aprobar no se ven en la lista ni en Inicio**
 - Téc: `trips.service.ts:195-202` seleccionar `status`, contar `pending_approval`; `TripCard.tsx:166` chip "{n} por aprobar" con enlace; subtítulo del atajo Viajes en Inicio (consulta head-count).
 - Verificar: una reserva web pendiente muestra el chip en la tarjeta.
 
-**P1-16 · F56+M39+G23 · La hoja del chofer no dice dónde se recoge a cada pasajero y no se puede compartir por WhatsApp; CSV e Imprimir no hacen nada en la app nativa**
+**P1-16 · ✅ HECHO 2026-10-06 (columna Recogida + Compartir lista (@capacitor/share)) · F56+M39+G23 · La hoja del chofer no dice dónde se recoge a cada pasajero y no se puede compartir por WhatsApp; CSV e Imprimir no hacen nada en la app nativa**
 - Téc: `trips/details/page.tsx:249-312`: agregar la columna "Recogida" (nombre + hora), ordenar por parada, formatear la fecha y usar RichText (`PassengerPrintSheet.tsx:58,71`). Botón "Compartir lista": texto plano → `navigator.share({text})` con respaldo `wa.me/?text=` y portapapeles. En nativo, ocultar CSV e Imprimir hasta decidir sobre `@capacitor/filesystem`/`share` (D-07).
 - Verificar: la lista llega como texto a un chat de WhatsApp desde la APK.
 
-**P1-17 · F34 · Sin red, abrir una salida dice "No encontramos esa salida"**
+**P1-17 · ✅ HECHO 2026-10-06 (caché de listas o Sin conexión) · F34 · Sin red, abrir una salida dice "No encontramos esa salida"**
 - Téc: `trips/details/page.tsx:82-90`: usar primero la caché de `useTripsQuery()` (la misma clave que la lista) y leer `error`; si falló, mostrar "Sin conexión" con Reintentar (`:344`). Se completa con P2-01 (persistencia).
 - Verificar: abrir una salida sin red después de ver la lista muestra los datos o "Sin conexión", nunca "no existe".
 
-**P1-18 · M09+M35+F62 · Tras "Horario ocupado" se sigue ofreciendo la misma hora; "Continuar" no da señal durante 4,6 s**
+**P1-18 · ✅ HECHO 2026-10-06 (hueco tomado fuera de caché + Comprobando disponibilidad) · M09+M35+F62 · Tras "Horario ocupado" se sigue ofreciendo la misma hora; "Continuar" no da señal durante 4,6 s**
 - Téc: `BookingFlow.tsx` rama `slot_taken`: `setQueryData` que quita el hueco de `publicBookingKeys.slots(...)`. `TripsFlow.tsx:116-138` estado `checkingSeats` → `SeatsStep busy`, botón "Comprobando disponibilidad…" deshabilitado (`TripsSteps.tsx:361`).
 - Verificar: el hueco tomado desaparece; un doble toque en Continuar no lanza dos pedidos.
 
-**P1-19 · M33+F100 · En viajes el pasajero escribe su nombre dos veces**
+**P1-19 · ✅ HECHO 2026-10-06 (defaultName) · M33+F100 · En viajes el pasajero escribe su nombre dos veces**
 - Téc: `BookingSteps.tsx` DetailsStep prop `defaultName`; `TripsFlow.tsx:217` `defaultName={seatsData?.passengerNames[0]}`; `autoComplete="name"` en los nombres de pasajero.
 - Verificar: con 1 asiento, "Tus datos" llega precargado.
 
-**P1-20 · F21 · Un slug inexistente o una página apagada dice "Revisa tu conexión"**
+**P1-20 · ✅ HECHO 2026-10-06 (code ?? error) · F21 · Un slug inexistente o una página apagada dice "Revisa tu conexión"**
 - Téc: `services/public-trips.service.ts:53` → `(data?.code ?? data?.error)`; o normalizar en `public-trips/index.ts:121-127`.
 - Verificar: `/trips?b=no-existe` dice "no está recibiendo reservas".
 
-**P1-21 · G31 · El contador "Hoy" de Inicio suma los cancelados**
+**P1-21 · ✅ HECHO 2026-10-06 (sin cancelados + fecha en visibilitychange) · G31 · El contador "Hoy" de Inicio suma los cancelados**
 - Téc: `app/dashboard/page.tsx:334` filtrar `cancelled` y `no_show`; recalcular `todayString` en `visibilitychange` (`:326`).
 - Verificar: un día con 9 cancelados y 2 completados muestra 2.
 
-**P1-22 · F46+M62(chip) · El profesional sin apodo aparece como un chip vacío**
+**P1-22 · ✅ HECHO 2026-10-06 (nickname vacío → nombre) · F46+M62(chip) · El profesional sin apodo aparece como un chip vacío**
 - Téc: `AppointmentModal.tsx:273` `s.nickname?.trim() || nombre completo`; guardar null en `staff/page.tsx`.
 - Verificar: un profesional sin apodo muestra su nombre.
 
-**P1-23 · M48+G24 · Safe area doble en iPhone con notch y nula en Android 15+**
+**P1-23 · ✅ HECHO 2026-10-06 (--safe-area-inset-* y body:has(barras)) · M48+G24 · Safe area doble en iPhone con notch y nula en Android 15+**
 - Téc: `globals.css:194-201` body con `var(--safe-area-inset-*)`; quitar el `env()` de `MobileTopbar.tsx:30` y `MobileTabBar.tsx:84`; `sheet.tsx:59` y `Drawer.tsx:250-251` → `var(--safe-area-inset-*, 0px)`.
 - Verificar: en iPhone 13 no queda una franja vacía de 47 px; en Android 15 la barra no queda bajo la barra de estado.
 
-**P1-24 · M49+G19 · Una invitación enviada desde la app nativa lleva a https://localhost**
+**P1-24 · ✅ HECHO 2026-10-06 (getSiteUrl()) · M49+G19 · Una invitación enviada desde la app nativa lleva a https://localhost**
 - Téc: `services/invitations.service.ts:71` → `${getSiteUrl()}/auth/callback?type=invite`; revisar la allowlist de Supabase Auth.
 - Verificar: el email de invitación apunta al dominio público.
 
-**P1-25 · M20+G41 · Sesión en cookies: en la app iOS puede no persistir (y en Android, un cierre brusco puede perder el token renovado)**
+**P1-25 · ✅ HECHO 2026-10-06 (sesión nativa en @capacitor/preferences) · M20+G41 · Sesión en cookies: en la app iOS puede no persistir (y en Android, un cierre brusco puede perder el token renovado)**
 - Téc: `utils/supabase/client.ts`: en nativo, `createClient` de supabase-js con `storage: window.localStorage` (o `@capacitor/preferences`, D-07), `persistSession`, `flowType:"pkce"`, singleton. La web sigue igual.
 - Verificar: en un iPhone físico, cerrar y abrir la app conserva la sesión.
 
-**P1-26 · M19 · El proyecto iOS no compila tal como está en el repo**
+**P1-26 · PENDIENTE: necesita una Mac (Android ya sincronizado, `3a7c7c7`) · M19 · El proyecto iOS no compila tal como está en el repo**
 - Téc: en una Mac, `npm run cap:sync:ios`; verificar las rutas POSIX en `ios/App/CapApp-SPM/Package.swift` y la entrada de RevenueCat; commitear. También `npm run cap:sync:android` (los assets son de junio). Solo si el piloto incluye iPhone nativo (D-09).
 - Verificar: build de Xcode limpio.
 
-**P1-27 · F26+F64+F65+G40+F83(stats) · El registro de errores está roto: no vas a ver los fallos del piloto**
+**P1-27 · ✅ HECHO 2026-10-06 (migración 065 + logger) · F26+F64+F65+G40+F83(stats) · El registro de errores está roto: no vas a ver los fallos del piloto**
 - Téc: migración: `increment_error_count()` con variable local (`011_error_logging.sql:48-63`); políticas de admin y owner separadas (`:89-131`); `get_error_stats` con chequeo de admin y `REVOKE … FROM anon, PUBLIC` (`:138`); REVOKE de `cleanup_wa_processed_events`, `wa_appointments_in_window` y `generate_appointment_number` a anon; INSERT `WITH CHECK (user_id=auth.uid() AND org propia)` (`:83`). `app/dashboard/page.tsx:233` `enabled: isAdmin`. `utils/logger.ts`: no enviar sin red, `getSession()` en vez de `getUser()`, dedup de 60 s; quitar el doble log de `query-client-provider.tsx:33-37`.
 - Verificar: un error forzado aparece en /dashboard/errors para el admin.
 
-**P1-28 · F28 · No existe "¿Olvidaste tu contraseña?"**
+**P1-28 · ✅ HECHO 2026-10-06 (/forgot-password con flujo implícito) · F28 · No existe "¿Olvidaste tu contraseña?"**
 - Téc: enlace en `app/login/page.tsx` → `app/forgot-password/page.tsx` (`resetPasswordForEmail`, mensaje neutro). `app/auth/callback/page.tsx:118` agregar `type==='recovery'` → `/auth/setup-password`. Allowlist de redirect. Comprobar el SMTP (límites del de Supabase).
 - Verificar: llega el email y permite poner una contraseña nueva.
 
-**P1-29 · F77 · El registro self-service no tiene anti-abuso**
+**P1-29 · ✅ HECHO 2026-10-06 (honeypot + 10 negocios/hora) · F77 · El registro self-service no tiene anti-abuso**
 - Téc: honeypot en `app/register/page.tsx` y en `self-signup`; límite de N orgs por hora (o tabla por IP con RLS) con 429; throttle del WhatsApp al admin (`self-signup/index.ts:186-220`). Verificar email → D-06.
 - Verificar: una ráfaga de 20 registros recibe 429 a partir del N.
 
-**P1-30 · F67 · El login muestra "Invalid login credentials" en inglés y "Bienvenida"**
+**P1-30 · ✅ HECHO 2026-10-06 (mensajes en español) · F67 · El login muestra "Invalid login credentials" en inglés y "Bienvenida"**
 - Téc: `app/login/page.tsx:33` mapear `invalid_credentials`/`email_not_confirmed`; `:66` "Hola de nuevo"; `:69` texto neutro.
 - Verificar: con una contraseña mala sale "Email o contraseña incorrectos."
 
-**P1-31 · F74 · Un profesional sin horario ni servicios aparece "Online sí"**
+**P1-31 · ✅ HECHO 2026-10-06 (abre Horario y servicios) · F74 · Un profesional sin horario ni servicios aparece "Online sí"**
 - Téc: `app/dashboard/staff/page.tsx:137-145` al crear, abrir el editor de horario (`setScheduleStaff(created)`) con un toast que lo explique.
 - Verificar: después de crear un profesional se abre "Horario y servicios".
 
-**P1-32 · F44+M43 · Cambiar de día o vista reemplaza toda la pantalla por un spinner**
+**P1-32 · ✅ HECHO 2026-10-06 (keepPreviousData + Actualizando…) · F44+M43 · Cambiar de día o vista reemplaza toda la pantalla por un spinner**
 - Téc: `hooks/useAppointments.query.ts:~638` `placeholderData: keepPreviousData`; indicador pequeño con `isFetching`. Lo mismo en el detalle de la salida.
 - Verificar: cambiar Día→Semana deja los controles visibles.
 
-**P1-33 · G32 · Cerrar un día con turnos ya reservados no avisa y el panel deja crear turnos ese día**
+**P1-33 · ✅ HECHO 2026-10-06 (ConfirmSheet + chequeo de staff_exceptions) · G32 · Cerrar un día con turnos ya reservados no avisa y el panel deja crear turnos ese día**
 - Téc: `ExceptionsEditor.tsx:48-72` contar los turnos vivos del rango y pedir confirmación; `appointments.service.ts:391` reemplazar el TODO por un chequeo de `staff_exceptions`; `confirm()` antes de borrar el cierre.
 - Verificar: agregar un cierre con 1 turno muestra "Hay 1 turno ese día".
 

@@ -56,9 +56,19 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
 
 - **2026-10-06:** D-14 hecho. Migración 061: el `staff` tiene INSERT y UPDATE en `trip_bookings` (sin DELETE; nada borra reservas); `trips` y `trip_pickup_points` siguen solo para owner/admin. En la UI, el detalle de la salida (todo es de pasajes) habilita al staff; la lista de salidas sigue con `canManage` solo para owner/admin. Ensayado por rol en BEGIN/ROLLBACK (update de reserva sí; update de salida y delete de reserva no). El insert no se probó en vivo porque dispara el WhatsApp al pasajero. `special` sigue fuera a propósito.
 
+- **2026-10-06: P1 cerrados salvo P1-26** (iOS necesita Mac). Migraciones 061-065. Lo no obvio:
+  - **Reprogramar (062):** un trigger BEFORE resetea estado/recordatorio/confirmación al mover fecha u hora, y uno AFTER manda el intent `rescheduled`. **Las listas de columnas de un trigger ignoran cambios hechos por triggers BEFORE**: por eso el AFTER escucha `appointment_date, start_time` y compara `rescheduled_at`. `wa-send` ignora recordatorios enviados antes de `rescheduled_at`.
+  - **RLS rechaza en silencio**: un UPDATE bloqueado (licencia vencida, sin permiso) devuelve 0 filas y ningún error. Los servicios de turnos, salidas y pasajes piden `.select("id")` y fallan si no vuelve nada. Seguir ese patrón en cualquier escritura nueva.
+  - **Sesión nativa (P1-25):** en Capacitor el cliente es un singleton de supabase-js con `@capacitor/preferences`; la web sigue con cookies. Tras actualizar la APK, los usuarios nativos inician sesión una vez.
+  - **Recuperar contraseña (P1-28):** el email usa flujo implícito a propósito (se abre en otro dispositivo o fuera de la app, donde no existe el verificador PKCE). **El SMTP por defecto de Supabase solo envía a miembros del equipo del proyecto y con un límite muy bajo**: sin SMTP propio, los dueños no reciben el email.
+  - **Safe area (P1-23):** todo lee `--safe-area-inset-*` (Capacitor 8 las rellena en Android 15); el body no aplica arriba/abajo cuando están las barras del panel (`body:has([data-mobile-topbar])`).
+  - Plugins nativos nuevos: `@capacitor/share` y `@capacitor/preferences` (D-07); Android ya sincronizado.
+  - Pruebas: negocio desechable `qa-fixture-*` con dueño, empleado y admin, creado con la clave de servicio. Usarlo en vez de tocar negocios reales.
+
 ## Qué falta del plan (al 2026-10-06)
 
-- **P0 cerrados en código.** Solo quedan pruebas en teléfonos reales: medir la versión del WebView (P0-23) y probar el botón Atrás físico (P0-12). Las dos necesitan regenerar la APK (`npm run mobile:build`).
+- **P0 y P1 cerrados en código** salvo P1-26 (Mac). En teléfonos reales falta: medir la versión del WebView (P0-23), el botón Atrás físico (P0-12), la sesión nativa (P1-25), compartir lista (P1-16) y la safe area (P1-23). Hay que regenerar la APK (`npm run mobile:build` + Android Studio).
+- **SMTP propio** para que llegue "¿Olvidaste tu contraseña?" a los dueños (configurarlo en Supabase Auth).
 - **Pendiente menor pasado a P2:** reportes con la zona del negocio (P0-13, punto 7).
-- Siguen P1 a P3.
+- Siguen P2 y P3.
 - Turnos de prueba vivos a +5352564206: **T-0062** (7 oct 11:00) y **T-0063** (8 oct 15:00).
