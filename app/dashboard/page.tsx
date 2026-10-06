@@ -5,6 +5,7 @@ import {
   LicenseNotification,
   LicenseNotificationBanner,
 } from "@/components/license-notification";
+import { SetupGuide } from "@/components/onboarding/SetupGuide";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Avatar, Button, Card } from "@/components/ui";
@@ -167,7 +168,8 @@ const SHORTCUTS: readonly ShortcutCard[] = [
     Icon: AlertTriangle,
     mesh: "mesh-warn",
     href: "/dashboard/errors",
-    roles: ["admin", "owner"],
+    // Technical logs: an owner can't act on them (P2-15)
+    roles: ["admin"],
   },
 ];
 
@@ -442,6 +444,9 @@ export default function DashboardPage() {
                 <LicenseNotification licenseStatus={licenseStatus} />
               </div>
             )}
+
+          {/* Primeros pasos de un dueño nuevo */}
+          <SetupGuide />
 
           {/* Hero stat de admin (cuando es admin sin organización) */}
           {isAdminWithoutOrg && (

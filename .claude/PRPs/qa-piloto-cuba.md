@@ -345,7 +345,7 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 - Téc: toggle "Activos/Inactivos" en `customers/page.tsx:107`, "Reactivar" en `CustomerCard`, texto `:435`.
 - Verificar: un cliente desactivado se puede reactivar.
 
-**P2-15 · F30 · Una cuenta nueva no tiene guía de primeros pasos**
+**P2-15 · ✅ HECHO 2026-10-06 (tarjeta "Pon en marcha tu negocio" en Inicio para el dueño: hasta 8 pasos según módulos, foto real de cada pantalla con el botón resaltado, se marcan solos, "Ocultar" por negocio; `?create=1` también en Servicios y Profesionales; "Errores" solo admin) · F30 · Una cuenta nueva no tiene guía de primeros pasos**
 - Téc: `app/dashboard/page.tsx:173` "Errores" solo para el admin; tarjeta descartable "Pon en marcha tu negocio" con conteos head-count por módulo.
 - Verificar: un dueño nuevo ve los 3 pasos con enlaces.
 

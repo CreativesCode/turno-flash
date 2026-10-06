@@ -77,10 +77,12 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
   - **Probar offline:** abortar `supabase.co` con `page.route`; para simular token vencido, reescribir `expires_at` en la cookie `sb-*-auth-token` (base64). Se recupera solo ~13 s después de volver la red.
   - **Reserva pública (P2-10):** `useSessionState` (sessionStorage por campo, `booking:<slug>:*` / `trips:<slug>:*`) y `useStepHistory` lee el paso de `history.state` al montar.
 
+- **2026-10-06: P2-15 hecho** (guía de primeros pasos, pedida por Roberto para gente **poco ducha en tecnología y con fotos reales del sistema**). `components/onboarding/SetupGuide.tsx` + `OnboardingService.getProgress` (conteos head por módulo). Fotos en `public/images/guide/<paso>.webp` (520x933, 15-35 KB, solo se baja la del paso abierto), sacadas con Playwright a 390x700 @2x, `--lang=es-ES`, sobre un negocio desechable "Barbería La Esquina" (ya borrado), con el botón clave resaltado con un contorno naranja inyectado por CSS. **Si cambia una de esas pantallas, rehacer su foto.** Los textos nombran los botones tal cual («Crear servicio», «Guardar cambios»…): si se renombra un botón, actualizar la guía.
+
 ## Qué falta del plan (al 2026-10-06)
 
 - **P0 y P1 cerrados en código** salvo P1-26 (Mac). En teléfonos reales falta: medir la versión del WebView (P0-23), el botón Atrás físico (P0-12), la sesión nativa (P1-25), compartir lista (P1-16) y la safe area (P1-23). Hay que regenerar la APK (`npm run mobile:build` + Android Studio).
 - **SMTP propio** para que llegue "¿Olvidaste tu contraseña?" a los dueños (configurarlo en Supabase Auth).
 - **Pendiente menor pasado a P2:** reportes con la zona del negocio (P0-13, punto 7).
-- **P2 pendientes:** 02 resto (route group público sin AuthProvider), 08 (prefetch 404 por compilar en Windows), 15 (guía de primeros pasos). Después P3.
+- **P2 pendientes:** 02 resto (route group público sin AuthProvider) y 08 (prefetch 404 por compilar en Windows). Después P3.
 - Turnos de prueba vivos a +5352564206: **T-0062** (7 oct 11:00) y **T-0063** (8 oct 15:00).

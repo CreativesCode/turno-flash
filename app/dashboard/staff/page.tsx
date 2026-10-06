@@ -7,6 +7,7 @@ import { StaffFormModal } from "@/components/staff/StaffFormModal";
 import { StaffScheduleSheet } from "@/components/staff/StaffScheduleSheet";
 import { Button, ConfirmSheet } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
+import { useCreateParam } from "@/hooks/useCreateParam";
 import {
   useCreateStaffMember,
   useDeactivateStaffMember,
@@ -18,7 +19,7 @@ import {
 } from "@/hooks";
 import { StaffMember, StaffMemberFormData } from "@/types/appointments";
 import { Plus, Search, Users } from "lucide-react";
-import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
+import { FormEvent, Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 const EMPTY_FORM: StaffMemberFormData = {
   first_name: "",
@@ -35,7 +36,7 @@ const EMPTY_FORM: StaffMemberFormData = {
   sort_order: 0,
 };
 
-export default function StaffPage() {
+function StaffContent() {
   const { profile } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 300);
@@ -94,6 +95,8 @@ export default function StaffPage() {
     resetForm();
     setShowModal(true);
   }, [resetForm]);
+
+  useCreateParam(handleCreate, canManageStaff);
 
   const handleEdit = useCallback((staff: StaffMember) => {
     setFormData({
@@ -391,5 +394,24 @@ export default function StaffPage() {
         ? Dejará de aparecer para nuevos turnos.
       </ConfirmSheet>
     </ProtectedRoute>
+  );
+}
+
+export default function StaffPage() {
+  return (
+    <Suspense
+      fallback={
+        <ProtectedRoute>
+          <div className="flex min-h-screen w-full items-center justify-center bg-background">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <p className="text-sm text-foreground-muted">Cargando profesionales...</p>
+            </div>
+          </div>
+        </ProtectedRoute>
+      }
+    >
+      <StaffContent />
+    </Suspense>
   );
 }

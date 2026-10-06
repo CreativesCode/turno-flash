@@ -6,6 +6,7 @@ import { ServiceCard } from "@/components/services/ServiceCard";
 import { ServiceFormModal } from "@/components/services/ServiceFormModal";
 import { Button } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
+import { useCreateParam } from "@/hooks/useCreateParam";
 import {
   useCreateService,
   useDeactivateService,
@@ -18,7 +19,7 @@ import {
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { Service, ServiceFormData } from "@/types/appointments";
 import { Package, Plus, Search } from "lucide-react";
-import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
+import { FormEvent, Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 const EMPTY_FORM: ServiceFormData = {
   name: "",
@@ -36,7 +37,7 @@ const EMPTY_FORM: ServiceFormData = {
   sort_order: 0,
 };
 
-export default function ServicesPage() {
+function ServicesContent() {
   const { profile } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 300);
@@ -84,6 +85,8 @@ export default function ServicesPage() {
     resetForm();
     setShowModal(true);
   }, [resetForm]);
+
+  useCreateParam(handleCreate, canManageServices);
 
   const handleEdit = useCallback((service: Service) => {
     setFormData({
@@ -325,5 +328,24 @@ export default function ServicesPage() {
         }
       />
     </ProtectedRoute>
+  );
+}
+
+export default function ServicesPage() {
+  return (
+    <Suspense
+      fallback={
+        <ProtectedRoute>
+          <div className="flex min-h-screen w-full items-center justify-center bg-background">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <p className="text-sm text-foreground-muted">Cargando servicios...</p>
+            </div>
+          </div>
+        </ProtectedRoute>
+      }
+    >
+      <ServicesContent />
+    </Suspense>
   );
 }
