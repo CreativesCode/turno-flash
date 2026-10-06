@@ -93,7 +93,12 @@ function TripDetailsContent() {
   const updateNames = useUpdatePassengerNames();
   const createManual = useCreateManualBooking();
 
-  const canManage = profile?.role === "admin" || profile?.role === "owner";
+  // Every action on this page is about passengers, which staff handle too
+  // (D-14). Departures themselves are managed from the list, owner only.
+  const canManage =
+    profile?.role === "admin" ||
+    profile?.role === "owner" ||
+    profile?.role === "staff";
   const organizationId = profile?.organization_id ?? null;
 
   const liveBookings = useMemo(

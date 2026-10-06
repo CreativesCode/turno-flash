@@ -54,10 +54,11 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
 
 - **2026-10-06:** cerrados los P0 restantes. P0-24: número de soporte +5352564206 en `SUPPORT_WHATSAPP_URL` (`config/constants.ts`), botón `SupportWhatsAppLink` en bloqueo, avisos y Suscripción. P0-21: migración 058 (FKs de auditoría a `auth.users` con `ON DELETE SET NULL`) y `delete-account` reordenada; probada con un usuario desechable. P0-23: `minWebViewVersion: 111` + `public/webview-update.html` (entra en la próxima APK). Pendientes menores: 059 (las RPC de reserva prefieren la ficha activa, copiadas de la definición viva) y 060 (`my_access_revoked()`: "Tu acceso fue desactivado"). Para probar el login sin contraseñas conocidas se crean usuarios desechables con la clave de servicio de `.env.local` y se borran al final. En producción quedan 3 negocios `qa-*` de la campaña del 5-6 oct.
 
+- **2026-10-06:** D-14 hecho. Migración 061: el `staff` tiene INSERT y UPDATE en `trip_bookings` (sin DELETE; nada borra reservas); `trips` y `trip_pickup_points` siguen solo para owner/admin. En la UI, el detalle de la salida (todo es de pasajes) habilita al staff; la lista de salidas sigue con `canManage` solo para owner/admin. Ensayado por rol en BEGIN/ROLLBACK (update de reserva sí; update de salida y delete de reserva no). El insert no se probó en vivo porque dispara el WhatsApp al pasajero. `special` sigue fuera a propósito.
+
 ## Qué falta del plan (al 2026-10-06)
 
 - **P0 cerrados en código.** Solo quedan pruebas en teléfonos reales: medir la versión del WebView (P0-23) y probar el botón Atrás físico (P0-12). Las dos necesitan regenerar la APK (`npm run mobile:build`).
-- **D-14 sin implementar:** abrir al staff la escritura de `trip_bookings` (solo pasajes) y ocultarle la gestión de salidas.
 - **Pendiente menor pasado a P2:** reportes con la zona del negocio (P0-13, punto 7).
 - Siguen P1 a P3.
 - Turnos de prueba vivos a +5352564206: **T-0062** (7 oct 11:00) y **T-0063** (8 oct 15:00).
