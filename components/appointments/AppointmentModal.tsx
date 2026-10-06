@@ -8,6 +8,7 @@ import {
   StatusBadge,
   Select,
   sheetInputClasses as inputClasses,
+  SheetFooter,
 } from "@/components/ui";
 import type {
   AppointmentFormData,
@@ -295,7 +296,7 @@ export function AppointmentCreateModal({
         </Field>
 
         {/* Buttons */}
-        <div className="flex gap-2 pt-1">
+        <SheetFooter>
           <Button
             type="button"
             variant="ghost"
@@ -315,7 +316,7 @@ export function AppointmentCreateModal({
           >
             {isSubmitting ? "Guardando…" : "Crear turno"}
           </Button>
-        </div>
+        </SheetFooter>
       </form>
     </Sheet>
   );

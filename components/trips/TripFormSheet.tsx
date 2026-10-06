@@ -6,6 +6,7 @@ import {
   RichTextEditor,
   Sheet,
   sheetInputClasses as inputClasses,
+  SheetFooter,
 } from "@/components/ui";
 import type {
   NumericField,
@@ -13,6 +14,7 @@ import type {
   TripFormState,
   TripWithOccupancy,
 } from "@/types/trips";
+import { ChevronDown } from "lucide-react";
 import { PickupPointsEditor } from "./PickupPointsEditor";
 import { VehiclePhotoField } from "./VehiclePhotoField";
 import { FormEvent } from "react";
@@ -53,6 +55,17 @@ export function TripFormSheet({
   onPickupPointsChange,
 }: TripFormSheetProps) {
   const isEdit = !!editing;
+  // From the saved trip, not the form: typing must not collapse the section
+  const hasOptionalData = Boolean(
+    editing &&
+      (editing.driver_name ||
+        editing.driver_phone ||
+        editing.vehicle_description ||
+        editing.vehicle_photo_path ||
+        editing.booking_opens_at ||
+        editing.booking_closes_at ||
+        editing.internal_notes)
+  );
 
   return (
     <Sheet
@@ -288,94 +301,106 @@ export function TripFormSheet({
           </label>
         </div>
 
-        <div className="rounded-lg border border-border bg-surface-2 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
-            Chofer y vehículo (opcional)
-          </p>
-          <p className="mt-0.5 text-[11px] text-foreground-subtle">
-            Se suele avisar el día antes del viaje. Puedes dejarlo vacío y
-            completarlo después.
-          </p>
-          <div className="mt-2 grid gap-3 sm:grid-cols-3">
-            <Field label="Chofer">
-              <input
-                type="text"
-                value={formData.driver_name}
-                onChange={(e) => onChange({ driver_name: e.target.value })}
+        {/* Optional, so the form stays short; open when editing a trip that uses them */}
+        <details
+          open={hasOptionalData}
+          className="group rounded-lg border border-border"
+        >
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-semibold text-foreground">
+            Más opciones: chofer, cuándo reservar, notas
+            <ChevronDown className="h-4 w-4 text-foreground-muted transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="flex flex-col gap-4 border-t border-border p-3">
+            <div className="rounded-lg border border-border bg-surface-2 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+                Chofer y vehículo (opcional)
+              </p>
+              <p className="mt-0.5 text-[11px] text-foreground-subtle">
+                Se suele avisar el día antes del viaje. Puedes dejarlo vacío y
+                completarlo después.
+              </p>
+              <div className="mt-2 grid gap-3 sm:grid-cols-3">
+                <Field label="Chofer">
+                  <input
+                    type="text"
+                    value={formData.driver_name}
+                    onChange={(e) => onChange({ driver_name: e.target.value })}
+                    className={inputClasses}
+                    placeholder="Juan Pérez"
+                  />
+                </Field>
+                <Field label="Teléfono">
+                  <input
+                    type="tel"
+                    value={formData.driver_phone}
+                    onChange={(e) => onChange({ driver_phone: e.target.value })}
+                    className={inputClasses}
+                    placeholder="+53 5555 5555"
+                  />
+                </Field>
+                <Field label="Vehículo">
+                  <input
+                    type="text"
+                    value={formData.vehicle_description}
+                    onChange={(e) =>
+                      onChange({ vehicle_description: e.target.value })
+                    }
+                    className={inputClasses}
+                    placeholder="Ómnibus 2079"
+                  />
+                </Field>
+              </div>
+              <div className="mt-3">
+                <VehiclePhotoField
+                  value={formData.vehicle_photo_path}
+                  organizationId={organizationId}
+                  onChange={(vehicle_photo_path) => onChange({ vehicle_photo_path })}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-surface-2 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+                Cuándo se puede reservar (opcional)
+              </p>
+              <p className="mt-0.5 text-[11px] text-foreground-subtle">
+                Para abrir las reservas a partir de un día y hora concretos. Vacío = se
+                puede reservar desde que publicas y hasta que sale.
+              </p>
+              <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                <Field label="Abren">
+                  <input
+                    type="datetime-local"
+                    value={formData.booking_opens_at}
+                    onChange={(e) => onChange({ booking_opens_at: e.target.value })}
+                    className={inputClasses}
+                  />
+                </Field>
+                <Field label="Cierran">
+                  <input
+                    type="datetime-local"
+                    value={formData.booking_closes_at}
+                    onChange={(e) => onChange({ booking_closes_at: e.target.value })}
+                    className={inputClasses}
+                  />
+                </Field>
+              </div>
+            </div>
+
+            <Field label="Notas internas" hint="Solo las ves tú y tu equipo.">
+              <textarea
+                rows={2}
+                value={formData.internal_notes}
+                onChange={(e) => onChange({ internal_notes: e.target.value })}
                 className={inputClasses}
-                placeholder="Juan Pérez"
-              />
-            </Field>
-            <Field label="Teléfono">
-              <input
-                type="tel"
-                value={formData.driver_phone}
-                onChange={(e) => onChange({ driver_phone: e.target.value })}
-                className={inputClasses}
-                placeholder="+53 5555 5555"
-              />
-            </Field>
-            <Field label="Vehículo">
-              <input
-                type="text"
-                value={formData.vehicle_description}
-                onChange={(e) =>
-                  onChange({ vehicle_description: e.target.value })
-                }
-                className={inputClasses}
-                placeholder="Ómnibus 2079"
+                placeholder="Chofer, vehículo, recordatorios…"
               />
             </Field>
           </div>
-          <div className="mt-3">
-            <VehiclePhotoField
-              value={formData.vehicle_photo_path}
-              organizationId={organizationId}
-              onChange={(vehicle_photo_path) => onChange({ vehicle_photo_path })}
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
+        </details>
 
-        <div className="rounded-lg border border-border bg-surface-2 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
-            Cuándo se puede reservar (opcional)
-          </p>
-          <p className="mt-0.5 text-[11px] text-foreground-subtle">
-            Para abrir las reservas a partir de un día y hora concretos. Vacío = se
-            puede reservar desde que publicas y hasta que sale.
-          </p>
-          <div className="mt-2 grid gap-3 sm:grid-cols-2">
-            <Field label="Abren">
-              <input
-                type="datetime-local"
-                value={formData.booking_opens_at}
-                onChange={(e) => onChange({ booking_opens_at: e.target.value })}
-                className={inputClasses}
-              />
-            </Field>
-            <Field label="Cierran">
-              <input
-                type="datetime-local"
-                value={formData.booking_closes_at}
-                onChange={(e) => onChange({ booking_closes_at: e.target.value })}
-                className={inputClasses}
-              />
-            </Field>
-          </div>
-        </div>
-
-        <Field label="Notas internas" hint="Solo las ves tú y tu equipo.">
-          <textarea
-            rows={2}
-            value={formData.internal_notes}
-            onChange={(e) => onChange({ internal_notes: e.target.value })}
-            className={inputClasses}
-            placeholder="Chofer, vehículo, recordatorios…"
-          />
-        </Field>
-
-        <div className="flex gap-2 pt-2">
+        <SheetFooter>
           <Button
             type="button"
             variant="ghost"
@@ -397,7 +422,7 @@ export function TripFormSheet({
                 ? "Guardar cambios"
                 : "Crear salida"}
           </Button>
-        </div>
+        </SheetFooter>
       </form>
     </Sheet>
   );

@@ -41,7 +41,13 @@ export function Sheet({
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    // The page behind must not scroll while the sheet is open
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -51,14 +57,14 @@ export function Sheet({
       <button
         type="button"
         aria-label="Cerrar"
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 touch-none bg-black/50"
         onClick={onClose}
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`relative max-h-[85vh] w-full overflow-hidden rounded-t-3xl bg-surface shadow-xl sm:max-h-[90vh] sm:rounded-2xl sm:border sm:border-border ${maxWidthClass}`}
+        className={`relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-surface shadow-xl sm:max-h-[90dvh] sm:rounded-2xl sm:border sm:border-border ${maxWidthClass}`}
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         {/* Drag handle (mobile only) */}
@@ -90,10 +96,24 @@ export function Sheet({
         </div>
 
         {/* Body */}
-        <div className="scrollbar-discreet max-h-[calc(85vh-3.5rem)] overflow-y-auto px-5 pb-5 sm:max-h-[calc(90vh-4.5rem)]">
+        {/* dvh shrinks with the on-screen keyboard, so the body (and its
+            sticky SheetFooter) stays above it */}
+        <div className="scrollbar-discreet min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5">
           {children}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Action row pinned to the bottom of the Sheet body, so the submit button
+ * stays visible on long forms and above the keyboard.
+ */
+export function SheetFooter({ children }: { children: ReactNode }) {
+  return (
+    <div className="sticky -bottom-5 -mx-5 -mb-5 flex gap-2 border-t border-border bg-surface px-5 py-3">
+      {children}
     </div>
   );
 }

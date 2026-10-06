@@ -21,7 +21,13 @@ export {
   RichTextEditor,
   type RichTextEditorProps,
 } from "./rich-text-editor";
-export { Field, Sheet, sheetInputClasses, type SheetProps } from "./sheet";
+export {
+  Field,
+  Sheet,
+  SheetFooter,
+  sheetInputClasses,
+  type SheetProps,
+} from "./sheet";
 export { Select, type SelectProps } from "./select";
 export { CalendarSkeleton, ModalSkeleton } from "./skeleton";
 export { StatusBadge, type StatusBadgeProps } from "./status-badge";

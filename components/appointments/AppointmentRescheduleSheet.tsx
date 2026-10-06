@@ -6,6 +6,7 @@ import {
   Field,
   Sheet,
   sheetInputClasses as inputClasses,
+  SheetFooter,
 } from "@/components/ui";
 import type {
   AppointmentWithDetails,
@@ -122,7 +123,7 @@ export function AppointmentRescheduleSheet({
           del nuevo horario y le pedimos que confirme de nuevo.
         </p>
 
-        <div className="flex gap-2 pt-1">
+        <SheetFooter>
           <Button
             type="button"
             variant="ghost"
@@ -140,7 +141,7 @@ export function AppointmentRescheduleSheet({
           >
             {isSubmitting ? "Guardando…" : "Mover turno"}
           </Button>
-        </div>
+        </SheetFooter>
       </form>
     </Sheet>
   );

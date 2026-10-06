@@ -8,6 +8,7 @@ import {
   Sheet,
   Select,
   sheetInputClasses as inputClasses,
+  SheetFooter,
 } from "@/components/ui";
 import {
   seatPrice,
@@ -280,7 +281,7 @@ export function ManualBookingSheet({
           </Field>
         </div>
 
-        <div className="flex gap-2 pt-2">
+        <SheetFooter>
           <Button
             type="button"
             variant="ghost"
@@ -302,7 +303,7 @@ export function ManualBookingSheet({
                 ? "Sin asientos libres"
                 : "Cargar reserva"}
           </Button>
-        </div>
+        </SheetFooter>
       </form>
     </Sheet>
   );
