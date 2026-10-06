@@ -197,10 +197,8 @@ export class AppointmentService {
         }
       }
 
-      // Determine final status based on service requirements
-      const finalStatus = service.requires_approval
-        ? APPOINTMENT_STATUS.PENDING
-        : data.status || APPOINTMENT_STATUS.CONFIRMED;
+      // Approval is for web requests; what the business loads is already accepted
+      const finalStatus = data.status || APPOINTMENT_STATUS.CONFIRMED;
 
       // The business timezone, not the browser's: reminders are computed with it
       const { data: org } = await supabase

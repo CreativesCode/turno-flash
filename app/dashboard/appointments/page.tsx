@@ -280,18 +280,13 @@ function AppointmentsContent() {
 
   const handleServiceChange = useCallback(
     (serviceId: string) => {
-      const selectedService = services.find((s) => s.id === serviceId);
-      const newStatus = selectedService?.requires_approval
-        ? APPOINTMENT_STATUS.PENDING
-        : APPOINTMENT_STATUS.CONFIRMED;
       setFormData((prev) => ({
         ...prev,
         service_id: serviceId,
         end_time: calculateEndTime(prev.start_time, serviceId),
-        status: newStatus,
       }));
     },
-    [services, calculateEndTime]
+    [calculateEndTime]
   );
 
   const handleStartTimeChange = useCallback(

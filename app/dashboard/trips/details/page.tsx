@@ -241,7 +241,6 @@ function TripDetailsContent() {
           depositPerSeat: point
             ? point.deposit_per_seat
             : trip.deposit_per_seat,
-          requiresApproval: trip.requires_approval,
         });
         toast.success("Reserva cargada");
         setShowManual(false);

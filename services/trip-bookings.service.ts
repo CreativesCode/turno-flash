@@ -158,7 +158,6 @@ export class TripBookingService {
     /** Already resolved by the caller from the chosen stop, or the trip. */
     pricePerSeat: number;
     depositPerSeat: number;
-    requiresApproval: boolean;
   }): Promise<{ success: boolean; error?: string }> {
     const { organizationId, tripId, form } = params;
     const seats = form.seats === "" ? 0 : form.seats;
@@ -218,7 +217,8 @@ export class TripBookingService {
         passenger_names: form.passenger_names
           .map((name) => name.trim())
           .filter(Boolean),
-        status: params.requiresApproval ? "pending" : "confirmed",
+        // Loaded by the business itself: there is nothing left to approve
+        status: "confirmed",
         source: "admin",
         trip_type: form.trip_type,
         price_total: params.pricePerSeat * seats,

@@ -79,7 +79,6 @@ export function AppointmentCreateModal({
   isCreatingCustomer,
 }: AppointmentCreateModalProps) {
   const { format: money } = useMoney();
-  const selectedService = services.find((s) => s.id === formData.service_id);
 
   return (
     <Sheet open={open} onClose={onClose} title="Nuevo turno">
@@ -249,12 +248,6 @@ export function AppointmentCreateModal({
           {services.length === 0 && (
             <p className="mt-1.5 text-xs text-warning-600 dark:text-warning-400">
               No hay servicios. Crea uno en la sección de servicios.
-            </p>
-          )}
-          {selectedService?.requires_approval && (
-            <p className="mt-2 rounded-md bg-warning-50 px-2.5 py-1.5 text-xs text-warning-700 dark:bg-warning-900/20 dark:text-warning-400">
-              ⚠️ Este servicio requiere aprobación. El turno se creará como
-              &quot;Pendiente&quot;.
             </p>
           )}
         </Field>

@@ -131,7 +131,6 @@ export function useCreateManualBooking() {
       form: ManualBookingFormState;
       pricePerSeat: number;
       depositPerSeat: number;
-      requiresApproval: boolean;
     }) => {
       const result = await TripBookingService.createManual(params);
       if (!result.success) {

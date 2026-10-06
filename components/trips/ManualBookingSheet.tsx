@@ -115,7 +115,7 @@ export function ManualBookingSheet({
               value={form.phone}
               onChange={(e) => onChange({ phone: e.target.value })}
               className={inputClasses}
-              placeholder="+34600111222"
+              placeholder="+53 5 123 4567"
             />
           </Field>
 
