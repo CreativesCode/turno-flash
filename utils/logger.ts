@@ -11,6 +11,11 @@ import { createClient } from "@/utils/supabase/client";
  *   import { Logger } from "@/utils/logger";
  *   void Logger.error("Failed to load customers", err, { action: "loadCustomers" });
  */
+// Same message within this window is logged once: a failing query retried in
+// a loop must not flood error_logs (P1-27)
+const DEDUP_MS = 60_000;
+const lastLogged = new Map<string, number>();
+
 export class Logger {
   /**
    * Registra un error en `error_logs`. Fire-and-forget: nunca lanza.
@@ -31,13 +36,22 @@ export class Logger {
 
     console.error(`[ERROR] ${message}`, err ?? error);
 
+    // Offline the insert can't arrive, and usually the error is the network
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    const now = Date.now();
+    if (now - (lastLogged.get(message) ?? 0) < DEDUP_MS) return;
+    lastLogged.set(message, now);
+
     try {
       const supabase = createClient();
 
-      // Enriquecer con user + organization (mismo patrón que ErrorBoundary)
+      // getSession reads the local session; getUser was one more request
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
+      // Only signed-in users can write error_logs (065)
+      if (!user) return;
 
       let organizationId: string | null = null;
       if (user) {

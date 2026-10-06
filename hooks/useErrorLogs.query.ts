@@ -75,7 +75,7 @@ export function useErrorLogsQuery(params: ErrorLogsQueryParams = {}) {
 /**
  * Hook para obtener estadísticas de errores
  */
-export function useErrorStatsQuery(days: number = 7) {
+export function useErrorStatsQuery(days: number = 7, enabled = true) {
   return useQuery({
     queryKey: ["error_stats", days],
     queryFn: async () => {
@@ -102,6 +102,7 @@ export function useErrorStatsQuery(days: number = 7) {
       );
     },
     staleTime: 60000, // 1 minuto
+    enabled,
   });
 }
 

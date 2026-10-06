@@ -1,6 +1,5 @@
 "use client";
 
-import { Logger } from "@/utils/logger";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
 
@@ -29,12 +28,8 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             // Configuración para mutaciones
             retry: 0, // No reintentar mutaciones automáticamente
             networkMode: "always", // Siempre intentar, incluso offline
-            // Callback global para errores de mutación
-            onError: (error) => {
-              void Logger.error("React Query mutation error", error, {
-                context: "QueryProvider.mutations.onError",
-              });
-            },
+            // No global onError: the services already log their failures,
+            // and a second generic row per error hid the real message
           },
         },
       })

@@ -232,7 +232,7 @@ export default function DashboardPage() {
     profile?.role === "admin" && !profile?.organization_id;
 
   // Stats de errores para hero de admin (solo cuando admin sin org)
-  const { data: errorStats } = useErrorStatsQuery(7);
+  const { data: errorStats } = useErrorStatsQuery(7, isAdminWithoutOrg);
 
   // Cargar estado de licencia y nombre de organización al montar el componente
   useEffect(() => {
