@@ -10,7 +10,8 @@ import {
 } from "@/components/booking/BookingSteps";
 import { Button, Card, Logo } from "@/components/ui";
 import { guessPhoneCountry } from "@/config/phone-countries";
-import { useToast } from "@/hooks";
+// Not the "@/hooks" barrel: it drags the whole dashboard into the public page
+import { useToast } from "@/hooks/useToast";
 import {
   publicBookingKeys,
   useCreatePublicBooking,

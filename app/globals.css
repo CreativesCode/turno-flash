@@ -145,7 +145,9 @@
 
   /* Fonts */
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* System monospace: a second web font was preloaded on every page for a
+     few code snippets (P2-02) */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .dark {

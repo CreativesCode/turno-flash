@@ -15,7 +15,8 @@ import {
 } from "@/components/public-trips/TripsSteps";
 import { Button, Card, Logo, RichText } from "@/components/ui";
 import { guessPhoneCountry } from "@/config/phone-countries";
-import { useToast } from "@/hooks";
+// Not the "@/hooks" barrel: it drags the whole dashboard into the public page
+import { useToast } from "@/hooks/useToast";
 import {
   useCreatePublicTripBooking,
   usePublicTripsInfo,
@@ -28,7 +29,6 @@ import type {
   PublicTripBookingConfirmation,
 } from "@/types/public-trips";
 import { fmtMoney } from "@/utils/format";
-import { createClient } from "@/utils/supabase/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -55,10 +55,10 @@ const PREVIOUS_STEP: Partial<Record<Step, Step>> = {
 };
 
 /** Public bucket: the URL needs no session, same as the dashboard builds it. */
+/** Public bucket URL built as a string: no Supabase client on this page. */
 function vehiclePhotoUrl(path: string | null): string | null {
   if (!path) return null;
-  return createClient().storage.from("trip-photos").getPublicUrl(path).data
-    .publicUrl;
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/trip-photos/${path}`;
 }
 
 /**

@@ -85,6 +85,7 @@ export function TripListStep({
               <img
                 src={photo}
                 alt={trip.vehicle_description ?? "Foto del vehículo"}
+                loading="lazy"
                 className="h-32 w-full object-cover"
               />
             )}

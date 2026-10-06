@@ -5,17 +5,12 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { QueryProvider } from "@/contexts/query-client-provider";
 import { getAbsoluteUrl, getSiteUrl } from "@/utils/metadata";
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -124,7 +119,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${inter.variable} antialiased`}
       >
         <ErrorBoundary>
           <QueryProvider>
