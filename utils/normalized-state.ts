@@ -65,6 +65,9 @@ export function normalizeAppointments(
       id: aptWithDetails.id,
       organization_id: aptWithDetails.organization_id,
       appointment_number: aptWithDetails.appointment_number,
+      // Not in appointments_with_details (the view froze a.* before 050); the
+      // dashboard never uses it
+      booking_request_key: null,
       customer_id: aptWithDetails.customer_id,
       service_id: aptWithDetails.service_id,
       staff_id: aptWithDetails.staff_id,

@@ -85,3 +85,16 @@ igualdad exacta con la clave del entorno. Un control que solo mire el JWT rompe 
 funciones (wa-inbound → wa-send, send-reminders → wa-send). Pasó el 2026-10-06 durante ~3 h.
 **Respuestas desde `@lid`:** el alias se traduce con `message_id` antiguos que lo contienen (de antes del
 500 de OpenWA, junio). Un cliente cuyo alias nunca apareció en un `message_id` no se puede ubicar.
+
+**Formato de los mensajes al cliente (2026-10-06, pedido por Roberto):** todos pasan por
+`frameCustomerMessage` (`supabase/functions/_shared/wa-message.ts`). Arriba va el nombre del negocio y
+abajo la nota "_Mensaje automático de Turno Flash_", con lo que ese número acepta (OK/CANCELAR, 1-5 o
+nada). La línea **"💬 ¿Dudas? Escribe a {contact_name} al {whatsapp_phone}" solo va donde el cliente
+puede necesitar a una persona**: confirm, clarify, clarify_which, cancel_ack, waitlist_slot, trip_booked,
+las dos cancelaciones de viaje y wa-campaign. No va en recordatorios, agradecimientos, valoraciones ni
+avisos al negocio. La política vive en `CUSTOMER_FRAME` (wa-send) y `PASSENGER_FRAME` (wa-trip-send).
+**Why:** el número que envía es automático y solo entiende palabras clave. Si el cliente le escribe
+cualquier otra cosa, no le llega a nadie, y si se acostumbra a escribir ahí, se pierden mensajes.
+**How to apply:** un mensaje nuevo al cliente debe pasar por el marco y decidir `contact`. Nunca escribir
+"responde a este mensaje" ni "escríbenos" sin dar el contacto. El contacto (`organizations.contact_name` y
+`whatsapp_phone`, migración 057) lo edita el dueño en Ajustes › Contacto para tus clientes.

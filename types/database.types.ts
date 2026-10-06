@@ -175,6 +175,7 @@ export type Database = {
           actual_start_time: string | null
           appointment_date: string
           appointment_number: string | null
+          booking_request_key: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -208,6 +209,7 @@ export type Database = {
           actual_start_time?: string | null
           appointment_date: string
           appointment_number?: string | null
+          booking_request_key?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -243,6 +245,7 @@ export type Database = {
           actual_start_time?: string | null
           appointment_date?: string
           appointment_number?: string | null
+          booking_request_key?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -724,6 +727,7 @@ export type Database = {
       organizations: {
         Row: {
           appointments_module_enabled: boolean
+          contact_name: string | null
           created_at: string
           currency: string
           id: string
@@ -742,6 +746,7 @@ export type Database = {
         }
         Insert: {
           appointments_module_enabled?: boolean
+          contact_name?: string | null
           created_at?: string
           currency?: string
           id?: string
@@ -760,6 +765,7 @@ export type Database = {
         }
         Update: {
           appointments_module_enabled?: boolean
+          contact_name?: string | null
           created_at?: string
           currency?: string
           id?: string
@@ -1266,6 +1272,7 @@ export type Database = {
         Row: {
           amount_paid: number
           booking_number: string | null
+          booking_request_key: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -1296,6 +1303,7 @@ export type Database = {
         Insert: {
           amount_paid?: number
           booking_number?: string | null
+          booking_request_key?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1326,6 +1334,7 @@ export type Database = {
         Update: {
           amount_paid?: number
           booking_number?: string | null
+          booking_request_key?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1922,6 +1931,7 @@ export type Database = {
       organizations_with_license_status: {
         Row: {
           appointments_module_enabled: boolean | null
+          contact_name: string | null
           created_at: string | null
           currency: string | null
           days_remaining: number | null
@@ -1959,6 +1969,7 @@ export type Database = {
         }
         Returns: Json
       }
+      auth_user_org_id: { Args: never; Returns: string }
       auth_user_role: { Args: never; Returns: string }
       booking_min_to_time: { Args: { p_min: number }; Returns: string }
       booking_phone_key: {
@@ -2004,6 +2015,22 @@ export type Database = {
         }
         Returns: Json
       }
+      create_public_booking_once: {
+        Args: {
+          p_date: string
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_notes: string
+          p_org_id: string
+          p_phone: string
+          p_request_key: string
+          p_service_id: string
+          p_staff_id: string
+          p_start: string
+        }
+        Returns: Json
+      }
       create_trip_booking: {
         Args: {
           p_email: string
@@ -2014,6 +2041,23 @@ export type Database = {
           p_passenger_names: string[]
           p_phone: string
           p_pickup_point_id?: string
+          p_round_trip?: boolean
+          p_seats: number
+          p_trip_id: string
+        }
+        Returns: Json
+      }
+      create_trip_booking_once: {
+        Args: {
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_notes: string
+          p_org_id: string
+          p_passenger_names: string[]
+          p_phone: string
+          p_pickup_point_id?: string
+          p_request_key: string
           p_round_trip?: boolean
           p_seats: number
           p_trip_id: string
@@ -2061,6 +2105,7 @@ export type Database = {
         Returns: undefined
       }
       is_admin_or_owner_check: { Args: never; Returns: boolean }
+      is_platform_admin: { Args: never; Returns: boolean }
       is_staff_slot_free: {
         Args: {
           p_date: string
@@ -2230,6 +2275,7 @@ export type Database = {
         | "trip_notify_business"
         | "trip_booking_cancelled"
         | "trip_departure_cancelled"
+        | "clarify_which"
       wa_outbound_status: "pending" | "sent" | "delivered" | "read" | "failed"
       waitlist_status:
         | "active"
@@ -2429,6 +2475,7 @@ export const Constants = {
         "trip_notify_business",
         "trip_booking_cancelled",
         "trip_departure_cancelled",
+        "clarify_which",
       ],
       wa_outbound_status: ["pending", "sent", "delivered", "read", "failed"],
       waitlist_status: ["active", "notified", "booked", "expired", "cancelled"],

@@ -20,6 +20,7 @@ import {
   type OpenWaResponse,
   type SendTextData,
 } from "../_shared/openwa.ts";
+import { frameCustomerMessage } from "../_shared/wa-message.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -123,9 +124,9 @@ Deno.serve(async (req) => {
 
     const { data: orgRow } = await supabase
       .from("organizations")
-      .select("name")
+      .select("name, contact_name, whatsapp_phone")
       .eq("id", orgId)
-      .single<{ name: string }>();
+      .single<{ name: string; contact_name: string | null; whatsapp_phone: string | null }>();
     const orgName = orgRow?.name ?? "nuestro negocio";
 
     // 4. Cargar clientes (solo de la organización del usuario)
@@ -161,7 +162,17 @@ Deno.serve(async (req) => {
         continue;
       }
       const chatId = phoneToChatId(phone, customer.phone_country_code ?? "");
-      const text = buildMessage(customer.first_name, orgName, message);
+      // Customers answer campaigns: they must reach the business, not the
+      // automated number that sent it
+      const text = frameCustomerMessage(
+        {
+          name: orgName,
+          contactName: orgRow?.contact_name ?? null,
+          phone: orgRow?.whatsapp_phone ?? null,
+        },
+        buildMessage(customer.first_name, orgName, message),
+        { contact: true, reply: "none" }
+      );
 
       const result: OpenWaResponse<SendTextData> = await sendText({
         sessionId: settings.openwa_session_id,
@@ -232,7 +243,7 @@ function buildMessage(
     ``,
     `Hace tiempo que no te vemos por *${orgName}* y te extrañamos 💈`,
     ``,
-    `¿Te gustaría agendar un turno? Responde a este mensaje y te reservamos un lugar.`,
+    `¿Te gustaría agendar un turno? Escríbele al negocio y te reservamos un lugar.`,
   ].join("\n");
 }
 

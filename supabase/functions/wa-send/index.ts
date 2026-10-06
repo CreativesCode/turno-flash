@@ -26,6 +26,30 @@ import {
   type SendTextData,
 } from "../_shared/openwa.ts";
 import { isServiceRole } from "../_shared/auth.ts";
+import {
+  type FrameOptions,
+  frameCustomerMessage,
+} from "../_shared/wa-message.ts";
+
+// Which customer messages carry the business contact ("¿Dudas? Escribe a…").
+// Only where the customer is likely to need a person: the first message (so
+// they learn the right number from the start), when we did not understand
+// them, after a cancellation (to get another time) and for a freed slot.
+// Reminders, thanks and ratings stay short. notify_business_* are not framed.
+const CUSTOMER_FRAME: Partial<Record<Intent, FrameOptions>> = {
+  confirm: { contact: true, reply: "keywords" },
+  approved: { contact: false, reply: "keywords" },
+  reminder_24h: { contact: false, reply: "keywords" },
+  reminder_1h: { contact: false, reply: "keywords" },
+  reminder_manual: { contact: false, reply: "keywords" },
+  clarify: { contact: true, reply: "keywords" },
+  clarify_which: { contact: true, reply: "keywords" },
+  cancel_ack: { contact: true, reply: "none" },
+  confirm_ack: { contact: false, reply: "none" },
+  rating_request: { contact: false, reply: "rating" },
+  rating_ack: { contact: false, reply: "none" },
+  waitlist_slot: { contact: true, reply: "none" },
+};
 
 type Intent =
   | "confirm"
@@ -231,7 +255,25 @@ Deno.serve(async (req) => {
       intent === "clarify_which"
         ? await openAppointmentsList(supabase, appt.customer_id, appt.organization_id)
         : "";
-    const text = buildMessage(appt, intent, waitlistCustomerName, openList);
+    const body = buildMessage(appt, intent, waitlistCustomerName, openList);
+    const frame = CUSTOMER_FRAME[intent];
+    let text = body;
+    if (frame) {
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("name, contact_name, whatsapp_phone")
+        .eq("id", appt.organization_id)
+        .single<{ name: string; contact_name: string | null; whatsapp_phone: string | null }>();
+      text = frameCustomerMessage(
+        {
+          name: org?.name ?? appt.organization_name,
+          contactName: org?.contact_name ?? null,
+          phone: org?.whatsapp_phone ?? null,
+        },
+        body,
+        frame
+      );
+    }
 
     // 5. Enviar
     console.log("[wa-send] sending", {
@@ -489,7 +531,7 @@ function buildMessage(
           `💇 ${servicio}${staff}`,
           `🎫 N° ${numero}`,
           ``,
-          `El negocio revisará tu solicitud y te contactará para confirmarla.`,
+          `El negocio revisará tu solicitud y te avisaremos por aquí cuando la confirme.`,
           `❌ Si ya no puedes ir, responde *CANCELAR*.`,
         ].join("\n");
       }
@@ -587,7 +629,7 @@ function buildMessage(
       ].join("\n");
 
     case "cancel_ack":
-      return `Tu turno N° ${numero} fue cancelado. Si quieres reagendar, escríbenos cuando quieras 🙌`;
+      return `Tu turno N° ${numero} fue cancelado. Si quieres otro día u hora, avísale al negocio 🙌`;
 
     case "confirm_ack":
       if (appt.status === "pending") {
@@ -620,7 +662,7 @@ function buildMessage(
         `📅 ${fechaLarga}`,
         `⏰ ${hora}`,
         ``,
-        `Estabas en la lista de espera para este servicio. Si te interesa, responde a este mensaje o contáctanos cuanto antes: el lugar se asigna por orden de llegada.`,
+        `Estabas en la lista de espera para este servicio. Si te interesa, avísale al negocio cuanto antes: el lugar se asigna por orden de llegada.`,
       ].join("\n");
     }
 

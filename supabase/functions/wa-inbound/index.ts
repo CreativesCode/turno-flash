@@ -9,7 +9,6 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  checkNumber,
   chatIdToPhone,
   sendText,
   verifyWebhookSignature,
@@ -227,26 +226,6 @@ async function handleMessageReceived(
   // required: OpenWA can answer with an error after delivering, leaving it null.
   const from = data.from ?? "";
   const chatIds = await resolveChatIds(supabase, settings.organization_id, from);
-
-  // TEMPORARY (056): what OpenWA's contact check returns for recent chats, to
-  // learn how to match an @lid reply. Removed with the fix.
-  if (from.endsWith("@lid")) {
-    const since = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: recent } = await supabase
-      .from("wa_outbound_messages")
-      .select("chat_id")
-      .eq("organization_id", settings.organization_id)
-      .gte("sent_at", since)
-      .limit(50);
-    const candidates = [...new Set((recent ?? []).map((r: { chat_id: string }) => r.chat_id))].slice(0, 8) as string[];
-    const checks = await Promise.all(
-      candidates.map(async (chatId) => ({
-        chatId,
-        result: await checkNumber(env.sessionId, chatId).catch((e) => String(e)),
-      }))
-    );
-    await supabase.from("wa_inbound_debug").insert({ payload: env, checks, });
-  }
 
   console.log(
     `[wa-inbound] resolving outbound for from="${from}" (chatIds=${chatIds.join(",") || "none"})`

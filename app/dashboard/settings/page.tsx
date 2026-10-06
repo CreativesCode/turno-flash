@@ -6,6 +6,7 @@ import { BookingPageDetails } from "@/components/settings/BookingPageDetails";
 import { TripBookingDetails } from "@/components/settings/TripBookingDetails";
 import { ExceptionsEditor } from "@/components/staff/ExceptionsEditor";
 import { CurrencyCard } from "@/components/organizations/CurrencyCard";
+import { ContactCard } from "@/components/organizations/ContactCard";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
@@ -192,6 +193,9 @@ export default function SettingsPage() {
                   currency={modules.currency}
                 />
               )}
+
+              {/* A quién escriben los clientes (mensajes de WhatsApp) */}
+              {organizationId && <ContactCard organizationId={organizationId} />}
 
               {/* Cierres del negocio */}
               {modules.appointments && (

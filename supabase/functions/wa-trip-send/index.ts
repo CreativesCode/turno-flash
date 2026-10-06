@@ -19,6 +19,22 @@ import {
   type SendTextData,
 } from "../_shared/openwa.ts";
 import { isServiceRole } from "../_shared/auth.ts";
+import {
+  type BusinessContact,
+  type FrameOptions,
+  frameCustomerMessage,
+} from "../_shared/wa-message.ts";
+
+// Passenger messages that carry the business contact: the booking (deposit
+// by transfer raises questions) and both cancellations (refunds). Approval and
+// deposit receipts stay short. trip_notify_business is not framed.
+const PASSENGER_FRAME: Partial<Record<Intent, FrameOptions>> = {
+  trip_booked: { contact: true, reply: "none" },
+  trip_approved: { contact: false, reply: "none" },
+  trip_deposit_paid: { contact: false, reply: "none" },
+  trip_booking_cancelled: { contact: true, reply: "none" },
+  trip_departure_cancelled: { contact: true, reply: "none" },
+};
 
 type Intent =
   | "trip_booked"
@@ -186,12 +202,13 @@ Deno.serve(async (req) => {
 
     const { data: org } = await supabase
       .from("organizations")
-      .select("name, currency, whatsapp_phone")
+      .select("name, currency, whatsapp_phone, contact_name")
       .eq("id", booking.organization_id)
       .single<{
         name: string;
         currency: string | null;
         whatsapp_phone: string | null;
+        contact_name: string | null;
       }>();
 
     // Every intent is sent once per booking: a retry of the trigger, or two
@@ -233,13 +250,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    const text = buildMessage(
+    const body = buildMessage(
       booking,
       intent,
-      org?.name ?? "",
       org?.currency ?? "USD",
       settings.deposit_instructions
     );
+    const frame = PASSENGER_FRAME[intent];
+    const business: BusinessContact = {
+      name: org?.name ?? "",
+      contactName: org?.contact_name ?? null,
+      phone: org?.whatsapp_phone ?? null,
+    };
+    const text = frame ? frameCustomerMessage(business, body, frame) : body;
 
     const result: OpenWaResponse<SendTextData> = await sendText({
       sessionId: settings.openwa_session_id,
@@ -280,7 +303,6 @@ Deno.serve(async (req) => {
 function buildMessage(
   booking: BookingRow,
   intent: Intent,
-  orgName: string,
   currency: string,
   depositInstructions: string | null
 ): string {
@@ -305,9 +327,7 @@ function buildMessage(
   const deposit = booking.deposit_amount ?? 0;
   const refundNote =
     (booking.amount_paid ?? 0) > 0
-      ? `Por los *${money(booking.amount_paid, currency)}* que ya pagaste, contáctanos para coordinar la devolución.
-
-`
+      ? `Por los *${money(booking.amount_paid, currency)}* que ya pagaste, escríbele al negocio para coordinar la devolución.`
       : "";
 
   const header = `*${trip?.title ?? "Tu viaje"}*\n🗓️ ${when}\n💺 ${seats}${roundTrip}${pickup}${ref}`;
@@ -341,16 +361,15 @@ function buildMessage(
         booking.status === "pending"
           ? "\n\nTe confirmamos apenas la revisemos."
           : "";
-      return `${opening}\n\n${header}\n\nTotal: *${money(total, currency)}*${depositBlock}${approvalNote}\n\n${orgName}`;
+      return `${opening}\n\n${header}\n\nTotal: *${money(total, currency)}*${depositBlock}${approvalNote}`;
     }
 
     case "trip_approved":
       return (
         `Hola ${name}! ✅ Tu reserva quedó *confirmada*.\n\n${header}\n\n` +
         (pending > 0
-          ? `Falta abonar *${money(pending, currency)}*.\n\n`
-          : "") +
-        `${orgName}`
+          ? `Falta abonar *${money(pending, currency)}*.`
+          : "Está todo abonado. 🙌")
       );
 
     case "trip_deposit_paid":
@@ -360,31 +379,24 @@ function buildMessage(
           currency
         )}*.\n\n${header}\n\n` +
         (pending > 0
-          ? `Quedan *${money(pending, currency)}* para abonar el día del viaje.\n\n`
-          : "Está todo abonado. 🙌\n\n") +
-        `${orgName}`
+          ? `Quedan *${money(pending, currency)}* para abonar el día del viaje.`
+          : "Está todo abonado. 🙌")
       );
 
     case "trip_booking_cancelled":
       return (
         `Hola ${name}. Tu reserva fue *cancelada*.
 
-${header}
-
-` +
-        refundNote +
-        `${orgName}`
+${header}` +
+        (refundNote ? `\n\n${refundNote}` : "")
       );
 
     case "trip_departure_cancelled":
       return (
         `Hola ${name}. Lamentamos avisarte que esta salida fue *cancelada*:
 
-${header}
-
-` +
-        refundNote +
-        `${orgName}`
+${header}` +
+        (refundNote ? `\n\n${refundNote}` : "")
       );
 
     case "trip_notify_business": {
