@@ -2,6 +2,7 @@ import { APPOINTMENT_STATUS } from "@/config/constants";
 import { useAuth } from "@/contexts/auth-context";
 import {
   appointmentFormSchema,
+  appointmentRescheduleSchema,
   appointmentUpdateStatusSchema,
   checkAvailabilitySchema,
   sendReminderSchema,
@@ -380,6 +381,47 @@ export function useUpdateAppointmentStatus() {
     // Refetch from server to ensure consistency
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
+    },
+  });
+}
+
+/**
+ * Hook for moving an appointment to another date, time or professional (P1-03)
+ */
+export function useRescheduleAppointment() {
+  const queryClient = useQueryClient();
+  const { profile } = useAuth();
+
+  return useMutation({
+    mutationFn: async (input: {
+      appointmentId: string;
+      appointment_date: string;
+      start_time: string;
+      end_time: string;
+      staff_id: string | null;
+    }) => {
+      if (!profile?.organization_id) {
+        throw new Error("No se encontró la información de la organización");
+      }
+      const parsed = appointmentRescheduleSchema.safeParse(input);
+      if (!parsed.success) {
+        throw new Error(
+          `Validación fallida: ${parsed.error.issues[0].message}`
+        );
+      }
+      const { appointmentId, ...data } = parsed.data;
+      const result = await AppointmentService.reschedule(
+        appointmentId,
+        profile.organization_id,
+        data
+      );
+      if (!result.success) {
+        throw new Error(result.error || "No se pudo mover el turno");
+      }
+      return result;
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },
   });

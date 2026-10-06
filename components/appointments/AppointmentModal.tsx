@@ -327,7 +327,7 @@ export function AppointmentCreateModal({
   );
 }
 
-function ChipButton({
+export function ChipButton({
   selected,
   onClick,
   children,
@@ -483,7 +483,7 @@ export function AppointmentDetailModal({
               {onEdit && (
                 <ActionTile
                   icon={<Edit3 className="h-4 w-4" />}
-                  label="Editar"
+                  label="Mover"
                   onClick={onEdit}
                   disabled={isProcessing}
                 />

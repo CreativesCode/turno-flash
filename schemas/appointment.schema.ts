@@ -131,6 +131,25 @@ export const appointmentUpdateStatusSchema = z.object({
 });
 
 /**
+ * Reschedule Schema (P1-03): new date, time and professional
+ */
+export const appointmentRescheduleSchema = z.object({
+  appointmentId: z.string().uuid({
+    message: "ID de turno inválido",
+  }),
+  appointment_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: "Fecha inválida. Formato esperado: YYYY-MM-DD",
+  }),
+  start_time: z.string().regex(timeRegex, {
+    message: "Hora de inicio inválida. Formato esperado: HH:MM",
+  }),
+  end_time: z.string().regex(timeRegex, {
+    message: "Hora de fin inválida. Formato esperado: HH:MM",
+  }),
+  staff_id: z.string().uuid().nullable(),
+});
+
+/**
  * Send Reminder Schema
  */
 export const sendReminderSchema = z.object({
@@ -217,5 +236,8 @@ export type AppointmentUpdateStatusInput = z.infer<
   typeof appointmentUpdateStatusSchema
 >;
 export type SendReminderInput = z.infer<typeof sendReminderSchema>;
+export type AppointmentRescheduleInput = z.infer<
+  typeof appointmentRescheduleSchema
+>;
 export type CheckAvailabilityInput = z.infer<typeof checkAvailabilitySchema>;
 export type AppointmentRequestInput = z.infer<typeof appointmentRequestSchema>;

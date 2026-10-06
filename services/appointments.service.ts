@@ -251,6 +251,67 @@ export class AppointmentService {
   }
 
   /**
+   * Move an appointment to another date, time or professional (P1-03).
+   * The status is left alone here: migration 062 resets the customer's
+   * confirmation and the reminder, and sends the "rescheduled" WhatsApp.
+   */
+  static async reschedule(
+    appointmentId: string,
+    organizationId: string,
+    data: {
+      appointment_date: string;
+      start_time: string;
+      end_time: string;
+      staff_id: string | null;
+    }
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (data.staff_id) {
+        const availabilityCheck = await this.checkAvailability(
+          data.appointment_date,
+          data.start_time,
+          data.end_time,
+          data.staff_id,
+          organizationId,
+          appointmentId
+        );
+        if (!availabilityCheck.available) {
+          return {
+            success: false,
+            error:
+              availabilityCheck.reason ||
+              "El horario seleccionado no está disponible",
+          };
+        }
+      }
+
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("appointments")
+        .update(data)
+        .eq("id", appointmentId)
+        .eq("organization_id", organizationId);
+
+      if (error) {
+        // 23P01 = appointments_staff_no_overlap (migration 049)
+        if (error.code === "23P01") {
+          return {
+            success: false,
+            error: "El horario seleccionado no está disponible",
+          };
+        }
+        void Logger.error("Error rescheduling appointment:", error);
+        return { success: false, error: "No se pudo mover el turno" };
+      }
+
+      return { success: true };
+    } catch (error) {
+      void Logger.error("Unexpected error rescheduling appointment:", error);
+      return { success: false, error: "Error inesperado al mover el turno" };
+    }
+  }
+
+  /**
    * Update appointment status with validation
    */
   static async updateStatus(

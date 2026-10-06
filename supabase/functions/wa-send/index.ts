@@ -10,9 +10,11 @@
 //   { appointmentId: string, intent: "confirm" | "reminder_24h" | "reminder_1h"
 //     | "notify_business_new" | "notify_business_cancel" | "notify_business_confirm"
 //     | "cancel_ack" | "confirm_ack" | "rating_request" | "rating_ack"
-//     | "waitlist_slot" | "approved", waitlistId?: string }
+//     | "waitlist_slot" | "approved" | "rescheduled", waitlistId?: string }
 //
 //   approved: el negocio aprobó un turno pending (trigger en UPDATE de status).
+//   rescheduled: el negocio movió el turno de fecha u hora (migración 062);
+//     se pide confirmar de nuevo.
 //
 //   waitlistId es obligatorio para intent=waitlist_slot: el mensaje describe el
 //   hueco liberado (datos del appointment cancelado) pero va al cliente de la
@@ -39,6 +41,7 @@ import {
 const CUSTOMER_FRAME: Partial<Record<Intent, FrameOptions>> = {
   confirm: { contact: true, reply: "keywords" },
   approved: { contact: false, reply: "keywords" },
+  rescheduled: { contact: true, reply: "keywords" },
   reminder_24h: { contact: false, reply: "keywords" },
   reminder_1h: { contact: false, reply: "keywords" },
   reminder_manual: { contact: false, reply: "keywords" },
@@ -66,7 +69,8 @@ type Intent =
   | "rating_request"
   | "rating_ack"
   | "waitlist_slot"
-  | "approved";
+  | "approved"
+  | "rescheduled";
 
 interface AppointmentRow {
   id: string;
@@ -175,6 +179,7 @@ Deno.serve(async (req) => {
 
     // 3. Idempotencia: ¿ya mandamos este intent para este appointment?
     //    `reminder_manual` queda fuera: el operador puede querer reenviar.
+    //    `rescheduled` también: cada cambio de horario se avisa.
     if (
       intent === "confirm" ||
       intent === "reminder_24h" ||
@@ -182,15 +187,24 @@ Deno.serve(async (req) => {
       intent === "rating_request" ||
       intent === "approved"
     ) {
-      const { data: existing } = await supabase
+      // A reminder sent for the old time doesn't count after a reschedule
+      const { data: moved } = await supabase
+        .from("appointments")
+        .select("rescheduled_at")
+        .eq("id", appointmentId)
+        .single<{ rescheduled_at: string | null }>();
+
+      let existingQuery = supabase
         .from("wa_outbound_messages")
         .select("id")
         .eq("appointment_id", appointmentId)
         .eq("intent", intent)
         // "failed" too: OpenWA can answer HTTP 500 after delivering
-        .in("status", ["pending", "sent", "delivered", "read", "failed"])
-        .limit(1)
-        .maybeSingle();
+        .in("status", ["pending", "sent", "delivered", "read", "failed"]);
+      if (moved?.rescheduled_at) {
+        existingQuery = existingQuery.gte("sent_at", moved.rescheduled_at);
+      }
+      const { data: existing } = await existingQuery.limit(1).maybeSingle();
 
       if (existing) {
         return json(200, {
@@ -560,6 +574,33 @@ function buildMessage(
         ``,
         `Te esperamos 🙌`,
         `❌ Si ya no puedes ir, responde *CANCELAR*.`,
+      ].join("\n");
+
+    case "rescheduled":
+      if (appt.status === "pending") {
+        return [
+          `🔄 Hola ${cliente}! Cambiamos el horario de tu solicitud de turno:`,
+          ``,
+          `📅 ${fechaLarga}`,
+          `⏰ ${hora}`,
+          `💇 ${servicio}${staff}`,
+          `🎫 N° ${numero}`,
+          ``,
+          `El negocio revisará tu solicitud y te avisaremos por aquí cuando la confirme.`,
+          `❌ Si este horario no te sirve, responde *CANCELAR*.`,
+        ].join("\n");
+      }
+      return [
+        `🔄 Hola ${cliente}! Tu turno cambió de horario:`,
+        ``,
+        `📅 ${fechaLarga}`,
+        `⏰ ${hora}`,
+        `💇 ${servicio}${staff}`,
+        `🎫 N° ${numero}`,
+        ``,
+        `Por favor confirma de nuevo:`,
+        `✅ *OK* — confirmo que asisto`,
+        `❌ *CANCELAR* — no podré ir`,
       ].join("\n");
 
     case "reminder_24h":

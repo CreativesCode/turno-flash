@@ -269,6 +269,7 @@ async function handleMessageReceived(
     "reminder_1h",
     "reminder_manual",
     "approved",
+    "rescheduled",
   ];
   // A reply only applies to appointments that are still open and ahead
   const OPEN_STATUSES = ["pending", "confirmed", "reminded", "client_confirmed"];

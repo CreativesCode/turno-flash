@@ -5,6 +5,7 @@ import {
   AppointmentCreateModal,
   AppointmentDetailModal,
 } from "@/components/appointments/AppointmentModal";
+import { AppointmentRescheduleSheet } from "@/components/appointments/AppointmentRescheduleSheet";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Button } from "@/components/ui";
@@ -20,6 +21,7 @@ import {
   useDebounce,
   useInfiniteAppointments,
   useNormalizedData,
+  useRescheduleAppointment,
   useSendReminder,
   useToast,
   useUpdateAppointmentStatus,
@@ -81,6 +83,14 @@ const FILTER_CHIPS: { key: FilterStatus; label: string }[] = [
   { key: "cancelled", label: "Cancelados" },
 ];
 
+// Only appointments that haven't started can be moved to another time
+const RESCHEDULABLE: readonly string[] = [
+  APPOINTMENT_STATUS.PENDING,
+  APPOINTMENT_STATUS.CONFIRMED,
+  APPOINTMENT_STATUS.REMINDED,
+  APPOINTMENT_STATUS.CLIENT_CONFIRMED,
+];
+
 function AppointmentsContent() {
   const { profile } = useAuth();
   const router = useRouter();
@@ -94,6 +104,7 @@ function AppointmentsContent() {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showReschedule, setShowReschedule] = useState(false);
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentWithDetails | null>(null);
@@ -191,6 +202,7 @@ function AppointmentsContent() {
 
   const createAppointmentMutation = useCreateAppointment();
   const updateAppointmentStatusMutation = useUpdateAppointmentStatus();
+  const rescheduleMutation = useRescheduleAppointment();
   const sendReminderMutation = useSendReminder();
   const createCustomerMutation = useCreateCustomer();
 
@@ -878,6 +890,15 @@ function AppointmentsContent() {
           serviceColor={detailServiceColor}
           staffColor={detailStaffColor}
           onAdvance={(to) => updateStatus(selectedAppointment.id, to)}
+          onEdit={
+            canManageAppointments &&
+            RESCHEDULABLE.includes(selectedAppointment.status ?? "")
+              ? () => {
+                  setShowDetailModal(false);
+                  setShowReschedule(true);
+                }
+              : undefined
+          }
           onSendReminder={() => handleSendReminder(selectedAppointment)}
           onMarkNoShow={() =>
             updateStatus(
@@ -892,6 +913,35 @@ function AppointmentsContent() {
             )
           }
           isProcessing={updateAppointmentStatusMutation.isPending}
+        />
+      )}
+
+      {selectedAppointment && showReschedule && (
+        <AppointmentRescheduleSheet
+          open={showReschedule}
+          onClose={() => {
+            setShowReschedule(false);
+            setSelectedAppointment(null);
+          }}
+          appointment={selectedAppointment}
+          staff={staffMembers}
+          isSubmitting={rescheduleMutation.isPending}
+          onSubmit={async (input) => {
+            try {
+              await rescheduleMutation.mutateAsync({
+                appointmentId: selectedAppointment.id,
+                ...input,
+              });
+              toast.success("Turno movido", "Le pedimos al cliente que confirme");
+              setShowReschedule(false);
+              setSelectedAppointment(null);
+            } catch (err) {
+              toast.error(
+                "No se pudo mover el turno",
+                err instanceof Error ? err.message : undefined
+              );
+            }
+          }}
         />
       )}
     </ProtectedRoute>

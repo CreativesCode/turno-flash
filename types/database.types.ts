@@ -195,6 +195,7 @@ export type Database = {
           rating: number | null
           reminder_method: Database["public"]["Enums"]["reminder_method"] | null
           reminder_sent_at: string | null
+          rescheduled_at: string | null
           service_id: string
           source: Database["public"]["Enums"]["appointment_source"] | null
           staff_id: string | null
@@ -231,6 +232,7 @@ export type Database = {
             | Database["public"]["Enums"]["reminder_method"]
             | null
           reminder_sent_at?: string | null
+          rescheduled_at?: string | null
           service_id: string
           source?: Database["public"]["Enums"]["appointment_source"] | null
           staff_id?: string | null
@@ -267,6 +269,7 @@ export type Database = {
             | Database["public"]["Enums"]["reminder_method"]
             | null
           reminder_sent_at?: string | null
+          rescheduled_at?: string | null
           service_id?: string
           source?: Database["public"]["Enums"]["appointment_source"] | null
           staff_id?: string | null
