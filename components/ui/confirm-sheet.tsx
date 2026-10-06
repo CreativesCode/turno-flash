@@ -15,6 +15,10 @@ export interface ConfirmSheetProps {
   busyLabel?: string;
   /** While true, both buttons are disabled and the sheet can't be dismissed. */
   busy?: boolean;
+  /** Red for destructive actions (default); primary for constructive ones. */
+  confirmVariant?: "danger" | "mesh-primary";
+  /** Keeps the confirm button off until the sheet's input is valid. */
+  confirmDisabled?: boolean;
 }
 
 /** Destructive-action confirmation, rendered as a Sheet (bottom-sheet on mobile). */
@@ -27,6 +31,8 @@ export function ConfirmSheet({
   confirmLabel = "Eliminar",
   busyLabel = "Eliminando…",
   busy = false,
+  confirmVariant = "danger",
+  confirmDisabled = false,
 }: ConfirmSheetProps) {
   return (
     <Sheet
@@ -49,9 +55,9 @@ export function ConfirmSheet({
           </Button>
           <Button
             type="button"
-            variant="danger"
+            variant={confirmVariant}
             onClick={onConfirm}
-            disabled={busy}
+            disabled={busy || confirmDisabled}
             className="flex-1 justify-center"
           >
             {busy ? busyLabel : confirmLabel}

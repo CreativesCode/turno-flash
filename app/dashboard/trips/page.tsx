@@ -29,7 +29,7 @@ import { Bus, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, Suspense, useCallback, useMemo, useState } from "react";
 import { useCreateParam } from "@/hooks/useCreateParam";
-import { getLocalDateString } from "@/utils/date";
+import { addDays, getLocalDateString } from "@/utils/date";
 
 /** Tomorrow, so a new departure never starts in the past. */
 function defaultDepartureDate(): string {
@@ -412,7 +412,10 @@ function TripsContent() {
                   onTogglePublished={handleTogglePublished}
                   onDuplicate={(t) => {
                     setDuplicating(t);
-                    setDuplicateDate("");
+                    // Same weekday next week, never in the past (P2-17)
+                    const nextWeek = addDays(t.departure_date, 7);
+                    const today = getLocalDateString();
+                    setDuplicateDate(nextWeek < today ? addDays(today, 1) : nextWeek);
                   }}
                   onShare={handleShare}
                   onCancel={setCancelling}
@@ -461,6 +464,8 @@ function TripsContent() {
         confirmLabel="Duplicar"
         busyLabel="Duplicando…"
         busy={duplicateTrip.isPending}
+        confirmVariant="mesh-primary"
+        confirmDisabled={!duplicateDate || duplicateDate < getLocalDateString()}
       >
         <p className="text-sm text-foreground-muted">
           Se copia todo (horario, asientos, precio y anticipo) con la fecha que
@@ -469,6 +474,7 @@ function TripsContent() {
         <input
           type="date"
           value={duplicateDate}
+          min={getLocalDateString()}
           onChange={(e) => setDuplicateDate(e.target.value)}
           className="mt-3 block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
         />
