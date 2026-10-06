@@ -49,8 +49,10 @@ async function call<T>(payload: Record<string, unknown>): Promise<T> {
 
   const data = await response.json().catch(() => null);
   if (!response.ok || (data && data.success === false)) {
+    // The info RPC answers { error: "booking_closed" } without a code: an
+    // unknown or switched-off page, not a network problem (P1-20)
     throw new PublicTripsError(
-      (data?.code as PublicTripsErrorCode) ?? "server_error",
+      ((data?.code ?? data?.error) as PublicTripsErrorCode) ?? "server_error",
       data?.error ?? "Ocurrió un error. Intenta nuevamente."
     );
   }
