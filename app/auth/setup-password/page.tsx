@@ -16,6 +16,12 @@ export default function SetupPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const hasChecked = useRef(false);
+  // Coming from "¿Olvidaste tu contraseña?" rather than an invitation
+  const [isRecovery] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("mode") === "recovery"
+  );
 
   // Memoizar el cliente de Supabase
   const supabase = useMemo(() => createClient(), []);
@@ -160,10 +166,12 @@ export default function SetupPasswordPage() {
         <div className="flex flex-col items-center text-center">
           <Logo size={56} priority className="mb-4" />
           <h1 className="text-3xl font-bold tracking-tight text-black dark:text-zinc-50">
-            ¡Bienvenido a Turno Flash!
+            {isRecovery ? "Elige una contraseña nueva" : "¡Te damos la bienvenida a Turno Flash!"}
           </h1>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Configura tu contraseña para completar tu registro
+            {isRecovery
+              ? "La usarás desde ahora para entrar con tu email"
+              : "Configura tu contraseña para completar tu registro"}
           </p>
           {userEmail && (
             <p className="mt-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">

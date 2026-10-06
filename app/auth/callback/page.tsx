@@ -92,7 +92,7 @@ export default function AuthCallbackPage() {
               exchangeError.message.includes("code verifier")
             ) {
               setError(
-                "El enlace de invitación ha expirado o ya fue usado. Por favor, solicita una nueva invitación."
+                "El enlace expiró o ya fue usado. Pide uno nuevo."
               );
             } else {
               setError(exchangeError.message);
@@ -112,6 +112,13 @@ export default function AuthCallbackPage() {
         // Limpiar timeout - autenticación exitosa
         clearTimeout(timeoutId);
         console.log("Session established for:", session.user.email);
+
+        // "¿Olvidaste tu contraseña?": choose a new one (P1-28)
+        if (type === "recovery") {
+          setStatus("Redirigiendo...");
+          window.location.href = "/auth/setup-password?mode=recovery";
+          return;
+        }
 
         // Si es un magic link de invitación, redirigir a configurar contraseña
         // También verificar si el usuario no tiene contraseña configurada (invited user)
