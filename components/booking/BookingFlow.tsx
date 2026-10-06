@@ -19,6 +19,7 @@ import {
 } from "@/hooks/usePublicBooking.query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRequestKey } from "@/hooks/useRequestKey";
+import { useSessionState } from "@/hooks/useSessionState";
 import { useStepHistory } from "@/hooks/useStepHistory";
 import { PublicBookingError } from "@/services/public-booking.service";
 import type {
@@ -36,7 +37,7 @@ import {
   Hourglass,
   WifiOff,
 } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 
 type Step = "service" | "staff" | "time" | "details" | "done";
 
@@ -66,13 +67,21 @@ export function BookingFlow({ slug }: { slug: string }) {
   const toast = useToast();
 
   const { step, go, replace, back } = useStepHistory<Step>("service");
-  const [service, setService] = useState<PublicService | null>(null);
+  // Kept in the tab's storage: Android may reload the page after WhatsApp
+  const storageKey = `booking:${slug}`;
+  const [service, setService] = useSessionState<PublicService | null>(
+    `${storageKey}:service`,
+    null
+  );
   /** null = "no preference" */
-  const [staffId, setStaffId] = useState<string | null>(null);
-  const [date, setDate] = useState<string | null>(null);
-  const [slot, setSlot] = useState<PublicSlot | null>(null);
-  const [confirmation, setConfirmation] = useState<PublicBookingConfirmation | null>(null);
-  const [draft, setDraft] = useState<DetailsDraft | null>(null);
+  const [staffId, setStaffId] = useSessionState<string | null>(`${storageKey}:staff`, null);
+  const [date, setDate] = useSessionState<string | null>(`${storageKey}:date`, null);
+  const [slot, setSlot] = useSessionState<PublicSlot | null>(`${storageKey}:slot`, null);
+  const [confirmation, setConfirmation] = useSessionState<PublicBookingConfirmation | null>(
+    `${storageKey}:confirmation`,
+    null
+  );
+  const [draft, setDraft] = useSessionState<DetailsDraft | null>(`${storageKey}:draft`, null);
 
   // A failed background refresh keeps the last data: only a page that never
   // loaded shows an error, so a signal drop does not wipe the form.

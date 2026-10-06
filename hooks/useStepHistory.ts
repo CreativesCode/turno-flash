@@ -9,7 +9,12 @@ import { useCallback, useEffect, useState } from "react";
  * keep the router's own keys.
  */
 export function useStepHistory<S extends string>(initial: S) {
-  const [step, setStep] = useState<S>(initial);
+  // After a reload (e.g. Android discarded the tab) the entry still holds its step
+  const [step, setStep] = useState<S>(() =>
+    typeof window === "undefined"
+      ? initial
+      : ((window.history.state as { flowStep?: S } | null)?.flowStep ?? initial)
+  );
 
   useEffect(() => {
     const onPopState = (event: PopStateEvent) => {

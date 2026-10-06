@@ -22,6 +22,7 @@ import {
   usePublicTripsInfo,
 } from "@/hooks/usePublicTrips.query";
 import { useRequestKey } from "@/hooks/useRequestKey";
+import { useSessionState } from "@/hooks/useSessionState";
 import { useStepHistory } from "@/hooks/useStepHistory";
 import { PublicTripsError } from "@/services/public-trips.service";
 import type {
@@ -72,11 +73,16 @@ export function TripsFlow({ slug }: { slug: string }) {
   const toast = useToast();
 
   const { step, go, replace, back } = useStepHistory<Step>("trips");
-  const [tripId, setTripId] = useState<string | null>(null);
-  const [seatsData, setSeatsData] = useState<SeatsSubmit | null>(null);
+  // Kept in the tab's storage: Android may reload the page after WhatsApp
+  const storageKey = `trips:${slug}`;
+  const [tripId, setTripId] = useSessionState<string | null>(`${storageKey}:trip`, null);
+  const [seatsData, setSeatsData] = useSessionState<SeatsSubmit | null>(
+    `${storageKey}:seats`,
+    null
+  );
   const [confirmation, setConfirmation] =
-    useState<PublicTripBookingConfirmation | null>(null);
-  const [draft, setDraft] = useState<DetailsDraft | null>(null);
+    useSessionState<PublicTripBookingConfirmation | null>(`${storageKey}:confirmation`, null);
+  const [draft, setDraft] = useSessionState<DetailsDraft | null>(`${storageKey}:draft`, null);
   // The last seat check can take seconds on 3G: show it and block a 2nd tap
   const [checkingSeats, setCheckingSeats] = useState(false);
 

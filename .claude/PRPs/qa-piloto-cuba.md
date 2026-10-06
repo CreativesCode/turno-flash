@@ -325,11 +325,11 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 - Téc: borrar `public/images/bg-hero.png`; convertir `tf-1..3.png` a WebP de ~800 px (`home-client.tsx:487`); quitar `*.map` de `out/` antes de `cap sync`.
 - Verificar: landing < 400 KB; APK unos 3 MB más chico.
 
-**P2-10 · M08 · Si Android descarta la pestaña al cambiar a WhatsApp, la reserva pública empieza de cero**
+**P2-10 · ✅ HECHO 2026-10-06 (useSessionState por campo en `booking:<slug>` / `trips:<slug>`, incluida la confirmación; el paso sale de `history.state`) · M08 · Si Android descarta la pestaña al cambiar a WhatsApp, la reserva pública empieza de cero**
 - Téc: guardar `{step, serviceId, staffId, date, slot}` / `{step, tripId, seatsData}` + borrador del formulario en `sessionStorage` (`booking:${slug}`) con try/catch; restaurar con inicializadores lazy; borrar al confirmar.
 - Verificar: recargar en "Tus datos" vuelve al mismo paso con lo escrito.
 
-**P2-11 · M36+F93 · Se preselecciona "Hoy" aunque no tenga horarios y cada día cuesta 8-10 s en 3G**
+**P2-11 · ✅ HECHO 2026-10-06 (salta hasta 3 días vacíos mientras el cliente no elige) · M36+F93 · Se preselecciona "Hoy" aunque no tenga horarios y cada día cuesta 8-10 s en 3G**
 - Téc: `BookingSteps.tsx:149-165`: saltar automáticamente hasta 3 días vacíos mientras el cliente no elige; a futuro, `available_dates` en `public_booking_info`.
 - Verificar: de noche se preselecciona el primer día con huecos.
 

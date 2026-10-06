@@ -16,6 +16,8 @@ import { FormEvent, useState } from "react";
 
 /** Max day chips shown, even if the service allows booking further ahead. */
 const MAX_VISIBLE_DAYS = 30;
+/** Empty days skipped on their own before the customer picks one (each costs a request). */
+const MAX_AUTO_SKIPPED_DAYS = 3;
 
 // ─── Service ──────────────────────────────────────────────
 
@@ -161,14 +163,20 @@ export function DateTimeStep({
     });
   }
 
-  // Derived, not synced: the first available day until the customer picks one
-  const activeDate = date ?? days[0]?.value ?? null;
+  // Derived, not synced: the first day with free times until the customer picks one
+  const [autoIndex, setAutoIndex] = useState(0);
+  const activeDate = date ?? days[autoIndex]?.value ?? null;
   const { data: slots = [], isLoading, error, refetch } = usePublicSlots({
     slug,
     serviceId: service.id,
     staffId,
     date: activeDate,
   });
+
+  const autoDayIsEmpty = date === null && !isLoading && !error && slots.length === 0;
+  if (autoDayIsEmpty && autoIndex < MAX_AUTO_SKIPPED_DAYS && autoIndex < days.length - 1) {
+    setAutoIndex(autoIndex + 1);
+  }
 
   if (days.length === 0) {
     return (
