@@ -18,6 +18,7 @@ import {
   type OpenWaResponse,
   type SendTextData,
 } from "../_shared/openwa.ts";
+import { isServiceRole } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,6 +48,11 @@ interface AppointmentRow {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  // Only triggers and crons (service role) may call this function.
+  if (!isServiceRole(req)) {
+    return json(403, { success: false, error: "No autorizado" });
   }
 
   try {

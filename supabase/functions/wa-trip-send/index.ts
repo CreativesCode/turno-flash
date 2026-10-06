@@ -18,6 +18,7 @@ import {
   type OpenWaResponse,
   type SendTextData,
 } from "../_shared/openwa.ts";
+import { isServiceRole } from "../_shared/auth.ts";
 
 type Intent =
   | "trip_booked"
@@ -110,6 +111,11 @@ Deno.serve(async (req) => {
   }
   if (req.method !== "POST") {
     return json(405, { success: false, error: "Método no permitido" });
+  }
+
+  // Only triggers and crons (service role) may call this function.
+  if (!isServiceRole(req)) {
+    return json(403, { success: false, error: "No autorizado" });
   }
 
   try {

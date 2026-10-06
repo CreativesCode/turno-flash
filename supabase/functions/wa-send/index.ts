@@ -25,6 +25,7 @@ import {
   type OpenWaResponse,
   type SendTextData,
 } from "../_shared/openwa.ts";
+import { isServiceRole } from "../_shared/auth.ts";
 
 type Intent =
   | "confirm"
@@ -88,6 +89,17 @@ Deno.serve(async (req) => {
         success: false,
         error: "waitlistId is required for intent=waitlist_slot",
       });
+    }
+
+    // Triggers and crons call with the service role. From the dashboard only the
+    // manual reminder is allowed, and only for an appointment the user can see.
+    if (!isServiceRole(req)) {
+      const allowed =
+        intent === "reminder_manual" &&
+        (await userCanSeeAppointment(req, appointmentId));
+      if (!allowed) {
+        return json(403, { success: false, error: "No autorizado" });
+      }
     }
 
     const supabase = createClient(
@@ -587,6 +599,24 @@ function buildMessage(
         `N° ${numero}`,
       ].join("\n");
   }
+}
+
+// RLS decides: the appointment is visible only to members of its organization.
+async function userCanSeeAppointment(
+  req: Request,
+  appointmentId: string
+): Promise<boolean> {
+  const userClient = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: req.headers.get("Authorization")! } } }
+  );
+  const { data } = await userClient
+    .from("appointments")
+    .select("id")
+    .eq("id", appointmentId)
+    .maybeSingle();
+  return !!data;
 }
 
 function json(status: number, body: unknown): Response {

@@ -9,3 +9,4 @@ export { CustomerService } from "./customers.service";
 export { InvitationService } from "./invitations.service";
 export { ServiceService } from "./services.service";
 export { StaffService } from "./staff.service";
+export { TeamService } from "./team.service";

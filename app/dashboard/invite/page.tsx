@@ -6,6 +6,7 @@ import {
   Field,
   sheetInputClasses as inputClasses,
 } from "@/components/ui";
+import { TeamCard } from "@/components/organizations/TeamCard";
 import { useAuth } from "@/contexts/auth-context";
 import { InvitationService } from "@/services";
 import { Mail } from "lucide-react";
@@ -148,6 +149,10 @@ export default function InvitePage() {
             </Button>
           </form>
         </Card>
+
+        {isOwner && profile.organization_id && (
+          <TeamCard organizationId={profile.organization_id} />
+        )}
 
         <Card className="p-4">
           <h3 className="text-sm font-bold text-foreground">Cómo funciona</h3>
