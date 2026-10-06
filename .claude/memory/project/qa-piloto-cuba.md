@@ -65,10 +65,17 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
   - Plugins nativos nuevos: `@capacitor/share` y `@capacitor/preferences` (D-07); Android ya sincronizado.
   - Pruebas: negocio desechable `qa-fixture-*` con dueño, empleado y admin, creado con la clave de servicio. Usarlo en vez de tocar negocios reales.
 
+- **2026-10-06: P2 en curso.** Hechos 03, 04, 05, 06, 07, 09, 12, 13, 14, 16, 17; P2-02 parcial. Migración 066 (SELECT de `storage.objects` para `trip-photos`: sin ella la API de Storage no copia ni borra). Lo no obvio:
+  - `useLicense` es un `useQuery` compartido con `refetchOnWindowFocus: "always"` (con `staleTime` de 5 min, `true` no revalidaría al volver y se rompería P1-13). TanStack escucha `visibilitychange` en `window`: un evento sintético de prueba necesita `bubbles: true`.
+  - Nombre del negocio: usar `useOrganizationModules().modules.name`, no consultas propias.
+  - Invalidar solo `X.all` en las mutaciones: `lists()` + `all` lanzaba dos pedidos de la misma lista.
+  - **No pasar Prettier a archivos enteros**: varios (p. ej. `services/trips.service.ts`, `ExceptionsEditor.tsx`) no están formateados y reformatea líneas ajenas.
+  - Medir peso de páginas públicas: `npm run build:next`, servir `out/` con `python -m http.server` (parar el servidor antes de recompilar: bloquea `out/`) y abrir `/book.html?b=<slug>`.
+
 ## Qué falta del plan (al 2026-10-06)
 
 - **P0 y P1 cerrados en código** salvo P1-26 (Mac). En teléfonos reales falta: medir la versión del WebView (P0-23), el botón Atrás físico (P0-12), la sesión nativa (P1-25), compartir lista (P1-16) y la safe area (P1-23). Hay que regenerar la APK (`npm run mobile:build` + Android Studio).
 - **SMTP propio** para que llegue "¿Olvidaste tu contraseña?" a los dueños (configurarlo en Supabase Auth).
 - **Pendiente menor pasado a P2:** reportes con la zona del negocio (P0-13, punto 7).
-- Siguen P2 y P3.
+- **P2 pendientes:** 01 (offline: TanStack `offlineFirst` + persistencia, D-01 aprobado), 02 resto (route group público sin AuthProvider), 08 (prefetch 404 por compilar en Windows), 10 (borrador de reserva en sessionStorage), 11 (saltar días sin huecos), 15 (guía de primeros pasos). Después P3.
 - Turnos de prueba vivos a +5352564206: **T-0062** (7 oct 11:00) y **T-0063** (8 oct 15:00).

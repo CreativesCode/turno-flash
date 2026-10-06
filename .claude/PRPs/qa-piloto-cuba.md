@@ -293,27 +293,27 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 
 **P2-01 · F35+F33 · TanStack configurado para red buena: nada sobrevive sin conexión** → ver la sección 3. Téc: `contexts/query-client-provider.tsx:16-31`: `networkMode:"offlineFirst"`, `retry:2`, `gcTime:24h`; mutaciones `networkMode:"online"` + banner con `onlineManager`. Persistencia → D-01. Web/PWA: guard `navigator.onLine` en los enlaces de `Sidebar`/`MobileTabBar` (toast "Sin conexión") en vez de dejar la página en blanco; un service worker solo con aprobación (D-02). Verificar: cerrar y abrir sin red muestra la agenda del día.
 
-**P2-02 · F50+M11 · Página pública de 440 KB y 1,3 MB de JS: en 3G, 8-37 s hasta ver algo**
+**P2-02 · PARCIAL 2026-10-06 (useToast directo, URL de foto como string, lazy, una sola fuente: 1473→1301 KB sin comprimir). Falta (b) route group `app/(public)/` sin AuthProvider, (e) y (f) · F50+M11 · Página pública de 440 KB y 1,3 MB de JS: en 3G, 8-37 s hasta ver algo**
 - Téc: (a) importar `useToast` desde `@/hooks/useToast` y no desde el barril `@/hooks` en `BookingFlow.tsx:12`, `TripsFlow.tsx:14` (saca Capacitor y los servicios del panel). (b) Route group `app/(public)/` para book y trips con un layout mínimo, sin `AuthProvider`. (c) Una sola fuente (sin JetBrains_Mono en el root). (d) URL de la foto armada como string (`TripsFlow.tsx:48`), `loading="lazy"` (`TripsSteps.tsx:83-85`). (e) Fallback de Suspense con texto estático. (f) Opcional `zod/mini`.
 - Verificar: /book en frío por debajo de 200 KB y contenido útil en menos de 6 s en regular3g.
 
-**P2-03 · F85 · Cada poll público paga un preflight CORS**
+**P2-03 · ✅ HECHO 2026-10-06 (Access-Control-Max-Age 86400, funciones desplegadas) · F85 · Cada poll público paga un preflight CORS**
 - Téc: `"Access-Control-Max-Age":"86400"` en `public-trips/index.ts:21-25` y `public-booking/index.ts:20-24`.
 - Verificar: un solo OPTIONS por sesión.
 
-**P2-04 · F83+M44 · El panel repite pedidos al abrir (organización x3-4, licencia x2, stats de admin)**
+**P2-04 · ✅ HECHO 2026-10-06 (nombre desde useOrganizationModules, useLicense como useQuery con refetch al volver; Inicio en frío: 5 pedidos) · F83+M44 · El panel repite pedidos al abrir (organización x3-4, licencia x2, stats de admin)**
 - Téc: quitar los efectos `organizations.select('name')` de `Sidebar.tsx:212`, `Drawer.tsx:205` y `dashboard/page.tsx:262` → `modules.name`; `useLicense` como `useQuery(['license',orgId])` con un staleTime de minutos.
 - Verificar: Inicio en frío pasa de 18 a unos 10 pedidos.
 
-**P2-05 · F78+F79+F80 · Cada cambio repite peticiones y Realtime trae datos que nadie usa**
+**P2-05 · ✅ HECHO 2026-10-06 (una invalidación por mutación, debounce 500 ms, DELETE ajenos ignorados, sin suscripción global a wa_outbound; crear turno 13→10 pedidos) · F78+F79+F80 · Cada cambio repite peticiones y Realtime trae datos que nadie usa**
 - Téc: dejar una sola invalidación (`X.all`) en los `onSettled` de useAppointments/useCustomers/useServices/useStaff (`useAppointments.query.ts:285-286`). Debounce de 500 ms en `useRealtimeTable.ts:90-96`. Quitar `useRealtimeWAOutbound` de `useRealtimeAll` (`useRealtimeEntities.ts:119`). Ignorar los DELETE de otras organizaciones (G39).
 - Verificar: crear un turno pasa de 13 a unos 4 pedidos.
 
-**P2-06 · F84 · Turnos descarga todos los clientes con `select('*')` y los recarga al volver el foco**
+**P2-06 · ✅ HECHO 2026-10-06 (clientes solo con el formulario abierto) · F84 · Turnos descarga todos los clientes con `select('*')` y los recarga al volver el foco**
 - Téc: `customers.service.ts:245-255` pedir solo las columnas mínimas; opciones `enabled: showCreateModal, refetchOnWindowFocus:false`; con P1-11 queda una búsqueda bajo demanda.
 - Verificar: Turnos no pide la lista de clientes hasta que se abre el formulario.
 
-**P2-07 · F60 · El detalle de una salida baja todas las salidas de la historia (y la URL acabará dando 414)**
+**P2-07 · ✅ HECHO 2026-10-06 (TripService.getById + useTripQuery) · F60 · El detalle de una salida baja todas las salidas de la historia (y la URL acabará dando 414)**
 - Téc: `TripService.getById` + `useTripQuery(id)` (`trips/details/page.tsx:82-87`); invalidaciones dirigidas en `useInvalidateBookings`.
 - Verificar: abrir el detalle hace 3 GET pequeños que no crecen con la historia.
 
@@ -321,7 +321,7 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 - Téc: **construir los builds en Linux, macOS o WSL** (causa: el export de Next en Windows). Si se compila en Windows, `prefetch={false}` en los enlaces de `MobileTabBar`, `Sidebar` y `Drawer`.
 - Verificar: 0 respuestas 404 de `__next.*.txt`.
 
-**P2-09 · F86+M70 · Landing de 1,8 MB en PNG y APK con 1 MB de imagen sin usar**
+**P2-09 · ✅ HECHO 2026-10-06 (WebP 800 px, 69 KB; bg-hero.png borrado; .map solo 116 KB, no se tocó) · F86+M70 · Landing de 1,8 MB en PNG y APK con 1 MB de imagen sin usar**
 - Téc: borrar `public/images/bg-hero.png`; convertir `tf-1..3.png` a WebP de ~800 px (`home-client.tsx:487`); quitar `*.map` de `out/` antes de `cap sync`.
 - Verificar: landing < 400 KB; APK unos 3 MB más chico.
 
@@ -333,15 +333,15 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 - Téc: `BookingSteps.tsx:149-165`: saltar automáticamente hasta 3 días vacíos mientras el cliente no elige; a futuro, `available_dates` en `public_booking_info`.
 - Verificar: de noche se preselecciona el primer día con huecos.
 
-**P2-12 · M50+G25 · La app nativa abre en la landing de marketing aunque haya sesión**
+**P2-12 · ✅ HECHO 2026-10-06 (nativo → /dashboard) · M50+G25 · La app nativa abre en la landing de marketing aunque haya sesión**
 - Téc: `app/home-client.tsx:~245`: si `Capacitor.isNativePlatform()` y auth ya cargó → `router.replace(user ? "/dashboard" : "/login")`.
 - Verificar: abrir la APK con sesión entra directo al panel.
 
-**P2-13 · F111+F72 · La foto del vehículo sin caché; crear un servicio o profesional hace 3 pedidos en serie**
+**P2-13 · ✅ HECHO 2026-10-06 (cacheControl 1 año; chequeos en paralelo con maybeSingle) · F111+F72 · La foto del vehículo sin caché; crear un servicio o profesional hace 3 pedidos en serie**
 - Téc: `trips.service.ts:104` `cacheControl:"31536000"`. `services.service.ts:69-90` y `staff.service.ts:70-93`: `.maybeSingle()` y `Promise.all`.
 - Verificar: la foto se sirve desde la caché en la segunda visita.
 
-**P2-14 · G30 · Desactivar un cliente promete "podrás reactivarlo" pero no hay cómo**
+**P2-14 · ✅ HECHO 2026-10-06 (Activos/Inactivos + Reactivar) · G30 · Desactivar un cliente promete "podrás reactivarlo" pero no hay cómo**
 - Téc: toggle "Activos/Inactivos" en `customers/page.tsx:107`, "Reactivar" en `CustomerCard`, texto `:435`.
 - Verificar: un cliente desactivado se puede reactivar.
 
@@ -349,11 +349,11 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 - Téc: `app/dashboard/page.tsx:173` "Errores" solo para el admin; tarjeta descartable "Pon en marcha tu negocio" con conteos head-count por módulo.
 - Verificar: un dueño nuevo ve los 3 pasos con enlaces.
 
-**P2-16 · F53 · Duplicar una salida pierde la foto y borrar la foto falla en silencio**
+**P2-16 · ✅ HECHO 2026-10-06 (migración 066 SELECT en storage; 2 fotos QA huérfanas borradas) · F53 · Duplicar una salida pierde la foto y borrar la foto falla en silencio**
 - Téc: migración: política SELECT de `storage.objects` para `trip-photos` limitada a la carpeta de la organización. Borrar el objeto QA que quedó con service role.
 - Verificar: la copia conserva la foto.
 
-**P2-17 · M46+F98 · Duplicar una salida: botón rojo, fecha vacía, se puede elegir el pasado**
+**P2-17 · ✅ HECHO 2026-10-06 (fecha +7 días, min hoy, botón primario; ConfirmSheet confirmVariant/confirmDisabled) · M46+F98 · Duplicar una salida: botón rojo, fecha vacía, se puede elegir el pasado**
 - Téc: `confirm-sheet.tsx` prop `confirmVariant`; precargar `departure_date+7`; `min=hoy`; deshabilitar sin fecha (`trips/page.tsx:268,405-477`).
 - Verificar: duplicar en 2 toques con la fecha sugerida.
 
