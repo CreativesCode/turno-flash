@@ -22,6 +22,9 @@ const corsHeaders = {
 };
 
 const TRIAL_DAYS = 7;
+// Anti-abuse (P1-29): businesses created in the last hour, across the
+// platform. Far above real pilot traffic; also caps the admin's WhatsApp.
+const MAX_SIGNUPS_PER_HOUR = 10;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -92,6 +95,27 @@ Deno.serve(async (req) => {
     }
     if (!orgName) {
       return json({ error: "Ingresa el nombre de tu negocio" }, 400);
+    }
+
+    // 2a. Honeypot: people never see this field, bots fill it
+    if (String(body.website ?? "").trim()) {
+      return json({ error: "No se pudo crear la cuenta. Intenta de nuevo." }, 400);
+    }
+
+    // 2b. A burst of signups is abuse, not pilot traffic
+    const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentSignups } = await admin
+      .from("organizations")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", hourAgo);
+    if ((recentSignups ?? 0) >= MAX_SIGNUPS_PER_HOUR) {
+      return json(
+        {
+          error:
+            "Hay muchos registros en este momento. Intenta de nuevo en un rato.",
+        },
+        429
+      );
     }
 
     // 2. Anti-abuso v1: rechazar si el email ya tiene cuenta

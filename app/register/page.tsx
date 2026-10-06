@@ -57,6 +57,8 @@ export default function RegisterPage() {
   const [timezone, setTimezone] = useState<string>("America/Havana");
   const [kind, setKind] = useState<BusinessKind>("appointments");
   const [showPassword, setShowPassword] = useState(false);
+  // Honeypot (P1-29): invisible for people, bots fill it
+  const [website, setWebsite] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,6 +92,7 @@ export default function RegisterPage() {
           org_timezone: timezone,
           org_whatsapp_phone: whatsapp || undefined,
           modules: kind,
+          website,
         }),
       });
 
@@ -307,6 +310,23 @@ export default function RegisterPage() {
                   ))}
                 </select>
               </div>
+
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
+              />
+
+              {/* D-06: registration stays open, but the data must be real */}
+              <p className="text-xs text-foreground-muted">
+                Usa tus datos reales: con ese email y ese WhatsApp te
+                contactamos para activar tu licencia.
+              </p>
 
               {error && (
                 <div className="rounded-lg bg-danger-50 px-3 py-2.5 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
