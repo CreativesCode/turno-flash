@@ -7,7 +7,6 @@ import {
   type OrganizationModules,
 } from "@/hooks/useOrganizationModules.query";
 import { useTheme } from "@/contexts/theme-context";
-import { createClient } from "@/utils/supabase/client";
 import {
   Activity,
   AlertTriangle,
@@ -32,7 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 
 interface NavItem {
   name: string;
@@ -203,33 +202,9 @@ export const Sidebar = React.memo(function Sidebar() {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = useMemo(() => createClient(), []);
-  const [fetchedOrgName, setFetchedOrgName] = useState<string | null>(null);
-  // Derivado en render (no en el efecto) para evitar setState síncrono al no haber org
-  const organizationName = profile?.organization_id ? fetchedOrgName : null;
-
-  useEffect(() => {
-    let mounted = true;
-    if (!profile?.organization_id) {
-      return;
-    }
-    supabase
-      .from("organizations")
-      .select("name")
-      .eq("id", profile.organization_id)
-      .single()
-      .then(({ data, error }) => {
-        if (!mounted) return;
-        if (error) {
-          setFetchedOrgName(null);
-        } else {
-          setFetchedOrgName(data?.name ?? null);
-        }
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [profile?.organization_id, supabase]);
+  // From the shared, cached organization query (P2-04): no fetch of its own
+  const organizationName =
+    profile?.organization_id && modules.name ? modules.name : null;
 
   const visibleEntries = useMemo(() => {
     const role = profile?.role;

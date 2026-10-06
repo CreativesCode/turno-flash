@@ -13,13 +13,9 @@ import { useAppointments } from "@/hooks/useAppointments.query";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { usePendingTripBookingsCount } from "@/hooks/useTripBookings.query";
 import { useErrorStatsQuery } from "@/hooks/useErrorLogs.query";
+import { useLicense } from "@/hooks/useLicense";
 import type { AppointmentStatus } from "@/types/appointments";
-import { LicenseStatusResult } from "@/types/organization";
-import {
-  canUseApplication,
-  getMyOrganizationLicenseStatus,
-  shouldShowLicenseNotification,
-} from "@/utils/license";
+import { shouldShowLicenseNotification } from "@/utils/license";
 import { createClient } from "@/utils/supabase/client";
 import {
   Activity,
@@ -218,11 +214,11 @@ export default function DashboardPage() {
   const showAppointments = !!profile?.organization_id && modules.appointments;
   const pendingTripBookings = usePendingTripBookingsCount(modules.trips);
 
-  const [licenseStatus, setLicenseStatus] =
-    useState<LicenseStatusResult | null>(null);
-  const [loadingLicense, setLoadingLicense] = useState(true);
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [organizationName, setOrganizationName] = useState<string | null>(null);
+  // Shared with the license gate instead of a request of its own (P2-04)
+  const { licenseStatus, loading: loadingLicense, isBlocked } = useLicense();
+  const organizationName = profile?.organization_id
+    ? modules.name || null
+    : null;
   const [adminCounts, setAdminCounts] = useState<{
     organizations: number;
     users: number;
@@ -234,57 +230,9 @@ export default function DashboardPage() {
   // Stats de errores para hero de admin (solo cuando admin sin org)
   const { data: errorStats } = useErrorStatsQuery(7, isAdminWithoutOrg);
 
-  // Cargar estado de licencia y nombre de organización al montar el componente
+  // Platform counters for the admin
   useEffect(() => {
     let isMounted = true;
-
-    const loadLicenseStatus = async () => {
-      try {
-        if (!profile?.organization_id && profile?.role !== "admin") {
-          if (isMounted) setLoadingLicense(false);
-          return;
-        }
-
-        const status = await getMyOrganizationLicenseStatus();
-        if (!isMounted) return;
-
-        setLicenseStatus(status);
-        if (status && !canUseApplication(status)) {
-          setIsBlocked(true);
-        }
-      } catch (error) {
-        void Logger.error("Error loading license status:", error);
-      } finally {
-        if (isMounted) setLoadingLicense(false);
-      }
-    };
-
-    const loadOrganizationName = async () => {
-      if (!profile?.organization_id) {
-        if (isMounted) setOrganizationName(null);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from("organizations")
-          .select("name")
-          .eq("id", profile.organization_id)
-          .single();
-
-        if (!isMounted) return;
-
-        if (error) {
-          setOrganizationName(null);
-        } else {
-          setOrganizationName(data?.name || null);
-        }
-      } catch (error) {
-        if (!isMounted) return;
-        void Logger.error("Error loading organization name:", error);
-        setOrganizationName(null);
-      }
-    };
 
     const loadAdminCounts = async () => {
       if (profile?.role !== "admin") {
@@ -313,8 +261,6 @@ export default function DashboardPage() {
     };
 
     if (profile) {
-      loadLicenseStatus();
-      loadOrganizationName();
       loadAdminCounts();
     }
 

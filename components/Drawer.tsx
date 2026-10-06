@@ -8,7 +8,6 @@ import {
 } from "@/hooks/useOrganizationModules.query";
 import { useTheme } from "@/contexts/theme-context";
 import { useBackToClose } from "@/hooks/useBackToClose";
-import { createClient } from "@/utils/supabase/client";
 import {
   Activity,
   AlertTriangle,
@@ -32,7 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 interface DrawerProps {
   open: boolean;
@@ -202,8 +201,9 @@ export function Drawer({ open, onClose }: DrawerProps) {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = useMemo(() => createClient(), []);
-  const [organizationName, setOrganizationName] = useState<string | null>(null);
+  // From the shared, cached organization query (P2-04): no fetch of its own
+  const organizationName =
+    profile?.organization_id && modules.name ? modules.name : null;
   const releaseBack = useBackToClose(open, onClose);
   // Leaving to another screen: the back entry must stay put (see the hook)
   const closeToNavigate = () => {
@@ -211,29 +211,6 @@ export function Drawer({ open, onClose }: DrawerProps) {
     onClose();
   };
 
-  useEffect(() => {
-    let mounted = true;
-    if (!profile?.organization_id) {
-      setOrganizationName(null);
-      return;
-    }
-    supabase
-      .from("organizations")
-      .select("name")
-      .eq("id", profile.organization_id)
-      .single()
-      .then(({ data, error }) => {
-        if (!mounted) return;
-        if (error) {
-          setOrganizationName(null);
-        } else {
-          setOrganizationName(data?.name ?? null);
-        }
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [profile?.organization_id, supabase]);
 
   const visibleEntries = useMemo(() => {
     const role = profile?.role;
