@@ -8,7 +8,7 @@ import {
 import { AppointmentRescheduleSheet } from "@/components/appointments/AppointmentRescheduleSheet";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Button } from "@/components/ui";
+import { Button, ConfirmSheet } from "@/components/ui";
 import { CalendarSkeleton } from "@/components/ui/skeleton";
 import {
   APPOINTMENT_SOURCE,
@@ -90,6 +90,11 @@ const RESCHEDULABLE: readonly string[] = [
   APPOINTMENT_STATUS.CLIENT_CONFIRMED,
 ];
 
+/** "No vino" only makes sense once the appointment's start time has passed. */
+function hasStarted(a: AppointmentWithDetails): boolean {
+  return new Date(`${a.appointment_date}T${a.start_time}`) <= new Date();
+}
+
 function AppointmentsContent() {
   const { profile } = useAuth();
   const router = useRouter();
@@ -104,6 +109,10 @@ function AppointmentsContent() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showReschedule, setShowReschedule] = useState(false);
+  // Cancel and no-show notify the customer and can't be undone: confirm first
+  const [pendingTerminal, setPendingTerminal] = useState<
+    "cancelled" | "no_show" | null
+  >(null);
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentWithDetails | null>(null);
@@ -866,21 +875,38 @@ function AppointmentsContent() {
                 }
               : undefined
           }
-          onMarkNoShow={() =>
-            updateStatus(
-              selectedAppointment.id,
-              APPOINTMENT_STATUS.NO_SHOW as AppointmentStatus
-            )
+          onMarkNoShow={
+            hasStarted(selectedAppointment)
+              ? () => setPendingTerminal("no_show")
+              : undefined
           }
-          onCancel={() =>
-            updateStatus(
-              selectedAppointment.id,
-              APPOINTMENT_STATUS.CANCELLED as AppointmentStatus
-            )
-          }
+          onCancel={() => setPendingTerminal("cancelled")}
           isProcessing={updateAppointmentStatusMutation.isPending}
         />
       )}
+
+      <ConfirmSheet
+        open={!!pendingTerminal && !!selectedAppointment}
+        onClose={() => setPendingTerminal(null)}
+        onConfirm={async () => {
+          if (!selectedAppointment || !pendingTerminal) return;
+          await updateStatus(
+            selectedAppointment.id,
+            pendingTerminal as AppointmentStatus
+          );
+          setPendingTerminal(null);
+        }}
+        title={pendingTerminal === "no_show" ? "Marcar que no vino" : "Cancelar turno"}
+        confirmLabel={pendingTerminal === "no_show" ? "No vino" : "Cancelar turno"}
+        busyLabel="Guardando…"
+        busy={updateAppointmentStatusMutation.isPending}
+      >
+        <p className="text-sm text-foreground-muted">
+          {pendingTerminal === "no_show"
+            ? "El turno queda marcado como no asistió. No se puede deshacer."
+            : "El horario queda libre y, si tienes WhatsApp conectado, le avisamos al cliente. No se puede deshacer."}
+        </p>
+      </ConfirmSheet>
 
       {selectedAppointment && showReschedule && (
         <AppointmentRescheduleSheet

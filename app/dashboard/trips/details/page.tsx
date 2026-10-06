@@ -6,7 +6,13 @@ import { ManualBookingSheet } from "@/components/trips/ManualBookingSheet";
 import { PassengerPrintSheet } from "@/components/trips/PassengerPrintSheet";
 import { PassengerRow } from "@/components/trips/PassengerRow";
 import { PaymentSheet } from "@/components/trips/PaymentSheet";
-import { Button, Field, Sheet, sheetInputClasses } from "@/components/ui";
+import {
+  Button,
+  ConfirmSheet,
+  Field,
+  Sheet,
+  sheetInputClasses,
+} from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { TripService } from "@/services/trips.service";
 import {
@@ -169,23 +175,27 @@ function TripDetailsContent() {
     [setStatus, toast]
   );
 
-  const handleReject = useCallback(
-    async (booking: TripBookingWithCustomer) => {
-      try {
-        await setStatus.mutateAsync({
-          bookingId: booking.id,
-          status: "cancelled",
-        });
-        toast.success("Reserva cancelada", "Los asientos vuelven a estar libres");
-      } catch (err) {
-        toast.error(
-          "Error",
-          err instanceof Error ? err.message : "No se pudo cancelar"
-        );
-      }
-    },
-    [setStatus, toast]
+  // Cancelling notifies the passenger and frees the seats: confirm first
+  const [rejecting, setRejecting] = useState<TripBookingWithCustomer | null>(
+    null
   );
+
+  const handleConfirmReject = useCallback(async () => {
+    if (!rejecting) return;
+    try {
+      await setStatus.mutateAsync({
+        bookingId: rejecting.id,
+        status: "cancelled",
+      });
+      toast.success("Reserva cancelada", "Los asientos vuelven a estar libres");
+      setRejecting(null);
+    } catch (err) {
+      toast.error(
+        "Error",
+        err instanceof Error ? err.message : "No se pudo cancelar"
+      );
+    }
+  }, [rejecting, setStatus, toast]);
 
   const handleEditNames = useCallback((booking: TripBookingWithCustomer) => {
     setEditingNames(booking);
@@ -518,7 +528,7 @@ function TripDetailsContent() {
                   canManage={canManage}
                   requiresApproval={trip.requires_approval}
                   onApprove={handleApprove}
-                  onReject={handleReject}
+                  onReject={setRejecting}
                   onRegisterPayment={setPaying}
                   onEditNames={handleEditNames}
                 />
@@ -541,6 +551,26 @@ function TripDetailsContent() {
           </button>
         )}
       </div>
+
+      <ConfirmSheet
+        open={!!rejecting}
+        onClose={() => setRejecting(null)}
+        onConfirm={handleConfirmReject}
+        title="Cancelar reserva"
+        confirmLabel="Cancelar reserva"
+        busyLabel="Cancelando…"
+        busy={setStatus.isPending}
+      >
+        <p className="text-sm text-foreground-muted">
+          Los asientos quedan libres y, si tienes WhatsApp conectado, le
+          avisamos al pasajero. No se puede deshacer.
+        </p>
+        {rejecting?.deposit_status === "paid" && (
+          <p className="mt-2 text-sm font-semibold text-warning-700 dark:text-warning-400">
+            Ya pagó el anticipo: recuerda devolvérselo.
+          </p>
+        )}
+      </ConfirmSheet>
 
       {paying && (
         <PaymentSheet

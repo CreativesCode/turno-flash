@@ -168,9 +168,12 @@ export function PassengerRow({
             <span className={STATUS_CHIP[booking.status]}>
               {STATUS_LABEL[booking.status]}
             </span>
-            <span className={DEPOSIT_CHIP[booking.deposit_status]}>
-              {DEPOSIT_LABEL[booking.deposit_status]}
-            </span>
+            {/* On a cancelled booking only a paid deposit matters: it must be returned */}
+            {(!isCancelled || booking.deposit_status === "paid") && (
+              <span className={DEPOSIT_CHIP[booking.deposit_status]}>
+                {DEPOSIT_LABEL[booking.deposit_status]}
+              </span>
+            )}
             {isExpiring && !isCancelled && deadline && (
               <span className={`${chip} border-border-2 bg-muted text-foreground-muted`}>
                 Vence {deadline}
