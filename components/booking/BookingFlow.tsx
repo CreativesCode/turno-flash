@@ -3,6 +3,7 @@
 import {
   type CustomerSubmit,
   DateTimeStep,
+  type DetailsDraft,
   DetailsStep,
   ServiceStep,
   StaffStep,
@@ -15,6 +16,7 @@ import {
   usePublicBookingInfo,
 } from "@/hooks/usePublicBooking.query";
 import { useRequestKey } from "@/hooks/useRequestKey";
+import { useStepHistory } from "@/hooks/useStepHistory";
 import { PublicBookingError } from "@/services/public-booking.service";
 import type {
   PublicBookingConfirmation,
@@ -24,7 +26,13 @@ import type {
 import { fmtDuration } from "@/utils/format";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarCheck, CalendarX, ChevronLeft, Hourglass } from "lucide-react";
+import {
+  CalendarCheck,
+  CalendarX,
+  ChevronLeft,
+  Hourglass,
+  WifiOff,
+} from "lucide-react";
 import { ReactNode, useState } from "react";
 
 type Step = "service" | "staff" | "time" | "details" | "done";
@@ -48,32 +56,54 @@ function longDate(date: string): string {
 }
 
 export function BookingFlow({ slug }: { slug: string }) {
-  const { data: info, isLoading, error } = usePublicBookingInfo(slug);
+  const { data: info, isLoading, error, refetch } = usePublicBookingInfo(slug);
   const bookMutation = useCreatePublicBooking();
   const requestKey = useRequestKey();
   const toast = useToast();
 
-  const [step, setStep] = useState<Step>("service");
+  const { step, go, replace, back } = useStepHistory<Step>("service");
   const [service, setService] = useState<PublicService | null>(null);
   /** null = "no preference" */
   const [staffId, setStaffId] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
   const [slot, setSlot] = useState<PublicSlot | null>(null);
   const [confirmation, setConfirmation] = useState<PublicBookingConfirmation | null>(null);
+  const [draft, setDraft] = useState<DetailsDraft | null>(null);
 
-  if (!slug || (!isLoading && (error || !info || !info.available))) {
+  // A failed background refresh keeps the last data: only a page that never
+  // loaded shows an error, so a signal drop does not wipe the form.
+  const offline =
+    !!error &&
+    (!(error instanceof PublicBookingError) ||
+      error.code === "network" ||
+      error.code === "server_error");
+
+  if (!slug || (!isLoading && (!info || !info.available))) {
     return (
       <Shell>
         <Card className="p-8 text-center">
-          <CalendarX className="mx-auto h-10 w-10 text-foreground-subtle" />
+          {offline ? (
+            <WifiOff className="mx-auto h-10 w-10 text-foreground-subtle" />
+          ) : (
+            <CalendarX className="mx-auto h-10 w-10 text-foreground-subtle" />
+          )}
           <h1 className="mt-3 text-lg font-extrabold text-foreground">
-            Reservas no disponibles
+            {offline ? "Sin conexión" : "Reservas no disponibles"}
           </h1>
           <p className="mt-1 text-sm text-foreground-muted">
-            {error
-              ? "No pudimos cargar la página. Revisa tu conexión e intenta de nuevo."
+            {offline
+              ? "No pudimos cargar la página. Revisa tu conexión."
               : "Este negocio no está recibiendo reservas online en este momento."}
           </p>
+          {offline && (
+            <Button
+              variant="soft"
+              onClick={() => void refetch()}
+              className="mt-4 w-full justify-center"
+            >
+              Reintentar
+            </Button>
+          )}
         </Card>
       </Shell>
     );
@@ -96,7 +126,7 @@ export function BookingFlow({ slug }: { slug: string }) {
     info.staff.find((s) => s.id === id)?.name ?? null;
 
   const reset = () => {
-    setStep("service");
+    replace("service");
     setService(null);
     setStaffId(null);
     setDate(null);
@@ -125,12 +155,13 @@ export function BookingFlow({ slug }: { slug: string }) {
       });
       requestKey.reset();
       setConfirmation(result);
-      setStep("done");
+      // Replaces "details": back from the confirmation must not resubmit
+      replace("done");
     } catch (err) {
       if (err instanceof PublicBookingError && err.code === "slot_taken") {
         toast.error("Horario ocupado", err.message);
         setSlot(null);
-        setStep("time");
+        back();
         return;
       }
       toast.error(
@@ -140,21 +171,30 @@ export function BookingFlow({ slug }: { slug: string }) {
     }
   };
 
-  const previous = PREVIOUS_STEP[step];
+  // History entries can outlive the choices they need (after "Hacer otra
+  // reserva"): fall back to the first step instead of rendering nothing.
+  const view: Step = step !== "service" && step !== "done" && !service ? "service" : step;
+  const previous = PREVIOUS_STEP[view];
 
   return (
     <Shell
       businessName={info.organization.name}
-      subtitle={STEP_TITLES[step]}
-      onBack={previous ? () => setStep(previous) : undefined}
+      subtitle={STEP_TITLES[view]}
+      onBack={previous ? () => back() : undefined}
     >
-      {service && step !== "service" && step !== "done" && (
+      {offline && (
+        <p className="mb-3 flex items-center gap-1.5 rounded-lg bg-warning-50 px-3 py-2 text-xs font-semibold text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+          <WifiOff className="h-3.5 w-3.5 shrink-0" />
+          Sin conexión, reintentando… Lo que escribiste se mantiene.
+        </p>
+      )}
+      {service && view !== "service" && view !== "done" && (
         <div className="mb-4 flex flex-wrap gap-1.5 text-xs">
           <Chip>
             {service.name} · {fmtDuration(service.duration_minutes)}
           </Chip>
-          {step !== "staff" && <Chip>{staffName(staffId) ?? "Sin preferencia"}</Chip>}
-          {step === "details" && date && slot && (
+          {view !== "staff" && <Chip>{staffName(staffId) ?? "Sin preferencia"}</Chip>}
+          {view === "details" && date && slot && (
             <Chip>
               {longDate(date)} · {slot.start_time}
             </Chip>
@@ -162,30 +202,30 @@ export function BookingFlow({ slug }: { slug: string }) {
         </div>
       )}
 
-      {step === "service" && (
+      {view === "service" && (
         <ServiceStep
           services={info.services}
           onSelect={(s) => {
             setService(s);
             setStaffId(null);
             setDate(null);
-            setStep("staff");
+            go("staff");
           }}
         />
       )}
 
-      {step === "staff" && (
+      {view === "staff" && (
         <StaffStep
           staff={staffForService}
           onSelect={(id) => {
             setStaffId(id);
             setDate(null);
-            setStep("time");
+            go("time");
           }}
         />
       )}
 
-      {step === "time" && service && (
+      {view === "time" && service && (
         <DateTimeStep
           slug={slug}
           service={service}
@@ -198,20 +238,22 @@ export function BookingFlow({ slug }: { slug: string }) {
           onSelect={(selectedDate, selectedSlot) => {
             setDate(selectedDate);
             setSlot(selectedSlot);
-            setStep("details");
+            go("details");
           }}
         />
       )}
 
-      {step === "details" && (
+      {view === "details" && (
         <DetailsStep
           defaultCountry={guessPhoneCountry(info.organization.timezone)}
           isSubmitting={bookMutation.isPending}
           onSubmit={handleBook}
+          initial={draft}
+          onChange={setDraft}
         />
       )}
 
-      {step === "done" && confirmation && service && date && slot && (
+      {view === "done" && confirmation && service && date && slot && (
         <Card className="p-6 text-center">
           {confirmation.status === "confirmed" ? (
             <CalendarCheck className="mx-auto h-12 w-12 text-primary-600" />

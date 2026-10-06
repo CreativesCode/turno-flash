@@ -1,6 +1,10 @@
 "use client";
 
-import { type CustomerSubmit, DetailsStep } from "@/components/booking/BookingSteps";
+import {
+  type CustomerSubmit,
+  type DetailsDraft,
+  DetailsStep,
+} from "@/components/booking/BookingSteps";
 import {
   SeatsStep,
   TripListStep,
@@ -17,6 +21,7 @@ import {
   usePublicTripsInfo,
 } from "@/hooks/usePublicTrips.query";
 import { useRequestKey } from "@/hooks/useRequestKey";
+import { useStepHistory } from "@/hooks/useStepHistory";
 import { PublicTripsError } from "@/services/public-trips.service";
 import type {
   PublicTrip,
@@ -26,7 +31,13 @@ import { fmtMoney } from "@/utils/format";
 import { createClient } from "@/utils/supabase/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { BusFront, CalendarX, ChevronLeft, Hourglass } from "lucide-react";
+import {
+  BusFront,
+  CalendarX,
+  ChevronLeft,
+  Hourglass,
+  WifiOff,
+} from "lucide-react";
 import { ReactNode, useState } from "react";
 
 type Step = "trips" | "seats" | "details" | "done";
@@ -60,25 +71,48 @@ export function TripsFlow({ slug }: { slug: string }) {
   const requestKey = useRequestKey();
   const toast = useToast();
 
-  const [step, setStep] = useState<Step>("trips");
+  const { step, go, replace, back } = useStepHistory<Step>("trips");
   const [tripId, setTripId] = useState<string | null>(null);
   const [seatsData, setSeatsData] = useState<SeatsSubmit | null>(null);
   const [confirmation, setConfirmation] =
     useState<PublicTripBookingConfirmation | null>(null);
+  const [draft, setDraft] = useState<DetailsDraft | null>(null);
 
-  if (!slug || (!isLoading && (error || !info || !info.available))) {
+  // A failed background refresh (every 30 s, and when coming back from
+  // WhatsApp) keeps the last data: only a page that never loaded shows an
+  // error, so a signal drop does not wipe the seats and names typed.
+  const offline =
+    !!error &&
+    (!(error instanceof PublicTripsError) ||
+      error.code === "network" ||
+      error.code === "server_error");
+
+  if (!slug || (!isLoading && (!info || !info.available))) {
     return (
       <Shell>
         <Card className="p-8 text-center">
-          <CalendarX className="mx-auto h-10 w-10 text-foreground-subtle" />
+          {offline ? (
+            <WifiOff className="mx-auto h-10 w-10 text-foreground-subtle" />
+          ) : (
+            <CalendarX className="mx-auto h-10 w-10 text-foreground-subtle" />
+          )}
           <h1 className="mt-3 text-lg font-extrabold text-foreground">
-            Reservas no disponibles
+            {offline ? "Sin conexión" : "Reservas no disponibles"}
           </h1>
           <p className="mt-1 text-sm text-foreground-muted">
-            {error
-              ? "No pudimos cargar la página. Revisa tu conexión e intenta de nuevo."
+            {offline
+              ? "No pudimos cargar la página. Revisa tu conexión."
               : "Este negocio no está recibiendo reservas de viajes en este momento."}
           </p>
+          {offline && (
+            <Button
+              variant="soft"
+              onClick={() => void refetch()}
+              className="mt-4 w-full justify-center"
+            >
+              Reintentar
+            </Button>
+          )}
         </Card>
       </Shell>
     );
@@ -102,41 +136,60 @@ export function TripsFlow({ slug }: { slug: string }) {
     info.trips.find((candidate) => candidate.id === tripId) ?? null;
 
   const reset = () => {
-    setStep("trips");
+    replace("trips");
     setTripId(null);
     setSeatsData(null);
     setConfirmation(null);
   };
 
-  /** Back to the list when the chosen departure is gone or full. */
-  const bounceToList = (message: string) => {
-    toast.error("Se llenó esa salida", message);
+  /** Seats left on the chosen departure right now (null = gone). */
+  const freshSeatsLeft = async (): Promise<number | null> => {
+    const fresh = await refetch();
+    const current =
+      fresh.data && fresh.data.available
+        ? fresh.data.trips.find((candidate) => candidate.id === tripId)
+        : null;
+    return current ? current.seats_left : null;
+  };
+
+  /**
+   * Fewer seats than asked: stay on (or return to) the seats step with
+   * everything typed. Only a full or gone departure goes back to the list.
+   * The step counts are history entries from the current step.
+   */
+  const handleShortage = (
+    seatsLeft: number | null,
+    stepsToSeats: number,
+    stepsToList: number
+  ) => {
+    if (seatsLeft && seatsLeft > 0) {
+      toast.error(
+        "Quedan menos asientos",
+        "Quedan " + seatsLeft + ". Ajusta la cantidad, por favor."
+      );
+      if (stepsToSeats > 0) back(stepsToSeats);
+      return;
+    }
+    toast.error(
+      "Se llenó esa salida",
+      seatsLeft === null
+        ? "Esa salida ya no está disponible."
+        : "Ya no quedan asientos."
+    );
     setSeatsData(null);
-    setStep("trips");
+    back(stepsToList);
   };
 
   const handleSeats = async (data: SeatsSubmit) => {
     setSeatsData(data);
     // One last check before asking for personal data, so the customer does
     // not type everything to be told the bus is full.
-    const fresh = await refetch();
-    const current =
-      fresh.data && fresh.data.available
-        ? fresh.data.trips.find((candidate) => candidate.id === tripId)
-        : null;
-    if (!current) {
-      bounceToList("Esa salida ya no está disponible.");
+    const seatsLeft = await freshSeatsLeft();
+    if (seatsLeft === null || seatsLeft < data.seats) {
+      handleShortage(seatsLeft, 0, 1);
       return;
     }
-    if (current.seats_left < data.seats) {
-      bounceToList(
-        current.seats_left > 0
-          ? `Quedan ${current.seats_left} asientos.`
-          : "Ya no quedan asientos."
-      );
-      return;
-    }
-    setStep("details");
+    go("details");
   };
 
   const handleBook = async (customer: CustomerSubmit) => {
@@ -161,10 +214,11 @@ export function TripsFlow({ slug }: { slug: string }) {
       });
       requestKey.reset();
       setConfirmation(result);
-      setStep("done");
+      // Replaces "details": back from the confirmation must not resubmit
+      replace("done");
     } catch (err) {
       if (err instanceof PublicTripsError && err.code === "not_enough_seats") {
-        bounceToList(err.message);
+        handleShortage(await freshSeatsLeft(), 1, 2);
         return;
       }
       toast.error(
@@ -174,7 +228,15 @@ export function TripsFlow({ slug }: { slug: string }) {
     }
   };
 
-  const previous = PREVIOUS_STEP[step];
+  // History entries can outlive the choices they need (after "Hacer otra
+  // reserva"): fall back to an earlier step instead of rendering nothing.
+  const view: Step =
+    step !== "trips" && step !== "done" && !trip
+      ? "trips"
+      : step === "details" && !seatsData
+        ? "seats"
+        : step;
+  const previous = PREVIOUS_STEP[view];
   const point = trip?.pickup_points.find(
     (candidate) => candidate.id === seatsData?.pickupPointId
   );
@@ -182,15 +244,21 @@ export function TripsFlow({ slug }: { slug: string }) {
   return (
     <Shell
       businessName={info.organization.name}
-      subtitle={STEP_TITLES[step]}
-      onBack={previous ? () => setStep(previous) : undefined}
+      subtitle={STEP_TITLES[view]}
+      onBack={previous ? () => back() : undefined}
     >
-      {trip && step !== "trips" && step !== "done" && (
+      {offline && (
+        <p className="mb-3 flex items-center gap-1.5 rounded-lg bg-warning-50 px-3 py-2 text-xs font-semibold text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+          <WifiOff className="h-3.5 w-3.5 shrink-0" />
+          Sin conexión, reintentando… Lo que escribiste se mantiene.
+        </p>
+      )}
+      {trip && view !== "trips" && view !== "done" && (
         <div className="mb-4 flex flex-wrap gap-1.5 text-xs">
           <Chip>
             {trip.title} · {hhmm(trip.departure_time)}
           </Chip>
-          {step === "details" && seatsData && (
+          {view === "details" && seatsData && (
             <>
               <Chip>
                 {seatsData.seats} asiento{seatsData.seats === 1 ? "" : "s"}
@@ -202,32 +270,40 @@ export function TripsFlow({ slug }: { slug: string }) {
         </div>
       )}
 
-      {step === "trips" && (
+      {view === "trips" && (
         <TripListStep
           trips={info.trips}
           currency={currency}
           photoUrl={vehiclePhotoUrl}
           onSelect={(selected) => {
+            // Coming back to the same departure keeps the seats and names
+            if (selected.id !== tripId) setSeatsData(null);
             setTripId(selected.id);
-            setSeatsData(null);
-            setStep("seats");
+            go("seats");
           }}
         />
       )}
 
-      {step === "seats" && trip && (
-        <SeatsStep trip={trip} currency={currency} onSubmit={handleSeats} />
+      {view === "seats" && trip && (
+        <SeatsStep
+          trip={trip}
+          currency={currency}
+          onSubmit={handleSeats}
+          initial={seatsData}
+        />
       )}
 
-      {step === "details" && (
+      {view === "details" && (
         <DetailsStep
           defaultCountry={guessPhoneCountry(info.organization.timezone)}
           isSubmitting={bookMutation.isPending}
           onSubmit={handleBook}
+          initial={draft}
+          onChange={setDraft}
         />
       )}
 
-      {step === "done" && confirmation && trip && seatsData && (
+      {view === "done" && confirmation && trip && seatsData && (
         <Card className="p-6 text-center">
           {confirmation.status === "confirmed" ? (
             <BusFront className="mx-auto h-12 w-12 text-primary-600" />

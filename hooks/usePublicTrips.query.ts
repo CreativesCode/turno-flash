@@ -25,7 +25,8 @@ export function usePublicTripsInfo(slug: string) {
     refetchInterval: 1000 * 30,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
-    retry: 1,
+    // Cuban mobile data drops often: a failed fetch is usually just a hiccup
+    retry: 3,
   });
 }
 

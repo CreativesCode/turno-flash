@@ -112,4 +112,6 @@ export type PublicTripsErrorCode =
   | "pickup_point_required"
   | "pickup_point_invalid"
   | "round_trip_unavailable"
-  | "server_error";
+  | "server_error"
+  /** The request never reached the server (no signal) */
+  | "network";

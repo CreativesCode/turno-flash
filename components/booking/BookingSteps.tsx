@@ -163,7 +163,7 @@ export function DateTimeStep({
 
   // Derived, not synced: the first available day until the customer picks one
   const activeDate = date ?? days[0]?.value ?? null;
-  const { data: slots = [], isLoading, error } = usePublicSlots({
+  const { data: slots = [], isLoading, error, refetch } = usePublicSlots({
     slug,
     serviceId: service.id,
     staffId,
@@ -210,8 +210,17 @@ export function DateTimeStep({
             <div key={i} className="h-10 animate-pulse rounded-lg bg-surface-2" />
           ))}
         </div>
-      ) : error ? (
-        <p className="text-sm text-danger-600">{error.message}</p>
+      ) : error && slots.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-foreground-muted">
+          No pudimos cargar los horarios. Revisa tu conexión.
+          <Button
+            variant="soft"
+            onClick={() => void refetch()}
+            className="mt-3 w-full justify-center"
+          >
+            Reintentar
+          </Button>
+        </div>
       ) : slots.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-foreground-muted">
           No quedan horarios libres este día. Prueba con otro.
@@ -241,28 +250,49 @@ export interface CustomerSubmit extends PublicCustomerInput {
   website: string;
 }
 
+/** What the customer typed, kept by the flow so going back does not erase it. */
+export interface DetailsDraft {
+  first_name: string;
+  last_name: string;
+  country: string;
+  phone: string;
+  email: string;
+  notes: string;
+  website: string;
+}
+
 export function DetailsStep({
   defaultCountry,
   isSubmitting,
   onSubmit,
+  initial,
+  onChange,
 }: {
   /** ISO code preselected in the phone country picker */
   defaultCountry: string;
   isSubmitting: boolean;
   onSubmit: (data: CustomerSubmit) => void;
+  initial?: DetailsDraft | null;
+  onChange?: (draft: DetailsDraft) => void;
 }) {
-  const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
-    country: defaultCountry,
-    phone: "",
-    email: "",
-    notes: "",
-    website: "",
-  });
+  const [form, setForm] = useState<DetailsDraft>(
+    initial ?? {
+      first_name: "",
+      last_name: "",
+      country: defaultCountry,
+      phone: "",
+      email: "",
+      notes: "",
+      website: "",
+    }
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const patch = (p: Partial<typeof form>) => setForm((prev) => ({ ...prev, ...p }));
+  const patch = (p: Partial<DetailsDraft>) => {
+    const next = { ...form, ...p };
+    setForm(next);
+    onChange?.(next);
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

@@ -73,4 +73,6 @@ export type PublicBookingErrorCode =
   | "service_unavailable"
   | "slot_taken"
   | "too_many_bookings"
-  | "server_error";
+  | "server_error"
+  /** The request never reached the server (no signal) */
+  | "network";

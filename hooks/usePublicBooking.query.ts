@@ -16,7 +16,8 @@ export function usePublicBookingInfo(slug: string) {
     queryFn: () => PublicBookingService.getInfo(slug),
     enabled: !!slug,
     staleTime: 1000 * 60,
-    retry: 1,
+    // Cuban mobile data drops often: a failed fetch is usually just a hiccup
+    retry: 3,
   });
 }
 

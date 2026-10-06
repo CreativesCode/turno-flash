@@ -149,17 +149,21 @@ export function SeatsStep({
   trip,
   currency,
   onSubmit,
+  initial,
 }: {
   trip: PublicTrip;
   currency: string;
   onSubmit: (data: SeatsSubmit) => void;
+  /** What the passenger already chose, when coming back to this step. */
+  initial?: SeatsSubmit | null;
 }) {
   const [pickupPointId, setPickupPointId] = useState(
-    trip.pickup_points.length === 1 ? trip.pickup_points[0].id : ""
+    initial?.pickupPointId ??
+      (trip.pickup_points.length === 1 ? trip.pickup_points[0].id : "")
   );
-  const [roundTrip, setRoundTrip] = useState(false);
-  const [seats, setSeats] = useState(1);
-  const [names, setNames] = useState<string[]>([""]);
+  const [roundTrip, setRoundTrip] = useState(initial?.roundTrip ?? false);
+  const [seats, setSeats] = useState(initial?.seats ?? 1);
+  const [names, setNames] = useState<string[]>(initial?.passengerNames ?? [""]);
   const [error, setError] = useState<string | null>(null);
 
   const point = trip.pickup_points.find((p) => p.id === pickupPointId);

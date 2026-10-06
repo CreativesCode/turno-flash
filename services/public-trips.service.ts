@@ -42,7 +42,7 @@ async function call<T>(payload: Record<string, unknown>): Promise<T> {
     });
   } catch {
     throw new PublicTripsError(
-      "server_error",
+      "network",
       "No hay conexión. Revisa tu internet e intenta de nuevo."
     );
   }
