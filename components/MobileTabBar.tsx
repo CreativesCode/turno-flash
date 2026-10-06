@@ -88,9 +88,10 @@ export function MobileTabBar() {
 
   return (
     <div
+      data-mobile-tabbar
       className="sticky bottom-0 z-30 grid grid-cols-5 border-t border-border bg-surface px-1 pt-1.5 lg:hidden print:hidden"
       style={{
-        paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom, 0px))",
+        paddingBottom: "calc(0.5rem + var(--safe-area-inset-bottom, 0px))",
       }}
     >
       {tabs.slice(0, 2).map((t) => (

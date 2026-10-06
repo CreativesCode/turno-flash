@@ -263,8 +263,8 @@ export function Drawer({ open, onClose }: DrawerProps) {
       <aside
         className="fixed bottom-0 left-0 top-0 z-50 flex w-72 flex-col bg-surface shadow-2xl"
         style={{
-          paddingTop: "env(safe-area-inset-top, 0px)",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          paddingTop: "var(--safe-area-inset-top, 0px)",
+          paddingBottom: "var(--safe-area-inset-bottom, 0px)",
         }}
       >
         {/* Brand */}

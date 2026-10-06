@@ -65,7 +65,7 @@ export function Sheet({
         aria-modal="true"
         aria-label={title}
         className={`relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-surface shadow-xl sm:max-h-[90dvh] sm:rounded-2xl sm:border sm:border-border ${maxWidthClass}`}
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        style={{ paddingBottom: "var(--safe-area-inset-bottom, 0px)" }}
       >
         {/* Drag handle (mobile only) */}
         <div className="flex justify-center py-2 sm:hidden">

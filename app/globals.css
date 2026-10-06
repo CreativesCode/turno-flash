@@ -190,13 +190,23 @@ body {
   padding-right: env(safe-area-inset-right);
 }
 
-/* Para evitar que el contenido se oculte bajo el notch o barra de estado */
+/* Para evitar que el contenido se oculte bajo el notch o barra de estado.
+   The --safe-area-inset-* vars default to env() (:root above) and Capacitor 8
+   overwrites them on Android 15+, where env() reports 0 (P1-23). */
 @supports (padding: max(0px)) {
   body {
-    padding-top: max(0px, env(safe-area-inset-top));
-    padding-left: max(0px, env(safe-area-inset-left));
-    padding-right: max(0px, env(safe-area-inset-right));
-    padding-bottom: max(0px, env(safe-area-inset-bottom));
+    padding-top: var(--safe-area-inset-top, 0px);
+    padding-left: var(--safe-area-inset-left, 0px);
+    padding-right: var(--safe-area-inset-right, 0px);
+    padding-bottom: var(--safe-area-inset-bottom, 0px);
+  }
+  /* The dashboard's mobile bars stick to the edges and pad themselves;
+     padding the body too doubled the gap under the notch */
+  body:has([data-mobile-topbar]) {
+    padding-top: 0;
+  }
+  body:has([data-mobile-tabbar]) {
+    padding-bottom: 0;
   }
 }
 
