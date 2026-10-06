@@ -48,6 +48,8 @@ export interface AppointmentCreateModalProps {
   isSubmitting: boolean;
 
   customers: Customer[];
+  /** Customers load when the form opens (P2-06). */
+  customersLoading?: boolean;
   services: Service[];
   staff: StaffMember[];
 
@@ -70,6 +72,7 @@ export function AppointmentCreateModal({
   onSubmit,
   isSubmitting,
   customers,
+  customersLoading,
   services,
   staff,
   showNewCustomerForm,
@@ -90,6 +93,7 @@ export function AppointmentCreateModal({
             <div className="min-w-0 flex-1">
               <CustomerPicker
                 customers={customers}
+                loading={customersLoading}
                 value={formData.customer_id}
                 onSelect={(id) => onChange({ customer_id: id })}
                 onCreateWith={(query) => {

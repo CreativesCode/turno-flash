@@ -13,6 +13,8 @@ interface CustomerPickerProps {
   onSelect: (customerId: string) => void;
   /** No match: open the quick-create form, prefilled with what was typed. */
   onCreateWith: (query: string) => void;
+  /** The list is still arriving: don't offer to create yet. */
+  loading?: boolean;
 }
 
 /**
@@ -25,6 +27,7 @@ export function CustomerPicker({
   value,
   onSelect,
   onCreateWith,
+  loading = false,
 }: CustomerPickerProps) {
   const [query, setQuery] = useState("");
   const selected = customers.find((c) => c.id === value);
@@ -104,7 +107,11 @@ export function CustomerPicker({
         </ul>
       )}
 
-      {query.trim() && matches.length === 0 && (
+      {query.trim() && matches.length === 0 && loading && (
+        <p className="mt-2 text-xs text-foreground-muted">Buscando clientes…</p>
+      )}
+
+      {query.trim() && matches.length === 0 && !loading && (
         <button
           type="button"
           onClick={() => onCreateWith(query.trim())}

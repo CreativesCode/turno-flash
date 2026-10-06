@@ -200,6 +200,9 @@ function AppointmentsContent() {
 
   const normalizedData = useNormalizedData({
     includeAppointments: false,
+    // Only the create form uses them: no full customer download per visit
+    // (P2-06)
+    includeCustomers: showCreateModal,
     customerFilters: { isActive: true },
     serviceFilters: { isActive: true },
     staffFilters: { isActive: true, isBookable: true },
@@ -214,7 +217,11 @@ function AppointmentsContent() {
   const rescheduleMutation = useRescheduleAppointment();
   const createCustomerMutation = useCreateCustomer();
 
-  const loading = appointmentsLoading || normalizedData.loading;
+  // Customers load with the create form, which handles its own empty state
+  const loading =
+    appointmentsLoading ||
+    normalizedData.servicesLoading ||
+    normalizedData.staffLoading;
   const error =
     appointmentsError?.message || normalizedData.error || localError;
 
@@ -846,6 +853,7 @@ function AppointmentsContent() {
         onSubmit={handleSave}
         isSubmitting={createAppointmentMutation.isPending}
         customers={customers}
+        customersLoading={normalizedData.customersLoading}
         services={services}
         staff={staffMembers}
         showNewCustomerForm={showNewCustomerForm}
