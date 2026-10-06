@@ -610,7 +610,7 @@ function OrganizationDetailsContent() {
           {/* Sección WhatsApp — solo admin */}
           {isAdmin && <WhatsAppOrgSection organizationId={organizationId} />}
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div className="flex flex-col gap-4 lg:col-span-2">
               <Card className="p-4">
                 <SectionHeader

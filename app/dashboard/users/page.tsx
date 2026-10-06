@@ -268,7 +268,7 @@ export default function UsersManagementPage() {
               </p>
             </div>
           ) : (
-            <div className="grid gap-2 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               {users.map((user) => (
                 <UserCard
                   key={user.id}

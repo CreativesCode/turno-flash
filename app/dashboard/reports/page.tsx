@@ -258,7 +258,7 @@ export default function ReportsPage() {
               </section>
 
               {/* Estados + Top servicios */}
-              <div className="mb-6 grid gap-6 lg:grid-cols-2">
+              <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <section>
                   <SectionLabel>Turnos por estado</SectionLabel>
                   <Card className="p-4 sm:p-5">
@@ -301,7 +301,7 @@ export default function ReportsPage() {
               </div>
 
               {/* Profesionales + Horas pico */}
-              <div className="mb-6 grid gap-6 lg:grid-cols-2">
+              <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <section>
                   <SectionLabel>Rendimiento del equipo</SectionLabel>
                   <Card className="overflow-hidden p-0">

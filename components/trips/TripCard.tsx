@@ -124,8 +124,8 @@ export function TripCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="truncate text-sm font-bold text-foreground">
+          <div className="flex min-w-0 items-start justify-between gap-2">
+            <h3 className="min-w-0 truncate text-sm font-bold text-foreground">
               {trip.title}
             </h3>
             <div className="whitespace-nowrap text-base font-extrabold tracking-tight text-foreground">
@@ -144,9 +144,11 @@ export function TripCard({
               {trip.return_time ? ` – ${fmtTime(trip.return_time)}` : ""}
             </span>
             {trip.pickup_location && (
-              <span className="inline-flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                <span className="truncate">{trip.pickup_location}</span>
+              <span className="inline-flex min-w-0 items-center gap-1">
+                <MapPin className="h-3 w-3 shrink-0" />
+                <span className="truncate">
+                  <RichText text={trip.pickup_location} />
+                </span>
               </span>
             )}
           </div>
@@ -178,14 +180,19 @@ export function TripCard({
           </div>
         </div>
 
-        {canManage && <KebabMenu items={menuItems} />}
+        {canManage && (
+          <div className="relative z-10">
+            <KebabMenu items={menuItems} />
+          </div>
+        )}
       </div>
 
       <div className="border-t border-border pt-3">
         <div className="flex items-center justify-between text-xs font-semibold">
+          {/* The ::after covers the whole card, so a tap anywhere opens it (P1-08) */}
           <Link
             href={`/dashboard/trips/details?id=${trip.id}`}
-            className="inline-flex items-center gap-1.5 text-foreground-muted transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-1.5 text-foreground-muted transition-colors after:absolute after:inset-0 after:content-[''] hover:text-foreground"
           >
             <Users className="h-3.5 w-3.5" />
             {trip.seats_taken} de {trip.total_seats} asientos
