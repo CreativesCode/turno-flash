@@ -45,7 +45,7 @@ interface NewOrganizationForm {
 const EMPTY_FORM: NewOrganizationForm = {
   org_name: "",
   org_slug: "",
-  org_timezone: "UTC",
+  org_timezone: "America/Havana",
   org_whatsapp_phone: "",
   selected_user_id: "",
   license_start_date: "",

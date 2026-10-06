@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 
 const TIMEZONES = [
+  "America/Havana",
   "America/Mexico_City",
   "America/Argentina/Buenos_Aires",
   "America/Santiago",
@@ -18,7 +19,6 @@ const TIMEZONES = [
   "America/Caracas",
   "America/New_York",
   "America/Los_Angeles",
-  "America/Havana",
   "Europe/Madrid",
   "UTC",
 ] as const;
@@ -54,7 +54,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
-  const [timezone, setTimezone] = useState<string>("America/Mexico_City");
+  const [timezone, setTimezone] = useState<string>("America/Havana");
   const [kind, setKind] = useState<BusinessKind>("appointments");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);

@@ -161,7 +161,8 @@ Deno.serve(async (req) => {
         .select("id")
         .eq("appointment_id", appointmentId)
         .eq("intent", intent)
-        .in("status", ["pending", "sent", "delivered", "read"])
+        // "failed" too: OpenWA can answer HTTP 500 after delivering
+        .in("status", ["pending", "sent", "delivered", "read", "failed"])
         .limit(1)
         .maybeSingle();
 
@@ -280,11 +281,16 @@ Deno.serve(async (req) => {
           .from("appointments")
           .update({
             reminder_sent_at: new Date().toISOString(),
-            status: "reminded",
             reminder_method: "whatsapp",
           })
+          .eq("id", appointmentId);
+        // Only a confirmed appointment moves to "reminded": a pending request
+        // must keep its "Aprobar" button.
+        await supabase
+          .from("appointments")
+          .update({ status: "reminded" })
           .eq("id", appointmentId)
-          .neq("status", "cancelled");
+          .eq("status", "confirmed");
 
         await supabase.from("reminder_logs").insert({
           appointment_id: appointmentId,

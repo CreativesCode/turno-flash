@@ -64,6 +64,7 @@ interface BookingRow {
   } | null;
   trips: {
     title: string;
+    timezone: string | null;
     departure_date: string;
     departure_time: string;
     return_time: string | null;
@@ -142,7 +143,7 @@ Deno.serve(async (req) => {
          price_total, deposit_amount, deposit_status, amount_paid, extra_amount,
          hold_expires_at, passenger_names,
          customers ( first_name, last_name, phone, phone_country_code, whatsapp_number ),
-         trips ( title, departure_date, departure_time, return_time, requires_approval,
+         trips ( title, departure_date, departure_time, return_time, requires_approval, timezone,
                  driver_name, driver_phone, vehicle_description ),
          trip_pickup_points ( name, pickup_time )`
       )
@@ -325,7 +326,13 @@ function buildMessage(
               booking.hold_expires_at
                 ? `, antes del ${new Date(booking.hold_expires_at).toLocaleString(
                     "es",
-                    { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }
+                    {
+                      day: "numeric",
+                      month: "long",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: booking.trips?.timezone || "America/Havana",
+                    }
                   )}`
                 : ""
             }.${depositInstructions ? `\n${depositInstructions}` : ""}`

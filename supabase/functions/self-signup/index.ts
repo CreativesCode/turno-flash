@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     const password = String(body.password ?? "");
     const fullName = String(body.full_name ?? "").trim();
     const orgName = String(body.org_name ?? "").trim();
-    const orgTimezone = String(body.org_timezone ?? "America/Mexico_City").trim();
+    const orgTimezone = String(body.org_timezone ?? "America/Havana").trim();
     const orgWhatsappPhone = String(body.org_whatsapp_phone ?? "").trim();
     const modules = String(body.modules ?? "appointments").trim();
 
@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
       {
         org_name: orgName,
         org_slug: buildSlug(orgName, createdUserId),
-        org_timezone: orgTimezone || "America/Mexico_City",
+        org_timezone: orgTimezone || "America/Havana",
         org_whatsapp_phone: orgWhatsappPhone || null,
         owner_user_id: createdUserId,
         license_start_date: now.toISOString(),

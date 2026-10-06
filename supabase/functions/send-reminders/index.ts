@@ -92,40 +92,9 @@ async function loadInWindow(
   });
 
   if (error) {
-    // Fallback: query directa si el RPC no existe aún
-    console.warn(
-      "[send-reminders] RPC missing, falling back to client-side filter",
-      error.message
-    );
-    return fallbackFilter(supabase, start, end);
+    throw error;
   }
   return (data ?? []) as AppointmentRow[];
-}
-
-// Fallback que filtra en JS si no se creó el RPC en DB
-async function fallbackFilter(
-  // deno-lint-ignore no-explicit-any
-  supabase: any,
-  start: Date,
-  end: Date
-): Promise<AppointmentRow[]> {
-  const dateStart = start.toISOString().slice(0, 10);
-  const dateEnd = end.toISOString().slice(0, 10);
-
-  const { data } = await supabase
-    .from("appointments")
-    .select(
-      "id, organization_id, appointment_date, start_time, status, reminder_sent_at"
-    )
-    .gte("appointment_date", dateStart)
-    .lte("appointment_date", dateEnd)
-    .in("status", ["confirmed", "pending", "client_confirmed"])
-    .is("reminder_sent_at", null);
-
-  return (data ?? []).filter((a: AppointmentRow) => {
-    const apptAt = new Date(`${a.appointment_date}T${a.start_time}`);
-    return apptAt >= start && apptAt <= end;
-  });
 }
 
 async function dispatchBatch(rows: AppointmentRow[], intent: string) {

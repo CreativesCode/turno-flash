@@ -28,12 +28,13 @@ import { tripShareText, tripShareUrl } from "@/utils/trip-share";
 import { Bus, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useMemo, useState } from "react";
+import { getLocalDateString } from "@/utils/date";
 
 /** Tomorrow, so a new departure never starts in the past. */
 function defaultDepartureDate(): string {
   const date = new Date();
   date.setDate(date.getDate() + 1);
-  return date.toISOString().slice(0, 10);
+  return getLocalDateString(date);
 }
 
 const EMPTY_FORM: TripFormState = {

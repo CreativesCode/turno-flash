@@ -6,6 +6,7 @@ import type {
   TripPickupPoint,
   TripWithOccupancy,
 } from "@/types/trips";
+import { getLocalDateString } from "@/utils/date";
 import { downscaleImage } from "@/utils/image";
 import { Logger } from "@/utils/logger";
 
@@ -165,7 +166,7 @@ export class TripService {
         .order("departure_time", { ascending: true });
 
       if (!filters?.includePast) {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = getLocalDateString();
         query = query.gte("departure_date", today);
       }
 

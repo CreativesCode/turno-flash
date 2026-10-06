@@ -202,6 +202,13 @@ export class AppointmentService {
         ? APPOINTMENT_STATUS.PENDING
         : data.status || APPOINTMENT_STATUS.CONFIRMED;
 
+      // The business timezone, not the browser's: reminders are computed with it
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("timezone")
+        .eq("id", organizationId)
+        .single();
+
       // Create appointment
       const { data: appointment, error: insertError } = await supabase
         .from("appointments")
@@ -210,7 +217,7 @@ export class AppointmentService {
           status: finalStatus,
           organization_id: organizationId,
           created_by: userId,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          timezone: org?.timezone || "UTC",
         })
         .select()
         .single();
