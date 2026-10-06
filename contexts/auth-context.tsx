@@ -1,9 +1,11 @@
 "use client";
 
+import { clearPersistedQueries } from "@/contexts/query-client-provider";
 import { UserProfile } from "@/types/auth";
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
 import { User, isAuthRetryableFetchError } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ReactNode,
   createContext,
@@ -19,6 +21,44 @@ import {
 // Cuban networks often stay "online" without reaching the server, so the
 // browser's `online` event alone is not enough.
 const CONNECTION_RETRY_MS = 10000;
+
+// Last user and profile that loaded, so the panel opens without signal (P2-01).
+// The real session check runs again as soon as the network is back.
+const OFFLINE_SESSION_KEY = "turnoflash:offline-session";
+// Without signal, refreshing an expired token keeps getSession pending for
+// half a minute or more: open with the saved session after this long.
+const OFFLINE_FALLBACK_MS = 8000;
+
+interface OfflineSession {
+  user: User;
+  profile: UserProfile;
+}
+
+function readOfflineSession(): OfflineSession | null {
+  try {
+    const saved = window.localStorage.getItem(OFFLINE_SESSION_KEY);
+    return saved ? (JSON.parse(saved) as OfflineSession) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveOfflineSession(session: OfflineSession) {
+  try {
+    window.localStorage.setItem(OFFLINE_SESSION_KEY, JSON.stringify(session));
+  } catch {
+    // Not critical: the panel just will not open without signal
+  }
+}
+
+function clearOfflineSession() {
+  try {
+    window.localStorage.removeItem(OFFLINE_SESSION_KEY);
+  } catch {
+    // Nothing to remove
+  }
+  clearPersistedQueries();
+}
 
 interface AuthContextType {
   user: User | null;
@@ -50,6 +90,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Memoizar el cliente de Supabase para evitar crear una nueva instancia en cada render
   const supabase = useMemo(() => createClient(), []);
+  const queryClient = useQueryClient();
+
+  /** Leaves nothing of this user on the device, saved or in memory. */
+  const forgetUserData = useCallback(() => {
+    queryClient.clear();
+    clearOfflineSession();
+  }, [queryClient]);
 
   // A network failure must never wipe a profile that already loaded
   const hasProfileRef = useRef(false);
@@ -62,6 +109,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     userId: null,
     event: null,
   });
+
+  /** Network failure before any profile loaded: open with the saved one, if it is this user's. */
+  const fallBackToOfflineSession = useCallback((userId?: string) => {
+    setConnectionError(true);
+    if (hasProfileRef.current) return;
+    const saved = readOfflineSession();
+    if (!saved || (userId && saved.user.id !== userId)) return;
+    hasProfileRef.current = true;
+    setUser((current) => current ?? saved.user);
+    setProfile(saved.profile);
+    setLoading(false);
+  }, []);
 
   const loadUserProfile = useCallback(
     async (authUser: User, abortSignal?: AbortSignal) => {
@@ -89,7 +148,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             );
             if (abortSignal?.aborted || !isMountedRef.current) return;
             if (revokedError) {
-              if (!hasProfileRef.current) setConnectionError(true);
+              fallBackToOfflineSession(authUser.id);
               return;
             }
             console.log("User profile not found (new user from invitation)");
@@ -109,32 +168,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
           } else {
             // Network or expired token: keep the profile we had and retry later.
             // Showing "Sin organización asignada" here would be a lie.
-            if (!hasProfileRef.current) setConnectionError(true);
+            fallBackToOfflineSession(authUser.id);
             return;
           }
         } else {
           hasProfileRef.current = true;
           setProfile(userProfile);
+          saveOfflineSession({ user: authUser, profile: userProfile });
         }
         setConnectionError(false);
         setLoading(false);
       } catch {
         if (!isMountedRef.current) return;
-        if (!hasProfileRef.current) setConnectionError(true);
+        fallBackToOfflineSession(authUser.id);
       }
     },
-    [supabase]
+    [supabase, fallBackToOfflineSession]
   );
 
   const restoreSession = useCallback(
     async (abortSignal?: AbortSignal) => {
+      const fallback = setTimeout(() => {
+        if (isMountedRef.current && !abortSignal?.aborted) fallBackToOfflineSession();
+      }, OFFLINE_FALLBACK_MS);
       try {
         if (abortSignal?.aborted) return;
 
         const {
           data: { session },
           error,
-        } = await supabase.auth.getSession();
+        } = await supabase.auth.getSession().finally(() => clearTimeout(fallback));
 
         if (abortSignal?.aborted || !isMountedRef.current) return;
 
@@ -143,7 +206,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // stored session in that case, so wait and retry instead of
           // treating the owner as logged out.
           if (isAuthRetryableFetchError(error)) {
-            setConnectionError(true);
+            fallBackToOfflineSession();
             return;
           }
           void Logger.error("Error getting session", error, {
@@ -161,15 +224,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
           };
           await loadUserProfile(session.user, abortSignal);
         } else {
+          // Also undoes an offline session whose refresh token is no longer valid
+          if (hasProfileRef.current) {
+            hasProfileRef.current = false;
+            setUser(null);
+            setProfile(null);
+            forgetUserData();
+          }
           setConnectionError(false);
           setLoading(false);
         }
       } catch {
         if (!isMountedRef.current) return;
-        setConnectionError(true);
+        fallBackToOfflineSession();
       }
     },
-    [supabase, loadUserProfile]
+    [supabase, loadUserProfile, fallBackToOfflineSession, forgetUserData]
   );
 
   const retry = useCallback(async () => {
@@ -253,6 +323,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }, 0);
       } else {
         hasProfileRef.current = false;
+        forgetUserData();
         setProfile(null);
         setConnectionError(false);
         setLoading(false);
@@ -271,15 +342,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Limpiar suscripción
       subscription.unsubscribe();
     };
-  }, [supabase, loadUserProfile, restoreSession]);
+  }, [supabase, loadUserProfile, restoreSession, forgetUserData]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
+    forgetUserData();
     hasProfileRef.current = false;
     setUser(null);
     setProfile(null);
     setConnectionError(false);
-  }, [supabase]);
+  }, [supabase, forgetUserData]);
 
   const refreshProfile = useCallback(async () => {
     const {

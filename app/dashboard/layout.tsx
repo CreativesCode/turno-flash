@@ -4,6 +4,7 @@ import { Drawer } from "@/components/Drawer";
 import { LicenseGate } from "@/components/license-gate";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { MobileTopbar } from "@/components/MobileTopbar";
+import { OfflineBanner } from "@/components/offline-banner";
 import { Sidebar } from "@/components/Sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
@@ -34,6 +35,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-h-screen flex-col lg:pl-60 print:block print:min-h-0 print:pl-0">
         <MobileTopbar title="TurnoFlash" onMenu={() => setDrawerOpen(true)} />
+        <OfflineBanner />
         <main className="flex-1">{children}</main>
         {showTabBar && <MobileTabBar />}
       </div>

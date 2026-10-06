@@ -72,10 +72,15 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
   - **No pasar Prettier a archivos enteros**: varios (p. ej. `services/trips.service.ts`, `ExceptionsEditor.tsx`) no están formateados y reformatea líneas ajenas.
   - Medir peso de páginas públicas: `npm run build:next`, servir `out/` con `python -m http.server` (parar el servidor antes de recompilar: bloquea `out/`) y abrir `/book.html?b=<slug>`.
 
+- **2026-10-06: P2-01, P2-10 y P2-11 hechos.** Lo no obvio:
+  - **Offline del panel (P2-01):** `@tanstack/react-query-persist-client` (D-01) con un persister propio sobre `localStorage` (`turnoflash:query-cache`, 24 h, `buster` = `NEXT_PUBLIC_BUILD_ID` de `next.config.ts`, así cada build descarta lo guardado). Solo se guardan las raíces de `PERSISTED_ROOTS` en `contexts/query-client-provider.tsx`: **una query nueva que deba verse sin señal hay que agregarla ahí**; huecos, asientos y clientes nunca. `auth-context` guarda `{user, profile}` en `turnoflash:offline-session` y, si la red falla o `getSession` tarda más de 8 s (refresca un token vencido), abre con eso y sigue reintentando. Cerrar sesión (o SIGNED_OUT) borra ambos y hace `queryClient.clear()`. Las mutaciones siguen `networkMode: "always"` a propósito: sin cola de escrituras offline.
+  - **Probar offline:** abortar `supabase.co` con `page.route`; para simular token vencido, reescribir `expires_at` en la cookie `sb-*-auth-token` (base64). Se recupera solo ~13 s después de volver la red.
+  - **Reserva pública (P2-10):** `useSessionState` (sessionStorage por campo, `booking:<slug>:*` / `trips:<slug>:*`) y `useStepHistory` lee el paso de `history.state` al montar.
+
 ## Qué falta del plan (al 2026-10-06)
 
 - **P0 y P1 cerrados en código** salvo P1-26 (Mac). En teléfonos reales falta: medir la versión del WebView (P0-23), el botón Atrás físico (P0-12), la sesión nativa (P1-25), compartir lista (P1-16) y la safe area (P1-23). Hay que regenerar la APK (`npm run mobile:build` + Android Studio).
 - **SMTP propio** para que llegue "¿Olvidaste tu contraseña?" a los dueños (configurarlo en Supabase Auth).
 - **Pendiente menor pasado a P2:** reportes con la zona del negocio (P0-13, punto 7).
-- **P2 pendientes:** 01 (offline: TanStack `offlineFirst` + persistencia, D-01 aprobado), 02 resto (route group público sin AuthProvider), 08 (prefetch 404 por compilar en Windows), 10 (borrador de reserva en sessionStorage), 11 (saltar días sin huecos), 15 (guía de primeros pasos). Después P3.
+- **P2 pendientes:** 02 resto (route group público sin AuthProvider), 08 (prefetch 404 por compilar en Windows), 15 (guía de primeros pasos). Después P3.
 - Turnos de prueba vivos a +5352564206: **T-0062** (7 oct 11:00) y **T-0063** (8 oct 15:00).
