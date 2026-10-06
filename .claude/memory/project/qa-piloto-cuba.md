@@ -63,7 +63,7 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
   - **Recuperar contraseña (P1-28):** el email usa flujo implícito a propósito (se abre en otro dispositivo o fuera de la app, donde no existe el verificador PKCE). **El SMTP por defecto de Supabase solo envía a miembros del equipo del proyecto y con un límite muy bajo**: sin SMTP propio, los dueños no reciben el email.
   - **Safe area (P1-23):** todo lee `--safe-area-inset-*` (Capacitor 8 las rellena en Android 15); el body no aplica arriba/abajo cuando están las barras del panel (`body:has([data-mobile-topbar])`).
   - Plugins nativos nuevos: `@capacitor/share` y `@capacitor/preferences` (D-07); Android ya sincronizado.
-  - Pruebas: negocio desechable `qa-fixture-*` con dueño, empleado y admin, creado con la clave de servicio. Usarlo en vez de tocar negocios reales.
+  - Pruebas: crear un negocio desechable `qa-fixture-*` (dueño, empleado, admin) con la clave de servicio de `.env.local`, probar con Playwright y **borrarlo al terminar** (el del 2026-10-06 ya se borró). Sin WhatsApp conectado no sale ningún mensaje real. Nunca probar sobre negocios reales.
 
 - **2026-10-06: P2 en curso.** Hechos 03, 04, 05, 06, 07, 09, 12, 13, 14, 16, 17; P2-02 parcial. Migración 066 (SELECT de `storage.objects` para `trip-photos`: sin ella la API de Storage no copia ni borra). Lo no obvio:
   - `useLicense` es un `useQuery` compartido con `refetchOnWindowFocus: "always"` (con `staleTime` de 5 min, `true` no revalidaría al volver y se rompería P1-13). TanStack escucha `visibilitychange` en `window`: un evento sintético de prueba necesita `bubbles: true`.
