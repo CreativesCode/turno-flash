@@ -5,6 +5,7 @@ import { Customer, CustomerFormData } from "@/types/appointments";
 import {
   InfiniteData,
   UseQueryOptions,
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -89,6 +90,9 @@ export function useCustomers(
     },
     enabled: !!profile?.organization_id,
     staleTime: 1000 * 60, // 1 minuto
+    // Typing in the search keeps the last results instead of a full-page
+    // spinner, which also unmounted the search box and closed the keyboard
+    placeholderData: keepPreviousData,
     ...options,
   });
 
@@ -434,6 +438,9 @@ export function useInfiniteCustomers(
     initialPageParam: 0,
     enabled: !!profile?.organization_id,
     staleTime: 1000 * 60, // 1 minuto
+    // Typing in the search keeps the last results instead of a full-page
+    // spinner, which also unmounted the search box and closed the keyboard
+    placeholderData: keepPreviousData,
     ...options,
   });
 }

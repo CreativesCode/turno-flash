@@ -6,7 +6,6 @@ import {
   Field,
   Sheet,
   StatusBadge,
-  Select,
   sheetInputClasses as inputClasses,
   SheetFooter,
 } from "@/components/ui";
@@ -19,6 +18,7 @@ import type {
   Service,
   StaffMember,
 } from "@/types/appointments";
+import { CustomerPicker } from "@/components/appointments/CustomerPicker";
 import { NEXT_ACTIONS } from "@/utils/appointment-status";
 import { formatDateForDisplay, parseLocalDate } from "@/utils/date";
 import { toInternationalPhone } from "@/utils/phone";
@@ -86,19 +86,22 @@ export function AppointmentCreateModal({
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         {/* Customer */}
         <Field label="Cliente">
-          <div className="flex items-center justify-between gap-2">
-            <Select
-              required
-              value={formData.customer_id}
-              onChange={(e) => onChange({ customer_id: e.target.value })}
-            >
-              <option value="">Selecciona un cliente</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.first_name} {c.last_name} — {c.phone}
-                </option>
-              ))}
-            </Select>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <CustomerPicker
+                customers={customers}
+                value={formData.customer_id}
+                onSelect={(id) => onChange({ customer_id: id })}
+                onCreateWith={(query) => {
+                  // Mostly a phone typed from the caller ID; otherwise a name
+                  const isPhone = query.replace(/\D/g, "").length >= 6;
+                  onChangeNewCustomer(
+                    isPhone ? { phone: query } : { first_name: query }
+                  );
+                  if (!showNewCustomerForm) onToggleNewCustomerForm();
+                }}
+              />
+            </div>
             <button
               type="button"
               onClick={onToggleNewCustomerForm}
@@ -310,7 +313,7 @@ export function AppointmentCreateModal({
             type="submit"
             variant="mesh-primary"
             disabled={
-              isSubmitting || customers.length === 0 || services.length === 0
+              isSubmitting || !formData.customer_id || services.length === 0
             }
             className="flex-2 justify-center"
           >
