@@ -69,7 +69,7 @@ export class TripBookingService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createClient();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("trip_bookings")
         .update({
           amount_paid: Math.max(amountPaid, 0),
@@ -81,8 +81,11 @@ export class TripBookingService {
               }
             : {}),
         })
-        .eq("id", bookingId);
+        .eq("id", bookingId)
+        .select("id");
       if (error) throw error;
+      // RLS rejects silently (expired license, no permission): 0 rows, no error
+      if (!data?.length) throw new Error("not_saved");
       return { success: true };
     } catch (error) {
       void Logger.error("Error updating trip payment", error, { bookingId });
@@ -98,7 +101,7 @@ export class TripBookingService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createClient();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("trip_bookings")
         .update({
           status,
@@ -109,8 +112,11 @@ export class TripBookingService {
               }
             : {}),
         })
-        .eq("id", bookingId);
+        .eq("id", bookingId)
+        .select("id");
       if (error) throw error;
+      // RLS rejects silently (expired license, no permission): 0 rows, no error
+      if (!data?.length) throw new Error("not_saved");
       return { success: true };
     } catch (error) {
       void Logger.error("Error updating trip booking status", error, {
@@ -129,13 +135,16 @@ export class TripBookingService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createClient();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("trip_bookings")
         .update({
           passenger_names: names.map((name) => name.trim()).filter(Boolean),
         })
-        .eq("id", bookingId);
+        .eq("id", bookingId)
+        .select("id");
       if (error) throw error;
+      // RLS rejects silently (expired license, no permission): 0 rows, no error
+      if (!data?.length) throw new Error("not_saved");
       return { success: true };
     } catch (error) {
       void Logger.error("Error updating passenger names", error, { bookingId });

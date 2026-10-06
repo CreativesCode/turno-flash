@@ -284,11 +284,12 @@ export class AppointmentService {
       }
 
       const supabase = createClient();
-      const { error } = await supabase
+      const { data: updated, error } = await supabase
         .from("appointments")
         .update(data)
         .eq("id", appointmentId)
-        .eq("organization_id", organizationId);
+        .eq("organization_id", organizationId)
+        .select("id");
 
       if (error) {
         // 23P01 = appointments_staff_no_overlap (migration 049)
@@ -300,6 +301,12 @@ export class AppointmentService {
         }
         void Logger.error("Error rescheduling appointment:", error);
         return { success: false, error: "No se pudo mover el turno" };
+      }
+      if (!updated?.length) {
+        return {
+          success: false,
+          error: "No se guardó el cambio. Revisa tu licencia o tus permisos.",
+        };
       }
 
       return { success: true };
@@ -376,10 +383,19 @@ export class AppointmentService {
       }
 
       // Update appointment
-      const { error: updateError } = await supabase
+      const { data: updated, error: updateError } = await supabase
         .from("appointments")
         .update(updateData)
-        .eq("id", appointmentId);
+        .eq("id", appointmentId)
+        .select("id");
+
+      // RLS rejects silently (expired license, no permission): 0 rows, no error
+      if (!updateError && !updated?.length) {
+        return {
+          success: false,
+          error: "No se guardó el cambio. Revisa tu licencia o tus permisos.",
+        };
+      }
 
       if (updateError) {
         void Logger.error("Error updating appointment status:", updateError);

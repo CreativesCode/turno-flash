@@ -61,9 +61,24 @@ export function useLicense() {
       loadLicenseStatus();
     }
 
+    // A license can expire mid-session: check again, quietly, whenever the
+    // owner comes back to the app (P1-13)
+    const onVisible = async () => {
+      if (document.visibilityState !== "visible") return;
+      if (!profile?.organization_id) return;
+      try {
+        const status = await getMyOrganizationLicenseStatus();
+        if (isMounted) setLicenseStatus(status);
+      } catch {
+        // Keep the last known status; the next return retries
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
     // Cleanup: marcar como desmontado para evitar actualizaciones de estado
     return () => {
       isMounted = false;
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [profile]);
 

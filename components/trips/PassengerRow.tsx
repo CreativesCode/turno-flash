@@ -3,7 +3,11 @@
 import { useMoney } from "@/hooks/useMoney";
 
 import { KebabMenu, type KebabMenuItem } from "@/components/ui";
-import type { TripBookingWithCustomer } from "@/types/trips";
+import {
+  bookingPending,
+  bookingTotal,
+  type TripBookingWithCustomer,
+} from "@/types/trips";
 import {
   BadgeCheck,
   Ban,
@@ -84,8 +88,9 @@ export function PassengerRow({
     ? `${customer.first_name} ${customer.last_name}`.trim()
     : "Cliente eliminado";
   const isCancelled = booking.status === "cancelled";
-  const total = booking.price_total ?? 0;
-  const pending = Math.max(total - booking.amount_paid, 0);
+  // Same helpers as the trip summary, so the extra counts in both
+  const total = bookingTotal(booking);
+  const pending = bookingPending(booking);
   const missingNames = booking.seats - booking.passenger_names.length;
   const deadline = fmtDeadline(booking.hold_expires_at);
   const isExpiring =

@@ -472,7 +472,7 @@ function TripDetailsContent() {
             </div>
           )}
 
-          {(pendingApproval > 0 || pendingDeposits > 0) && (
+          {(pendingApproval > 0 || pendingDeposits > 0 || owed > 0) && (
             <div className="mb-4 flex flex-wrap gap-2 text-xs font-semibold print:hidden">
               {pendingApproval > 0 && (
                 <span className="rounded-full border border-warning-600 bg-warning-50 px-3 py-1 text-warning-600 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-300">

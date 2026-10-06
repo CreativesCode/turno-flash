@@ -428,11 +428,14 @@ export class TripService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createClient();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("trips")
         .update({ is_published: isPublished })
-        .eq("id", tripId);
+        .eq("id", tripId)
+        .select("id");
       if (error) throw error;
+      // RLS rejects silently (expired license, no permission): 0 rows, no error
+      if (!data?.length) throw new Error("not_saved");
       return { success: true };
     } catch (error) {
       void Logger.error("Error publishing trip", error, { tripId });
@@ -449,11 +452,14 @@ export class TripService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createClient();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("trips")
         .update({ cancelled_at: new Date().toISOString(), is_published: false })
-        .eq("id", tripId);
+        .eq("id", tripId)
+        .select("id");
       if (error) throw error;
+      // RLS rejects silently (expired license, no permission): 0 rows, no error
+      if (!data?.length) throw new Error("not_saved");
       return { success: true };
     } catch (error) {
       void Logger.error("Error cancelling trip", error, { tripId });
