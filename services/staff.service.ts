@@ -66,31 +66,34 @@ export class StaffService {
 
       const supabase = createClient();
 
-      // Check if email already exists (if provided)
-      if (data.email) {
-        const { data: existingStaff } = await supabase
+      // Duplicate email check (if provided) and the max sort_order (to
+      // append at the end) in parallel: two round trips in series cost
+      // seconds on 3G
+      const [existingResult, { data: maxSortOrder }] = await Promise.all([
+        data.email
+          ? supabase
+              .from("staff_members")
+              .select("id")
+              .eq("organization_id", organizationId)
+              .eq("email", data.email)
+              .limit(1)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+        supabase
           .from("staff_members")
-          .select("id")
+          .select("sort_order")
           .eq("organization_id", organizationId)
-          .eq("email", data.email)
-          .single();
+          .order("sort_order", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
-        if (existingStaff) {
-          return {
-            success: false,
-            error: "Ya existe un miembro del staff con ese email",
-          };
-        }
+      if (existingResult.data) {
+        return {
+          success: false,
+          error: "Ya existe un miembro del staff con ese email",
+        };
       }
-
-      // Get the max sort_order to append at the end
-      const { data: maxSortOrder } = await supabase
-        .from("staff_members")
-        .select("sort_order")
-        .eq("organization_id", organizationId)
-        .order("sort_order", { ascending: false })
-        .limit(1)
-        .single();
 
       const nextSortOrder =
         maxSortOrder && maxSortOrder.sort_order != null

@@ -65,13 +65,25 @@ export class ServiceService {
 
       const supabase = createClient();
 
-      // Check if service with same name already exists
-      const { data: existingService } = await supabase
-        .from("services")
-        .select("id")
-        .eq("organization_id", organizationId)
-        .eq("name", data.name)
-        .single();
+      // Duplicate name check and the max sort_order (to append at the end)
+      // in parallel: two round trips in series cost seconds on 3G
+      const [{ data: existingService }, { data: maxSortOrder }] =
+        await Promise.all([
+          supabase
+            .from("services")
+            .select("id")
+            .eq("organization_id", organizationId)
+            .eq("name", data.name)
+            .limit(1)
+            .maybeSingle(),
+          supabase
+            .from("services")
+            .select("sort_order")
+            .eq("organization_id", organizationId)
+            .order("sort_order", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+        ]);
 
       if (existingService) {
         return {
@@ -79,15 +91,6 @@ export class ServiceService {
           error: "Ya existe un servicio con ese nombre",
         };
       }
-
-      // Get the max sort_order to append at the end
-      const { data: maxSortOrder } = await supabase
-        .from("services")
-        .select("sort_order")
-        .eq("organization_id", organizationId)
-        .order("sort_order", { ascending: false })
-        .limit(1)
-        .single();
 
       const nextSortOrder = maxSortOrder && maxSortOrder.sort_order != null
         ? maxSortOrder.sort_order + 1

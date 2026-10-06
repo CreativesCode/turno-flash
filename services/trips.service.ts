@@ -105,7 +105,12 @@ export class TripService {
       const path = `${organizationId}/${crypto.randomUUID()}.jpg`;
       const { error } = await supabase.storage
         .from(PHOTO_BUCKET)
-        .upload(path, shrunk, { contentType: shrunk.type, upsert: false });
+        // Paths are unique per upload, so the file never changes: cache it
+        .upload(path, shrunk, {
+          contentType: shrunk.type,
+          upsert: false,
+          cacheControl: "31536000",
+        });
       if (error) throw error;
       return { success: true, path };
     } catch (error) {
