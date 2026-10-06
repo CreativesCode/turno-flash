@@ -77,6 +77,8 @@ export function TripsFlow({ slug }: { slug: string }) {
   const [confirmation, setConfirmation] =
     useState<PublicTripBookingConfirmation | null>(null);
   const [draft, setDraft] = useState<DetailsDraft | null>(null);
+  // The last seat check can take seconds on 3G: show it and block a 2nd tap
+  const [checkingSeats, setCheckingSeats] = useState(false);
 
   // A failed background refresh (every 30 s, and when coming back from
   // WhatsApp) keeps the last data: only a page that never loaded shows an
@@ -181,10 +183,14 @@ export function TripsFlow({ slug }: { slug: string }) {
   };
 
   const handleSeats = async (data: SeatsSubmit) => {
+    if (checkingSeats) return;
     setSeatsData(data);
     // One last check before asking for personal data, so the customer does
     // not type everything to be told the bus is full.
-    const seatsLeft = await freshSeatsLeft();
+    setCheckingSeats(true);
+    const seatsLeft = await freshSeatsLeft().finally(() =>
+      setCheckingSeats(false)
+    );
     if (seatsLeft === null || seatsLeft < data.seats) {
       handleShortage(seatsLeft, 0, 1);
       return;
@@ -290,6 +296,7 @@ export function TripsFlow({ slug }: { slug: string }) {
           currency={currency}
           onSubmit={handleSeats}
           initial={seatsData}
+          busy={checkingSeats}
         />
       )}
 

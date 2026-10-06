@@ -12,9 +12,11 @@ import { Button, Card, Logo } from "@/components/ui";
 import { guessPhoneCountry } from "@/config/phone-countries";
 import { useToast } from "@/hooks";
 import {
+  publicBookingKeys,
   useCreatePublicBooking,
   usePublicBookingInfo,
 } from "@/hooks/usePublicBooking.query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRequestKey } from "@/hooks/useRequestKey";
 import { useStepHistory } from "@/hooks/useStepHistory";
 import { PublicBookingError } from "@/services/public-booking.service";
@@ -58,6 +60,7 @@ function longDate(date: string): string {
 export function BookingFlow({ slug }: { slug: string }) {
   const { data: info, isLoading, error, refetch } = usePublicBookingInfo(slug);
   const bookMutation = useCreatePublicBooking();
+  const queryClient = useQueryClient();
   const requestKey = useRequestKey();
   const toast = useToast();
 
@@ -160,6 +163,16 @@ export function BookingFlow({ slug }: { slug: string }) {
     } catch (err) {
       if (err instanceof PublicBookingError && err.code === "slot_taken") {
         toast.error("Horario ocupado", err.message);
+        // Drop it from the cached list right away: the refetch takes a while
+        // on a slow network and the same time would still be offered
+        queryClient.setQueryData<PublicSlot[]>(
+          publicBookingKeys.slots(slug, service.id, staffId, date),
+          (slots) =>
+            slots?.filter(
+              (s) =>
+                !(s.start_time === slot.start_time && s.staff_id === slot.staff_id)
+            )
+        );
         setSlot(null);
         back();
         return;

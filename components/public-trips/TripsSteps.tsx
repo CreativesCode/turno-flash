@@ -150,12 +150,15 @@ export function SeatsStep({
   currency,
   onSubmit,
   initial,
+  busy = false,
 }: {
   trip: PublicTrip;
   currency: string;
   onSubmit: (data: SeatsSubmit) => void;
   /** What the passenger already chose, when coming back to this step. */
   initial?: SeatsSubmit | null;
+  /** The flow is checking the seats left before moving on. */
+  busy?: boolean;
 }) {
   const [pickupPointId, setPickupPointId] = useState(
     initial?.pickupPointId ??
@@ -362,8 +365,14 @@ export function SeatsStep({
 
       {error && <p className="text-sm text-danger-600">{error}</p>}
 
-      <Button size="lg" type="submit" variant="mesh-primary" className="w-full justify-center">
-        Continuar
+      <Button
+        size="lg"
+        type="submit"
+        variant="mesh-primary"
+        disabled={busy}
+        className="w-full justify-center"
+      >
+        {busy ? "Comprobando disponibilidad…" : "Continuar"}
       </Button>
     </form>
   );
