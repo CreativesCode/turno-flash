@@ -6,6 +6,7 @@ import {
   getLicenseAlertType,
   getLicenseMessageTitle,
 } from "@/utils/license";
+import { SUPPORT_WHATSAPP_URL } from "@/config/constants";
 import { X } from "lucide-react";
 import { useState } from "react";
 
@@ -107,6 +108,7 @@ export function LicenseNotification({
                 ⚠️ Estás en período de gracia. Puedes continuar usando la
                 aplicación, pero debes renovar tu licencia pronto.
               </p>
+              <SupportLine />
               {licenseStatus.days_remaining !== null && (
                 <p className="mt-1">
                   Quedan {licenseStatus.days_remaining} día(s) de acceso antes
@@ -119,9 +121,9 @@ export function LicenseNotification({
           {licenseStatus.status === "expired" && (
             <div className={`mt-3 text-xs ${styles.message}`}>
               <p className="font-medium">
-                🚫 Tu licencia ha expirado. Por favor, contacta al administrador
-                para renovarla.
+                🚫 Tu licencia ha expirado.
               </p>
+              <SupportLine />
             </div>
           )}
 
@@ -133,6 +135,7 @@ export function LicenseNotification({
                   Tu licencia expirará pronto. Te recomendamos renovarla para
                   evitar interrupciones.
                 </p>
+                <SupportLine />
               </div>
             )}
         </div>
@@ -148,6 +151,23 @@ export function LicenseNotification({
         )}
       </div>
     </div>
+  );
+}
+
+function SupportLine() {
+  return (
+    <p className="mt-1">
+      Para renovarla,{" "}
+      <a
+        href={SUPPORT_WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-semibold underline"
+      >
+        escríbenos por WhatsApp
+      </a>
+      .
+    </p>
   );
 }
 
@@ -187,7 +207,7 @@ export function LicenseNotificationBanner({
 
   const getMessage = () => {
     if (licenseStatus.status === "expired") {
-      return "🚫 Licencia expirada - Contacta al administrador";
+      return "🚫 Licencia expirada - Escríbenos por WhatsApp para renovarla";
     }
 
     if (licenseStatus.status === "grace_period") {

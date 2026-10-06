@@ -6,6 +6,14 @@
  */
 
 /**
+ * Licenses can't be paid in-app from Cuba (D-10): owners write to support on
+ * WhatsApp and an admin extends the license by hand.
+ */
+export const SUPPORT_WHATSAPP_URL = `https://wa.me/5352564206?text=${encodeURIComponent(
+  "Hola, quiero activar o renovar la licencia de Turno Flash."
+)}`;
+
+/**
  * Appointment Status Constants
  */
 export const APPOINTMENT_STATUS = {

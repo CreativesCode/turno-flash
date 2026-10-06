@@ -1,6 +1,7 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/protected-route";
+import { SupportWhatsAppLink } from "@/components/support-whatsapp-link";
 import { Badge, Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useLicense } from "@/hooks/useLicense";
@@ -10,9 +11,9 @@ import {
   ArrowLeft,
   BadgeCheck,
   Crown,
+  MessageCircle,
   RefreshCw,
   ShieldCheck,
-  Smartphone,
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
@@ -143,20 +144,23 @@ export default function SubscriptionPage() {
             )}
           </Card>
 
-          {/* Planes / compra */}
-          {!isAvailable && !loading ? (
+          {/* Cómo activar o renovar: desde Cuba no hay pago en la app (D-10) */}
+          {!isPro && (
             <Card className="p-6 text-center">
-              <Smartphone className="mx-auto mb-3 h-8 w-8 text-foreground-muted" />
+              <MessageCircle className="mx-auto mb-3 h-8 w-8 text-foreground-muted" />
               <h2 className="mb-1 text-lg font-semibold text-foreground">
-                Compra disponible en la app móvil
+                Activa o renueva tu licencia
               </h2>
-              <p className="text-sm text-foreground-muted">
-                Las suscripciones se gestionan a través de Google Play. Abre
-                Turno Flash en tu teléfono Android para suscribirte o gestionar
-                tu plan.
+              <p className="mb-4 text-sm text-foreground-muted">
+                Para activar o renovar tu licencia, escríbenos por WhatsApp y te
+                indicamos cómo pagar.
               </p>
+              <SupportWhatsAppLink className="w-full sm:w-auto" />
             </Card>
-          ) : loading ? (
+          )}
+
+          {/* Google Play: solo en Android y con planes configurados */}
+          {isAvailable && loading && (
             <Card className="p-6">
               <div className="flex items-center justify-center gap-3 py-6">
                 <div className="h-6 w-6 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
@@ -165,8 +169,12 @@ export default function SubscriptionPage() {
                 </p>
               </div>
             </Card>
-          ) : (
+          )}
+          {isAvailable && !loading && packages.length > 0 && (
             <>
+              <p className="mt-6 mb-3 text-sm text-foreground-muted">
+                También puedes suscribirte con Google Play:
+              </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 {packages.map((pkg) => {
                   const label = packageLabel(pkg);
@@ -204,14 +212,6 @@ export default function SubscriptionPage() {
                     </Card>
                   );
                 })}
-                {packages.length === 0 && (
-                  <Card className="p-6 text-center sm:col-span-2">
-                    <p className="text-sm text-foreground-muted">
-                      No hay planes disponibles en este momento. Verifica la
-                      configuración del offering en RevenueCat.
-                    </p>
-                  </Card>
-                )}
               </div>
 
               {error && (

@@ -4,6 +4,7 @@ import {
   LicenseNotification,
   LicenseNotificationBanner,
 } from "@/components/license-notification";
+import { SupportWhatsAppLink } from "@/components/support-whatsapp-link";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useLicense } from "@/hooks/useLicense";
@@ -58,8 +59,8 @@ export function LicenseGate({ children }: { children: ReactNode }) {
             Acceso Bloqueado
           </h1>
           <p className="mt-4 text-sm text-foreground-muted">
-            La licencia de tu organización ha expirado. Renueva tu suscripción
-            para volver a gestionar turnos, clientes y servicios.
+            La licencia de tu negocio venció. Para activarla o renovarla,
+            escríbenos por WhatsApp y te ayudamos.
           </p>
           {licenseStatus && (
             <div className="mt-6">
@@ -70,14 +71,7 @@ export function LicenseGate({ children }: { children: ReactNode }) {
             </div>
           )}
           <div className="mt-6 flex flex-col gap-3">
-            <Button
-              variant="mesh-primary"
-              size="md"
-              className="w-full"
-              onClick={() => router.push("/dashboard/subscription")}
-            >
-              Renovar suscripción
-            </Button>
+            <SupportWhatsAppLink className="w-full" />
             <Button
               variant="danger"
               size="md"
