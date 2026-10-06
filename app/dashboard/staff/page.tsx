@@ -51,6 +51,9 @@ export default function StaffPage() {
   const { staff: staffMembers, loading, error } = useStaffQuery({});
 
   const createStaffMutation = useCreateStaffMember();
+  const [scheduleStaff, setScheduleStaff] = useState<StaffMember | null>(
+    null
+  );
   const updateStaffMutation = useUpdateStaffMember();
   const deactivateStaffMutation = useDeactivateStaffMember();
   const reactivateStaffMutation = useReactivateStaffMember();
@@ -139,12 +142,15 @@ export default function StaffPage() {
             `${dataToSave.first_name} ${dataToSave.last_name} fue actualizado`
           );
         } else {
-          await createStaffMutation.mutateAsync(dataToSave);
+          const created = await createStaffMutation.mutateAsync(dataToSave);
           toast.dismiss(loadingToast);
           toast.success(
             "Profesional creado",
-            `${dataToSave.first_name} ${dataToSave.last_name} fue agregado`
+            "Ahora elige sus días, horario y servicios para que pueda recibir turnos"
           );
+          // Without schedule and services they showed as bookable online
+          // without being bookable at all (P1-31)
+          if (created) setScheduleStaff(created as StaffMember);
         }
         setShowModal(false);
         resetForm();
@@ -206,9 +212,6 @@ export default function StaffPage() {
     [deactivateStaffMutation, reactivateStaffMutation, toast]
   );
 
-  const [scheduleStaff, setScheduleStaff] = useState<StaffMember | null>(
-    null
-  );
   const [staffToDeactivate, setStaffToDeactivate] =
     useState<StaffMember | null>(null);
 
