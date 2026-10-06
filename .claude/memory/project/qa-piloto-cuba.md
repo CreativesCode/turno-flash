@@ -52,10 +52,12 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
 
 - **2026-10-06:** P0-22 hecho. Un fallo de red ya no se trata como "sin sesión" ni "sin perfil": `auth-context` expone `connectionError` y `retry` (reintenta cada 10 s, al volver `online` y al volver a primer plano), conserva el perfil ya cargado y ya no tiene el timeout de 10 s. `ProtectedRoute` solo redirige con `!loading && !user` y no muestra la página hasta tener perfil; si tarda más de 15 s, muestra "Conectando…/Sin conexión" con Reintentar. El login salta al panel si la sesión se recupera sola. `useOrganizationModules` expone `ready`: **no decidir nada con los módulos ni la moneda hasta `ready`** (los valores por defecto son Turnos y USD); en Ajustes, la tarjeta de moneda espera a `ready`. Verificado con Playwright: con un token vencido y Supabase bloqueado ya no manda al login. Ojo: `getSession` puede quedar ~30 s pendiente porque auth-js reintenta el refresh, así que la primera pantalla es "Conectando…" y no "Sin conexión".
 
+- **2026-10-06:** cerrados los P0 restantes. P0-24: número de soporte +5352564206 en `SUPPORT_WHATSAPP_URL` (`config/constants.ts`), botón `SupportWhatsAppLink` en bloqueo, avisos y Suscripción. P0-21: migración 058 (FKs de auditoría a `auth.users` con `ON DELETE SET NULL`) y `delete-account` reordenada; probada con un usuario desechable. P0-23: `minWebViewVersion: 111` + `public/webview-update.html` (entra en la próxima APK). Pendientes menores: 059 (las RPC de reserva prefieren la ficha activa, copiadas de la definición viva) y 060 (`my_access_revoked()`: "Tu acceso fue desactivado"). Para probar el login sin contraseñas conocidas se crean usuarios desechables con la clave de servicio de `.env.local` y se borran al final. En producción quedan 3 negocios `qa-*` de la campaña del 5-6 oct.
+
 ## Qué falta del plan (al 2026-10-06)
 
-- **P0 abiertos:** P0-21 (eliminar cuenta deja la cuenta a medias), P0-23 (WebView viejo: hay que medirlo en teléfonos reales) y P0-24 (cobro de la licencia por WhatsApp a soporte, D-10).
+- **P0 cerrados en código.** Solo quedan pruebas en teléfonos reales: medir la versión del WebView (P0-23) y probar el botón Atrás físico (P0-12). Las dos necesitan regenerar la APK (`npm run mobile:build`).
 - **D-14 sin implementar:** abrir al staff la escritura de `trip_bookings` (solo pasajes) y ocultarle la gestión de salidas.
-- **Pendientes menores anotados en el PRP:** reportes con la zona del negocio (P0-13, punto 7); que las RPC de reserva prefieran la ficha activa ante clientes duplicados (P0-17 d); el empleado sin acceso ve "Sin organización" en vez de un aviso propio (P0-05); probar el botón Atrás físico en la APK (P0-12).
-- Después siguen P1 a P3. Para pilotar en el teléfono hay que regenerar la APK (`npm run mobile:build`), porque se agregó `@capacitor/app`.
+- **Pendiente menor pasado a P2:** reportes con la zona del negocio (P0-13, punto 7).
+- Siguen P1 a P3.
 - Turnos de prueba vivos a +5352564206: **T-0062** (7 oct 11:00) y **T-0063** (8 oct 15:00).
