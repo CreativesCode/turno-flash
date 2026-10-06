@@ -11,6 +11,7 @@ import { Avatar, Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useAppointments } from "@/hooks/useAppointments.query";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
+import { usePendingTripBookingsCount } from "@/hooks/useTripBookings.query";
 import { useErrorStatsQuery } from "@/hooks/useErrorLogs.query";
 import type { AppointmentStatus } from "@/types/appointments";
 import { LicenseStatusResult } from "@/types/organization";
@@ -215,6 +216,7 @@ export default function DashboardPage() {
   // Today's stats, "Nuevo turno" and the upcoming list only make sense for a
   // business that takes appointments; a bus agency would see empty counters.
   const showAppointments = !!profile?.organization_id && modules.appointments;
+  const pendingTripBookings = usePendingTripBookingsCount(modules.trips);
 
   const [licenseStatus, setLicenseStatus] =
     useState<LicenseStatusResult | null>(null);
@@ -357,8 +359,12 @@ export default function DashboardPage() {
       if (s.requiresOrg && !hasOrg) return false;
       if (s.module && hasOrg && !modules[s.module]) return false;
       return true;
-    });
-  }, [profile?.role, profile?.organization_id, modules]);
+    }).map((s) =>
+      s.key === "trips" && pendingTripBookings > 0
+        ? { ...s, subtitle: `${pendingTripBookings} por aprobar` }
+        : s
+    );
+  }, [profile?.role, profile?.organization_id, modules, pendingTripBookings]);
 
   // Next 3 upcoming non-terminal appointments — sorted by start_time.
   const upcoming = useMemo(() => {

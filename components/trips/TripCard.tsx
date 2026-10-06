@@ -165,7 +165,12 @@ export function TripCard({
                 Anticipo {money(trip.deposit_per_seat)} por asiento
               </span>
             )}
-            {trip.requires_approval && (
+            {trip.pending_approval > 0 && !isCancelled && (
+              <span className={chipClasses.warning}>
+                {trip.pending_approval} por aprobar
+              </span>
+            )}
+            {trip.requires_approval && trip.pending_approval === 0 && (
               <span className={chipClasses.warning}>Requiere aprobación</span>
             )}
             {!trip.is_published && !isCancelled && (

@@ -95,6 +95,8 @@ export interface PickupPointFormState {
 export interface TripWithOccupancy extends Trip {
   seats_taken: number;
   seats_left: number;
+  /** Web bookings waiting for the business to approve them. */
+  pending_approval: number;
   pickup_points: TripPickupPoint[];
 }
 

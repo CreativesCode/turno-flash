@@ -1,4 +1,6 @@
+import { useAuth } from "@/contexts/auth-context";
 import { TripBookingService } from "@/services/trip-bookings.service";
+import { createClient } from "@/utils/supabase/client";
 import type {
   ManualBookingFormState,
   TripBookingWithCustomer,
@@ -30,6 +32,30 @@ export function useTripBookingsQuery(tripId: string | null) {
     loading: query.isLoading,
     error: query.error ? (query.error as Error).message : null,
   };
+}
+
+/**
+ * Web bookings waiting for approval, for the Viajes shortcut on Inicio
+ * (P1-15). Under tripBookingKeys.all, so realtime refreshes it.
+ */
+export function usePendingTripBookingsCount(enabled: boolean) {
+  const { profile } = useAuth();
+  const orgId = profile?.organization_id ?? "";
+  const query = useQuery({
+    queryKey: [...tripBookingKeys.all, "pending-count", orgId],
+    queryFn: async () => {
+      const { count, error } = await createClient()
+        .from("trip_bookings")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId)
+        .eq("status", "pending");
+      if (error) throw error;
+      return count ?? 0;
+    },
+    enabled: enabled && !!orgId,
+    staleTime: 1000 * 30,
+  });
+  return query.data ?? 0;
 }
 
 /** Bookings change the trip occupancy, so both key sets have to refresh. */

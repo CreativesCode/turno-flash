@@ -196,7 +196,7 @@ export class TripService {
 
       const { data: bookings, error: bookingsError } = await supabase
         .from("trip_bookings")
-        .select("trip_id, seats")
+        .select("trip_id, seats, status")
         .in(
           "trip_id",
           rows.map((trip) => trip.id)
@@ -205,11 +205,18 @@ export class TripService {
       if (bookingsError) throw bookingsError;
 
       const takenByTrip = new Map<string, number>();
+      const pendingByTrip = new Map<string, number>();
       for (const booking of bookings ?? []) {
         takenByTrip.set(
           booking.trip_id,
           (takenByTrip.get(booking.trip_id) ?? 0) + booking.seats
         );
+        if (booking.status === "pending") {
+          pendingByTrip.set(
+            booking.trip_id,
+            (pendingByTrip.get(booking.trip_id) ?? 0) + 1
+          );
+        }
       }
 
       return {
@@ -220,6 +227,7 @@ export class TripService {
             ...trip,
             seats_taken: seatsTaken,
             seats_left: Math.max(trip.total_seats - seatsTaken, 0),
+            pending_approval: pendingByTrip.get(trip.id) ?? 0,
             pickup_points: pointsByTrip.get(trip.id) ?? [],
           };
         }),
