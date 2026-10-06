@@ -112,7 +112,7 @@ export function AppointmentRescheduleSheet({
                   className="h-2 w-2 shrink-0 rounded-full"
                   style={{ background: s.color ?? "#94a3b8" }}
                 />
-                {s.nickname ?? `${s.first_name} ${s.last_name}`}
+                {s.nickname?.trim() || `${s.first_name} ${s.last_name}`}
               </ChipButton>
             ))}
           </div>

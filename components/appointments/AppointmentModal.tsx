@@ -268,7 +268,9 @@ export function AppointmentCreateModal({
             {staff.map((s) => {
               const selected = formData.staff_id === s.id;
               const dot = s.color ?? "#94a3b8";
-              const label = s.nickname ?? `${s.first_name} ${s.last_name}`;
+              // An empty nickname ("") used to render an empty chip
+              const label =
+                s.nickname?.trim() || `${s.first_name} ${s.last_name}`;
               return (
                 <ChipButton
                   key={s.id}
