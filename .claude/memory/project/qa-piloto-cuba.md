@@ -33,6 +33,7 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
 
 - **2026-10-06:** P0-01 a P0-05 (seguridad) hechos y verificados en producción: migración 048,
   `supabase/functions/_shared/auth.ts` en las 4 funciones de WhatsApp y la tarjeta "Tu equipo" en
-  Invitar usuario. Lo siguiente es **P0-06** (no se puede crear un turno para hoy desde el panel).
+  Invitar usuario. 
 - Datos de prueba: el empleado `qa.staff.2@example.com` / `QaStaff*2026` (activo, "QA Empleado") sirve
   para probar el rol staff en "Organización test". `qa.verifier.g04@example.com` queda sin acceso.
+- **2026-10-06:** P0-06, P0-07 y P0-08 hechos: turno para hoy, turnos seguidos y doble toque. La migración 049 agrega la restricción `appointments_staff_no_overlap` (EXCLUDE gist, rango semiabierto) y el error 23P01 se traduce en el servicio y en `public-booking`. Lo siguiente es **P0-09** (reserva pública idempotente con `booking_request_key`).

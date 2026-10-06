@@ -18,7 +18,7 @@ import {
 } from "@/hooks";
 import { StaffMember, StaffMemberFormData } from "@/types/appointments";
 import { Plus, Search, Users } from "lucide-react";
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
 
 const EMPTY_FORM: StaffMemberFormData = {
   first_name: "",
@@ -111,6 +111,7 @@ export default function StaffPage() {
     setShowModal(true);
   }, []);
 
+  const savingRef = useRef(false);
   const handleSave = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
@@ -120,6 +121,9 @@ export default function StaffPage() {
           ? formData.specialties
           : undefined,
       };
+      // A second tap while the first save is in flight would create a duplicate.
+      if (savingRef.current) return;
+      savingRef.current = true;
       const loadingToast = toast.loading(
         editingStaff ? "Actualizando profesional..." : "Creando profesional..."
       );
@@ -155,6 +159,8 @@ export default function StaffPage() {
         } else {
           toast.error("Error inesperado", "No se pudo guardar el profesional");
         }
+      } finally {
+        savingRef.current = false;
       }
     },
     [

@@ -216,6 +216,13 @@ export class AppointmentService {
         .single();
 
       if (insertError) {
+        // 23P01 = appointments_staff_no_overlap (migration 049)
+        if (insertError.code === "23P01") {
+          return {
+            success: false,
+            error: "El horario seleccionado no está disponible",
+          };
+        }
         void Logger.error("Error creating appointment:", insertError);
         return {
           success: false,
@@ -371,14 +378,13 @@ export class AppointmentService {
       }
 
       // Check for time conflicts
-      const hasConflict = appointments?.some((apt) => {
-        // Check if the new appointment overlaps with existing ones
-        return (
-          (startTime >= apt.start_time && startTime < apt.end_time) ||
-          (endTime > apt.start_time && endTime <= apt.end_time) ||
-          (startTime <= apt.start_time && endTime >= apt.end_time)
-        );
-      });
+      // The DB returns HH:MM:SS and the form HH:MM: compare both as HH:MM, or
+      // "09:30" < "09:30:00" makes back-to-back appointments look overlapped.
+      const hasConflict = appointments?.some(
+        (apt) =>
+          startTime.slice(0, 5) < apt.end_time.slice(0, 5) &&
+          endTime.slice(0, 5) > apt.start_time.slice(0, 5)
+      );
 
       if (hasConflict) {
         return {

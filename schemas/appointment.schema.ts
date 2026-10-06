@@ -1,3 +1,4 @@
+import { getLocalDateString } from "@/utils/date";
 import { z } from "zod";
 
 /**
@@ -102,11 +103,10 @@ export const appointmentFormSchema = z
   )
   .refine(
     (data) => {
-      // Validate appointment date is not in the past
-      const appointmentDate = new Date(data.appointment_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return appointmentDate >= today;
+      // Validate appointment date is not in the past. Compare YYYY-MM-DD
+      // strings: new Date("YYYY-MM-DD") is UTC midnight, which in the
+      // Americas is still yesterday and rejected same-day appointments.
+      return data.appointment_date >= getLocalDateString();
     },
     {
       message: "La fecha del turno no puede ser en el pasado",

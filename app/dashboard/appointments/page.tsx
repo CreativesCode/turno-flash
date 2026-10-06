@@ -48,6 +48,7 @@ import {
   FormEvent,
   useCallback,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -324,6 +325,7 @@ export default function AppointmentsPage() {
     setShowCreateModal(true);
   }, [canManageAppointments, resetForm]);
 
+  const savingRef = useRef(false);
   const handleSave = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
@@ -331,6 +333,9 @@ export default function AppointmentsPage() {
         toast.error("Sin permisos", "No tienes permisos para crear turnos");
         return;
       }
+      // A second tap while the first save is in flight would create a duplicate.
+      if (savingRef.current) return;
+      savingRef.current = true;
       const loadingToast = toast.loading("Creando turno...");
       try {
         await createAppointmentMutation.mutateAsync(formData);
@@ -349,6 +354,8 @@ export default function AppointmentsPage() {
         } else {
           toast.error("Error inesperado", "No se pudo crear el turno");
         }
+      } finally {
+        savingRef.current = false;
       }
     },
     [canManageAppointments, formData, createAppointmentMutation, toast, resetForm]

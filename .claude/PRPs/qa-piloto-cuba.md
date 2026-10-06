@@ -55,17 +55,17 @@ Formato de cada punto: **id · hallazgos · título**. Quién lo sufre / qué pa
 - Téc: migración: helper `is_active_member(org)` con `AND is_active=true` y volver a crear las políticas por organización de `027_enforce_license_on_writes.sql:180-209` y las de trips. En `prevent_role_org_change` (`026:188-218`) proteger también `is_active`. En la UI: botón "Quitar acceso" en la lista de miembros (`app/dashboard/organizations/details/page.tsx:308,437`) mediante una RPC `deactivate_org_member`.
 - Verificar: un empleado inactivo lee 0 clientes y no se puede reactivar solo.
 
-**P0-06 · F04 · No se puede crear un turno para HOY desde el panel (Cuba y toda América)**
+**P0-06 · ✅ HECHO 2026-10-06 · F04 · No se puede crear un turno para HOY desde el panel (Cuba y toda América)**
 - Quién: el dueño con un cliente que llega sin cita, que es el caso más común.
 - Téc: `schemas/appointment.schema.ts:105-109` → `return data.appointment_date >= getLocalDateString();` (importar desde `@/utils/date`).
 - Verificar: con el dispositivo en America/Havana se crea un turno para hoy a las 20:00.
 
-**P0-07 · F38 · El panel rechaza turnos seguidos ("ya tiene un turno en ese horario")**
+**P0-07 · ✅ HECHO 2026-10-06 · F38 · El panel rechaza turnos seguidos ("ya tiene un turno en ese horario")**
 - Quién: el dueño que agenda turnos uno detrás de otro (09:00–09:30 y luego 09:30).
 - Téc: `services/appointments.service.ts:374-381` → `startTime < apt.end_time.slice(0,5) && endTime > apt.start_time.slice(0,5)`.
 - Verificar: con un turno 09:00–09:30, uno nuevo 09:30–10:00 se acepta y uno 09:15–09:45 se rechaza.
 
-**P0-08 · F16+F36 · Doble toque en "Crear" duplica turnos solapados (y manda WhatsApp doble); sin bloqueo en la base**
+**P0-08 · ✅ HECHO 2026-10-06 (guard de doble toque + migración 049 `appointments_staff_no_overlap`) · F16+F36 · Doble toque en "Crear" duplica turnos solapados (y manda WhatsApp doble); sin bloqueo en la base**
 - Quién: el dueño en un Android lento (la campaña móvil no duplicó en el Pixel, pero sí en escritorio con CPU lenta).
 - Téc: (a) guard `savingRef` antes del primer `await` en `handleSave` de `app/dashboard/appointments/page.tsx:327`, `services/page.tsx:108` y del formulario de staff. (b) Migración: `btree_gist` + `EXCLUDE USING gist (staff_id WITH =, tsrange(appointment_date+start_time, appointment_date+end_time) WITH &&) WHERE (staff_id IS NOT NULL AND status IN ('pending','confirmed','reminded','client_confirmed','checked_in','in_progress'))`. Antes, revisar si hay solapamientos existentes. Mapear el error 23P01 a "El horario seleccionado no está disponible". Esto también cierra la carrera web contra panel (F36).
 - Verificar: doble toque con CPU 6x → 1 fila; dos inserts simultáneos → uno falla con el mensaje.

@@ -166,6 +166,14 @@ Deno.serve(async (req) => {
       p_email: body.email || null,
       p_notes: body.notes || null,
     });
+    // 23P01 = appointments_staff_no_overlap (049): a dashboard save took the
+    // slot between our check and our insert.
+    if (error?.code === "23P01") {
+      return json(
+        { success: false, code: "slot_taken", error: ERROR_MESSAGES.slot_taken },
+        409
+      );
+    }
     if (error) throw error;
 
     const result = data as {

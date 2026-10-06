@@ -18,7 +18,7 @@ import {
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { Service, ServiceFormData } from "@/types/appointments";
 import { Package, Plus, Search } from "lucide-react";
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
 
 const EMPTY_FORM: ServiceFormData = {
   name: "",
@@ -105,9 +105,13 @@ export default function ServicesPage() {
     setShowModal(true);
   }, []);
 
+  const savingRef = useRef(false);
   const handleSave = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
+      // A second tap while the first save is in flight would create a duplicate.
+      if (savingRef.current) return;
+      savingRef.current = true;
       const loadingToast = toast.loading(
         editingService ? "Actualizando servicio..." : "Creando servicio..."
       );
@@ -143,6 +147,8 @@ export default function ServicesPage() {
         } else {
           toast.error("Error inesperado", "No se pudo guardar el servicio");
         }
+      } finally {
+        savingRef.current = false;
       }
     },
     [
