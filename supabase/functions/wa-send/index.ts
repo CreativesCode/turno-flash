@@ -33,6 +33,7 @@ type Intent =
   | "reminder_1h"
   | "reminder_manual"
   | "clarify"
+  | "clarify_which"
   | "notify_business_new"
   | "notify_business_cancel"
   | "notify_business_confirm"
@@ -46,6 +47,7 @@ type Intent =
 interface AppointmentRow {
   id: string;
   organization_id: string;
+  customer_id: string;
   appointment_number: string | null;
   appointment_date: string;
   start_time: string;
@@ -225,7 +227,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const text = buildMessage(appt, intent, waitlistCustomerName);
+    const openList =
+      intent === "clarify_which"
+        ? await openAppointmentsList(supabase, appt.customer_id, appt.organization_id)
+        : "";
+    const text = buildMessage(appt, intent, waitlistCustomerName, openList);
 
     // 5. Enviar
     console.log("[wa-send] sending", {
@@ -414,10 +420,44 @@ async function getCustomerId(supabase: any, appointmentId: string) {
   return data?.customer_id;
 }
 
+/** "• T-0045 · martes 8 de octubre, 10:00" lines of the customer's open appointments. */
+async function openAppointmentsList(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  customerId: string,
+  organizationId: string
+): Promise<string> {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data } = await supabase
+    .from("appointments")
+    .select("appointment_number, appointment_date, start_time")
+    .eq("customer_id", customerId)
+    .eq("organization_id", organizationId)
+    .in("status", ["pending", "confirmed", "reminded", "client_confirmed"])
+    .gte("appointment_date", today)
+    .order("appointment_date")
+    .order("start_time");
+  return ((data ?? []) as {
+    appointment_number: string | null;
+    appointment_date: string;
+    start_time: string;
+  }[])
+    .map((row) => {
+      const day = new Date(`${row.appointment_date}T00:00:00`).toLocaleDateString("es", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      });
+      return `• *${row.appointment_number}* · ${day}, ${row.start_time.slice(0, 5)}`;
+    })
+    .join("\n");
+}
+
 function buildMessage(
   appt: AppointmentRow,
   intent: Intent,
-  waitlistCustomerName = ""
+  waitlistCustomerName = "",
+  openList = ""
 ): string {
   const date = new Date(`${appt.appointment_date}T${appt.start_time}`);
   const fechaLarga = date.toLocaleDateString("es-CU", {
@@ -536,6 +576,14 @@ function buildMessage(
         ``,
         `✅ Escribe *OK* si vas a asistir`,
         `❌ Escribe *CANCELAR* si no puedes ir`,
+      ].join("\n");
+
+    case "clarify_which":
+      return [
+        `Tienes varios turnos con nosotros:`,
+        openList,
+        ``,
+        `Para cancelar uno, escribe *CANCELAR* y su número, por ejemplo: *CANCELAR ${numero}*`,
       ].join("\n");
 
     case "cancel_ack":

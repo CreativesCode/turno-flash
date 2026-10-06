@@ -245,6 +245,24 @@ async function handleMessageReceived(
     // Sin rating_request pendiente: cae al flujo normal (confirm/cancel/clarify)
   }
 
+  // A reply to a trip message (seat booking) must never change an appointment
+  const { data: latestAny } = chatIds.length
+    ? await supabase
+        .from("wa_outbound_messages")
+        .select("trip_booking_id")
+        .eq("organization_id", settings.organization_id)
+        .in("chat_id", chatIds)
+        .order("sent_at", { ascending: false })
+        .limit(1)
+        .maybeSingle<{ trip_booking_id: string | null }>()
+    : { data: null };
+  if (latestAny?.trip_booking_id) {
+    console.log(
+      `[wa-inbound] latest message to "${from}" was about a trip booking: appointments untouched`
+    );
+    return;
+  }
+
   const OPEN_INTENTS = [
     "confirm",
     "reminder_24h",
@@ -259,11 +277,11 @@ async function handleMessageReceived(
     .toISOString()
     .slice(0, 10);
 
-  const { data: lastOutbound } = chatIds.length
+  const { data: openOutbound } = chatIds.length
     ? await supabase
         .from("wa_outbound_messages")
         .select(
-          "appointment_id, sent_at, chat_id, appointments!inner(status, appointment_date)"
+          "appointment_id, sent_at, chat_id, appointments!inner(status, appointment_date, appointment_number)"
         )
         .eq("organization_id", settings.organization_id)
         .in("chat_id", chatIds)
@@ -271,13 +289,24 @@ async function handleMessageReceived(
         .in("appointments.status", OPEN_STATUSES)
         .gte("appointments.appointment_date", minDate)
         .order("sent_at", { ascending: false })
-        .limit(1)
-        .maybeSingle<{
-          appointment_id: string;
-          sent_at: string;
-          chat_id: string;
-        }>()
-    : { data: null };
+        .limit(30)
+    : { data: [] };
+
+  const openRows = (openOutbound ?? []) as {
+    appointment_id: string;
+    sent_at: string;
+    chat_id: string;
+    appointments: { appointment_number: string | null };
+  }[];
+  const openIds = [...new Set(openRows.map((row) => row.appointment_id))];
+
+  // The customer can name the appointment ("CANCELAR T-0045"); otherwise the
+  // one that got the latest message.
+  const named = appointmentNumberIn(data.body);
+  const lastOutbound =
+    (named &&
+      openRows.find((row) => row.appointments?.appointment_number === named)) ||
+    openRows[0];
 
   if (!lastOutbound?.appointment_id) {
     console.log(
@@ -291,6 +320,16 @@ async function handleMessageReceived(
   );
 
   const appointmentId = lastOutbound.appointment_id;
+
+  // Several open appointments and no number: cancelling the latest one may
+  // cancel the wrong appointment. Ask which one instead.
+  if (intent === "cancel" && openIds.length > 1 && !named) {
+    console.log(
+      `[wa-inbound] ambiguous CANCEL: ${openIds.length} open appointments for "${from}"`
+    );
+    await invokeWaSend(appointmentId, "clarify_which");
+    return;
+  }
 
   // Si no se entendió → mandar mensaje de clarificación (con throttle)
   if (!intent) {
@@ -590,26 +629,45 @@ function classifyReply(body: string): "confirm" | "cancel" | null {
     "BARBARO",
   ]);
   const CANCEL = new Set([
-    "NO",
     "CANCELAR",
     "CANCELO",
     "CANCELADO",
     "CANCEL",
     "ANULAR",
     "ANULO",
-    "REAGENDAR",
   ]);
+  // Words that only cancel on their own: "No hay problema, allí estaré" or
+  // "NO" inside a longer sentence must not cancel an appointment.
+  const CANCEL_ALONE = new Set(["NO"]);
 
   // Match exacto sobre el mensaje completo
   if (CONFIRM.has(normalized)) return "confirm";
-  if (CANCEL.has(normalized)) return "cancel";
+  if (CANCEL.has(normalized) || CANCEL_ALONE.has(normalized)) return "cancel";
 
-  // Match sobre la primera palabra (captura "OK gracias", "Cancelar por favor")
-  const firstWord = normalized.split(" ")[0];
-  if (CONFIRM.has(firstWord)) return "confirm";
+  // Match sobre la primera palabra (captura "OK gracias", "Cancelar por favor",
+  // "Cancelar T-0045"), salvo que lo que sigue lo niegue ("Si no puedo ir")
+  const [firstWord, ...rest] = normalized.split(" ");
+  if (CONFIRM.has(firstWord)) return rest.includes("NO") ? null : "confirm";
   if (CANCEL.has(firstWord)) return "cancel";
+  // "No puedo ir, cancelo": an explicit cancel word anywhere, unless negated
+  // right before it ("no quiero cancelar", "no cancelen")
+  const words = [firstWord, ...rest];
+  const cancelAt = words.findIndex((word) => CANCEL.has(word));
+  const negated =
+    words[cancelAt - 1] === "NO" ||
+    (words[cancelAt - 2] === "NO" && words[cancelAt - 1] === "QUIERO");
+  if (cancelAt > 0 && !negated) {
+    return "cancel";
+  }
 
+  // Anything else (including "Reagendar") gets the clarification message
   return null;
+}
+
+/** "T-0045", "t45" or "T 0045" in the reply → "T-0045", else null. */
+function appointmentNumberIn(body: string): string | null {
+  const match = body.toUpperCase().match(/\bT[-\s]?(\d{1,6})\b/);
+  return match ? `T-${match[1].padStart(4, "0")}` : null;
 }
 
 async function invokeWaSend(appointmentId: string, intent: string) {
