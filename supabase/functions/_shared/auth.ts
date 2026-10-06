@@ -18,7 +18,12 @@ export function bearerRole(req: Request): string | null {
   }
 }
 
-// Triggers (pg_net) and crons call with the service role key from app_config.
+// Triggers (pg_net) and crons call with the service role JWT stored in
+// app_config. Other Edge Functions call with SUPABASE_SERVICE_ROLE_KEY from
+// their env, which on this project is a new-format secret key (sb_secret_...),
+// not a JWT: it has no role claim, so it is compared as is.
 export function isServiceRole(req: Request): boolean {
-  return bearerRole(req) === "service_role";
+  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+  const envKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  return bearerRole(req) === "service_role" || (!!envKey && token === envKey);
 }

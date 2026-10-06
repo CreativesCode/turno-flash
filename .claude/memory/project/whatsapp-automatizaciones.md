@@ -77,3 +77,11 @@ de `app_config`). `wa-send` acepta el service role para todos los intents, y el 
 para `reminder_manual`** de un turno que ese usuario puede ver por RLS. El control está en
 `supabase/functions/_shared/auth.ts` (lee el `role` del JWT; la firma ya la verificó el gateway con
 `verify_jwt = true`). **Una función nueva que mande WhatsApp debe usar el mismo control.**
+
+**Ojo, claves de servicio (2026-10-06):** dentro de las Edge Functions, `SUPABASE_SERVICE_ROLE_KEY` es
+una clave **nueva** (`sb_secret_...`, 41 caracteres), **no un JWT**; la de `app_config` (triggers y crons)
+sí es JWT. Por eso `isServiceRole` (`_shared/auth.ts`) acepta las dos: rol `service_role` en el JWT o
+igualdad exacta con la clave del entorno. Un control que solo mire el JWT rompe las llamadas entre
+funciones (wa-inbound → wa-send, send-reminders → wa-send). Pasó el 2026-10-06 durante ~3 h.
+**Respuestas desde `@lid`:** el alias se traduce con `message_id` antiguos que lo contienen (de antes del
+500 de OpenWA, junio). Un cliente cuyo alias nunca apareció en un `message_id` no se puede ubicar.
