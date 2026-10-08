@@ -354,9 +354,11 @@ No das opciones tecnicas. Ejecutas el stack perfeccionado:
 
 ```
 app/                    # Next.js App Router (rutas)
-├── api/                # Route handlers
-├── auth/  login/  register/
-├── dashboard/          # App autenticada
+├── (app)/              # Rutas con sesion (AuthProvider); "(app)" no aparece en la URL
+│   ├── auth/  login/  register/  forgot-password/  help/
+│   ├── dashboard/      # App autenticada
+│   └── page.tsx        # Landing
+├── book/  trips/       # Paginas publicas de reserva (sin sesion, sin useAuth)
 └── privacy/ terms/ account-deletion/
 
 components/             # UI por dominio
@@ -446,7 +448,7 @@ Antes de usarlo, consultar SIEMPRE el skill `n8n-mcp-tools-expert`.
 
 ```bash
 npm run dev              # Servidor de desarrollo
-npm run build:next       # Build web
+npm run build:next       # Build web (+ arreglo del export en Windows)
 npm run build            # Build web + asegura plataformas nativas
 npx tsc --noEmit         # Type check (no hay script typecheck)
 npx eslint .             # Lint (usar npx: `npm run lint` esta roto)

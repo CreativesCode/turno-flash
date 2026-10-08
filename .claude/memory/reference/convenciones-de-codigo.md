@@ -48,10 +48,10 @@ function `invite-user` a mano desde las paginas.
 
 Inputs `datetime-local`: el valor debe ser **hora local**, nunca `toISOString().slice(0,16)` (eso es
 UTC y al guardar `new Date(valor)` lo lee como local → la fecha se corre el offset en cada guardado).
-Patron correcto: `toDateTimeInput` en `app/dashboard/organizations/details/page.tsx`.
+Patron correcto: `toDateTimeInput` en `app/(app)/dashboard/organizations/details/page.tsx`.
 
 Consultas de listas: **nunca N+1 por fila**. Traer las filas relacionadas en una sola query y agrupar
-en el cliente (patron en `app/dashboard/organizations/page.tsx`: orgs + `user_profiles` con
+en el cliente (patron en `app/(app)/dashboard/organizations/page.tsx`: orgs + `user_profiles` con
 `organization_id` no nulo en `Promise.all`, luego `Map` por org). Si crece mucho, pasar a RPC agregada
 como las de analitica (migracion 022). El resto se agrupa por
 dominio (`appointments/`, `calendar/`, `customers/`, `services/`, `staff/`, `analytics/`).
@@ -98,3 +98,22 @@ Relacionado: [[arquitectura-static-export]], [[rediseno-ui-migracion]].
   cliente.
 - **Errores de restricciones de la BD** que se traducen en la app: `23P01` = turno solapado (049),
   `seats_below_taken:N` / `no_seats_left:N` (053), `booking_window_closed` (039).
+
+## Helpers y reglas del cierre de P2 (2026-10-06)
+
+- **`useSessionState(key, initial)`** (`hooks/`): `useState` que sobrevive a una recarga de la pestaña
+  (sessionStorage). Lo usan los flujos públicos; una clave por campo (`booking:<slug>:service`…).
+- **`useCreateParam(onCreate, ready)`** (`hooks/`): abre el formulario de alta con `?create=1` y limpia la URL.
+  Lo tienen Turnos, Viajes, Servicios y Profesionales. Necesita `<Suspense>` arriba (usa `useSearchParams`):
+  el patrón es `function XContent()` + `export default function XPage()` que lo envuelve.
+- **Datos que deben verse sin señal:** agregar la raíz de su query key a `PERSISTED_ROOTS`
+  (`contexts/query-client-provider.tsx`). Nunca huecos, asientos ni clientes. Las mutaciones no se encolan.
+- **`OfflineBanner`** (`components/offline-banner.tsx`): ya está en el layout del panel; no repetir avisos
+  de "sin conexión" por pantalla.
+- **`useSetupProgress` + `OnboardingService`**: progreso de la guía de primeros pasos; los pasos y sus
+  textos están en `STEPS` de `components/onboarding/SetupGuide.tsx` y las fotos en `public/images/guide/`.
+- **Páginas públicas (`/book`, `/trips`):** están fuera de `app/(app)/`, sin `AuthProvider`. No usar `useAuth`,
+  no importar `utils/supabase/client` ni el barril `@/hooks`, y cargar Zod con `import()` (ver
+  `loadCustomerSchema` en `components/booking/BookingSteps.tsx`). Detalle en [[arquitectura-static-export]].
+- **Texto para el dueño o el cliente:** frases cortas, nombrar los botones tal como se ven («Crear servicio»)
+  y, si es una guía, con foto real de la pantalla ([[preferencias-roberto]]).

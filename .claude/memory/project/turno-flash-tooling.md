@@ -26,8 +26,24 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
   No hay Deno: chequear sintaxis antes con `typescript.transpileModule` desde Node.
 - Antes de `supabase db push`, correr `supabase migration list --linked` (la 028 estaba aplicada a mano).
 - Build de producción: `npm run build:next` (el `build` normal añade scripts
-  de Capacitor).
+  de Capacitor). Desde 2026-10-06 ambos corren después `scripts/fix-windows-export.mjs`
+  (ver [[arquitectura-static-export]]). Las páginas del panel viven en `app/(app)/dashboard/`.
 - pg_cron se habilitó en la migración 025 (antes los recordatorios WhatsApp NO
   corrían automáticamente); jobs: `wa-reminders` y `wa-daily-summary` cada 15 min.
 - El usuario (Roberto) prefiere actualizar el landing solo cuando un plan
   completo está terminado, no por fases ([[preferencias-roberto]]).
+
+## Probar en navegador y medir (2026-10-06)
+
+- **El MCP de Playwright suele estar ocupado** por otra sesión ("Browser is already in use") y el **MCP de
+  Supabase puede estar sin autenticar**. Alternativas que funcionan: `playwright-core` instalado en el
+  scratchpad (no en el repo) lanzando el Chromium de `~/AppData/Local/ms-playwright/chromium-*/chrome-win64/chrome.exe`;
+  para datos, el CLI (`supabase inspect db table-stats --linked`) o REST con la clave de servicio de `.env.local`.
+- En `next dev` el overlay de errores (`<nextjs-portal>`) tapa botones y sale en las capturas: ocultarlo con
+  `page.addStyleTag({ content: "nextjs-portal{display:none!important}" })`. Los `<input type=date>` salen en
+  formato español solo si Chromium arranca con `--lang=es-ES`.
+- **Medir el peso real de una página:** `npm run build:next`, servir `out/` y sumar el tamaño **brotli** de cada
+  respuesta (así lo sirve Vercel). `python -m http.server` no resuelve `/ruta` a `ruta.html`; para navegar el
+  panel exportado hace falta un servidor mínimo que lo haga. Parar esos servidores antes de recompilar.
+- `npm run dev` bloquea las carpetas de `app/`: pararlo antes de moverlas y borrar `.next/dev` después.
+- No terminar un comando Bash con `cat > archivo` sin heredoc: se queda esperando entrada hasta el timeout.

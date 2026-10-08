@@ -16,5 +16,12 @@ metadata:
 - **Cambios quirurgicos:** el proyecto ya esta en produccion en Google Play. No refactorizar
   de paso, no introducir dependencias nuevas (Zustand, shadcn/ui, Sentry...) sin preguntar:
   el stack real ya diverge del template de Titan Factory.
+- **Guías y ayudas para el negocio (2026-10-06):** pensarlas para **personas poco duchas en tecnología**
+  e incluir **fotos reales del sistema**, no ilustraciones ni texto solo.
+  **Por que:** los dueños del piloto en Cuba usan casi todo desde el teléfono y no tienen costumbre de apps.
+  **Como aplicar:** un paso a la vez, frases cortas, el botón que hay que tocar resaltado en la captura y
+  nombrado tal cual, y un botón que lleve directo a la pantalla. Vale para la guía de primeros pasos y para
+  cualquier ayuda nueva (también el manual de `/help` si se le agregan imágenes). Las capturas se sacan sobre
+  un negocio desechable con datos cubanos ([[qa-piloto-cuba]]), nunca sobre uno real.
 
 Relacionado: [[estado-actual-2026-09]], [[convenciones-de-codigo]].

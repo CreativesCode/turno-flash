@@ -174,7 +174,7 @@ Sagua - La Habana) que el usuario pego en el chat:
 **Realtime en paginas publicas: no se puede y no se debe.** Realtime respeta RLS y `anon` no tiene
 policies; enchufarlo obligaria a abrir lectura de `trip_bookings`/`appointments` (nombres y telefonos).
 En su lugar, revalidacion automatica contra la edge function. En el dashboard si hay Realtime real:
-`useRealtimeEntities` ya montado en `app/dashboard/layout.tsx`.
+`useRealtimeEntities` ya montado en `app/(app)/dashboard/layout.tsx`.
 
 Relacionado: [[producto-y-dominio]], [[reserva-online]], [[whatsapp-automatizaciones]].
 

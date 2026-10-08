@@ -81,10 +81,19 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
 
 - **2026-10-06: P2 cerrado** con P2-02 (páginas públicas sin AuthProvider ni supabase-js; Zod diferido) y P2-08 (script post-build para Windows). Detalle técnico en [[arquitectura-static-export]].
 
-## Qué falta del plan (al 2026-10-06)
+## Qué falta del plan (al 2026-10-08)
 
-- **P0 y P1 cerrados en código** salvo P1-26 (Mac). En teléfonos reales falta: medir la versión del WebView (P0-23), el botón Atrás físico (P0-12), la sesión nativa (P1-25), compartir lista (P1-16) y la safe area (P1-23). Hay que regenerar la APK (`npm run mobile:build` + Android Studio).
+- **P0, P1 y P2 cerrados en código** salvo P1-26 (iOS necesita Mac). Sigue **P3** (26 puntos menores en el PRP).
+- **Sin subir:** `main` local va **por delante de `origin/main`** con todo el trabajo del 5-6 oct (60+ commits).
+  Roberto todavía no pidió el push; Vercel no tiene nada de esto hasta que se suba.
+- **Probar en teléfono real** (hay que regenerar la APK: `npm run mobile:build` + Android Studio): versión del
+  WebView (P0-23), botón Atrás físico (P0-12), sesión nativa (P1-25), compartir lista (P1-16), safe area (P1-23),
+  **abrir sin señal** (P2-01), **menú sin recarga** (P2-08) y la guía de primeros pasos (P2-15).
 - **SMTP propio** para que llegue "¿Olvidaste tu contraseña?" a los dueños (configurarlo en Supabase Auth).
-- **Pendiente menor pasado a P2:** reportes con la zona del negocio (P0-13, punto 7).
-- **P2 cerrado.** Sigue P3.
-- Turnos de prueba vivos a +5352564206: **T-0062** (7 oct 11:00) y **T-0063** (8 oct 15:00).
+- **Pedir a cada dueño su WhatsApp de contacto** (`organizations.whatsapp_phone`); la guía de primeros pasos ya
+  se lo pide al dueño nuevo.
+- **Pendientes menores:** reportes con la zona del negocio (P0-13, punto 7); el detalle de una salida muestra la
+  fecha como `2026-10-09` (se ve en una foto de la guía); la web en navegador no abre sin señal (haría falta el
+  service worker descartado en D-02).
+- Los turnos de prueba T-0062 y T-0063 (7 y 8 oct) ya pasaron. En producción quedan los negocios `qa-*` y
+  "Organización test" con datos "QA", a propósito.

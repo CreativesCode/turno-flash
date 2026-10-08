@@ -93,3 +93,19 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
 - Sigue sin haber tests, CI ni Sentry. `npm run lint` sigue roto (usar `npx eslint`), y hay
   errores de lint **preexistentes** en Drawer, protected-route, theme-context, useCapacitor,
   useErrorLogs y appointments.service que no son de este trabajo.
+
+## Actualizacion 2026-10-08
+
+- **Campaña QA del piloto en Cuba** (5-6 oct): P0, P1 y P2 cerrados en código; detalle y pendientes en
+  [[qa-piloto-cuba]]. Migraciones hasta la **066**. BD al 2026-10-06: 11 organizaciones, 14 usuarios,
+  71 turnos, 24 clientes, 13 salidas, 21 pasajes, 273 mensajes de WhatsApp (varias son de prueba `qa-*`).
+- **Nuevo desde septiembre:** panel legible sin señal, guía de primeros pasos con fotos, reservas públicas
+  idempotentes y que sobreviven a una recarga, reprogramar turnos, rol `staff` con pasajes, páginas públicas
+  más livianas. Dependencias nuevas, todas aprobadas: `@tanstack/react-query-persist-client` (D-01),
+  `@capacitor/app`, `@capacitor/share` y `@capacitor/preferences` (D-07).
+- **Estructura:** las rutas con sesión viven en `app/(app)/` ([[arquitectura-static-export]]).
+- **Agujeros que siguen:** cero tests automatizados (se prueba a mano con Playwright), sin CI de build/lint,
+  sin Sentry, `npm run lint` roto, SMTP por defecto de Supabase, y el owner aún puede editar por API las fechas
+  de licencia de su organización.
+- **Sin publicar:** el trabajo del 5-6 oct está en commits locales sin subir a GitHub, y la APK de Google Play
+  sigue siendo la anterior.
