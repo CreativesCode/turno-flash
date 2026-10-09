@@ -84,8 +84,8 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
 ## Qué falta del plan (al 2026-10-08)
 
 - **P0, P1 y P2 cerrados en código** salvo P1-26 (iOS necesita Mac). Sigue **P3** (26 puntos menores en el PRP).
-- **Sin subir:** `main` local va **por delante de `origin/main`** con todo el trabajo del 5-6 oct (60+ commits).
-  Roberto todavía no pidió el push; Vercel no tiene nada de esto hasta que se suba.
+- **Subido:** todo el trabajo del 5-6 oct y el de P3 está en GitHub desde el 2026-10-08 (push de Roberto), así que
+  Vercel ya lo publica.
 - **Probar en teléfono real** (hay que regenerar la APK: `npm run mobile:build` + Android Studio): versión del
   WebView (P0-23), botón Atrás físico (P0-12), sesión nativa (P1-25), compartir lista (P1-16), safe area (P1-23),
   **abrir sin señal** (P2-01), **menú sin recarga** (P2-08) y la guía de primeros pasos (P2-15).

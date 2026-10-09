@@ -107,7 +107,7 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
 - **Agujeros que siguen:** cero tests automatizados (se prueba a mano con Playwright), sin CI de build/lint,
   sin Sentry, `npm run lint` roto, SMTP por defecto de Supabase, y el owner aún puede editar por API las fechas
   de licencia de su organización.
-- **Sin publicar:** el trabajo del 5-6 oct está en commits locales sin subir a GitHub, y la APK de Google Play
+- **APK sin publicar:** el trabajo del 5-6 oct ya está en GitHub (Roberto lo subió el 2026-10-08), pero la APK de Google Play
   sigue siendo la anterior.
 
 ## Actualizacion 2026-10-08 (noche): P3 cerrado
