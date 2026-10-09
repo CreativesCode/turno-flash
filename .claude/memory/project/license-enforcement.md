@@ -20,3 +20,5 @@ admin; `service_role` (webhook de RevenueCat, self-signup) sigue pasando.
 no en solo lectura. Hoy las lecturas siguen abiertas: hay que cerrarlas (punto pendiente del plan
 `qa-piloto-cuba`). El cobro en Cuba será por transferencia más WhatsApp a soporte, y el admin extiende la
 licencia a mano. No hay licencias largas para los negocios piloto.
+
+**Migración 067 (2026-10-08):** la gracia ya no se configura en el cliente: son 7 días fijos en SQL y en `getGracePeriodDays()`. El acoplamiento con `NEXT_PUBLIC_LICENSE_GRACE_PERIOD_DAYS` de arriba ya no aplica (la variable sigue en `.env.local` y en el README, sin efecto). Los días se redondean hacia arriba.

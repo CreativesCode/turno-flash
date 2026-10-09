@@ -504,7 +504,7 @@
     <li><strong>Atajos</strong> a las secciones que más se usan.</li>
     <li><strong>Próximos:</strong> los siguientes tres turnos del día que todavía no empezaron. <span class="ui">Ver todos →</span> te lleva a la agenda completa.</li>
   </ul>
-  <p>En la computadora el menú está siempre a la izquierda; ahí también encuentras <span class="ui">Ayuda</span>, que abre esta guía, y puedes cambiar a <span class="ui">Tema oscuro</span> o <span class="ui">Cerrar sesión</span>. En el teléfono tienes una barra inferior con Inicio, Turnos, Clientes y Avisos, y un botón <span class="ui">+</span> en el centro que abre la agenda para crear un turno.</p>
+  <p>En la computadora el menú está siempre a la izquierda; ahí también encuentras <span class="ui">Ayuda</span>, que abre esta guía, y puedes cambiar a <span class="ui">Tema oscuro</span> o <span class="ui">Cerrar sesión</span>. En el teléfono tienes una barra inferior con Inicio, Turnos, Clientes y Avisos, y un botón <span class="ui">+</span> en el centro que abre la agenda para crear un turno. Arriba a la derecha, el botón de las flechas (<span class="ui">Actualizar</span>) vuelve a traer los datos sin salir de la pantalla.</p>
 
   <h2 id="td-turnos">La agenda de turnos</h2>
   <p>Todo pasa en <span class="path">Turnos</span>. Arriba eliges cómo ver la agenda:</p>
@@ -512,7 +512,7 @@
     <table>
       <thead><tr><th>Vista</th><th>Qué muestra</th></tr></thead>
       <tbody>
-        <tr><td><span class="ui">Lista</span></td><td class="wrap">Los turnos desde 7 días atrás hasta 60 días adelante, agrupados por día (Hoy, Mañana, luego la fecha) y dentro de cada día en <em>Mañana</em> y <em>Tarde</em>. Es la única vista con buscador y filtros por estado.</td></tr>
+        <tr><td><span class="ui">Lista</span></td><td class="wrap">Los turnos desde 7 días atrás hasta 60 días adelante, agrupados por día (<em>Hoy</em> y <em>Mañana</em> llevan también la fecha) y dentro de cada día en <em>Por la mañana</em> y <em>Por la tarde</em>. Es la única vista con buscador y filtros por estado.</td></tr>
         <tr><td><span class="ui">Día</span></td><td class="wrap">Una grilla de 8:00 a 20:00 con cada turno dibujado en su horario. Usa las flechas para cambiar de día y <span class="ui">Hoy</span> para volver. Tocar un hueco libre abre el formulario con esa hora ya puesta.</td></tr>
         <tr><td><span class="ui">Semana</span></td><td class="wrap">Los siete días de la semana, de lunes a domingo, en la misma grilla horaria. También puedes tocar un hueco para crear un turno ahí.</td></tr>
       </tbody>
@@ -520,7 +520,7 @@
   </div>
 
   <h3>Buscar y filtrar</h3>
-  <p>En la vista Lista, el buscador encuentra turnos por nombre o teléfono del cliente, por servicio o por profesional. Debajo, las pastillas filtran por estado: Todos, Pendientes, Confirmados, Recordatorio, Cliente OK, Check-in, En curso, Completados y Cancelados. Si hay muchos turnos, al final aparece <span class="ui">Cargar más</span>.</p>
+  <p>En la vista Lista, el buscador encuentra turnos por nombre o teléfono del cliente, por servicio o por profesional. Debajo, las pastillas filtran por estado: Todos, Pendientes, Confirmados, Recordatorio, Cliente OK, Check-in, En curso, Completados, Cancelados y No vino. El buscador y los filtros revisan todos los turnos del período, no solo los que ya están en pantalla. Si hay muchos turnos, al final aparece <span class="ui">Cargar más</span>.</p>
 
   <h3>Crear un turno</h3>
   <ol class="steps">
@@ -581,7 +581,7 @@
   <h2 id="td-clientes">Clientes</h2>
   <p>En <span class="path">Clientes</span> tienes la base de clientes activos, con buscador por nombre, teléfono o email. Cada tarjeta muestra el teléfono, el email, las notas y una marca <strong>WA</strong> si tiene WhatsApp cargado.</p>
   <ul>
-    <li><span class="ui">Nuevo cliente</span>: nombre, apellido y teléfono son obligatorios; WhatsApp, email y notas (preferencias, alergias…) son opcionales.</li>
+    <li><span class="ui">Nuevo cliente</span>: nombre y teléfono son obligatorios; apellido, WhatsApp, email y notas (preferencias, alergias…) son opcionales.</li>
     <li>Menú <span class="ui">⋮</span> › <span class="ui">Editar</span> para corregir datos.</li>
     <li>Menú <span class="ui">⋮</span> › <span class="ui">Desactivar</span> para sacarlo de la lista sin borrar su historial. Lo encuentras en <span class="ui">Inactivos</span>, donde <span class="ui">⋮</span> › <span class="ui">Reactivar</span> lo devuelve a la lista.</li>
     <li><span class="ui">CSV</span> descarga todos los clientes activos con sus contactos, cantidad de turnos, faltas y última visita.</li>
@@ -619,7 +619,7 @@
   <p>El interruptor <span class="ui">Activo</span> / <span class="ui">Pausado</span> de cada tarjeta deja de ofrecer un servicio sin borrarlo. Puedes volver a activarlo cuando quieras.</p>
 
   <h2 id="td-profesionales">Profesionales</h2>
-  <p>En <span class="path">Profesionales</span> cargas a las personas que atienden. Pulsa <span class="ui">Nuevo profesional</span> y completa nombre y apellido; el resto es opcional: apodo (es el nombre que se muestra), teléfono, email, especialidades separadas por coma, una bio y un color para la agenda. Además hay tres casillas:</p>
+  <p>En <span class="path">Profesionales</span> cargas a las personas que atienden. Pulsa <span class="ui">Nuevo profesional</span> y completa nombre y apellido; el resto es opcional: apodo (es el nombre que se muestra), teléfono, email, especialidades separadas por coma, una bio y un color para la agenda. Si esa persona entra a la app con su propia cuenta, elígela en <strong>Cuenta de la app</strong>: así verá la pastilla <span class="ui">Mis turnos</span> en su agenda. Además hay tres casillas:</p>
   <ul>
     <li><strong>Profesional activo:</strong> si está desmarcada, la persona queda pausada.</li>
     <li><strong>Se pueden reservar turnos con esta persona:</strong> desmárcala para quien no atiende clientes (por ejemplo, recepción).</li>
@@ -641,7 +641,7 @@
   <ol class="steps">
     <li>Entra a <span class="path">Ajustes</span> y enciende <strong>Página de reservas online</strong>.</li>
     <li>Pulsa <span class="ui">Guardar cambios</span>. Hasta que guardes, el link no funciona.</li>
-    <li>Usa <span class="ui">Copiar link</span>, <span class="ui">Compartir</span> (abre WhatsApp con el mensaje <em>Reserva tu turno online</em> y el link) o <span class="ui">Ver página</span> para probarla.</li>
+    <li>Con la página ya activa aparecen <span class="ui">Copiar link</span>, <span class="ui">Compartir</span> (abre WhatsApp con el mensaje <em>Reserva tu turno online</em> y el link) y <span class="ui">Ver página</span> para probarla.</li>
   </ol>
   <p>Debajo del link, la app te avisa cuántos profesionales aparecerán y, para los que no, qué les falta (horario o servicios), con un acceso directo a <span class="path">Profesionales</span>.</p>
 
@@ -654,10 +654,10 @@
     <span class="chip plain">Listo</span>
   </div>
   <ul>
-    <li>En <em>¿Con quién?</em> puede elegir a un profesional o <strong>Sin preferencia</strong>, y la app asigna al primero que esté libre.</li>
+    <li>En <em>¿Con quién?</em> puede elegir a un profesional o <strong>Sin preferencia</strong>, y la app asigna al primero que esté libre. Si el servicio lo hace una sola persona, ese paso se salta.</li>
     <li>Solo ve horarios realmente libres, calculados con el horario de cada profesional, sus turnos, sus días libres y los cierres del negocio.</li>
-    <li>En <em>Tus datos</em> deja nombre, apellido, teléfono de WhatsApp (con selector de país), email opcional y una nota para el negocio.</li>
-    <li>Al final ve <strong>¡Turno confirmado!</strong> o, si el servicio requiere aprobación, <strong>Solicitud enviada</strong>, con su número de turno.</li>
+    <li>En <em>Tus datos</em> deja nombre, teléfono de WhatsApp (con selector de país) y, si quiere, apellido, email y una nota para el negocio. Su teléfono recuerda el nombre y el número para la próxima reserva.</li>
+    <li>Al final ve <strong>¡Turno confirmado!</strong> o, si el servicio requiere aprobación, <strong>Solicitud enviada</strong>, con su número de turno. Si cargaste el WhatsApp del negocio en <span class="path">Ajustes</span>, también ve el botón <span class="ui">Escribir al negocio</span>.</li>
   </ul>
   <div class="callout note">
     <span class="tag">Reglas de la reserva online</span>
@@ -720,10 +720,10 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
 
   <h3>Cuando el cliente responde</h3>
   <ul>
-    <li><strong>OK, SI o CONFIRMO:</strong> el turno pasa a <span class="chip st-client_confirmed">Cliente confirmó</span> y el negocio recibe <em>Cliente confirmó asistencia</em>. En un turno pendiente solo queda anotado que vendrá: aprobarlo sigue siendo decisión tuya.</li>
+    <li><strong>OK, SI, CONFIRMO o un 👍:</strong> el turno pasa a <span class="chip st-client_confirmed">Cliente confirmó</span> y el negocio recibe <em>Cliente confirmó asistencia</em>. En un turno pendiente solo queda anotado que vendrá: aprobarlo sigue siendo decisión tuya.</li>
     <li><strong>CANCELAR o NO:</strong> el turno se cancela solo, el cliente recibe la confirmación y el negocio, un aviso de <em>Turno cancelado por el cliente</em>.</li>
     <li><strong>Un número del 1 al 5</strong> después de un pedido de valoración: se guarda como rating y alimenta tus reportes.</li>
-    <li><strong>Cualquier otra cosa:</strong> el cliente recibe un mensaje que le vuelve a explicar cómo confirmar o cancelar.</li>
+    <li><strong>Cualquier otra cosa, o una nota de voz:</strong> el cliente recibe un mensaje que le vuelve a explicar cómo confirmar o cancelar.</li>
   </ul>
 
   <h3>Enviar recordatorios a mano</h3>
@@ -775,8 +775,8 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
 
   <h2 id="td-licencia">Suscripción y licencia</h2>
   <ul>
-    <li>Empiezas con <strong>7 días de prueba</strong>. Cuando la licencia se acerca a su vencimiento, la app muestra un aviso arriba.</li>
-    <li>Al vencer tienes <strong>7 días de gracia</strong> para renovar. Pasado ese plazo aparece <strong>Acceso bloqueado</strong>: tus datos no se borran, pero no puedes seguir trabajando hasta renovar. Solo quedan abiertas <span class="path">Suscripción</span> y <span class="path">Mi cuenta</span>.</li>
+    <li>Empiezas con <strong>7 días de prueba</strong>. Cuando faltan 7 días o menos, <span class="path">Inicio</span> muestra un aviso con los días de acceso que te quedan.</li>
+    <li>Al vencer tienes <strong>7 días de gracia</strong> para renovar, y el aviso te dice cuántos faltan para el bloqueo. Pasado ese plazo aparece <strong>Acceso bloqueado</strong>: tus datos no se borran, pero no puedes seguir trabajando hasta renovar. Solo quedan abiertas <span class="path">Suscripción</span> y <span class="path">Mi cuenta</span>.</li>
     <li>Para activar o renovar la licencia, entra en <span class="path">Suscripción</span> y pulsa <span class="ui">Escribir a soporte por WhatsApp</span>: te indicamos cómo pagar y activamos la licencia nosotros. El mismo botón aparece en la pantalla de Acceso bloqueado.</li>
   </ul>
 
@@ -837,7 +837,7 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
   <h2 id="tp-agenda">La agenda</h2>
   <p>En <span class="path">Turnos</span> elige la vista:</p>
   <ul>
-    <li><span class="ui">Lista</span>: turnos por día, con buscador (cliente, teléfono, servicio o profesional) y filtros por estado.</li>
+    <li><span class="ui">Lista</span>: turnos por día, con buscador (cliente, teléfono, servicio o profesional) y filtros por estado. Si el dueño vinculó tu cuenta con tu ficha de profesional, verás también la pastilla <span class="ui">Mis turnos</span>, que deja solo los tuyos.</li>
     <li><span class="ui">Día</span>: grilla de 8:00 a 20:00. Toca un hueco libre para crear un turno a esa hora.</li>
     <li><span class="ui">Semana</span>: los siete días en la misma grilla.</li>
   </ul>
@@ -898,7 +898,7 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
   <h2 id="tp-clientes">Clientes</h2>
   <ul>
     <li>Busca por nombre, teléfono o email.</li>
-    <li><span class="ui">Nuevo cliente</span>: nombre, apellido y teléfono son obligatorios. Anota en <em>Notas</em> lo que conviene recordar (preferencias, alergias).</li>
+    <li><span class="ui">Nuevo cliente</span>: nombre y teléfono son obligatorios; el apellido es opcional. Anota en <em>Notas</em> lo que conviene recordar (preferencias, alergias).</li>
     <li>Menú <span class="ui">⋮</span> › <span class="ui">Editar</span> para corregir datos, o <span class="ui">Desactivar</span> para sacarlo de la lista. Un cliente desactivado ya no aparece, así que úsalo solo cuando corresponda.</li>
   </ul>
 
@@ -1041,7 +1041,7 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
   <h3>Otras acciones del menú ⋮ de cada reserva</h3>
   <ul>
     <li><span class="ui">Editar nombres de pasajeros</span>: un nombre por asiento.</li>
-    <li><span class="ui">Aprobar reserva</span> o <span class="ui">Confirmar</span>.</li>
+    <li><span class="ui">Aprobar reserva</span>, mientras esté por aprobar.</li>
     <li><span class="ui">Cancelar reserva</span>: los asientos vuelven a quedar libres y, con WhatsApp conectado, el pasajero recibe un aviso. Si ya había pagado algo, el mensaje le pide contactarte para la devolución.</li>
   </ul>
 
@@ -1059,7 +1059,7 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
   <h3>La hoja del chofer</h3>
   <ul>
     <li><span class="ui">Imprimir</span> genera una hoja con el nombre del negocio, los datos de la salida y una fila <strong>por pasajero</strong>: nombre, quién reservó, teléfono, número de reserva, estado, extra, total, lo que pagó y <strong>lo que hay que cobrarle</strong>, con totales al pie. Desde el diálogo de impresión puedes guardarla como PDF.</li>
-    <li><span class="ui">Exportar CSV</span> descarga la misma información para Excel o Google Sheets.</li>
+    <li><span class="ui">Exportar CSV</span> descarga la misma información para Excel o Google Sheets. En el teléfono ese botón no aparece.</li>
     <li><span class="ui">Compartir lista</span> manda la lista como texto (por ejemplo, al WhatsApp del chofer): cada pasajero con su parada y hora de recogida, su teléfono y lo que hay que cobrarle. En la app del teléfono es la única opción; Imprimir y Exportar CSV están en la versión web.</li>
   </ul>
   <p>Los importes se reparten por pasajero: una reserva de 4 asientos por 2 000 figura como 500 por persona. Las reservas canceladas no aparecen ni suman en los totales.</p>
@@ -1067,8 +1067,8 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
   <h2 id="vd-pagina">Tu página de reservas</h2>
   <p>En <span class="path">Ajustes</span>, la sección <strong>Página de reservas de viajes</strong> tiene:</p>
   <ul>
-    <li>El interruptor para activarla (luego <span class="ui">Guardar cambios</span>) y el link, con <span class="ui">Copiar link</span>, <span class="ui">Compartir</span> (WhatsApp con <em>Reserva tu asiento</em>) y <span class="ui">Ver página</span>. Si no tienes ninguna salida publicada, te lo advierte.</li>
-    <li><strong>Cómo se paga el anticipo:</strong> las instrucciones que el cliente ve apenas reserva y en el WhatsApp de confirmación, con formato de WhatsApp. Por ejemplo: <em>*Transfiere el anticipo* a la tarjeta 9200 1299 1234 5678 (Juan Pérez) y envíanos el comprobante por WhatsApp.</em></li>
+    <li>El interruptor para activarla (luego <span class="ui">Guardar cambios</span>) y el link. Con la página activa aparecen <span class="ui">Copiar link</span>, <span class="ui">Compartir</span> (WhatsApp con <em>Reserva tu asiento</em>) y <span class="ui">Ver página</span>. Si no tienes ninguna salida publicada, te lo advierte.</li>
+    <li><strong>Cómo se paga el anticipo:</strong> las instrucciones que el cliente ve apenas reserva y en el WhatsApp de confirmación, con formato de WhatsApp. Por ejemplo: <em>*Transfiere el anticipo* a la tarjeta 9200 XXXX XXXX XXXX (tu nombre) y envíanos el comprobante por WhatsApp.</em> Si la página está activa y este texto está vacío, la app te lo avisa.</li>
     <li><strong>Horas para pagar el anticipo:</strong> de 1 a 168 (una semana). Viene en 24.</li>
   </ul>
 
@@ -1082,8 +1082,8 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
   <ol class="steps">
     <li><strong>Elige tu viaje:</strong> ve las salidas publicadas con foto, fecha, precio desde y asientos que quedan, o si están sin asientos, por abrir o cerradas.</li>
     <li><strong>Tu reserva:</strong> elige dónde lo recogen, solo ida o ida y vuelta, cuántos asientos (hasta el máximo por reserva) y escribe el nombre de <strong>cada</strong> pasajero, que aquí es obligatorio.</li>
-    <li><strong>Tus datos:</strong> nombre, apellido, teléfono de WhatsApp con su país, email opcional y una nota.</li>
-    <li><strong>Listo:</strong> ve <strong>¡Asiento reservado!</strong> o <strong>Solicitud enviada</strong> si la salida requiere aprobación, con el resumen, el total, el número de reserva, el anticipo que falta, hasta cuándo se guardan sus asientos y tus instrucciones de pago.</li>
+    <li><strong>Tus datos:</strong> nombre, teléfono de WhatsApp con su país y, si quiere, apellido, email y una nota. Su teléfono recuerda el nombre y el número para la próxima reserva.</li>
+    <li><strong>Listo:</strong> ve <strong>¡Asiento reservado!</strong> o <strong>Solicitud enviada</strong> si la salida requiere aprobación, con el resumen, el total, el número de reserva, el anticipo que falta, hasta cuándo se guardan sus asientos y tus instrucciones de pago, con un botón <span class="ui">Copiar instrucciones</span>. Si cargaste el WhatsApp del negocio, también ve <span class="ui">Escribir al negocio</span>.</li>
   </ol>
   <p>La página revisa sola cada 30 segundos cuántos asientos quedan, y vuelve a comprobarlo antes de pedir los datos, para que nadie complete el formulario de una salida que se llenó. Es imposible vender más asientos de los que hay. Un mismo teléfono puede tener hasta 3 reservas futuras.</p>
 

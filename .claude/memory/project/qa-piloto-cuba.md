@@ -97,3 +97,46 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
   service worker descartado en D-02).
 - Los turnos de prueba T-0062 y T-0063 (7 y 8 oct) ya pasaron. En producción quedan los negocios `qa-*` y
   "Organización test" con datos "QA", a propósito.
+
+## P3 cerrado (2026-10-08)
+
+- **Todo hecho salvo `special`** (P3-18, aparcado por Roberto) y el reintento del resumen diario, que **no se hace**:
+  OpenWA responde 500 y entrega, reintentar duplicaría.
+- **Migraciones 067-072 aplicadas.** 067 días de licencia redondeados hacia arriba y gracia de 7 días exactos
+  (los textos «Te quedan N días de acceso» salen de `check_license_status`; `getGracePeriodDays()` devuelve 7 fijo).
+  068 `contact_phone` en los payloads públicos y sin `driver_phone`. 069 apellido opcional en las RPC de reserva.
+  070 borrar clientes/turnos solo owner/admin (RESTRICTIVE). 071 `notify_business_new` solo con `source = web`,
+  numeración con lock por organización + índices únicos, índice por `booking_phone_key`. 072 RevenueCat: los eventos
+  **SANDBOX solo se auditan** y una compra nunca acorta la licencia (GREATEST).
+- **Edge functions desplegadas el 2026-10-08** (Roberto lo pidió esa vez; no es permiso permanente, preguntar la
+  próxima): `public-booking`, `public-trips`, `wa-trip-send`, `daily-summary`, `wa-campaign`, `wa-inbound`.
+  Comprobadas desde fuera con la clave anon las dos públicas. **Sin probar con teléfono real:** 👍 = confirmar,
+  nota de voz → aclaración, resumen diario con viajes y moneda.
+- **Ojo con las compras de prueba:** `.env.local` usa la key `test_` de RevenueCat (Test Store). Desde la 072 esas
+  compras ya no extienden la licencia; para probar el flujo completo hay que mirar `subscription_events`.
+- **Lo no obvio:**
+  - `Field` (`components/ui/sheet.tsx`) enlaza solo la etiqueta con su primer hijo (`useId` + `cloneElement`).
+  - `fmtMoney` fuerza el separador de miles; Reportes y gráficos usan `useMoney()` (ya no existe `formatMoney`).
+  - Rol visible: `ROLE_META[role].label`, nunca el valor crudo.
+  - Apellido opcional en todos lados (reserva pública, ficha de cliente, alta rápida): se guarda `''`.
+  - Páginas públicas: `components/booking/BusinessInfo.tsx` (`BusinessContactLink`, `BusinessTimeNote`);
+    `focusNextOnEnter` y `stickyActionClasses` en `BookingSteps.tsx`; el cliente se recuerda en `localStorage`
+    `turnoflash:customer`; con un solo profesional se salta «¿Con quién?».
+  - La Lista de turnos filtra estado, texto y «Mis turnos» **en el servidor** (solo en vista Lista).
+    «Mis turnos» aparece si `staff_members.user_id` = usuario; el dueño lo elige en Profesionales («Cuenta de la app»).
+  - `updateStatus` exige en el UPDATE el estado que validó: 0 filas también puede ser «alguien lo cambió».
+  - El layout del panel redirige a Inicio si la ruta es de un módulo apagado (`MODULE_ROUTES`), salvo admin.
+  - `sendReminder` trata `code: "HTTP_500"` de wa-send como enviado.
+  - Las `public_*_info` no tienen EXECUTE para `anon` (las llama la edge con clave de servicio): al ensayar, no usar
+    `SET LOCAL ROLE anon`. Para ensayar las RPC de reserva sin crear nada, pasar un `service_id`/`trip_id` inexistente.
+  - **Scripts de edición:** un heredoc de Bash colapsa `\\` en `\` y se trunca si es largo; escribir el script con
+    Write en el scratchpad y ejecutarlo.
+  - **Rehacer una foto de la guía:** `playwright-core` en el scratchpad + Chromium de `ms-playwright`, 390x700 con
+    `deviceScaleFactor: 2`, `sharp().resize(520, 933).webp({ quality: 80 })`, contorno naranja `#f97316` por estilo
+    en línea, sobre un negocio `qa-fixture-*` creado con la clave de servicio y borrado en el `finally`.
+- **Manual y guía al día:** `docs/user-manual/` actualizado con lo visible nuevo; `passenger.webp` rehecha. Las otras
+  7 fotos muestran la cabecera sin el botón «Actualizar» (diferencia menor, sin rehacer).
+- **Pendiente:** nada de P3 está commiteado (Roberto no lo pidió); probar en la APK la barra de estado
+  (`useCapacitor` montado en el layout) junto con el resto de la lista de teléfono real.
+- **Visto de paso:** 6 negocios reales (AgroRed, DveloxSoft SC, LeoDev, Negocio, Negocio test registro, Notengo)
+  tienen la licencia vencida hace más de 100 días. `roleLabel` en `dashboard/page.tsx` es código muerto anterior.
