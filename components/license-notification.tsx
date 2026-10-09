@@ -109,12 +109,6 @@ export function LicenseNotification({
                 aplicación, pero debes renovar tu licencia pronto.
               </p>
               <SupportLine />
-              {licenseStatus.days_remaining !== null && (
-                <p className="mt-1">
-                  Quedan {licenseStatus.days_remaining} día(s) de acceso antes
-                  del bloqueo.
-                </p>
-              )}
             </div>
           )}
 
@@ -131,10 +125,6 @@ export function LicenseNotification({
             licenseStatus.days_remaining !== null &&
             licenseStatus.days_remaining <= 7 && (
               <div className={`mt-3 text-xs ${styles.message}`}>
-                <p className="font-medium">
-                  Tu licencia expirará pronto. Te recomendamos renovarla para
-                  evitar interrupciones.
-                </p>
                 <SupportLine />
               </div>
             )}
@@ -157,7 +147,7 @@ export function LicenseNotification({
 function SupportLine() {
   return (
     <p className="mt-1">
-      Para renovarla,{" "}
+      Para seguir usando Turno Flash,{" "}
       <a
         href={SUPPORT_WHATSAPP_URL}
         target="_blank"
@@ -211,16 +201,14 @@ export function LicenseNotificationBanner({
     }
 
     if (licenseStatus.status === "grace_period") {
-      return `⚠️ Licencia vencida - ${
-        licenseStatus.days_remaining || 0
-      } días de gracia restantes`;
+      return `⚠️ ${licenseStatus.message}`;
     }
 
     if (
       licenseStatus.status === "active" &&
       licenseStatus.days_remaining !== null
     ) {
-      return `⚠️ Tu licencia expira en ${licenseStatus.days_remaining} día(s)`;
+      return `⚠️ ${licenseStatus.message}`;
     }
 
     return licenseStatus.message;

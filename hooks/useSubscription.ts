@@ -10,6 +10,7 @@ import type {
   PurchasesPackage,
 } from "@revenuecat/purchases-capacitor";
 import { useAuth } from "@/contexts/auth-context";
+import { useQueryClient } from "@tanstack/react-query";
 import { Logger } from "@/utils/logger";
 import {
   getCurrentOffering,
@@ -25,6 +26,7 @@ import {
 
 export function useSubscription() {
   const { profile } = useAuth();
+  const queryClient = useQueryClient();
   const [isAvailable, setIsAvailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -95,6 +97,12 @@ export function useSubscription() {
         const result = await purchasePackage(pkg);
         if (result.success && result.customerInfo) {
           setCustomerInfo(result.customerInfo);
+          // The license is extended by the RevenueCat webhook a moment later:
+          // ask again now and once more when it has had time to arrive
+          const refreshLicense = () =>
+            void queryClient.invalidateQueries({ queryKey: ["license"] });
+          refreshLicense();
+          setTimeout(refreshLicense, 8000);
         } else if (!result.cancelled && result.error) {
           setError(result.error);
         }
@@ -103,7 +111,7 @@ export function useSubscription() {
         setPurchasing(false);
       }
     },
-    []
+    [queryClient]
   );
 
   const restore = useCallback(async (): Promise<boolean> => {

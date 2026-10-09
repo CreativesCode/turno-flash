@@ -5,12 +5,11 @@ import { createClient } from "@/utils/supabase/client";
 import { LicenseStatusResult } from "@/types/organization";
 
 /**
- * Obtiene el período de gracia configurado en días
- * Por defecto es 7 días si no está configurado
+ * Período de gracia en días. Es fijo: la base de datos usa el mismo valor en
+ * org_license_usable (migración 027), y ahí es donde se decide el bloqueo.
  */
 export function getGracePeriodDays(): number {
-  const gracePeriod = process.env.NEXT_PUBLIC_LICENSE_GRACE_PERIOD_DAYS;
-  return gracePeriod ? parseInt(gracePeriod, 10) : 7;
+  return 7;
 }
 
 /**
@@ -149,7 +148,7 @@ export function getLicenseMessageTitle(licenseStatus: LicenseStatusResult | null
 
   switch (status) {
     case 'active':
-      return 'Licencia activa';
+      return 'Tu acceso está por vencer';
     case 'grace_period':
       return '⚠️ Licencia vencida - Período de gracia';
     case 'expired':

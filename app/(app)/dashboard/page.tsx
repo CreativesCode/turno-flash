@@ -396,11 +396,6 @@ export default function DashboardPage() {
         description="Accede a tu panel de control de Turno Flash. Gestiona turnos, clientes, servicios y profesionales desde un solo lugar."
       />
       <div className="min-h-screen bg-background">
-        {/* Banner de notificación de licencia en la parte superior */}
-        {licenseStatus && shouldShowLicenseNotification(licenseStatus) && (
-          <LicenseNotificationBanner licenseStatus={licenseStatus} />
-        )}
-
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {/* Header */}
           <div className="mb-6 flex items-center justify-between gap-4 lg:mb-8">
@@ -410,7 +405,7 @@ export default function DashboardPage() {
                   {organizationName} · {todayLabel}
                 </div>
               )}
-              <h1 className="mt-0.5 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="mt-0.5 break-words text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
                 Hola, {greetName} 👋
               </h1>
             </div>
