@@ -40,7 +40,6 @@ export interface PublicTrip {
   booking_opens_at: string | null;
   booking_closes_at: string | null;
   driver_name: string | null;
-  driver_phone: string | null;
   vehicle_description: string | null;
   /** Path inside the public trip-photos bucket; the page builds the URL. */
   vehicle_photo_path: string | null;
@@ -59,6 +58,8 @@ export type PublicTripsInfo =
         currency: string;
         /** How to pay the deposit, written by the business. */
         deposit_instructions: string | null;
+        /** WhatsApp of the business, if it loaded one. */
+        contact_phone: string | null;
       };
       trips: PublicTrip[];
     };

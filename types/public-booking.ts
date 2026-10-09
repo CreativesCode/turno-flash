@@ -26,7 +26,14 @@ export type PublicBookingInfo =
   | { available: false }
   | {
       available: true;
-      organization: { id: string; name: string; slug: string; timezone: string };
+      organization: {
+        id: string;
+        name: string;
+        slug: string;
+        timezone: string;
+        /** WhatsApp of the business, if it loaded one. */
+        contact_phone: string | null;
+      };
       /** Today's date (YYYY-MM-DD) in the business timezone. */
       today: string;
       allow_same_day: boolean;

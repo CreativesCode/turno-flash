@@ -9,7 +9,7 @@ import { fmtDuration, fmtMoney } from "@/utils/format";
 import { addDays, format, getDay, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { ChevronDown, ChevronRight, Shuffle } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useState } from "react";
 
 /**
  * Zod only travels with the details step: Turbopack can't tree-shake it and
@@ -258,6 +258,56 @@ export function DateTimeStep({
 
 // ─── Customer details ─────────────────────────────────────
 
+/**
+ * Enter on a one-line field moves to the next one instead of sending a
+ * half-filled form (P3-14). On the last field it submits as usual.
+ */
+export function focusNextOnEnter(e: KeyboardEvent<HTMLFormElement>) {
+  const target = e.target;
+  if (e.key !== "Enter" || !(target instanceof HTMLInputElement)) return;
+  const fields = Array.from(
+    e.currentTarget.querySelectorAll<HTMLElement>(
+      'input:not([tabindex="-1"]):not([type="radio"]):not([type="checkbox"]), textarea'
+    )
+  );
+  const next = fields[fields.indexOf(target) + 1];
+  if (!next) return;
+  e.preventDefault();
+  next.focus();
+}
+
+/** Keeps the main button of a public step in view on short screens. */
+export const stickyActionClasses =
+  "sticky bottom-0 z-10 -mx-4 border-t border-border bg-background px-4 pt-3";
+export const stickyActionStyle = {
+  paddingBottom: "calc(var(--safe-area-inset-bottom, 0px) + 0.75rem)",
+};
+
+/** Name and phone stay on the customer's own device for the next booking (D-04). */
+const REMEMBERED_CUSTOMER_KEY = "turnoflash:customer";
+
+type RememberedCustomer = Pick<
+  DetailsDraft,
+  "first_name" | "last_name" | "country" | "phone"
+>;
+
+function readRememberedCustomer(): RememberedCustomer | null {
+  try {
+    const raw = localStorage.getItem(REMEMBERED_CUSTOMER_KEY);
+    return raw ? (JSON.parse(raw) as RememberedCustomer) : null;
+  } catch {
+    return null;
+  }
+}
+
+function rememberCustomer(customer: RememberedCustomer) {
+  try {
+    localStorage.setItem(REMEMBERED_CUSTOMER_KEY, JSON.stringify(customer));
+  } catch {
+    // Private mode or full storage: the form simply starts empty next time
+  }
+}
+
 export interface CustomerSubmit extends PublicCustomerInput {
   /** Honeypot value (must be empty for humans) */
   website: string;
@@ -294,17 +344,21 @@ export function DetailsStep({
   const [defaultFirst = "", ...defaultLast] = (defaultName ?? "")
     .trim()
     .split(/\s+/);
-  const [form, setForm] = useState<DetailsDraft>(
-    initial ?? {
-      first_name: defaultFirst,
-      last_name: defaultLast.join(" "),
-      country: defaultCountry,
-      phone: "",
+  const [form, setForm] = useState<DetailsDraft>(() => {
+    if (initial) return initial;
+    const remembered = readRememberedCustomer();
+    return {
+      first_name: defaultFirst || remembered?.first_name || "",
+      last_name: defaultFirst
+        ? defaultLast.join(" ")
+        : remembered?.last_name ?? "",
+      country: remembered?.country ?? defaultCountry,
+      phone: remembered?.phone ?? "",
       email: "",
       notes: "",
       website: "",
-    }
-  );
+    };
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -340,6 +394,12 @@ export function DetailsStep({
       return;
     }
     setErrors({});
+    rememberCustomer({
+      first_name: parsed.data.first_name,
+      last_name: parsed.data.last_name,
+      country: form.country,
+      phone: parsed.data.phone,
+    });
     onSubmit({ ...parsed.data, website: form.website });
   };
 
@@ -347,22 +407,29 @@ export function DetailsStep({
     errors[key] && <p className="mt-1 text-[11px] text-danger-600">{errors[key]}</p>;
 
   return (
-    <form onSubmit={handleSubmit} className="relative flex flex-col gap-4" noValidate>
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={focusNextOnEnter}
+      className="relative flex flex-col gap-4"
+      noValidate
+    >
       <div className="grid grid-cols-2 gap-3">
         <Field label="Nombre">
           <input
             type="text"
             autoComplete="given-name"
+            enterKeyHint="next"
             value={form.first_name}
             onChange={(e) => patch({ first_name: e.target.value })}
             className={sheetInputClasses}
           />
           {fieldError("first_name")}
         </Field>
-        <Field label="Apellido">
+        <Field label="Apellido (opcional)">
           <input
             type="text"
             autoComplete="family-name"
+            enterKeyHint="next"
             value={form.last_name}
             onChange={(e) => patch({ last_name: e.target.value })}
             className={sheetInputClasses}
@@ -397,6 +464,7 @@ export function DetailsStep({
             type="tel"
             inputMode="tel"
             autoComplete="tel-national"
+            enterKeyHint="next"
             value={form.phone}
             onChange={(e) => patch({ phone: e.target.value })}
             placeholder="Número de celular"
@@ -440,16 +508,18 @@ export function DetailsStep({
         className="absolute -left-[9999px] h-0 w-0 opacity-0"
       />
 
-      <Button
-        type="submit"
-        variant="mesh-primary"
-        size="lg"
-        disabled={isSubmitting}
-        className="w-full justify-center"
-      >
-        {isSubmitting ? "Reservando…" : "Confirmar reserva"}
-      </Button>
-      {fieldError("form")}
+      <div className={stickyActionClasses} style={stickyActionStyle}>
+        <Button
+          type="submit"
+          variant="mesh-primary"
+          size="lg"
+          disabled={isSubmitting}
+          className="w-full justify-center"
+        >
+          {isSubmitting ? "Reservando…" : "Confirmar reserva"}
+        </Button>
+        {fieldError("form")}
+      </div>
     </form>
   );
 }

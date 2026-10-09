@@ -8,6 +8,10 @@ import {
   ServiceStep,
   StaffStep,
 } from "@/components/booking/BookingSteps";
+import {
+  BusinessContactLink,
+  BusinessTimeNote,
+} from "@/components/booking/BusinessInfo";
 import { Button, Card, Logo } from "@/components/ui";
 import { guessPhoneCountry } from "@/config/phone-countries";
 // Not the "@/hooks" barrel: it drags the whole dashboard into the public page
@@ -37,7 +41,7 @@ import {
   Hourglass,
   WifiOff,
 } from "lucide-react";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 type Step = "service" | "staff" | "time" | "details" | "done";
 
@@ -77,6 +81,7 @@ export function BookingFlow({ slug }: { slug: string }) {
   const [staffId, setStaffId] = useSessionState<string | null>(`${storageKey}:staff`, null);
   const [date, setDate] = useSessionState<string | null>(`${storageKey}:date`, null);
   const [slot, setSlot] = useSessionState<PublicSlot | null>(`${storageKey}:slot`, null);
+  const [limitReached, setLimitReached] = useState(false);
   const [confirmation, setConfirmation] = useSessionState<PublicBookingConfirmation | null>(
     `${storageKey}:confirmation`,
     null
@@ -187,6 +192,12 @@ export function BookingFlow({ slug }: { slug: string }) {
         back();
         return;
       }
+      if (
+        err instanceof PublicBookingError &&
+        err.code === "too_many_bookings"
+      ) {
+        setLimitReached(true);
+      }
       toast.error(
         "No se pudo reservar",
         err instanceof Error ? err.message : undefined
@@ -229,10 +240,14 @@ export function BookingFlow({ slug }: { slug: string }) {
         <ServiceStep
           services={info.services}
           onSelect={(s) => {
+            // Nothing to choose with a single professional: skip "¿Con quién?"
+            const candidates = info.staff.filter((member) =>
+              s.staff_ids.includes(member.id)
+            );
             setService(s);
-            setStaffId(null);
+            setStaffId(candidates.length === 1 ? candidates[0].id : null);
             setDate(null);
-            go("staff");
+            go(candidates.length === 1 ? "time" : "staff");
           }}
         />
       )}
@@ -249,7 +264,9 @@ export function BookingFlow({ slug }: { slug: string }) {
       )}
 
       {view === "time" && service && (
-        <DateTimeStep
+        <>
+          <BusinessTimeNote timezone={info.organization.timezone} />
+          <DateTimeStep
           slug={slug}
           service={service}
           staffId={staffId}
@@ -264,6 +281,17 @@ export function BookingFlow({ slug }: { slug: string }) {
             go("details");
           }}
         />
+        </>
+      )}
+
+      {limitReached && info.organization.contact_phone && (
+        <Card className="mb-3 p-4 text-sm text-foreground-muted">
+          <p>Ya tienes varios turnos próximos aquí. Si necesitas otro, escríbele al negocio.</p>
+          <BusinessContactLink
+            phone={info.organization.contact_phone}
+            className="mt-3"
+          />
+        </Card>
       )}
 
       {view === "details" && (
@@ -305,7 +333,11 @@ export function BookingFlow({ slug }: { slug: string }) {
             )}
           </dl>
 
-          <Button size="lg" variant="soft" onClick={reset} className="mt-5 w-full justify-center">
+          <BusinessContactLink
+            phone={info.organization.contact_phone}
+            className="mt-5"
+          />
+          <Button size="lg" variant="soft" onClick={reset} className="mt-3 w-full justify-center">
             Hacer otra reserva
           </Button>
         </Card>

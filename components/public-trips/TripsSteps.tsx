@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  focusNextOnEnter,
+  stickyActionClasses,
+  stickyActionStyle,
+} from "@/components/booking/BookingSteps";
 import { Button, Card, RichText, Select, sheetInputClasses } from "@/components/ui";
 import type { PublicPickupPoint, PublicTrip } from "@/types/public-trips";
 import { fmtMoney } from "@/utils/format";
@@ -93,7 +98,7 @@ export function TripListStep({
               <h2 className="text-base font-extrabold tracking-tight text-foreground">
                 {trip.title}
               </h2>
-              <p className="mt-0.5 text-xs capitalize text-foreground-muted">
+              <p className="mt-0.5 text-xs text-foreground-muted first-letter:uppercase">
                 {longDate(trip.departure_date)} · {hhmm(trip.departure_time)}
                 {trip.return_time ? ` · vuelve ${hhmm(trip.return_time)}` : ""}
               </p>
@@ -103,7 +108,9 @@ export function TripListStep({
                   <Users className="h-3 w-3" />
                   {soldOut
                     ? "Sin asientos"
-                    : `Quedan ${trip.seats_left} asientos`}
+                    : trip.seats_left === 1
+                      ? "Queda 1 asiento"
+                      : `Quedan ${trip.seats_left} asientos`}
                 </span>
                 <span className="font-bold text-foreground ml-1">
                   Desde {money(fromPrice(trip), currency)}
@@ -208,7 +215,11 @@ export function SeatsStep({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={focusNextOnEnter}
+      className="flex flex-col gap-4"
+    >
       {(trip.description || trip.pickup_location) && (
         <Card className="p-4 text-sm text-foreground-muted">
           {trip.description && <RichText text={trip.description} />}
@@ -365,17 +376,18 @@ export function SeatsStep({
         </p>
       )}
 
-      {error && <p className="text-sm text-danger-600">{error}</p>}
-
-      <Button
-        size="lg"
-        type="submit"
-        variant="mesh-primary"
-        disabled={busy}
-        className="w-full justify-center"
-      >
-        {busy ? "Comprobando disponibilidad…" : "Continuar"}
-      </Button>
+      <div className={stickyActionClasses} style={stickyActionStyle}>
+        {error && <p className="mb-2 text-sm text-danger-600">{error}</p>}
+        <Button
+          size="lg"
+          type="submit"
+          variant="mesh-primary"
+          disabled={busy}
+          className="w-full justify-center"
+        >
+          {busy ? "Comprobando disponibilidad…" : "Continuar"}
+        </Button>
+      </div>
     </form>
   );
 }

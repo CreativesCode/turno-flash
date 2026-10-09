@@ -48,7 +48,8 @@ const slug = z
   .toLowerCase()
   .regex(/^[a-z0-9-]{1,80}$/);
 const uuid = z.string().uuid();
-const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+// A real calendar date: the regex alone let "2026-02-31" through
+const date = z.iso.date();
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d(:00)?$/);
 
 const InfoSchema = z.object({ action: z.literal("info"), slug });
@@ -65,7 +66,7 @@ const BookSchema = SlotsSchema.extend({
   action: z.literal("book"),
   start_time: time,
   first_name: z.string().trim().min(1).max(80),
-  last_name: z.string().trim().min(1).max(80),
+  last_name: z.string().trim().max(80),
   // International format: "+" followed by 8-15 digits (spaces/dashes allowed)
   phone: z
     .string()

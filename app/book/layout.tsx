@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Reservar turno",
   description: "Reserva tu turno online en segundos: elige servicio, profesional y horario.",
+  openGraph: {
+    title: "Reservar turno",
+    description: "Elige servicio, profesional y horario, y reserva en segundos.",
+  },
   robots: {
     index: false,
     follow: false,

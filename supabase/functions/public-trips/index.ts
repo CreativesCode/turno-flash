@@ -76,7 +76,7 @@ const BookSchema = z
     // One name per seat: the driver list is nominal. The RPC checks this too.
     passenger_names: z.array(z.string().trim().min(1).max(80)).min(1).max(50),
     first_name: z.string().trim().min(1).max(80),
-    last_name: z.string().trim().min(1).max(80),
+    last_name: z.string().trim().max(80),
     // International format: "+" followed by 8-15 digits (spaces/dashes allowed)
     phone: z
       .string()

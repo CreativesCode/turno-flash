@@ -47,7 +47,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_ES",
-    url: getAbsoluteUrl("/"),
     siteName: "Turno Flash",
     title: "Turno Flash - Sistema de Reservas Inteligente",
     description:

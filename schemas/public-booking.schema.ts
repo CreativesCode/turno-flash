@@ -23,7 +23,7 @@ const name = (message: string) =>
 
 const customerFields = object({
   first_name: name("Ingresa tu nombre"),
-  last_name: name("Ingresa tu apellido"),
+  last_name: string().check(trim(), maxLength(80)),
   country_code: string().check(regex(/^\+\d{1,4}$/, "Código de país inválido")),
   phone: string().check(
     trim(),

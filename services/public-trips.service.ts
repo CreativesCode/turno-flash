@@ -73,6 +73,7 @@ export class PublicTripsService {
           timezone: string;
           currency: string;
           deposit_instructions: string | null;
+          contact_phone: string | null;
         };
         trips: PublicTrip[];
       }>({ action: "info", slug });

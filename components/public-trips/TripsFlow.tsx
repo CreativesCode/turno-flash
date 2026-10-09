@@ -13,6 +13,10 @@ import {
   seatPriceOf,
   type SeatsSubmit,
 } from "@/components/public-trips/TripsSteps";
+import {
+  BusinessContactLink,
+  BusinessTimeNote,
+} from "@/components/booking/BusinessInfo";
 import { Button, Card, Logo, RichText } from "@/components/ui";
 import { guessPhoneCountry } from "@/config/phone-countries";
 // Not the "@/hooks" barrel: it drags the whole dashboard into the public page
@@ -36,6 +40,7 @@ import {
   BusFront,
   CalendarX,
   ChevronLeft,
+  Copy,
   Hourglass,
   WifiOff,
 } from "lucide-react";
@@ -85,6 +90,7 @@ export function TripsFlow({ slug }: { slug: string }) {
   const [draft, setDraft] = useSessionState<DetailsDraft | null>(`${storageKey}:draft`, null);
   // The last seat check can take seconds on 3G: show it and block a 2nd tap
   const [checkingSeats, setCheckingSeats] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
 
   // A failed background refresh (every 30 s, and when coming back from
   // WhatsApp) keeps the last data: only a page that never loaded shows an
@@ -143,6 +149,17 @@ export function TripsFlow({ slug }: { slug: string }) {
   const trip: PublicTrip | null =
     info.trips.find((candidate) => candidate.id === tripId) ?? null;
 
+  const copyInstructions = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        info.organization.deposit_instructions ?? ""
+      );
+      toast.success("Instrucciones copiadas");
+    } catch {
+      toast.error("No se pudo copiar", "Mantén presionado el texto para copiarlo.");
+    }
+  };
+
   const reset = () => {
     replace("trips");
     setTripId(null);
@@ -173,7 +190,8 @@ export function TripsFlow({ slug }: { slug: string }) {
     if (seatsLeft && seatsLeft > 0) {
       toast.error(
         "Quedan menos asientos",
-        "Quedan " + seatsLeft + ". Ajusta la cantidad, por favor."
+        (seatsLeft === 1 ? "Queda 1" : "Quedan " + seatsLeft) +
+          ". Ajusta la cantidad, por favor."
       );
       if (stepsToSeats > 0) back(stepsToSeats);
       return;
@@ -233,6 +251,9 @@ export function TripsFlow({ slug }: { slug: string }) {
         handleShortage(await freshSeatsLeft(), 1, 2);
         return;
       }
+      if (err instanceof PublicTripsError && err.code === "too_many_bookings") {
+        setLimitReached(true);
+      }
       toast.error(
         "No se pudo reservar",
         err instanceof Error ? err.message : undefined
@@ -283,7 +304,9 @@ export function TripsFlow({ slug }: { slug: string }) {
       )}
 
       {view === "trips" && (
-        <TripListStep
+        <>
+          <BusinessTimeNote timezone={info.organization.timezone} />
+          <TripListStep
           trips={info.trips}
           currency={currency}
           photoUrl={vehiclePhotoUrl}
@@ -294,6 +317,7 @@ export function TripsFlow({ slug }: { slug: string }) {
             go("seats");
           }}
         />
+        </>
       )}
 
       {view === "seats" && trip && (
@@ -304,6 +328,16 @@ export function TripsFlow({ slug }: { slug: string }) {
           initial={seatsData}
           busy={checkingSeats}
         />
+      )}
+
+      {limitReached && info.organization.contact_phone && (
+        <Card className="mb-3 p-4 text-sm text-foreground-muted">
+          <p>Ya tienes varias reservas próximas aquí. Si necesitas otra, escríbele al negocio.</p>
+          <BusinessContactLink
+            phone={info.organization.contact_phone}
+            className="mt-3"
+          />
+        </Card>
       )}
 
       {view === "details" && (
@@ -382,17 +416,31 @@ export function TripsFlow({ slug }: { slug: string }) {
                   </p>
                 )}
                 {info.organization.deposit_instructions && (
-                  <div className="mt-2 text-xs text-foreground">
-                    <RichText text={info.organization.deposit_instructions} />
-                  </div>
+                  <>
+                    <div className="mt-2 text-xs text-foreground">
+                      <RichText text={info.organization.deposit_instructions} />
+                    </div>
+                    <Button
+                      variant="soft"
+                      onClick={() => void copyInstructions()}
+                      className="mt-3 w-full justify-center"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copiar instrucciones
+                    </Button>
+                  </>
                 )}
               </div>
             )}
 
+          <BusinessContactLink
+            phone={info.organization.contact_phone}
+            className="mt-5"
+          />
           <Button size="lg"
             variant="soft"
             onClick={reset}
-            className="mt-5 w-full justify-center"
+            className="mt-3 w-full justify-center"
           >
             Reservar otro viaje
           </Button>
