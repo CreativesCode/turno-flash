@@ -339,6 +339,13 @@ function TripsContent() {
               )}
             </div>
 
+            {!canManage && !moduleOff && (
+              <p className="rounded-lg bg-surface-2 px-3 py-2 text-xs text-foreground-muted">
+                Solo el dueño puede crear o cambiar salidas. Tú puedes entrar a
+                cada salida y gestionar sus pasajes.
+              </p>
+            )}
+
             {!moduleOff && (
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-muted" />

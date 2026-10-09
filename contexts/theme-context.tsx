@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -28,6 +29,9 @@ const THEME_STORAGE_KEY = "turno-flash-theme";
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
+  // Solo se guarda lo que el usuario elige: sin elección, la app sigue al
+  // tema del sistema en cada visita.
+  const userChose = useRef(false);
 
   // Cargar tema desde localStorage o preferencia del sistema
   useEffect(() => {
@@ -67,6 +71,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       root.classList.remove("dark");
     }
 
+    if (!userChose.current) return;
+
     // Guardar en localStorage
     try {
       localStorage.setItem(THEME_STORAGE_KEY, theme);
@@ -77,10 +83,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }, [theme, mounted]);
 
   const setTheme = (newTheme: Theme) => {
+    userChose.current = true;
     setThemeState(newTheme);
   };
 
   const toggleTheme = () => {
+    userChose.current = true;
     setThemeState((prev) => (prev === "light" ? "dark" : "light"));
   };
 

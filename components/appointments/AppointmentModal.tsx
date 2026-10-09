@@ -140,8 +140,7 @@ export function AppointmentCreateModal({
                   />
                   <input
                     type="text"
-                    required
-                    placeholder="Apellido"
+                    placeholder="Apellido (opcional)"
                     value={newCustomerData.last_name}
                     onChange={(e) =>
                       onChangeNewCustomer({ last_name: e.target.value })
@@ -514,7 +513,8 @@ export function AppointmentDetailModal({
                   disabled={isProcessing}
                 />
               )}
-              {onMarkNoShow && (
+              {/* The customer is already being attended: they did show up */}
+              {onMarkNoShow && status !== "in_progress" && (
                 <ActionTile
                   icon={<X className="h-4 w-4" />}
                   label="No vino"

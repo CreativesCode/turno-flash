@@ -80,6 +80,7 @@ const FILTER_CHIPS: { key: FilterStatus; label: string }[] = [
   { key: "in_progress", label: "En curso" },
   { key: "completed", label: "Completados" },
   { key: "cancelled", label: "Cancelados" },
+  { key: "no_show", label: "No vino" },
 ];
 
 // Only appointments that haven't started can be moved to another time
@@ -103,6 +104,8 @@ function AppointmentsContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  /** Professional id of the signed-in employee while "Mis turnos" is on. */
+  const [onlyMineStaffId, setOnlyMineStaffId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [view, setView] = useState<AppointmentView>("list");
 
@@ -189,7 +192,17 @@ function AppointmentsContent() {
     isLoading: appointmentsLoading,
     error: appointmentsError,
   } = useInfiniteAppointments(
-    { startDate: dateRange.start, endDate: dateRange.end },
+    {
+      startDate: dateRange.start,
+      endDate: dateRange.end,
+      // The list filters on the server, so a match beyond the first page is
+      // found too; the calendars always show everything
+      ...(view === "list" && {
+        status: filterStatus !== "all" ? [filterStatus] : undefined,
+        search: debouncedSearch || undefined,
+        staffId: onlyMineStaffId ?? undefined,
+      }),
+    },
     50
   );
 
@@ -211,6 +224,14 @@ function AppointmentsContent() {
   const customers = normalizedData.customers;
   const services = normalizedData.services;
   const staffMembers = normalizedData.staff;
+  // The professional this account is linked to (set by the owner in Profesionales)
+  const myStaffId = useMemo(
+    () =>
+      staffMembers.find(
+        (member) => !!member.user_id && member.user_id === profile?.user_id
+      )?.id ?? null,
+    [staffMembers, profile?.user_id]
+  );
 
   const createAppointmentMutation = useCreateAppointment();
   const updateAppointmentStatusMutation = useUpdateAppointmentStatus();
@@ -461,6 +482,9 @@ function AppointmentsContent() {
     if (filterStatus !== "all") {
       list = list.filter((a) => a.status === filterStatus);
     }
+    if (onlyMineStaffId) {
+      list = list.filter((a) => a.staff_id === onlyMineStaffId);
+    }
     if (debouncedSearch) {
       const term = debouncedSearch.toLowerCase();
       list = list.filter(
@@ -480,7 +504,7 @@ function AppointmentsContent() {
       }
       return a.start_time.localeCompare(b.start_time);
     });
-  }, [appointments, filterStatus, debouncedSearch]);
+  }, [appointments, filterStatus, debouncedSearch, onlyMineStaffId]);
 
   const grouped = useMemo(() => {
     // Group by date, then morning/afternoon
@@ -690,6 +714,22 @@ function AppointmentsContent() {
                   />
                 </div>
                 <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5">
+                  {myStaffId && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOnlyMineStaffId(onlyMineStaffId ? null : myStaffId)
+                      }
+                      aria-pressed={!!onlyMineStaffId}
+                      className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                        onlyMineStaffId
+                          ? "border-primary-600 bg-primary-600 text-white"
+                          : "border-border bg-surface text-foreground-muted hover:text-foreground"
+                      }`}
+                    >
+                      Mis turnos
+                    </button>
+                  )}
                   {FILTER_CHIPS.map((c) => {
                     const active = filterStatus === c.key;
                     return (
@@ -741,7 +781,7 @@ function AppointmentsContent() {
                         </h2>
                         {section.morning.length > 0 && (
                           <SectionHeader
-                            label="Mañana"
+                            label="Por la mañana"
                             count={section.morning.length}
                           />
                         )}
@@ -768,7 +808,7 @@ function AppointmentsContent() {
                         ))}
                         {section.afternoon.length > 0 && (
                           <SectionHeader
-                            label="Tarde"
+                            label="Por la tarde"
                             count={section.afternoon.length}
                           />
                         )}
@@ -1000,18 +1040,19 @@ function EmptyListState({
 }
 
 function formatSectionDate(date: string): string {
-  const today = getLocalDateString();
-  if (date === today) return "Hoy";
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  if (date === getLocalDateString(tomorrow)) return "Mañana";
   const [y, m, d] = date.split("-").map(Number);
   const dateObj = new Date(y, m - 1, d);
-  return dateObj.toLocaleDateString("es-ES", {
+  const label = dateObj.toLocaleDateString("es-ES", {
     weekday: "long",
     day: "numeric",
     month: "short",
   });
+  const today = getLocalDateString();
+  if (date === today) return `Hoy · ${label}`;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (date === getLocalDateString(tomorrow)) return `Mañana · ${label}`;
+  return label;
 }
 
 export default function AppointmentsPage() {

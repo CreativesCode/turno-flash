@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Field,
+  Select,
   sheetInputClasses as inputClasses,
 } from "@/components/ui";
 import { TeamCard } from "@/components/organizations/TeamCard";
@@ -27,6 +28,16 @@ export default function InvitePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [organizations, setOrganizations] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [adminOrgId, setAdminOrgId] = useState("");
+
+  const isAdmin = profile?.role === "admin";
+  useEffect(() => {
+    if (!isAdmin) return;
+    void InvitationService.listOrganizations().then(setOrganizations);
+  }, [isAdmin]);
 
   // Verificar que el usuario sea admin u owner
   useEffect(() => {
@@ -50,7 +61,7 @@ export default function InvitePage() {
     const organizationId =
       profile?.role === "owner"
         ? (profile.organization_id ?? undefined)
-        : undefined;
+        : adminOrgId || undefined;
     const result = await InvitationService.invite(email, organizationId);
     setLoading(false);
 
@@ -90,7 +101,7 @@ export default function InvitePage() {
           <p className="text-xs text-foreground-muted">
             {isOwner
               ? "Se sumará a tu negocio como empleado"
-              : "Quedará sin organización hasta que lo asignes"}
+              : "Elige a qué negocio se suma, o asígnalo después"}
           </p>
         </div>
       </div>
@@ -126,6 +137,25 @@ export default function InvitePage() {
                 placeholder="usuario@ejemplo.com"
               />
             </Field>
+
+            {isAdmin && (
+              <Field
+                label="Negocio"
+                hint="Se sumará como empleado de ese negocio."
+              >
+                <Select
+                  value={adminOrgId}
+                  onChange={(e) => setAdminOrgId(e.target.value)}
+                >
+                  <option value="">Sin negocio (asignar después)</option>
+                  {organizations.map((organization) => (
+                    <option key={organization.id} value={organization.id}>
+                      {organization.name}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            )}
 
             {error && (
               <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">

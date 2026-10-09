@@ -33,6 +33,7 @@ export interface AppointmentFilters {
   serviceId?: string;
   customerId?: string;
   status?: AppointmentStatus[];
+  search?: string;
   startDate?: string;
   endDate?: string;
 }
@@ -621,6 +622,7 @@ export function useInfiniteAppointments(
           serviceId: filters?.serviceId,
           customerId: filters?.customerId,
           status: filters?.status,
+          search: filters?.search,
         }
       );
     },

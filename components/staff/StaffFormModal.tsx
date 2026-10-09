@@ -3,6 +3,7 @@
 import {
   Button,
   Field,
+  Select,
   Sheet,
   sheetInputClasses as inputClasses,
 } from "@/components/ui";
@@ -14,6 +15,8 @@ export interface StaffFormModalProps {
   onClose: () => void;
   editing: StaffMember | null;
   formData: StaffMemberFormData;
+  /** Employees with an app account, to link one to this professional. */
+  team: { user_id: string; full_name: string | null; email: string }[];
   onChange: (patch: Partial<StaffMemberFormData>) => void;
   onSpecialtiesChange: (csv: string) => void;
   onSubmit: (e: FormEvent) => void | Promise<void>;
@@ -25,6 +28,7 @@ export function StaffFormModal({
   onClose,
   editing,
   formData,
+  team,
   onChange,
   onSpecialtiesChange,
   onSubmit,
@@ -99,6 +103,25 @@ export function StaffFormModal({
             className={inputClasses}
           />
         </Field>
+
+        {team.length > 0 && (
+          <Field
+            label="Cuenta de la app (opcional)"
+            hint="Si este profesional entra a la app, elige su cuenta: así puede ver solo sus turnos."
+          >
+            <Select
+              value={formData.user_id ?? ""}
+              onChange={(e) => onChange({ user_id: e.target.value || null })}
+            >
+              <option value="">Sin cuenta</option>
+              {team.map((member) => (
+                <option key={member.user_id} value={member.user_id}>
+                  {member.full_name || member.email}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        )}
 
         <Field label="Bio (opcional)">
           <textarea

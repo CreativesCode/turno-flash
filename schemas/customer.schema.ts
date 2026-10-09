@@ -19,11 +19,9 @@ export const customerFormSchema = z.object({
       message: "El nombre no puede superar los 50 caracteres",
     })
     .trim(),
+  // Optional: a customer who booked online may have left it empty (D-04)
   last_name: z
     .string()
-    .min(2, {
-      message: "El apellido debe tener al menos 2 caracteres",
-    })
     .max(50, {
       message: "El apellido no puede superar los 50 caracteres",
     })

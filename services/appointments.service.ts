@@ -1,4 +1,4 @@
-import { APPOINTMENT_STATUS } from "@/config/constants";
+import { APPOINTMENT_STATUS, getStatusLabel } from "@/config/constants";
 import {
   AppointmentFormData,
   AppointmentStatus,
@@ -354,7 +354,9 @@ export class AppointmentService {
       ) {
         return {
           success: false,
-          error: `No se puede cambiar de "${appointment.status}" a "${newStatus}"`,
+          error: `No se puede cambiar de "${getStatusLabel(
+            appointment.status
+          )}" a "${getStatusLabel(newStatus)}"`,
         };
       }
 
@@ -384,17 +386,23 @@ export class AppointmentService {
       }
 
       // Update appointment
-      const { data: updated, error: updateError } = await supabase
+      let update = supabase
         .from("appointments")
         .update(updateData)
-        .eq("id", appointmentId)
-        .select("id");
+        .eq("id", appointmentId);
+      // The transition was validated against this status: if someone else
+      // changed it in the meantime, nothing is written
+      if (appointment.status) {
+        update = update.eq("status", appointment.status);
+      }
+      const { data: updated, error: updateError } = await update.select("id");
 
       // RLS rejects silently (expired license, no permission): 0 rows, no error
       if (!updateError && !updated?.length) {
         return {
           success: false,
-          error: "No se guardó el cambio. Revisa tu licencia o tus permisos.",
+          error:
+            "No se guardó el cambio. Puede que el turno haya cambiado; si no, revisa tu licencia o tus permisos.",
         };
       }
 
@@ -632,6 +640,8 @@ export class AppointmentService {
       serviceId?: string;
       customerId?: string;
       status?: AppointmentStatus[];
+      /** Matches customer name or phone, service and professional. */
+      search?: string;
     }
   ): Promise<AppointmentWithDetails[]> {
     try {
@@ -665,6 +675,20 @@ export class AppointmentService {
       }
       if (filters?.status && filters.status.length > 0) {
         query = query.in("status", filters.status);
+      }
+      // Characters with a meaning in a PostgREST filter are dropped
+      const term = filters?.search?.replace(/[,()%*\\]/g, " ").trim();
+      if (term) {
+        const like = `%${term}%`;
+        query = query.or(
+          [
+            `customer_first_name.ilike.${like}`,
+            `customer_last_name.ilike.${like}`,
+            `customer_phone.ilike.${like}`,
+            `service_name.ilike.${like}`,
+            `staff_first_name.ilike.${like}`,
+          ].join(",")
+        );
       }
 
       const { data, error } = await query;
@@ -795,11 +819,19 @@ export class AppointmentService {
       const payload = await res.json().catch(() => null);
 
       if (!res.ok || payload?.success === false) {
-        const msg =
-          payload?.error ??
-          payload?.reason ??
-          `wa-send respondió ${res.status}`;
-        return { success: false, error: String(msg) };
+        // OpenWA answers HTTP 500 after delivering the message (confirmed
+        // with real phones): not a failure, and never retried.
+        if (payload?.code === "HTTP_500") {
+          return { success: true };
+        }
+        void Logger.error("wa-send rejected a manual reminder", payload, {
+          status: res.status,
+        });
+        return {
+          success: false,
+          error:
+            "No se pudo enviar el WhatsApp. Revisa que el WhatsApp del negocio esté conectado.",
+        };
       }
 
       return { success: true };

@@ -8,6 +8,8 @@ import { StaffScheduleSheet } from "@/components/staff/StaffScheduleSheet";
 import { Button, ConfirmSheet } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useCreateParam } from "@/hooks/useCreateParam";
+import { TeamService } from "@/services";
+import { useQuery } from "@tanstack/react-query";
 import {
   useCreateStaffMember,
   useDeactivateStaffMember,
@@ -98,6 +100,13 @@ function StaffContent() {
 
   useCreateParam(handleCreate, canManageStaff);
 
+  // Same key as TeamCard: one request for both
+  const { data: team } = useQuery({
+    queryKey: ["team", profile?.organization_id],
+    queryFn: () => TeamService.listStaff(profile?.organization_id ?? ""),
+    enabled: canManageStaff && !!profile?.organization_id,
+  });
+
   const handleEdit = useCallback((staff: StaffMember) => {
     setFormData({
       first_name: staff.first_name,
@@ -112,6 +121,7 @@ function StaffContent() {
       is_bookable: staff.is_bookable ?? true,
       accepts_online_bookings: staff.accepts_online_bookings ?? true,
       sort_order: staff.sort_order ?? 0,
+      user_id: staff.user_id ?? null,
     });
     setEditingStaff(staff);
     setShowModal(true);
@@ -367,6 +377,7 @@ function StaffContent() {
         onClose={() => setShowModal(false)}
         editing={editingStaff}
         formData={formData}
+        team={team?.data ?? []}
         onChange={patchForm}
         onSpecialtiesChange={handleSpecialtiesChange}
         onSubmit={handleSave}

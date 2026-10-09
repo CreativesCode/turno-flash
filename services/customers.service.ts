@@ -22,10 +22,6 @@ export class CustomerService {
       errors.push("El nombre es requerido");
     }
 
-    if (!data.last_name || data.last_name.trim() === "") {
-      errors.push("El apellido es requerido");
-    }
-
     if (!data.phone || data.phone.trim() === "") {
       errors.push("El teléfono es requerido");
     }

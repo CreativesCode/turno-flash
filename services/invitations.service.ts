@@ -11,10 +11,25 @@ import { createClient } from "@/utils/supabase/client";
 const SESSION_EXPIRED = "Sesión expirada. Por favor, vuelve a iniciar sesión.";
 
 export class InvitationService {
+  /** Businesses an admin can invite someone into. */
+  static async listOrganizations(): Promise<{ id: string; name: string }[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("organizations")
+      .select("id, name")
+      .order("name");
+    if (error) {
+      void Logger.error("Error listing organizations for invite", error);
+      return [];
+    }
+    return data ?? [];
+  }
+
   /**
    * Sends an invitation email with a link to set the password.
    * @param organizationId Owners pass their organization so the invitee joins
-   *   it; admins omit it and the invitee stays without organization.
+   *   it; admins may pick one, or omit it and the invitee stays without
+   *   organization.
    */
   static async invite(
     email: string,

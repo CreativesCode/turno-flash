@@ -48,10 +48,9 @@ export function CustomerFormModal({
               placeholder="Juana"
             />
           </Field>
-          <Field label="Apellido">
+          <Field label="Apellido (opcional)">
             <input
               type="text"
-              required
               value={formData.last_name}
               onChange={(e) => onChange({ last_name: e.target.value })}
               className={inputClasses}
