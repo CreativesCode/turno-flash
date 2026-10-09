@@ -369,6 +369,10 @@ deno_version = 2
 [functions.wa-inbound]
 verify_jwt = false
 
+# Called by RevenueCat with its own Authorization secret, not a Supabase JWT
+[functions.revenuecat-webhook]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

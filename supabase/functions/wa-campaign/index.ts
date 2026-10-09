@@ -105,6 +105,19 @@ Deno.serve(async (req) => {
 
     const orgId = profile.organization_id;
 
+    // A blocked business (expired license or deactivated) sends no campaigns
+    if (profile.role !== "admin") {
+      const { data: usable } = await supabase.rpc("org_license_usable", {
+        p_org_id: orgId,
+      });
+      if (usable !== true) {
+        return json(403, {
+          success: false,
+          error: "La licencia de tu negocio venció. Renuévala para enviar campañas.",
+        });
+      }
+    }
+
     // 3. Configuración WA del negocio
     const { data: settings } = await supabase
       .from("business_settings")

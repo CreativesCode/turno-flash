@@ -116,6 +116,7 @@ function money(amount: number, currency: string): string {
       style: "currency",
       currency,
       maximumFractionDigits: 0,
+      useGrouping: "always",
     }).format(amount);
   } catch {
     return `${amount} ${currency}`;

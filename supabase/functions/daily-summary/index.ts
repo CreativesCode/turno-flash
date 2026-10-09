@@ -34,7 +34,14 @@ interface OrgSettingsRow {
     name: string;
     timezone: string | null;
     whatsapp_phone: string | null;
+    currency: string | null;
+    trips_module_enabled: boolean | null;
   } | null;
+}
+
+interface TripRow {
+  id: string;
+  trip_bookings: { seats: number; status: string }[] | null;
 }
 
 interface AppointmentRow {
@@ -64,7 +71,7 @@ Deno.serve(async (req) => {
     const { data: targets, error } = await supabase
       .from("business_settings")
       .select(
-        "organization_id, openwa_session_id, daily_summary_time, organizations(name, timezone, whatsapp_phone)"
+        "organization_id, openwa_session_id, daily_summary_time, organizations(name, timezone, whatsapp_phone, currency, trips_module_enabled)"
       )
       .eq("enable_daily_summary", true)
       .eq("whatsapp_integration_enabled", true)
@@ -108,6 +115,15 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      // A blocked business (expired license or deactivated) gets no summary
+      const { data: usable } = await supabase.rpc("org_license_usable", {
+        p_org_id: row.organization_id,
+      });
+      if (usable !== true) {
+        results.push({ org: row.organization_id, status: "license_blocked" });
+        continue;
+      }
+
       // Turnos de hoy (día local de la organización)
       const { data: appts } = await supabase
         .from("appointments")
@@ -115,9 +131,23 @@ Deno.serve(async (req) => {
         .eq("organization_id", row.organization_id)
         .eq("appointment_date", localDate);
 
+      // Today's departures and their passengers, for a business with trips
+      let trips: TripRow[] = [];
+      if (org.trips_module_enabled) {
+        const { data: tripRows } = await supabase
+          .from("trips")
+          .select("id, trip_bookings(seats, status)")
+          .eq("organization_id", row.organization_id)
+          .eq("departure_date", localDate)
+          .is("cancelled_at", null);
+        trips = (tripRows ?? []) as unknown as TripRow[];
+      }
+
       const text = buildSummary(
         org.name,
-        (appts ?? []) as unknown as AppointmentRow[]
+        (appts ?? []) as unknown as AppointmentRow[],
+        trips,
+        org.currency || "USD"
       );
 
       const chatId = phoneToChatId(org.whatsapp_phone);
@@ -167,8 +197,37 @@ Deno.serve(async (req) => {
 
 const CANCELLED_STATUSES = new Set(["cancelled", "no_show", "rescheduled"]);
 
-function buildSummary(orgName: string, appts: AppointmentRow[]): string {
+function buildSummary(
+  orgName: string,
+  appts: AppointmentRow[],
+  trips: TripRow[],
+  currency: string
+): string {
   const active = appts.filter((a) => !CANCELLED_STATUSES.has(a.status));
+  const passengers = trips.reduce(
+    (sum, trip) =>
+      sum +
+      (trip.trip_bookings ?? [])
+        .filter((b) => b.status !== "cancelled")
+        .reduce((seats, b) => seats + b.seats, 0),
+    0
+  );
+  const tripsLine =
+    trips.length > 0
+      ? `🚌 Hoy sale${trips.length === 1 ? "" : "n"} *${trips.length}* viaje${
+          trips.length === 1 ? "" : "s"
+        } con ${passengers} pasajero${passengers === 1 ? "" : "s"}`
+      : null;
+
+  if (active.length === 0 && tripsLine) {
+    return [
+      `☀️ Buenos días! *${orgName}*`,
+      ``,
+      tripsLine,
+      ``,
+      `¡Buen día de trabajo! 💪`,
+    ].join("\n");
+  }
 
   if (active.length === 0) {
     return [
@@ -199,10 +258,13 @@ function buildSummary(orgName: string, appts: AppointmentRow[]): string {
     lines.push(`⏳ ${pending} pendiente${pending === 1 ? "" : "s"} de confirmar`);
   }
   if (revenue > 0) {
-    lines.push(`💰 Ingreso estimado: $${formatNumber(revenue)}`);
+    lines.push(`💰 Ingreso estimado: ${formatMoney(revenue, currency)}`);
   }
   if (firstTime) {
     lines.push(`⏰ Primer turno: ${firstTime}`);
+  }
+  if (tripsLine) {
+    lines.push(tripsLine);
   }
   lines.push(``, `¡Buen día de trabajo! 💪`);
 
@@ -252,8 +314,18 @@ function parseTimeToMinutes(time: string): number {
   return Number(h) * 60 + Number(m);
 }
 
-function formatNumber(n: number): string {
-  return new Intl.NumberFormat("es", { maximumFractionDigits: 0 }).format(n);
+/** In the currency the business charges in, like fmtMoney in the app. */
+function formatMoney(n: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat("es", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+      useGrouping: "always",
+    }).format(n);
+  } catch {
+    return `${Math.round(n)} ${currency}`;
+  }
 }
 
 function json(status: number, body: unknown): Response {

@@ -148,6 +148,12 @@ Deno.serve(async (req) => {
     return json(200, { status: "processed" });
   } catch (err) {
     console.error("[wa-inbound] processing failed", err);
+    // Forget the event: OpenWA retries after a 500, and with the key still
+    // stored the retry would be dropped as a duplicate
+    await supabase
+      .from("wa_processed_events")
+      .delete()
+      .eq("idempotency_key", idemKey);
     return json(500, {
       status: "error",
       message: err instanceof Error ? err.message : String(err),
@@ -181,7 +187,12 @@ async function handleMessageReceived(
 
   // Ignorar notificaciones internas de WhatsApp (e2e_notification,
   // call_log, group_notification, etc.) — solo procesar mensajes de chat reales.
-  if (data.type && data.type !== "chat") {
+  // A voice note cannot be read: it goes on as an unintelligible reply, so
+  // the customer is asked to answer in writing (the usual clarify, 1 per 12h)
+  const isVoiceNote = data.type === "ptt" || data.type === "audio";
+  if (isVoiceNote) {
+    data.body = "[nota de voz]";
+  } else if (data.type && data.type !== "chat") {
     console.log(`[wa-inbound] skip: type=${data.type} (no es chat)`);
     return;
   }
@@ -466,13 +477,24 @@ async function handleSessionStatus(supabase: any, env: WebhookEnvelope) {
 
   if (!settings) return;
 
-  await supabase.from("notifications").insert({
-    organization_id: settings.organization_id,
-    user_id: null,
-    type: "wa_session_down",
-    title: "WhatsApp desconectado",
-    message: `La sesión OpenWA ${env.sessionId} cambió a estado ${derived}. Vuelve a escanear el QR.`,
-  });
+  // notifications.user_id is NOT NULL: one row per owner of the business
+  const { data: owners } = await supabase
+    .from("user_profiles")
+    .select("user_id")
+    .eq("organization_id", settings.organization_id)
+    .eq("role", "owner");
+
+  if (!owners?.length) return;
+
+  await supabase.from("notifications").insert(
+    owners.map((owner: { user_id: string }) => ({
+      organization_id: settings.organization_id,
+      user_id: owner.user_id,
+      type: "wa_session_down",
+      title: "WhatsApp desconectado",
+      message: `La sesión OpenWA ${env.sessionId} cambió a estado ${derived}. Vuelve a escanear el QR.`,
+    }))
+  );
 }
 
 /** Chat ids ("<digits>@c.us", as wa-send writes them) that belong to the
@@ -604,6 +626,14 @@ async function tryApplyRating(
  *  - "Hola, queria preguntar..."          → null
  */
 function classifyReply(body: string): "confirm" | "cancel" | null {
+  // A thumbs-up on its own (any skin tone) is a yes
+  if (
+    /^(?:\s|👍|👌|✅|[\u{1F3FB}-\u{1F3FF}]|️)+$/u.test(body) &&
+    /👍|👌|✅/u.test(body)
+  ) {
+    return "confirm";
+  }
+
   // Normalizar: trim → upper → quitar acentos → quitar puntuación
   const normalized = body
     .trim()
