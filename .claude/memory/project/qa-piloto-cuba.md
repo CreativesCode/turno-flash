@@ -136,7 +136,7 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
     en línea, sobre un negocio `qa-fixture-*` creado con la clave de servicio y borrado en el `finally`.
 - **Manual y guía al día:** `docs/user-manual/` actualizado con lo visible nuevo; `passenger.webp` rehecha. Las otras
   7 fotos muestran la cabecera sin el botón «Actualizar» (diferencia menor, sin rehacer).
-- **Pendiente:** P3 está commiteado en local (7 commits del 2026-10-08) pero **sin subir**: `main` va 70 commits por delante de `origin/main` (el último ignora `.playwright-mcp/`); probar en la APK la barra de estado
+- **Pendiente:** P3 está commiteado (7 commits del 2026-10-08) y **subido a GitHub por Roberto ese mismo día**; probar en la APK la barra de estado
   (`useCapacitor` montado en el layout) junto con el resto de la lista de teléfono real.
 - **Visto de paso:** 6 negocios reales (AgroRed, DveloxSoft SC, LeoDev, Negocio, Negocio test registro, Notengo)
   tienen la licencia vencida hace más de 100 días. `roleLabel` en `dashboard/page.tsx` es código muerto anterior.

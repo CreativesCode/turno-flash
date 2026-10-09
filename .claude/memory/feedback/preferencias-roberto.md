@@ -28,7 +28,8 @@ Relacionado: [[estado-actual-2026-09]], [[convenciones-de-codigo]].
 
 - **Commits (2026-10-08):** pidió los commits «en trozos, aunque no sea por tareas específicas, como para no hacer
   uno solo». Se hicieron por área (licencia, página pública, base de datos, WhatsApp, panel, docs), sobre `main`,
-  que es donde trabaja. **Push solo cuando lo pida**: lleva 70 commits locales sin subir y no lo ha pedido.
+  que es donde trabaja. **El push lo hace él** (subió los 70 commits el 2026-10-08 desde su editor, sin pedírmelo):
+  no hacer push salvo que lo pida, y antes de escribir «sin subir» comprobar `git status -sb`.
 - **Carpetas de herramientas** (`.playwright-mcp/`): pidió ignorarlas en git, no commitearlas.
 - **Ritmo:** con «continúa» espera que siga con lo que no depende de sus respuestas y que junte las preguntas al
   final. Las preguntas sin responder no cuentan como permiso (no desplegué ni commiteé hasta que lo dijo).

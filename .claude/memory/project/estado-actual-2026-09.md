@@ -119,14 +119,15 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   278 mensajes de WhatsApp.
 - **Edge functions:** las 12 desplegadas; `public-booking` v5, `public-trips` v7, `wa-trip-send` v9,
   `daily-summary` v7, `wa-campaign` v6 y `wa-inbound` v38 llevan los cambios de P3.
-- **Git:** `main` local va **70 commits por delante de `origin/main`** (61 del 5-6 oct + 9 del 2026-10-08). Árbol
-  limpio. **Nada subido:** Vercel sigue con la versión anterior, aunque el servidor (BD y funciones) ya está al día.
-  Los cambios del servidor son compatibles con la web vieja, así que no hay apuro técnico, solo de producto.
+- **Git:** **Roberto subió todo a GitHub el 2026-10-08 a las 20:53** (push hecho por él, hasta el commit
+  `8be3df2`): los 61 commits del 5-6 oct más los 9 de P3. Con eso Vercel ya publica la web nueva, y coincide con el
+  servidor (BD y funciones), que ya estaba al día. No verifiqué el deploy de Vercel. Después de ese push solo quedan
+  locales los commits de memoria.
 - **Corrección de una nota anterior:** el dueño **ya no** puede editar por API las fechas de licencia de su
   organización; lo cerró la migración 048 ([[license-enforcement]]). Ignorar ese punto en las listas de agujeros
   de arriba.
 - **Agujeros que siguen:** cero tests automatizados, sin CI de build/lint, sin Sentry, `npm run lint` roto,
   SMTP por defecto de Supabase (los dueños no reciben «¿Olvidaste tu contraseña?»).
-- **Pendiente fuera del código:** subir a GitHub (Roberto no lo pidió), regenerar la APK y probar en teléfono real,
+- **Pendiente fuera del código:** comprobar que el deploy de Vercel salió bien, regenerar la APK y probar en teléfono real,
   SMTP propio, pedir a cada dueño su WhatsApp de contacto, y decidir qué hacer con los 6 negocios reales con la
   licencia vencida hace más de 100 días (AgroRed, DveloxSoft SC, LeoDev, Negocio, Negocio test registro, Notengo).
