@@ -5,9 +5,11 @@ import HomePageClient from "./home-client";
 const ogImageUrl = getAbsoluteUrl("/opengraph-image.jpg");
 
 export const metadata: Metadata = {
-  title: "Inicio",
+  // The home page is what search engines show: no "Inicio | Turno Flash"
+  title: { absolute: "Turno Flash: turnos y venta de pasajes con WhatsApp" },
   description:
-    "Turno Flash es la solución perfecta para salones, barberías, clínicas y talleres. Optimizado para móvil, bajo consumo de datos y fácil de usar. Gestiona tus turnos desde cualquier lugar.",
+    "Agenda de turnos y venta de pasajes para tu negocio, con página de reservas y avisos por WhatsApp. Para salones, barberías, clínicas y agencias de viajes.",
+  alternates: { canonical: "/" },
   keywords: [
     "sistema de reservas",
     "gestión de turnos",
@@ -17,11 +19,15 @@ export const metadata: Metadata = {
     "barberías",
     "clínicas",
     "talleres",
+    "venta de pasajes",
+    "reserva de asientos",
+    "viajes y excursiones",
+    "agencias de viajes",
   ],
   openGraph: {
-    title: "Turno Flash - Gestiona tus turnos desde cualquier lugar",
+    title: "Turno Flash - Turnos y venta de pasajes para tu negocio",
     description:
-      "Sistema de reservas móvil-first para negocios. Optimizado para salones, barberías, clínicas y talleres.",
+      "Agenda de turnos y venta de pasajes con página de reservas y avisos por WhatsApp. Para salones, barberías, clínicas, talleres y agencias de viajes.",
     type: "website",
     url: getAbsoluteUrl("/"),
     images: [
@@ -36,9 +42,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Turno Flash - Sistema de Reservas Inteligente",
+    title: "Turno Flash - Turnos y venta de pasajes para tu negocio",
     description:
-      "Gestiona tus turnos desde cualquier lugar. Optimizado para móvil, bajo consumo de datos.",
+      "Agenda de turnos y venta de pasajes con avisos por WhatsApp. Optimizado para móvil, bajo consumo de datos.",
     images: [ogImageUrl],
   },
 };

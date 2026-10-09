@@ -19,11 +19,11 @@ const ogImageUrl = getAbsoluteUrl("/opengraph-image.jpg");
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Turno Flash - Sistema de Reservas Inteligente",
+    default: "Turno Flash - Turnos y venta de pasajes para tu negocio",
     template: "%s | Turno Flash",
   },
   description:
-    "Sistema de reservas inteligente para negocios. Gestiona turnos, clientes y servicios desde cualquier dispositivo. Optimizado para salones, barberías, clínicas y talleres.",
+    "Sistema de reservas para negocios: agenda de turnos con recordatorios por WhatsApp y venta de pasajes para viajes y excursiones, con página pública de reservas. Para salones, barberías, clínicas, talleres y agencias de viajes.",
   keywords: [
     "sistema de reservas",
     "gestión de turnos",
@@ -35,6 +35,13 @@ export const metadata: Metadata = {
     "clínicas",
     "talleres",
     "app de citas",
+    "venta de pasajes",
+    "reserva de asientos",
+    "reservas de viajes",
+    "excursiones",
+    "agencias de viajes",
+    "transporte de pasajeros",
+    "recordatorios por WhatsApp",
   ],
   authors: [{ name: "Turno Flash" }],
   creator: "Turno Flash",
@@ -48,9 +55,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_ES",
     siteName: "Turno Flash",
-    title: "Turno Flash - Sistema de Reservas Inteligente",
+    title: "Turno Flash - Turnos y venta de pasajes para tu negocio",
     description:
-      "Gestiona tus turnos desde cualquier lugar. Sistema de reservas optimizado para móvil, ideal para salones, barberías, clínicas y talleres.",
+      "Agenda de turnos y venta de pasajes con página de reservas y avisos por WhatsApp. Para salones, barberías, clínicas, talleres y agencias de viajes.",
     images: [
       {
         url: ogImageUrl,
@@ -63,9 +70,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Turno Flash - Sistema de Reservas Inteligente",
+    title: "Turno Flash - Turnos y venta de pasajes para tu negocio",
     description:
-      "Gestiona tus turnos desde cualquier lugar. Optimizado para móvil, bajo consumo de datos.",
+      "Agenda de turnos y venta de pasajes con avisos por WhatsApp. Optimizado para móvil, bajo consumo de datos.",
     images: [ogImageUrl],
   },
   robots: {

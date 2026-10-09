@@ -1,7 +1,7 @@
 {
   "name": "Turno Flash",
   "short_name": "TurnoFlash",
-  "description": "Gestion de turnos para tu negocio",
+  "description": "Turnos y venta de pasajes para tu negocio",
   "lang": "es",
   "start_url": "/dashboard",
   "scope": "/",

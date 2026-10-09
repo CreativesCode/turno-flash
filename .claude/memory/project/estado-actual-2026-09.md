@@ -131,3 +131,16 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
 - **Pendiente fuera del código:** comprobar que el deploy de Vercel salió bien, regenerar la APK y probar en teléfono real,
   SMTP propio, pedir a cada dueño su WhatsApp de contacto, y decidir qué hacer con los 6 negocios reales con la
   licencia vencida hace más de 100 días (AgroRed, DveloxSoft SC, LeoDev, Negocio, Negocio test registro, Notengo).
+
+## Landing y SEO con pasajes (2026-10-08)
+
+- **Landing (`app/(app)/home-client.tsx`):** sección nueva «¿Vendes pasajes? También es para ti» (`#trips`,
+  `TRIP_FEATURES`), hero, pasos, planes, preguntas frecuentes y pie mencionan la venta de pasajes. Solo se promete lo
+  que existe: no hay recordatorio antes de la salida ni vencimiento automático del anticipo, así que no se nombran.
+- **SEO:** título propio del inicio (`title.absolute`, ya no «Inicio | Turno Flash»), descripción, palabras clave,
+  Open Graph y canonical con turnos + pasajes en `app/layout.tsx` y `app/(app)/page.tsx`; `app/robots.ts` y
+  `app/sitemap.ts` nuevos (`force-static`, salen como `robots.txt` y `sitemap.xml` en el export); el panel y `/auth`
+  quedan fuera de los buscadores. `/book` y `/trips` siguen con su `noindex`.
+- **Sin tocar:** la imagen `public/opengraph-image.jpg` y las tres capturas de la galería (`tf-1..3.webp`) siguen
+  siendo de turnos.
+- Un `next build` puede fallar una vez con «next/font/google queries have exactly one entry»: es pasajero, repetir.

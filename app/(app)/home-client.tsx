@@ -5,18 +5,23 @@ import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
 import {
   ArrowRight,
+  Banknote,
   BarChart3,
   Building2,
+  Bus,
   Calendar,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  ClipboardList,
   Clock,
+  Globe,
   HeartHandshake,
   KeyRound,
   Lock,
   type LucideIcon,
   Mail,
+  MapPin,
   MessageSquare,
   Moon,
   ServerCog,
@@ -99,6 +104,51 @@ const FEATURES: readonly Feature[] = [
   },
 ];
 
+const TRIP_FEATURES: readonly Feature[] = [
+  {
+    Icon: Bus,
+    title: "Salidas y asientos",
+    description:
+      "Publica cada salida con sus asientos, su precio y la foto del vehículo. Nunca se venden más asientos de los que hay.",
+    mesh: "mesh-info",
+  },
+  {
+    Icon: Globe,
+    title: "Tu página de pasajes",
+    description:
+      "Tus pasajeros reservan solos desde un enlace, sin llamar: eligen la salida, cuántos viajan y dónde los recoges.",
+    mesh: "mesh-primary",
+  },
+  {
+    Icon: MapPin,
+    title: "Puntos de recogida",
+    description:
+      "Cada parada con su hora y su precio. Solo ida o ida y vuelta.",
+    mesh: "mesh-secondary",
+  },
+  {
+    Icon: Banknote,
+    title: "Anticipos bajo control",
+    description:
+      "Pide un anticipo para guardar el asiento y registra cada cobro: siempre sabes quién pagó y cuánto falta.",
+    mesh: "mesh-warn",
+  },
+  {
+    Icon: ClipboardList,
+    title: "La lista del chofer",
+    description:
+      "Pasajeros, paradas, teléfonos y lo que falta cobrar, lista para compartir por WhatsApp o imprimir.",
+    mesh: "mesh-violet",
+  },
+  {
+    Icon: MessageSquare,
+    title: "Avisos por WhatsApp",
+    description:
+      "El pasajero recibe la confirmación de su reserva y cómo pagar el anticipo, sin que escribas nada.",
+    mesh: "mesh-info",
+  },
+];
+
 const HOW_IT_WORKS: readonly {
   step: string;
   title: string;
@@ -108,19 +158,19 @@ const HOW_IT_WORKS: readonly {
       step: "1",
       title: "Crea tu negocio",
       description:
-        "Registra tu organización, define tus servicios, precios y el equipo que atiende.",
+        "Regístrate y elige si trabajas con turnos, con pasajes o con ambos. Luego carga tus servicios y tu equipo, o tus salidas.",
     },
     {
       step: "2",
-      title: "Agenda los turnos",
+      title: "Agenda turnos o publica salidas",
       description:
-        "Carga las citas en segundos desde el móvil. El sistema evita solapes automáticamente.",
+        "Carga las reservas en segundos desde el móvil o comparte tu página para que reserven solos. El sistema evita solapes y asientos vendidos de más.",
     },
     {
       step: "3",
       title: "WhatsApp hace el resto",
       description:
-        "Confirmaciones y recordatorios automáticos. Tus clientes responden OK o CANCELAR y la agenda se actualiza sola.",
+        "Confirmaciones y recordatorios automáticos. En los turnos, tus clientes responden OK o CANCELAR y la agenda se actualiza sola.",
     },
   ];
 
@@ -136,7 +186,7 @@ const TRUST_POINTS: readonly Feature[] = [
     Icon: KeyRound,
     title: "Roles y permisos",
     description:
-      "Dueño, staff y permisos especiales: cada miembro del equipo ve exactamente lo que necesita.",
+      "Dueño y empleados: cada miembro del equipo ve exactamente lo que necesita.",
     mesh: "mesh-secondary",
   },
   {
@@ -148,9 +198,9 @@ const TRUST_POINTS: readonly Feature[] = [
   },
   {
     Icon: Building2,
-    title: "Hecho para servicios",
+    title: "Hecho para tu día a día",
     description:
-      "Salones, barberías, clínicas, estéticas y talleres: flujos de trabajo pensados para el día a día real.",
+      "Salones, barberías, clínicas, estéticas, talleres y negocios de viajes y excursiones: flujos pensados para el trabajo real.",
     mesh: "mesh-violet",
   },
 ];
@@ -167,7 +217,8 @@ const PLANS: readonly {
       price: "$9.99",
       period: "USD / mes",
       features: [
-        "Turnos y clientes ilimitados",
+        "Turnos, venta de pasajes o ambos",
+        "Turnos, salidas y clientes ilimitados",
         "Recordatorios y valoraciones por WhatsApp",
         "Reportes y estadísticas del negocio",
         "Campañas para recuperar clientes",
@@ -193,7 +244,12 @@ const FAQS: readonly { question: string; answer: string }[] = [
   {
     question: "¿Qué es Turno Flash?",
     answer:
-      "Turno Flash es un sistema de reservas diseñado especialmente para salones, barberías, clínicas y talleres. Está optimizado para funcionar desde tu móvil con bajo consumo de datos, permitiéndote gestionar tus turnos de manera eficiente y sin complicaciones.",
+      "Turno Flash es un sistema de reservas para negocios. Sirve para dos cosas: llevar la agenda de turnos de salones, barberías, clínicas y talleres, y vender pasajes para viajes y excursiones. Está optimizado para funcionar desde tu móvil con bajo consumo de datos.",
+  },
+  {
+    question: "¿Sirve para vender pasajes de viajes o excursiones?",
+    answer:
+      "Sí. Cargas cada salida con su fecha, sus asientos, sus puntos de recogida y su precio, y compartes un enlace para que tus pasajeros reserven solos. Puedes pedir un anticipo para guardar el asiento, aprobar las reservas antes de confirmarlas, registrar los cobros y compartir con el chofer la lista de pasajeros. Al registrarte eliges si tu negocio trabaja con turnos, con pasajes o con ambos.",
   },
   {
     question: "¿Cuánto cuesta?",
@@ -223,12 +279,12 @@ const FAQS: readonly { question: string; answer: string }[] = [
   {
     question: "¿Qué pasa si no tengo internet?",
     answer:
-      "Turno Flash requiere conexión a internet para sincronizar los datos. Sin embargo, está optimizado para funcionar con conexiones lentas y consumir muy pocos datos, ideal para áreas con conexión limitada.",
+      "En la app del teléfono puedes abrir y consultar tu día sin señal: la agenda y la lista de pasajeros quedan guardadas. Para crear o cambiar algo sí hace falta conexión. Turno Flash está optimizado para conexiones lentas y consume muy pocos datos.",
   },
   {
     question: "¿Puedo personalizar mi página de reservas?",
     answer:
-      "Sí, cada negocio tiene su propia página pública de reservas con un enlace único. Tus clientes pueden reservar turnos directamente desde esta página sin necesidad de crear una cuenta.",
+      "Sí, cada negocio tiene su propia página pública con un enlace único, que tú decides cuándo activar. Tus clientes reservan turnos o asientos directamente desde ahí, sin crear una cuenta.",
   },
   {
     question: "¿Cómo empiezo a usar Turno Flash?",
@@ -327,8 +383,9 @@ export default function HomePageClient() {
               en piloto automático.
             </h1>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">
-              Reservas, recordatorios y check-in para peluquerías, barberías,
-              consultorios y estéticas. Todo desde el celular.
+              Turnos para peluquerías, barberías, consultorios y estéticas, y
+              venta de pasajes para viajes y excursiones. Todo desde el
+              celular.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Button
@@ -362,7 +419,7 @@ export default function HomePageClient() {
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <CheckCircle2 className="h-4 w-4" />
-                Optimizado para móvil
+                Página de reservas propia
               </span>
             </div>
           </div>
@@ -410,7 +467,7 @@ export default function HomePageClient() {
         <div className="mx-auto max-w-7xl">
           <div className="text-center">
             <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
-              Para tu negocio
+              Negocios de turnos
             </div>
             <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
               Todo lo que necesitas, en un solo lugar.
@@ -444,8 +501,51 @@ export default function HomePageClient() {
         </div>
       </section>
 
+      {/* Trips */}
+      <section id="trips" className="px-5 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center">
+            <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
+              Viajes y excursiones
+            </div>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              ¿Vendes pasajes? También es para ti.
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-base text-foreground-muted">
+              Deja de anotar asientos en una libreta: tus pasajeros reservan
+              desde un enlace y tú ves quién viaja, quién pagó y dónde sube.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {TRIP_FEATURES.map((feature) => {
+              const Icon = feature.Icon;
+              return (
+                <Card
+                  key={feature.title}
+                  className="flex items-start gap-3 p-4"
+                >
+                  <div
+                    className={`${feature.mesh} flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-white shadow-sm`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-foreground">
+                      {feature.title}
+                    </div>
+                    <div className="mt-1 text-[13px] leading-relaxed text-foreground-muted">
+                      {feature.description}
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* How it works */}
-      <section className="px-5 py-20 sm:px-6 lg:px-8">
+      <section className="bg-surface px-5 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="text-center">
             <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
@@ -690,9 +790,9 @@ export default function HomePageClient() {
                 </span>
               </div>
               <p className="mt-3 max-w-sm text-sm leading-relaxed text-foreground-muted">
-                Sistema de gestión de turnos para negocios de servicios.
-                Reservas, recordatorios por WhatsApp y control total de tu
-                agenda, desde el móvil.
+                Turnos y venta de pasajes para tu negocio. Reservas online,
+                avisos por WhatsApp y control total de tu agenda y de tus
+                salidas, desde el móvil.
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
@@ -714,6 +814,14 @@ export default function HomePageClient() {
                     className="text-foreground-muted transition-colors hover:text-foreground"
                   >
                     Funcionalidades
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#trips"
+                    className="text-foreground-muted transition-colors hover:text-foreground"
+                  >
+                    Venta de pasajes
                   </a>
                 </li>
                 <li>
