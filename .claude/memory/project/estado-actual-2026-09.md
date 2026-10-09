@@ -109,3 +109,24 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   de licencia de su organización.
 - **Sin publicar:** el trabajo del 5-6 oct está en commits locales sin subir a GitHub, y la APK de Google Play
   sigue siendo la anterior.
+
+## Actualizacion 2026-10-08 (noche): P3 cerrado
+
+- **Plan QA del piloto terminado en código:** P0, P1, P2 y P3 cerrados. Solo quedan fuera P1-26 (iOS necesita Mac)
+  y el rol `special`, aparcado por Roberto. Detalle en [[qa-piloto-cuba]].
+- **Base de datos:** migraciones hasta la **072**, todas aplicadas en producción. 24 tablas en `public`.
+  Tamaño al 2026-10-08: 11 organizaciones, 14 usuarios, 71 turnos, 24 clientes, 13 salidas, 21 pasajes,
+  278 mensajes de WhatsApp.
+- **Edge functions:** las 12 desplegadas; `public-booking` v5, `public-trips` v7, `wa-trip-send` v9,
+  `daily-summary` v7, `wa-campaign` v6 y `wa-inbound` v38 llevan los cambios de P3.
+- **Git:** `main` local va **70 commits por delante de `origin/main`** (61 del 5-6 oct + 9 del 2026-10-08). Árbol
+  limpio. **Nada subido:** Vercel sigue con la versión anterior, aunque el servidor (BD y funciones) ya está al día.
+  Los cambios del servidor son compatibles con la web vieja, así que no hay apuro técnico, solo de producto.
+- **Corrección de una nota anterior:** el dueño **ya no** puede editar por API las fechas de licencia de su
+  organización; lo cerró la migración 048 ([[license-enforcement]]). Ignorar ese punto en las listas de agujeros
+  de arriba.
+- **Agujeros que siguen:** cero tests automatizados, sin CI de build/lint, sin Sentry, `npm run lint` roto,
+  SMTP por defecto de Supabase (los dueños no reciben «¿Olvidaste tu contraseña?»).
+- **Pendiente fuera del código:** subir a GitHub (Roberto no lo pidió), regenerar la APK y probar en teléfono real,
+  SMTP propio, pedir a cada dueño su WhatsApp de contacto, y decidir qué hacer con los 6 negocios reales con la
+  licencia vencida hace más de 100 días (AgroRed, DveloxSoft SC, LeoDev, Negocio, Negocio test registro, Notengo).

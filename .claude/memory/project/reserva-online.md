@@ -48,3 +48,16 @@ negocio → idioma del navegador → Cuba. Se descarto la IP a proposito (VPN en
 El backend ya aceptaba cualquier `+` con 8-15 digitos.
 
 Relacionado: [[producto-y-dominio]], [[arquitectura-static-export]], [[whatsapp-automatizaciones]].
+
+## Cambios del cierre de P3 (2026-10-08)
+
+- **Flujo más corto (D-04):** con un solo profesional para el servicio se salta «¿Con quién?»; el apellido es
+  opcional (migración 069, se guarda `''`); nombre y teléfono se recuerdan en el dispositivo (`localStorage`
+  `turnoflash:customer`); el botón «Confirmar reserva» queda fijo abajo y Enter pasa al campo siguiente.
+- **Contacto del negocio:** `public_booking_info` devuelve `organization.contact_phone` (=
+  `organizations.whatsapp_phone`, migración 068). Con ese dato, la pantalla final y el aviso de límite muestran
+  «Escribir al negocio». Sin número cargado, no se pinta nada.
+- **Otros:** nota «Los horarios son en la hora local del negocio» solo si el reloj del dispositivo difiere;
+  `openGraph` propio en `app/book/layout.tsx`; la edge valida la fecha con `z.iso.date()`.
+- **Ajustes:** Copiar, Compartir y Ver página aparecen solo con la página activa.
+- Probado en navegador a 360x640 sobre `qa-barberia-66e142`.

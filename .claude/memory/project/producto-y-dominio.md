@@ -52,3 +52,13 @@ Relacionado: [[arquitectura-static-export]], [[whatsapp-automatizaciones]], [[es
 
 
 **Mercado (2026-10-06):** todos los negocios de la plataforma están en **Cuba** (zona America/Havana). Es el valor por defecto del registro. No asumir Argentina ni México en zonas, prefijos ni ejemplos.
+
+## Roles: lo que cambió el 2026-10-08
+
+- **Borrar** clientes y turnos es solo de dueño y admin (migración 070). La app nunca borra: desactiva clientes y
+  cancela turnos.
+- **Empleado vinculado a su ficha:** el dueño elige en Profesionales la «Cuenta de la app» de cada profesional
+  (`staff_members.user_id`). Ese empleado ve la pastilla «Mis turnos» en la Lista.
+- **Módulos:** entrar por URL a una sección de un módulo apagado devuelve a Inicio (salvo admin). Apagar un módulo
+  pide confirmación. El admin puede invitar a alguien directo a un negocio.
+- En pantalla los roles se llaman Admin, Dueño, Empleado y Especial (`ROLE_META`).

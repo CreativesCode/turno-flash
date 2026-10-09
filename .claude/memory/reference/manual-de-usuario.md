@@ -34,3 +34,12 @@ Relacionado: [[modulo-reserva-asientos]], [[copy-espanol-internacional]], [[mapa
 **Guía de primeros pasos (2026-10-06):** además del manual, el dueño nuevo ve en Inicio la tarjeta
 "Pon en marcha tu negocio" (`components/onboarding/SetupGuide.tsx`), mencionada en las secciones
 "Puesta en marcha" del manual. Si cambia un paso de la guía, revisar también esas secciones.
+
+**Actualizado el 2026-10-08** con el cierre de P3 (21 cambios): botón Actualizar, «Hoy · fecha» y «Por la
+mañana/tarde», filtro No vino y búsqueda completa, apellido opcional, Cuenta de la app y Mis turnos, pasos de la
+reserva pública (salto de «¿Con quién?», cliente recordado, Escribir al negocio, Copiar instrucciones), 👍 y nota
+de voz, avisos de licencia, y CSV que no aparece en el teléfono.
+
+**Fotos de la guía:** `passenger.webp` rehecha el 2026-10-08 (receta en [[turno-flash-tooling]]). Las otras siete
+muestran la cabecera sin el botón «Actualizar», y `booking-page.webp` / `trips-page.webp` muestran Copiar y
+Compartir en la tarjeta apagada de abajo, que ya no aparecen. Diferencias menores, sin rehacer.

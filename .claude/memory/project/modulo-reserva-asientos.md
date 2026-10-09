@@ -229,3 +229,19 @@ copy. Regla completa en [[copy-espanol-internacional]].
   PRP ("Servicios siguen visibles para ambos módulos").
 - **Fase 5 (vencimiento automático del anticipo) sigue pendiente a propósito**: Roberto la volvió a
   frenar el 2026-09-12 ("eso aún no"). El manual y Ajustes lo advierten.
+
+## Cambios del cierre de P3 (2026-10-08)
+
+- **Página pública `/trips`:** `public_trips_info` ya **no devuelve `driver_phone`** y sí `contact_phone`
+  (migración 068). Apellido opcional (069), cliente recordado en el dispositivo, botón fijo abajo, «Copiar
+  instrucciones» del anticipo, «Escribir al negocio», singular «Queda 1 asiento», y `app/trips/layout.tsx` con su
+  propio `openGraph` y `robots: noindex`.
+- **Panel:** el detalle de la salida muestra la fecha legible (`departureDateLabel`) y el título en dos líneas;
+  una reserva confirmada no ofrece «Confirmar»; «Exportar CSV» se oculta en el teléfono; el empleado ve en Viajes
+  el aviso «Solo el dueño puede crear o cambiar salidas…».
+- **Ajustes:** el ejemplo del anticipo usa «9200 XXXX XXXX XXXX (tu nombre)» y avisa si el texto está vacío con la
+  página activa.
+- **Numeración:** `generate_trip_booking_number` toma un lock por organización y hay índice único
+  `(organization_id, booking_number)` (migración 071).
+- **Guía de primeros pasos:** `public/images/guide/passenger.webp` rehecha el 2026-10-08.
+- La Fase 5 (vencimiento automático del anticipo) sigue pendiente a propósito.

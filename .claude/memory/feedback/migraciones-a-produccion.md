@@ -15,3 +15,8 @@ aplicando las migraciones en producción").
 (anon, owner, admin, miembro inactivo). Después del push, verificar desde fuera con la clave anon y el
 login real del owner. Contarle a Roberto el resultado. Esto no cubre borrar datos reales ni tocar
 organizaciones de clientes: eso sigue requiriendo confirmación.
+
+**Edge functions (2026-10-08):** el permiso de arriba es para migraciones. Para desplegar funciones pregunté y
+Roberto respondió «publica las funciones» para esa tanda. No lo dijo como regla permanente: es mi lectura que hay
+que **preguntar cada vez** antes de `supabase functions deploy`. Sí conviene avisarle cuando un cambio del front
+depende de una función sin desplegar (pasó con el apellido opcional).

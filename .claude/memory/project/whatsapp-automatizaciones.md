@@ -98,3 +98,25 @@ cualquier otra cosa, no le llega a nadie, y si se acostumbra a escribir ahí, se
 **How to apply:** un mensaje nuevo al cliente debe pasar por el marco y decidir `contact`. Nunca escribir
 "responde a este mensaje" ni "escríbenos" sin dar el contacto. El contacto (`organizations.contact_name` y
 `whatsapp_phone`, migración 057) lo edita el dueño en Ajustes › Contacto para tus clientes.
+
+## Cambios del cierre de P3 (2026-10-08, desplegados)
+
+- **Respuestas del cliente (`wa-inbound`, `classifyReply`):** un 👍, 👌 o ✅ solo (con cualquier tono de piel)
+  confirma. Una **nota de voz** (`type` `ptt` o `audio`) ya no se ignora: sigue como respuesta ilegible y recibe el
+  `clarify` de siempre (máximo 1 cada 12 h por turno). El resto de los tipos que no son `chat` se siguen ignorando.
+- **Idempotencia:** si el procesamiento falla, se borra la fila de `wa_processed_events` antes de responder 500;
+  sin eso, el reintento de OpenWA se descartaba como duplicado.
+- **Alerta «WhatsApp desconectado»:** `notifications.user_id` es NOT NULL, así que se inserta una fila por cada
+  dueño del negocio (antes el insert fallaba en silencio). Nada en la app muestra todavía esa tabla.
+- **Aviso al negocio de turno nuevo:** el trigger `trigger_wa_send_on_appointment` manda `notify_business_new`
+  **solo si `source = 'web'`** (migración 071). Los turnos que carga el negocio no lo avisan.
+- **Resumen diario:** usa la moneda del negocio (`organizations.currency`), agrega «Hoy salen N viajes con M
+  pasajeros» si tiene el módulo de viajes, y no sale si la licencia está vencida. **No se reintenta** un resumen
+  «failed»: OpenWA responde 500 y entrega, así que reintentar lo duplicaría (decisión tomada, no reabrir).
+- **Campañas:** `wa-campaign` responde 403 a un dueño con la licencia vencida.
+- **Envío manual desde el panel:** `AppointmentService.sendReminder` trata `code: "HTTP_500"` como enviado y, para
+  cualquier otro fallo, muestra un texto en español. En Plataforma el contador dice «sin confirmar entrega», no
+  «fallidos». De 205 filas `failed`, 189 son ese `HTTP_500`.
+- **Importes en los mensajes:** siempre con separador de miles (`useGrouping: "always"`).
+- **Sin probar con teléfono real:** el 👍, la nota de voz y el resumen con viajes. El clasificador sí se probó con
+  14 respuestas de ejemplo.

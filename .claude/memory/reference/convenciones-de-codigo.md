@@ -117,3 +117,31 @@ Relacionado: [[arquitectura-static-export]], [[rediseno-ui-migracion]].
   `loadCustomerSchema` en `components/booking/BookingSteps.tsx`). Detalle en [[arquitectura-static-export]].
 - **Texto para el dueño o el cliente:** frases cortas, nombrar los botones tal como se ven («Crear servicio»)
   y, si es una guía, con foto real de la pantalla ([[preferencias-roberto]]).
+
+## Helpers y reglas del cierre de P3 (2026-10-08)
+
+- **`Field` (`components/ui/sheet.tsx`)** enlaza solo la etiqueta con su primer hijo (`useId` + `cloneElement`): no
+  pasar `htmlFor`. Si el primer hijo es un contenedor, la etiqueta queda apuntando a él y no hace nada (aceptado).
+- **Dinero:** `fmtMoney` fuerza el separador de miles. Reportes y gráficos usan `useMoney()`; ya no existe
+  `formatMoney` en `components/analytics/widgets.tsx`. En las edge functions, la misma regla a mano.
+- **Rol visible:** `ROLE_META[role].label` (`components/users/UserCard.tsx`), nunca el valor crudo.
+- **Estado de turno visible:** `getStatusLabel()` de `config/constants.ts`.
+- **Páginas públicas:** `components/booking/BusinessInfo.tsx` (`BusinessContactLink`, `BusinessTimeNote`);
+  `focusNextOnEnter`, `stickyActionClasses` y `stickyActionStyle` en `BookingSteps.tsx` para todo formulario de un
+  paso público.
+- **Apellido opcional en todas partes** (reserva pública, ficha de cliente, alta rápida en un turno). Mostrar el
+  nombre con `` `${first} ${last}`.trim() ``.
+- **Lista de turnos:** estado, texto y «Mis turnos» se filtran **en el servidor** vía los filtros de
+  `useInfiniteAppointments` (`status`, `search`, `staffId`), y solo en vista Lista; los calendarios traen todo.
+  El texto pasa por un saneado de caracteres de PostgREST antes del `.or(...)`.
+- **Cambios de estado:** `updateStatus` agrega `.eq("status", estadoValidado)`; 0 filas puede ser licencia,
+  permiso o «alguien lo cambió».
+- **Módulos:** `MODULE_ROUTES` en `app/(app)/dashboard/layout.tsx` lista las rutas de cada módulo; una sección
+  nueva de un módulo se agrega ahí además de en `Sidebar`/`Drawer`.
+- **Tema:** solo se guarda en `localStorage` cuando el usuario lo elige (`userChose` en `theme-context`).
+- **Soporte:** `SUPPORT_WHATSAPP_URL` (licencia) y `SUPPORT_WHATSAPP_CONNECT_URL` (pedir conexión de WhatsApp) en
+  `config/constants.ts`.
+- **Consultas sueltas:** la lista de negocios para invitar vive en `InvitationService.listOrganizations()`; el
+  equipo, en `TeamService.listStaff()` con la query key `["team", orgId]` (compartida por TeamCard y Profesionales).
+- **Lint:** quedan errores previos en `theme-context` (setState en efecto), `appointments.service` (3 `any`) y el
+  aviso de `roleLabel` sin uso en `dashboard/page.tsx`. No son de este trabajo; no «arreglarlos» de paso.

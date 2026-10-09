@@ -47,3 +47,30 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
   panel exportado hace falta un servidor mínimo que lo haga. Parar esos servidores antes de recompilar.
 - `npm run dev` bloquea las carpetas de `app/`: pararlo antes de moverlas y borrar `.next/dev` después.
 - No terminar un comando Bash con `cat > archivo` sin heredoc: se queda esperando entrada hasta el timeout.
+
+## Aprendido el 2026-10-08
+
+- **Scripts de edición grandes:** un heredoc de Bash colapsa `\\` en `\` (rompe regex y `\u{…}`) y se trunca si es
+  largo. Escribir el `.py` o `.cjs` con Write en el scratchpad y ejecutarlo desde ahí.
+- **Ensayar migraciones:** `supabase db query --linked -f` con `BEGIN … ROLLBACK`, juntando los resultados en una
+  tabla temporal y un único `SELECT` final (solo vuelve el último resultado). Para simular un rol dentro de un `DO`:
+  `set_config('request.jwt.claims', …, true)` + `SET LOCAL ROLE authenticated` + `RESET ROLE`.
+- **Definición viva de una función:** `select pg_get_functiondef(oid) …` por `db query`, guardar a un archivo y
+  generar la migración reemplazando solo lo necesario. La consola de Windows muestra mal los acentos; el archivo
+  queda bien en UTF-8.
+- **Funciones desplegadas y su `verify_jwt`:** `supabase functions list`. `config.toml` declara `wa-inbound` y
+  `revenuecat-webhook` con `verify_jwt = false`.
+- **Probar una edge function pública desde fuera:** `curl` con la clave anon de `.env.local` (cargarla con
+  `set -a; . ./.env.local`, sin imprimirla). Con un `service_id` o `trip_id` inexistente se prueba la validación
+  sin crear nada.
+- **Chequear la sintaxis de una edge function sin Deno:** `typescript.transpileModule` desde Node; sirve también
+  para extraer una función suelta y ejecutarla con datos de ejemplo (ojo: los archivos tienen CRLF).
+- **Playwright MCP funcionó** en esta sesión (login del empleado QA, medidas con `browser_evaluate`). El MCP de
+  Supabase seguía sin autenticar: se usó el CLI.
+- **Rehacer una foto de la guía:** `playwright-core` instalado en el scratchpad + Chromium de `ms-playwright`,
+  viewport 390x700 con `deviceScaleFactor: 2`, `--lang=es-ES`, ocultar `nextjs-portal`, contorno naranja `#f97316`
+  por estilo en línea, `sharp().resize(520, 933).webp({ quality: 80 })`. Negocio `qa-fixture-*` creado con la clave
+  de servicio (`create_organization_with_owner`) y borrado en el `finally`.
+- **Con `npm run dev` corriendo**, `tsc` puede mostrar errores de `.next/dev/types/validator.ts` al agregar un
+  layout nuevo: son tipos generados viejos; se van con `npm run build:next`.
+- `.playwright-mcp/` está en `.gitignore` desde el 2026-10-08.

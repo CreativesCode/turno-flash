@@ -22,3 +22,20 @@ no en solo lectura. Hoy las lecturas siguen abiertas: hay que cerrarlas (punto p
 licencia a mano. No hay licencias largas para los negocios piloto.
 
 **Migración 067 (2026-10-08):** la gracia ya no se configura en el cliente: son 7 días fijos en SQL y en `getGracePeriodDays()`. El acoplamiento con `NEXT_PUBLIC_LICENSE_GRACE_PERIOD_DAYS` de arriba ya no aplica (la variable sigue en `.env.local` y en el README, sin efecto). Los días se redondean hacia arriba.
+
+**Migración 072 (2026-10-08), `apply_revenuecat_event`:**
+- Los eventos con `environment = SANDBOX` **solo se auditan** en `subscription_events`; no tocan la licencia.
+  La app todavía usa la key `test_` de RevenueCat (Test Store), así que **una compra de prueba ya no extiende la
+  licencia**. Si Roberto necesita probar el flujo completo antes de salir a Play, hay que revertir ese `IF` o
+  mirar `subscription_events`. Se lo avisé y no pidió revertirlo.
+- Una compra o renovación usa `GREATEST(license_end_date, expiración)`: nunca acorta una licencia que el admin
+  extendió a mano (así se cobra en Cuba). `EXPIRATION` sigue fijando la fecha tal cual.
+- En el cliente, `useSubscription` invalida la query `["license"]` al comprar y otra vez a los 8 s (el webhook llega
+  después).
+
+**Avisos (2026-10-08):** en Inicio hay un solo aviso (la tarjeta `LicenseNotification`, sin la barra superior). Los
+textos de días salen del `message` de `check_license_status`; no rearmarlos en el cliente. La BD no distingue una
+prueba de una licencia paga, por eso el texto es neutro («Te quedan N días de acceso»).
+
+**Bloqueo en el servidor de WhatsApp (2026-10-08):** `daily-summary` y `wa-campaign` consultan
+`org_license_usable` y no envían nada a un negocio bloqueado.
