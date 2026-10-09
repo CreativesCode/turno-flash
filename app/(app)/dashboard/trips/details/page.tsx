@@ -36,7 +36,12 @@ import {
 } from "@/types/trips";
 import { downloadCsv, todayForFilename } from "@/utils/csv";
 import { useMoney } from "@/hooks/useMoney";
-import { driverListText, pickupLabel, shareText } from "@/utils/driver-list";
+import {
+  departureDateLabel,
+  driverListText,
+  pickupLabel,
+  shareText,
+} from "@/utils/driver-list";
 import { Capacitor } from "@capacitor/core";
 import {
   ArrowLeft,
@@ -498,11 +503,12 @@ function TripDetailsContent() {
 
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <h1 className="truncate text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                <h1 className="line-clamp-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
                   {trip.title}
                 </h1>
                 <p className="text-xs text-foreground-muted">
-                  {trip.departure_date} · {trip.departure_time.slice(0, 5)} ·{" "}
+                  {departureDateLabel(trip.departure_date)} ·{" "}
+                  {trip.departure_time.slice(0, 5)} ·{" "}
                   {seatsTaken} de {trip.total_seats} asientos
                 </p>
               </div>
@@ -530,7 +536,11 @@ function TripDetailsContent() {
               {/* Downloads and printing don't work inside the native app */}
               {!isNative && (
                 <>
-                  <Button variant="ghost" onClick={handleExport}>
+                  <Button
+                    variant="ghost"
+                    onClick={handleExport}
+                    className="max-sm:hidden"
+                  >
                     <Download className="h-4 w-4" />
                     Exportar CSV
                   </Button>

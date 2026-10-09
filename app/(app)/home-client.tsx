@@ -233,7 +233,7 @@ const FAQS: readonly { question: string; answer: string }[] = [
   {
     question: "¿Cómo empiezo a usar Turno Flash?",
     answer:
-      "Para comenzar, necesitas una invitación de un administrador. Una vez que recibas tu invitación por correo electrónico, podrás configurar tu contraseña y acceder al sistema. Si eres dueño de un negocio, contacta con nosotros para crear tu cuenta.",
+      "Si eres dueño de un negocio, crea tu cuenta gratis: en un minuto tienes tu negocio listo, con 7 días de prueba. Si trabajas en un negocio que ya usa Turno Flash, pídele al dueño que te invite: te llega un correo para elegir tu contraseña.",
   },
 ];
 
@@ -662,7 +662,7 @@ export default function HomePageClient() {
             <p className="mt-3 text-base text-white/85 sm:text-lg">
               {user
                 ? "Tu cuenta está activa. Vuelve al panel de control."
-                : "Pide tu invitación y simplifica la gestión de tu negocio."}
+                : "Crea tu cuenta gratis y simplifica la gestión de tu negocio."}
             </p>
             <div className="mt-7 flex justify-center">
               <Button

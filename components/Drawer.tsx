@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, Logo } from "@/components/ui";
+import { ROLE_META } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
 import {
   useOrganizationModules,
@@ -183,12 +184,6 @@ function isActive(pathname: string, href: string): boolean {
   return pathname.startsWith(href);
 }
 
-function roleLabel(role?: string): string {
-  if (role === "admin") return "Administrador";
-  if (role === "owner") return "Dueño";
-  return "Staff";
-}
-
 /**
  * Mobile-only sliding drawer. Activated by the hamburger in MobileTopbar.
  * Shows a mesh-gradient brand tile, the user avatar block, role-filtered nav,
@@ -272,7 +267,7 @@ export function Drawer({ open, onClose }: DrawerProps) {
                 {profile.full_name || profile.email || "Usuario"}
               </div>
               <div className="text-[11px] text-foreground-muted">
-                {roleLabel(profile.role)}
+                {ROLE_META[profile.role].label}
               </div>
             </div>
           </div>

@@ -147,7 +147,7 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
         </ul>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
         <label className="flex flex-col gap-1 text-[11px] font-semibold text-foreground-muted">
           Desde
           <input
@@ -168,7 +168,7 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
           />
         </label>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 max-[359px]:flex-col">
         <input
           type="text"
           value={title}

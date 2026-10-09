@@ -5,13 +5,13 @@ import {
   PeakHoursHeatmap,
   SectionLabel,
   computeDelta,
-  formatMoney,
 } from "@/components/analytics/widgets";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useOrganizationAnalytics } from "@/hooks/useAnalytics.query";
+import { useMoney } from "@/hooks/useMoney";
 import {
   Calendar,
   CheckCircle2,
@@ -96,6 +96,7 @@ const SOURCE_LABELS: Record<string, string> = {
 
 export default function ReportsPage() {
   const { profile } = useAuth();
+  const { format: formatMoney } = useMoney();
   const [period, setPeriod] = useState<PeriodKey>("30d");
 
   const { start, end } = useMemo(() => getPeriodRange(period), [period]);
@@ -155,7 +156,7 @@ export default function ReportsPage() {
                 Solo los dueños pueden ver los reportes
               </div>
               <div className="mt-1 text-xs text-foreground-muted">
-                Pedile acceso al dueño de tu organización.
+                Pídele acceso al dueño de tu organización.
               </div>
             </Card>
           )}

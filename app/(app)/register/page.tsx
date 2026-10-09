@@ -221,7 +221,7 @@ export default function RegisterPage() {
                   ))}
                 </div>
                 <p className="mt-1.5 text-xs text-foreground-subtle">
-                  Define qué ves en la app. Se puede cambiar después.
+                  Define qué ves en la app. Para cambiarlo después, escríbenos por WhatsApp.
                 </p>
               </div>
 

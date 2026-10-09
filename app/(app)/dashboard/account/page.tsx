@@ -2,6 +2,7 @@
 
 import { ProtectedRoute } from "@/components/protected-route";
 import { Badge, Button, Card } from "@/components/ui";
+import { ROLE_META } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/useToast";
 import { Logger } from "@/utils/logger";
@@ -110,7 +111,9 @@ export default function AccountPage() {
               <div className="flex items-center justify-between">
                 <dt className="text-foreground-muted">Rol</dt>
                 <dd>
-                  <Badge variant="primary">{profile?.role}</Badge>
+                  <Badge variant="primary">
+                    {profile ? ROLE_META[profile.role].label : ""}
+                  </Badge>
                 </dd>
               </div>
             </dl>

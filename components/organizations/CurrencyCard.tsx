@@ -75,7 +75,7 @@ export function CurrencyCard({ organizationId, currency }: CurrencyCardProps) {
         </div>
         <div>
           <div className="text-sm font-bold text-foreground">
-            Moneda en la que cobrás
+            Moneda en la que cobras
           </div>
           <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
             Se usa en todos los precios de la app: servicios, viajes, anticipos y

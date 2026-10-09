@@ -10,12 +10,6 @@ import { useMemo } from "react";
  * (KPI cards con delta y heatmap de horas pico).
  */
 
-export function formatMoney(value: number): string {
-  return `$${new Intl.NumberFormat("es", {
-    maximumFractionDigits: 0,
-  }).format(value)}`;
-}
-
 export function computeDelta(current: number, previous: number): number | null {
   if (!previous) return null; // sin base de comparación
   return ((current - previous) / previous) * 100;

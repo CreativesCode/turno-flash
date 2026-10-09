@@ -67,21 +67,22 @@ export function TripBookingDetails({
         {link}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="ghost" size="sm" onClick={copyLink}>
-          <Copy className="h-4 w-4" />
-          Copiar link
-        </Button>
-        <a
-          href={shareUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={linkButtonClasses}
-        >
-          <MessageCircle className="h-4 w-4" />
-          Compartir
-        </a>
-        {enabled && (
+      {/* Sharing a link that does not work yet only confuses customers */}
+      {enabled && (
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="ghost" size="sm" onClick={copyLink}>
+            <Copy className="h-4 w-4" />
+            Copiar link
+          </Button>
+          <a
+            href={shareUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={linkButtonClasses}
+          >
+            <MessageCircle className="h-4 w-4" />
+            Compartir
+          </a>
           <a
             href={link}
             target="_blank"
@@ -91,8 +92,8 @@ export function TripBookingDetails({
             <ExternalLink className="h-4 w-4" />
             Ver página
           </a>
-        )}
-      </div>
+        </div>
+      )}
 
       {!enabled && (
         <p className="text-[11px] text-foreground-subtle">
@@ -127,12 +128,22 @@ export function TripBookingDetails({
           onChange={(value) => onChange({ deposit_instructions: value })}
           rows={4}
           placeholder={
-            "*Transfiere el anticipo* a la tarjeta 9200 1299 1234 5678 (Juan Pérez)." +
+            "Ejemplo: *Transfiere el anticipo* a la tarjeta 9200 XXXX XXXX XXXX (tu nombre)." +
             "\n" +
             "Envíanos el comprobante por WhatsApp y te confirmamos el asiento."
           }
         />
       </Field>
+
+      {enabled && !depositInstructions.trim() && (
+        <div className="flex items-start gap-1.5 rounded-lg bg-warning-50 p-3 text-xs text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+          <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            Todavía no escribiste cómo se paga el anticipo: el cliente no va a
+            saber a dónde transferir.
+          </span>
+        </div>
+      )}
 
       <Field
         label="Horas para pagar el anticipo"

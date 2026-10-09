@@ -153,7 +153,7 @@ export default function PlatformPage() {
                     <KpiCard
                       label="WhatsApp (30 d)"
                       value={data.whatsapp_30d.total}
-                      hint={`${data.whatsapp_30d.failed} fallidos`}
+                      hint={`${data.whatsapp_30d.failed} sin confirmar entrega`}
                       icon={MessageSquare}
                       tone="primary"
                     />
@@ -162,7 +162,7 @@ export default function PlatformPage() {
                       value={data.errors.last_7d}
                       hint={`${data.errors.unresolved} sin resolver`}
                       icon={AlertTriangle}
-                      tone="danger"
+                      tone={data.errors.unresolved > 0 ? "danger" : "primary"}
                     />
                   </>
                 )}

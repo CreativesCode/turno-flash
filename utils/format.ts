@@ -24,6 +24,7 @@ export function fmtMoney(
       style: "currency",
       currency,
       maximumFractionDigits: 0,
+      useGrouping: "always",
     }).format(n);
   } catch {
     return `$${n.toLocaleString(locale)}`;

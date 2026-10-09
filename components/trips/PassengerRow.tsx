@@ -109,12 +109,18 @@ export function PassengerRow({
       icon: <Pencil className="h-4 w-4" />,
       disabled: isCancelled,
     },
-    {
-      label: booking.status === "pending" ? "Aprobar reserva" : "Confirmar",
-      onClick: () => onApprove(booking),
-      icon: <BadgeCheck className="h-4 w-4" />,
-      disabled: booking.status === "confirmed" || isCancelled,
-    },
+    // A confirmed booking has nothing left to confirm
+    ...(booking.status === "confirmed"
+      ? []
+      : [
+          {
+            label:
+              booking.status === "pending" ? "Aprobar reserva" : "Confirmar",
+            onClick: () => onApprove(booking),
+            icon: <BadgeCheck className="h-4 w-4" />,
+            disabled: isCancelled,
+          },
+        ]),
     {
       label: "Cancelar reserva",
       onClick: () => onReject(booking),

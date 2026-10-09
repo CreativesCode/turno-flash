@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, Logo } from "@/components/ui";
+import { ROLE_META } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
 import {
   useOrganizationModules,
@@ -183,12 +184,6 @@ function isActive(pathname: string, href: string): boolean {
   return pathname.startsWith(href);
 }
 
-function roleLabel(role?: string): string {
-  if (role === "admin") return "Administrador";
-  if (role === "owner") return "Dueño";
-  return "Staff";
-}
-
 /**
  * Desktop-only persistent sidebar (visible on lg+ via the dashboard layout).
  * The mobile counterpart is `Drawer.tsx`, opened from `MobileTopbar`'s menu.
@@ -250,7 +245,7 @@ export const Sidebar = React.memo(function Sidebar() {
               {profile.full_name || profile.email || "Usuario"}
             </div>
             <div className="text-[11px] text-foreground-muted">
-              {roleLabel(profile.role)}
+              {ROLE_META[profile.role].label}
             </div>
           </div>
         </div>

@@ -52,22 +52,23 @@ export function BookingPageDetails({ organizationId, enabled }: BookingPageDetai
         {link}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="ghost" size="sm" onClick={copyLink}>
-          <Copy className="h-4 w-4" />
-          Copiar link
-        </Button>
-        <a href={shareUrl} target="_blank" rel="noopener noreferrer" className={linkButtonClasses}>
-          <MessageCircle className="h-4 w-4" />
-          Compartir
-        </a>
-        {enabled && (
+      {/* Sharing a link that does not work yet only confuses customers */}
+      {enabled && (
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="ghost" size="sm" onClick={copyLink}>
+            <Copy className="h-4 w-4" />
+            Copiar link
+          </Button>
+          <a href={shareUrl} target="_blank" rel="noopener noreferrer" className={linkButtonClasses}>
+            <MessageCircle className="h-4 w-4" />
+            Compartir
+          </a>
           <a href={link} target="_blank" rel="noopener noreferrer" className={linkButtonClasses}>
             <ExternalLink className="h-4 w-4" />
             Ver página
           </a>
-        )}
-      </div>
+        </div>
+      )}
 
       {!enabled && (
         <p className="text-[11px] text-foreground-subtle">

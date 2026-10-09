@@ -1,6 +1,6 @@
 "use client";
 
-import { Card } from "@/components/ui";
+import { Card, ConfirmSheet } from "@/components/ui";
 import { useToast } from "@/hooks";
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
@@ -29,6 +29,11 @@ export function ModulesCard({
 }: ModulesCardProps) {
   const toast = useToast();
   const [saving, setSaving] = useState(false);
+  /** A module about to be turned off, waiting for confirmation. */
+  const [pendingOff, setPendingOff] = useState<{
+    appointments: boolean;
+    trips: boolean;
+  } | null>(null);
 
   const save = async (next: { appointments: boolean; trips: boolean }) => {
     // The business has to keep at least one: the database rejects the rest,
@@ -60,6 +65,14 @@ export function ModulesCard({
     }
   };
 
+  const change = (next: { appointments: boolean; trips: boolean }) => {
+    const turnsOff =
+      (appointments && !next.appointments) || (trips && !next.trips);
+    // Leaving the business with no module is rejected by save() itself
+    if (turnsOff && (next.appointments || next.trips)) setPendingOff(next);
+    else void save(next);
+  };
+
   return (
     <Card className="p-4">
       <div className="flex items-start gap-3">
@@ -84,16 +97,38 @@ export function ModulesCard({
           label="Turnos y citas"
           checked={appointments}
           disabled={!canEdit || saving}
-          onChange={(value) => save({ appointments: value, trips })}
+          onChange={(value) => change({ appointments: value, trips })}
         />
         <ModuleToggle
           icon={Bus}
           label="Reserva de asientos"
           checked={trips}
           disabled={!canEdit || saving}
-          onChange={(value) => save({ appointments, trips: value })}
+          onChange={(value) => change({ appointments, trips: value })}
         />
       </div>
+
+      <ConfirmSheet
+        open={pendingOff !== null}
+        onClose={() => setPendingOff(null)}
+        onConfirm={async () => {
+          if (pendingOff) await save(pendingOff);
+          setPendingOff(null);
+        }}
+        title="Apagar módulo"
+        confirmLabel="Apagar"
+        busyLabel="Guardando…"
+        busy={saving}
+      >
+        <p>
+          El negocio deja de ver las pantallas de{" "}
+          {pendingOff && !pendingOff.appointments
+            ? "Turnos y citas"
+            : "Reserva de asientos"}{" "}
+          y su página pública deja de recibir reservas. No se borra nada: al
+          volver a encenderlo, todo sigue ahí.
+        </p>
+      </ConfirmSheet>
     </Card>
   );
 }

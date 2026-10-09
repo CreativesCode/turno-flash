@@ -77,7 +77,11 @@ export function ManualBookingSheet({
       open={open}
       onClose={onClose}
       title="Cargar reserva"
-      subtitle={`${trip.title} · quedan ${trip.seats_left} asientos`}
+      subtitle={`${trip.title} · ${
+        trip.seats_left === 1
+          ? "queda 1 asiento"
+          : `quedan ${trip.seats_left} asientos`
+      }`}
       maxWidthClass="sm:max-w-2xl"
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-4">

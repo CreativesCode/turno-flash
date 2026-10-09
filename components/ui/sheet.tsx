@@ -2,7 +2,14 @@
 
 import { useBackToClose } from "@/hooks/useBackToClose";
 import { X } from "lucide-react";
-import { ReactNode, useEffect } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  ReactNode,
+  useEffect,
+  useId,
+} from "react";
 
 export interface SheetProps {
   open: boolean;
@@ -131,12 +138,31 @@ export function Field({
   hint?: string;
   children: ReactNode;
 }) {
+  // Ties the label to its control, so tapping the label focuses the input
+  // (the first element inside: an error line may follow the input)
+  const generatedId = useId();
+  const items = Children.toArray(children);
+  const controlIndex = items.findIndex((item) => isValidElement(item));
+  const control = items[controlIndex];
+  const controlId = isValidElement<{ id?: string }>(control)
+    ? control.props.id ?? generatedId
+    : undefined;
+
   return (
     <div>
-      <label className="block text-xs font-bold uppercase tracking-[0.05em] text-foreground-muted">
+      <label
+        htmlFor={controlId}
+        className="block text-xs font-bold uppercase tracking-[0.05em] text-foreground-muted"
+      >
         {label}
       </label>
-      <div className="mt-1.5">{children}</div>
+      <div className="mt-1.5">
+        {items.map((item, index) =>
+          index === controlIndex && isValidElement<{ id?: string }>(item)
+            ? cloneElement(item, { id: controlId })
+            : item
+        )}
+      </div>
       {hint && (
         <p className="mt-1 text-[11px] text-foreground-subtle">{hint}</p>
       )}

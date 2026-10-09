@@ -8,6 +8,7 @@ import { ExceptionsEditor } from "@/components/staff/ExceptionsEditor";
 import { CurrencyCard } from "@/components/organizations/CurrencyCard";
 import { ContactCard } from "@/components/organizations/ContactCard";
 import { Button, Card } from "@/components/ui";
+import { SUPPORT_WHATSAPP_CONNECT_URL } from "@/config/constants";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
@@ -236,8 +237,18 @@ export default function SettingsPage() {
                   <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
                     {waEnabled
                       ? "La integración está activa: los avisos a tus clientes salen por WhatsApp."
-                      : "Tus ajustes quedan guardados, pero no se enviará ningún WhatsApp hasta que el administrador lo conecte para tu negocio."}
+                      : "Tus ajustes quedan guardados, pero no se enviará ningún WhatsApp hasta que lo conectemos para tu negocio."}
                   </p>
+                  {!waEnabled && (
+                    <a
+                      href={SUPPORT_WHATSAPP_CONNECT_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-primary-600 underline dark:text-primary-400"
+                    >
+                      Pedir conexión de WhatsApp
+                    </a>
+                  )}
                 </div>
               </Card>
 

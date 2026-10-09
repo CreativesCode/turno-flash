@@ -6,7 +6,7 @@ import type {
   StatusCount,
   TopService,
 } from "@/types/analytics";
-import { formatMoney } from "@/components/analytics/widgets";
+import { useMoney } from "@/hooks/useMoney";
 import {
   Area,
   AreaChart,
@@ -74,6 +74,7 @@ function shortMonth(month: string): string {
 
 /** Ingresos + turnos por día (dashboard de reportes). */
 export function RevenueAreaChart({ data }: { data: RevenueByDay[] }) {
+  const { format: formatMoney } = useMoney();
   return (
     <ResponsiveContainer width="100%" height={260}>
       <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -97,7 +98,7 @@ export function RevenueAreaChart({ data }: { data: RevenueByDay[] }) {
           tick={{ fontSize: 11, fill: COLORS.text }}
           tickLine={false}
           axisLine={false}
-          width={56}
+          width={76}
         />
         <Tooltip
           contentStyle={TOOLTIP_STYLE}
@@ -161,6 +162,7 @@ export function StatusDonut({
 
 /** Top servicios por ingresos (barras horizontales). */
 export function TopServicesBars({ data }: { data: TopService[] }) {
+  const { format: formatMoney } = useMoney();
   const height = Math.max(160, data.length * 38 + 24);
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -221,11 +223,7 @@ export function MonthlyBarChart({ data }: { data: AppointmentsByMonth[] }) {
         <Tooltip
           contentStyle={TOOLTIP_STYLE}
           labelFormatter={(label) => shortMonth(String(label))}
-          formatter={(value, name) =>
-            name === "revenue"
-              ? [formatMoney(Number(value)), "Ingresos"]
-              : [value, "Turnos"]
-          }
+          formatter={(value) => [value, "Turnos"]}
         />
         <Bar dataKey="count" fill={COLORS.info} radius={[6, 6, 0, 0]} barSize={28} />
       </BarChart>
