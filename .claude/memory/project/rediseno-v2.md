@@ -45,14 +45,31 @@ Compila, `tsc` y `eslint` limpios, y se revisó con capturas en claro y oscuro.
 
 ## Distinto del diseño, a propósito o por falta de datos
 
-- **Turnos:** filtros de un solo estado (agruparlos pide tocar la consulta); sin tira de días ni contadores; el
-  buscador sigue visible; en el teléfono la fila no muestra el N° de turno (no cabía junto al nombre).
+- **Turnos:** ya va como el diseño (2026-10-12, a pedido de Roberto): la lista muestra **un día**, con la tira
+  de la semana arriba, filtros agrupados con contador (`FILTER_GROUPS`: Todos, Por atender, En curso, Terminados,
+  Cancelados) y el buscador detrás de la lupa, que busca de -7 a +60 días. La semana visible se pide aparte y sin
+  filtros (`useAppointmentsQuery`) para los puntitos y los contadores. Queda distinto: en el teléfono la fila no
+  muestra el N° de turno, y el estado vacío no dice «Tu página de reservas sigue abierta» (no se sabe si lo está).
 - **Clientes:** sin agrupar por inicial (lista virtualizada y paginada); desactivar sigue en el menú de la fila.
 - **Inicio:** sin «avisos para mañana» (pide una consulta nueva); hay una tarjeta de pasajes por aprobar.
 - **Barra superior:** sin punto fucsia en la campana ni selector de negocio.
 - **Landing:** no es solo-clara; funciona en ambos temas (las bandas invertidas usan `bg-inverse`). El mock de
   salida de la sección de pasajes no se hizo; el del hero es un recuadro estático, no una captura.
 - **Sin negocio (admin):** la barra de pestañas se sigue mostrando (Inicio + Más).
+
+## Reglas que pidió Roberto el 2026-10-12
+
+- **Cambiar un filtro o un día no redibuja la pantalla:** el encabezado y los controles se quedan y solo la zona
+  de datos se atenúa con un indicador (`LoadingRegion` de `components/ui/layout.tsx`, con `busy` =
+  `isPlaceholderData`). Para eso la consulta lleva `placeholderData: keepPreviousData`; `useAppointmentsQuery`
+  devuelve `stale`. Hecho en Turnos, Recordatorios y Clientes; seguirlo en cualquier lista con filtros en el servidor.
+- **Todas las páginas del panel tienen el mismo ancho y el mismo arranque:** contenedor
+  `mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8`, encabezado y contenido por igual, y título con
+  `PageHeader` (o `font-display text-display`). Nada de listas más estrechas que su encabezado ni de íconos antes
+  del título. `html` lleva `scrollbar-gutter: stable` para que la barra de scroll no corra el contenido.
+- **Los mensajes a soporte dicen qué negocio escribe:** `useSupportWhatsAppUrl(tema)` (temas `license`, `help`,
+  `plan`, `connect` en `config/constants.ts`) agrega «Mi negocio: <nombre>.». Ya no existen las constantes
+  `SUPPORT_WHATSAPP_*_URL`.
 
 ## Trampas
 

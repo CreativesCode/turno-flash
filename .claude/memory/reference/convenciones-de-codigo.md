@@ -139,7 +139,7 @@ Relacionado: [[arquitectura-static-export]], [[rediseno-ui-migracion]].
 - **Módulos:** `MODULE_ROUTES` en `app/(app)/dashboard/layout.tsx` lista las rutas de cada módulo; una sección
   nueva de un módulo se agrega ahí además de en `Sidebar`/`Drawer`.
 - **Tema:** solo se guarda en `localStorage` cuando el usuario lo elige (`userChose` en `theme-context`).
-- **Soporte:** `SUPPORT_WHATSAPP_URL` (licencia) y `SUPPORT_WHATSAPP_CONNECT_URL` (pedir conexión de WhatsApp) en
+- **Soporte:** `useSupportWhatsAppUrl("license" | "help" | "plan" | "connect")`, que nombra el negocio en el mensaje (antes `SUPPORT_WHATSAPP_URL` y `SUPPORT_WHATSAPP_CONNECT_URL` (pedir conexión de WhatsApp) en
   `config/constants.ts`.
 - **Consultas sueltas:** la lista de negocios para invitar vive en `InvitationService.listOrganizations()`; el
   equipo, en `TeamService.listStaff()` con la query key `["team", orgId]` (compartida por TeamCard y Profesionales).
