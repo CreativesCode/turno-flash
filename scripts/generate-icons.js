@@ -4,6 +4,27 @@ const path = require("path");
 
 const SVG_PATH = path.join(__dirname, "../public/images/isotipo.svg");
 
+// Page background of the v2 design (#f5f4f0)
+const BACKGROUND = { r: 245, g: 244, b: 240, alpha: 1 };
+
+// The mark at 60% of a solid square, centred: launcher icons need margin
+async function markOnBackground(size) {
+  const markSize = Math.round(size * 0.6);
+  const offset = Math.round((size - markSize) / 2);
+  return sharp({
+    create: { width: size, height: size, channels: 4, background: BACKGROUND },
+  }).composite([
+    {
+      input: await sharp(SVG_PATH)
+        .resize(markSize, markSize, { fit: "contain" })
+        .png()
+        .toBuffer(),
+      top: offset,
+      left: offset,
+    },
+  ]);
+}
+
 // Tamaños para Android
 const ANDROID_SIZES = {
   "mipmap-mdpi": 48,
@@ -55,19 +76,15 @@ async function generateAndroidIcons() {
 
     try {
       // Generar ic_launcher.png (icono normal)
-      await sharp(SVG_PATH)
-        .resize(size, size, {
-          fit: "contain",
-          background: { r: 255, g: 255, b: 255, alpha: 1 },
-        })
+      await (await markOnBackground(size))
         .png()
         .toFile(path.join(outputDir, "ic_launcher.png"));
 
       // Generar ic_launcher_foreground.png (para adaptive icon - sin padding)
       // El foreground debe tener el ícono centrado con padding interno
-      // Android recomienda que el foreground sea 108% del tamaño base, luego lo recortamos al 66%
+      // Android recomienda que el foreground sea 108% del tamaño base, luego lo recortamos al 44%
       const foregroundSize = Math.round(size * 1.08);
-      const iconSize = Math.round(size * 0.66);
+      const iconSize = Math.round(size * 0.44);
       const padding = Math.round((foregroundSize - iconSize) / 2);
 
       await sharp({
@@ -92,11 +109,7 @@ async function generateAndroidIcons() {
         .toFile(path.join(outputDir, "ic_launcher_foreground.png"));
 
       // Generar ic_launcher_round.png (icono redondo)
-      await sharp(SVG_PATH)
-        .resize(size, size, {
-          fit: "contain",
-          background: { r: 255, g: 255, b: 255, alpha: 1 },
-        })
+      await (await markOnBackground(size))
         .png()
         .toFile(path.join(outputDir, "ic_launcher_round.png"));
 
@@ -121,11 +134,7 @@ async function generateIOSIcon() {
   }
 
   try {
-    await sharp(SVG_PATH)
-      .resize(IOS_SIZE, IOS_SIZE, {
-        fit: "contain",
-        background: { r: 255, g: 255, b: 255, alpha: 1 },
-      })
+    await (await markOnBackground(IOS_SIZE))
       .png()
       .toFile(path.join(outputDir, "AppIcon-512@2x.png"));
 
@@ -138,8 +147,8 @@ async function generateIOSIcon() {
 async function generateAndroidSplashScreens() {
   console.log("Generando splash screens para Android...");
 
-  // Tamaño del logo en los splash screens (aproximadamente 25% del ancho)
-  const getLogoSize = (screenWidth) => Math.round(screenWidth * 0.25);
+  // Tamaño del logo en los splash screens (aproximadamente 14% del ancho)
+  const getLogoSize = (screenWidth) => Math.round(screenWidth * 0.14);
 
   for (const [folder, dimensions] of Object.entries(ANDROID_SPLASH_SIZES)) {
     const outputDir = path.join(
@@ -166,7 +175,7 @@ async function generateAndroidSplashScreens() {
           width,
           height,
           channels: 4,
-          background: { r: 255, g: 255, b: 255, alpha: 1 },
+          background: BACKGROUND,
         },
       })
         .composite([
@@ -205,7 +214,7 @@ async function generateIOSSplashScreens() {
   }
 
   // Tamaño del logo en los splash screens (aproximadamente 25% del tamaño)
-  const getLogoSize = (screenSize) => Math.round(screenSize * 0.25);
+  const getLogoSize = (screenSize) => Math.round(screenSize * 0.14);
 
   for (const [filename, size] of Object.entries(IOS_SPLASH_SIZES)) {
     try {
@@ -221,7 +230,7 @@ async function generateIOSSplashScreens() {
           width: size,
           height: size,
           channels: 4,
-          background: { r: 255, g: 255, b: 255, alpha: 1 },
+          background: BACKGROUND,
         },
       })
         .composite([
