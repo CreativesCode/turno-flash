@@ -1,195 +1,20 @@
 "use client";
 
-import { Avatar, Logo } from "@/components/ui";
+import { isNavActive, visibleNavGroups } from "@/components/nav-items";
+import { Avatar, KebabMenu, Logo, SectionLabel } from "@/components/ui";
 import { ROLE_META } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
-import {
-  useOrganizationModules,
-  type OrganizationModules,
-} from "@/hooks/useOrganizationModules.query";
+import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { useTheme } from "@/contexts/theme-context";
-import {
-  Activity,
-  AlertTriangle,
-  BarChart3,
-  Bell,
-  Building2,
-  Bus,
-  Calendar,
-  CircleHelp,
-  Crown,
-  Home,
-  LogOut,
-  type LucideIcon,
-  Moon,
-  Package,
-  Settings,
-  Sun,
-  UserCircle,
-  UserCog,
-  UserPlus,
-  Users,
-} from "lucide-react";
+import { LogOut, Moon, Sun, UserCircle } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 
-interface NavItem {
-  name: string;
-  href: string;
-  Icon: LucideIcon;
-  roles?: string[];
-  requiresOrg?: boolean;
-  /** Only shown when the organization has this module enabled (PRP-002). */
-  module?: "appointments" | "trips";
-}
-
-interface NavSeparator {
-  separator: true;
-  key: string;
-}
-
-type NavEntry = NavItem | NavSeparator;
-
-const NAV_ITEMS: readonly NavEntry[] = [
-  { name: "Dashboard", href: "/dashboard", Icon: Home },
-  {
-    name: "Turnos",
-    href: "/dashboard/appointments",
-    Icon: Calendar,
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    name: "Viajes",
-    href: "/dashboard/trips",
-    Icon: Bus,
-    requiresOrg: true,
-    module: "trips",
-  },
-  {
-    name: "Clientes",
-    href: "/dashboard/customers",
-    Icon: Users,
-    requiresOrg: true,
-  },
-  {
-    name: "Servicios",
-    href: "/dashboard/services",
-    Icon: Package,
-    roles: ["admin", "owner"],
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    name: "Profesionales",
-    href: "/dashboard/staff",
-    Icon: UserCog,
-    roles: ["admin", "owner"],
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    name: "Recordatorios",
-    href: "/dashboard/reminders",
-    Icon: Bell,
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    name: "Reportes",
-    href: "/dashboard/reports",
-    Icon: BarChart3,
-    roles: ["admin", "owner"],
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    name: "Ajustes",
-    href: "/dashboard/settings",
-    Icon: Settings,
-    roles: ["admin", "owner"],
-    requiresOrg: true,
-  },
-  {
-    name: "Suscripción",
-    href: "/dashboard/subscription",
-    Icon: Crown,
-    roles: ["admin", "owner"],
-    requiresOrg: true,
-  },
-  {
-    name: "Mi cuenta",
-    href: "/dashboard/account",
-    Icon: UserCircle,
-  },
-  {
-    name: "Ayuda",
-    href: "/help",
-    Icon: CircleHelp,
-  },
-  { separator: true, key: "admin" },
-  {
-    name: "Plataforma",
-    href: "/dashboard/platform",
-    Icon: Activity,
-    roles: ["admin"],
-  },
-  {
-    name: "Organizaciones",
-    href: "/dashboard/organizations",
-    Icon: Building2,
-    roles: ["admin"],
-  },
-  {
-    name: "Usuarios",
-    href: "/dashboard/users",
-    Icon: Users,
-    roles: ["admin"],
-  },
-  {
-    name: "Invitar",
-    href: "/dashboard/invite",
-    Icon: UserPlus,
-    roles: ["admin", "owner"],
-  },
-  {
-    name: "Errores",
-    href: "/dashboard/errors",
-    Icon: AlertTriangle,
-    roles: ["admin"],
-  },
-];
-
-function isItemVisible(
-  item: NavItem,
-  role?: string,
-  hasOrg?: boolean,
-  modules?: OrganizationModules
-): boolean {
-  if (item.roles && item.roles.length > 0 && (!role || !item.roles.includes(role))) {
-    return false;
-  }
-  if (item.requiresOrg && !hasOrg) {
-    return false;
-  }
-  if (item.module && modules && !modules[item.module]) {
-    return false;
-  }
-  return true;
-}
-
-function isActive(pathname: string, href: string): boolean {
-  if (href === "/dashboard") return pathname === href;
-  return pathname.startsWith(href);
-}
-
 /**
  * Desktop-only persistent sidebar (visible on lg+ via the dashboard layout).
- * The mobile counterpart is `Drawer.tsx`, opened from `MobileTopbar`'s menu.
- * Both components share the same NAV_ITEMS shape but are separate so each can
- * tune its layout independently (drawer has a fixed width on top of content,
- * sidebar is part of the desktop grid).
+ * The mobile counterpart is the tab bar plus `MoreSheet.tsx`; both read the
+ * same groups from `nav-items.ts`.
  */
 export const Sidebar = React.memo(function Sidebar() {
   const { profile, signOut } = useAuth();
@@ -201,121 +26,106 @@ export const Sidebar = React.memo(function Sidebar() {
   const organizationName =
     profile?.organization_id && modules.name ? modules.name : null;
 
-  const visibleEntries = useMemo(() => {
-    const role = profile?.role;
-    const hasOrg = !!profile?.organization_id;
-    return NAV_ITEMS.filter((entry) => {
-      if ("separator" in entry) return true;
-      return isItemVisible(entry, role, hasOrg, modules);
-    });
-  }, [profile?.role, profile?.organization_id, modules]);
+  const groups = useMemo(
+    () =>
+      visibleNavGroups(profile?.role, !!profile?.organization_id, modules),
+    [profile?.role, profile?.organization_id, modules]
+  );
 
   const handleSignOut = async () => {
     await signOut();
     router.push("/login");
   };
 
+  const userName = profile?.full_name || profile?.email || "Usuario";
+
   return (
-    <aside className="fixed bottom-0 left-0 top-0 z-30 hidden w-60 flex-col border-r border-border bg-surface lg:flex">
+    <aside className="fixed bottom-0 left-0 top-0 z-30 hidden w-64 flex-col border-r border-border bg-surface lg:flex">
       {/* Brand */}
-      <div className="flex items-center gap-3 border-b border-border px-5 py-5">
-        <Logo size={36} priority />
-        <div className="min-w-0">
-          <div className="text-base font-bold tracking-tight text-foreground">
-            TurnoFlash
+      <div className="px-5 pb-2 pt-6">
+        <Logo size={28} withWordmark />
+        {organizationName && (
+          <div className="mt-1.5 truncate text-meta text-foreground-subtle">
+            {organizationName}
           </div>
-          {organizationName && (
-            <div className="truncate text-[11px] text-foreground-muted">
-              {organizationName}
-            </div>
-          )}
-        </div>
+        )}
       </div>
+
+      {/* Nav */}
+      <nav className="scrollbar-discreet flex-1 overflow-y-auto px-3 pb-3 pt-2">
+        {groups.map((group) => (
+          <div key={group.key}>
+            {group.label && (
+              <SectionLabel className="!px-3 !pb-1.5 !pt-5">
+                {group.label}
+              </SectionLabel>
+            )}
+            {group.items.map((item) => {
+              const active = isNavActive(pathname, item.href);
+              const Icon = item.Icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex h-10 items-center gap-3 rounded-control px-3 text-body transition-colors ${
+                    active
+                      ? "bg-surface-2 font-semibold text-foreground"
+                      : "font-medium text-foreground-muted hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Icon
+                    className={`size-[18px] ${active ? "text-primary" : ""}`}
+                  />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
+      </nav>
 
       {/* User block */}
       {profile && (
-        <div className="flex items-center gap-3 border-b border-border px-5 py-3.5">
-          <Avatar
-            name={profile.full_name || profile.email || "Usuario"}
-            color="var(--color-secondary-500)"
-            size={36}
-          />
+        <div className="flex items-center gap-3 border-t border-border py-3 pl-5 pr-2">
+          <Avatar name={userName} seed={profile.id} size={36} />
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold text-foreground">
-              {profile.full_name || profile.email || "Usuario"}
+            <div className="truncate text-meta font-semibold text-foreground">
+              {userName}
             </div>
-            <div className="text-[11px] text-foreground-muted">
+            <div className="text-caption text-foreground-subtle">
               {ROLE_META[profile.role].label}
             </div>
           </div>
+          <KebabMenu
+            label="Opciones de la cuenta"
+            placement="top"
+            items={[
+              {
+                label: theme === "dark" ? "Tema claro" : "Tema oscuro",
+                icon:
+                  theme === "dark" ? (
+                    <Sun className="size-4" />
+                  ) : (
+                    <Moon className="size-4" />
+                  ),
+                onClick: toggleTheme,
+              },
+              {
+                label: "Mi cuenta",
+                icon: <UserCircle className="size-4" />,
+                onClick: () => router.push("/dashboard/account"),
+              },
+              {
+                label: "Cerrar sesión",
+                icon: <LogOut className="size-4" />,
+                danger: true,
+                onClick: () => void handleSignOut(),
+              },
+            ]}
+          />
         </div>
       )}
-
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-2.5">
-        {visibleEntries.map((entry) => {
-          if ("separator" in entry) {
-            return (
-              <div
-                key={entry.key}
-                className="my-2 mx-2 h-px bg-border"
-                aria-hidden
-              />
-            );
-          }
-          const active = isActive(pathname, entry.href);
-          const Icon = entry.Icon;
-          return (
-            <Link
-              key={entry.href}
-              href={entry.href}
-              className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-colors ${
-                active
-                  ? "bg-primary-50 font-bold text-primary-500 dark:bg-primary-900/30"
-                  : "font-medium text-foreground-muted hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              {active && (
-                <span
-                  aria-hidden
-                  className="absolute inset-y-1.5 left-0 w-1 rounded-r-full bg-primary-500"
-                />
-              )}
-              <Icon
-                className={`h-4.25 w-4.25 ${active ? "text-primary-500" : ""}`}
-              />
-              {entry.name}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Footer */}
-      <div className="flex flex-col gap-1 border-t border-border p-3">
-        <button
-          onClick={toggleTheme}
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-foreground-muted transition-colors hover:bg-muted"
-        >
-          {theme === "dark" ? (
-            <>
-              <Sun className="h-4.25 w-4.25" />
-              Tema claro
-            </>
-          ) : (
-            <>
-              <Moon className="h-4.25 w-4.25" />
-              Tema oscuro
-            </>
-          )}
-        </button>
-        <button
-          onClick={handleSignOut}
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-danger transition-colors hover:bg-danger-50 dark:hover:bg-danger-900/20"
-        >
-          <LogOut className="h-4.25 w-4.25" />
-          Cerrar sesión
-        </button>
-      </div>
     </aside>
   );
 });

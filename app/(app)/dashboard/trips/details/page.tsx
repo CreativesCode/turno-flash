@@ -520,7 +520,6 @@ function TripDetailsContent() {
                     setManualForm(EMPTY_BOOKING);
                     setShowManual(true);
                   }}
-                  className="max-sm:hidden"
                 >
                   <Plus className="h-4 w-4" />
                   Cargar reserva
@@ -529,7 +528,7 @@ function TripDetailsContent() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button variant="ghost" onClick={() => void handleShare()}>
+              <Button variant="secondary" onClick={() => void handleShare()}>
                 <Share2 className="h-4 w-4" />
                 Compartir lista
               </Button>
@@ -537,14 +536,14 @@ function TripDetailsContent() {
               {!isNative && (
                 <>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     onClick={handleExport}
                     className="max-sm:hidden"
                   >
                     <Download className="h-4 w-4" />
                     Exportar CSV
                   </Button>
-                  <Button variant="ghost" onClick={() => window.print()}>
+                  <Button variant="secondary" onClick={() => window.print()}>
                     <Printer className="h-4 w-4" />
                     Imprimir
                   </Button>
@@ -660,19 +659,6 @@ function TripDetailsContent() {
           )}
         </div>
 
-        {canLoadBookings && (
-          <button
-            type="button"
-            onClick={() => {
-              setManualForm(EMPTY_BOOKING);
-              setShowManual(true);
-            }}
-            aria-label="Cargar reserva"
-            className="mesh-primary fixed bottom-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-glow-primary transition-transform hover:-translate-y-px sm:hidden print:hidden"
-          >
-            <Plus className="h-6 w-6" />
-          </button>
-        )}
       </div>
 
       <ConfirmSheet
@@ -750,7 +736,7 @@ function TripDetailsContent() {
           <div className="flex gap-2 pt-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               onClick={() => setEditingNames(null)}
               className="flex-1 justify-center"
             >

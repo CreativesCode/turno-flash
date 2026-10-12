@@ -235,9 +235,8 @@ function ServicesContent() {
               </div>
               {canManageServices && (
                 <Button
-                  variant="mesh-primary"
+                  variant="secondary"
                   onClick={handleCreate}
-                  className="max-sm:hidden"
                 >
                   <Plus className="h-4 w-4" />
                   Nuevo servicio
@@ -304,16 +303,6 @@ function ServicesContent() {
           )}
         </div>
 
-        {canManageServices && (
-          <button
-            type="button"
-            onClick={handleCreate}
-            aria-label="Nuevo servicio"
-            className="mesh-primary fixed bottom-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-glow-primary transition-transform hover:-translate-y-px sm:hidden"
-          >
-            <Plus className="h-6 w-6" />
-          </button>
-        )}
       </div>
 
       <ServiceFormModal

@@ -1,9 +1,9 @@
 "use client";
 
-import { Drawer } from "@/components/Drawer";
 import { LicenseGate } from "@/components/license-gate";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { MobileTopbar } from "@/components/MobileTopbar";
+import { MoreSheet } from "@/components/MoreSheet";
 import { OfflineBanner } from "@/components/offline-banner";
 import { Sidebar } from "@/components/Sidebar";
 import { useAuth } from "@/contexts/auth-context";
@@ -12,7 +12,6 @@ import { useCapacitor } from "@/hooks/useCapacitor";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { useRealtimeAll } from "@/hooks/useRealtimeEntities";
 import { useQueryClient } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -29,14 +28,12 @@ const MODULE_ROUTES = {
 } as const;
 
 /**
- * Dashboard layout. Mobile gets a sticky topbar + sliding drawer + bottom tab
- * bar; desktop gets a fixed left sidebar. Both share the same nav data and
+ * Dashboard layout. Mobile gets a sticky topbar + bottom tab bar, whose
+ * "Más" tab opens a sheet; desktop gets a fixed left sidebar. Both share the same nav data and
  * read profile/role from AuthProvider (mounted in the root layout).
  */
 function DashboardContent({ children }: { children: React.ReactNode }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const { profile } = useAuth();
-  const showTabBar = !!profile?.organization_id;
 
   // Suscribir realtime a todas las tablas operativas core mientras
   // el usuario está dentro del dashboard. Los hooks se auto-deshabilitan
@@ -47,6 +44,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   // have goes back to Inicio. Admins are never redirected.
   const pathname = usePathname();
   const router = useRouter();
+  // The "Más" sheet is open only on the route it was opened from, so
+  // following one of its links closes it without touching history
+  const [moreOpenAt, setMoreOpenAt] = useState<string | null>(null);
+  const moreOpen = moreOpenAt === pathname;
   const { modules, ready } = useOrganizationModules();
   const blockedByModule =
     ready &&
@@ -80,30 +81,22 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background">
       <div className="print:hidden">
         <Sidebar />
-        <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+        <MoreSheet
+          open={moreOpen}
+          onClose={() => setMoreOpenAt(null)}
+          onRefresh={() => void handleRefresh()}
+          refreshing={refreshing}
+        />
       </div>
 
-      <div className="flex min-h-screen flex-col lg:pl-60 print:block print:min-h-0 print:pl-0">
-        <MobileTopbar
-          title="TurnoFlash"
-          onMenu={() => setDrawerOpen(true)}
-          action={
-            <button
-              type="button"
-              onClick={() => void handleRefresh()}
-              disabled={refreshing}
-              aria-label="Actualizar"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface text-foreground transition-colors hover:bg-muted disabled:opacity-60"
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-              />
-            </button>
-          }
-        />
+      <div className="flex min-h-screen flex-col lg:pl-64 print:block print:min-h-0 print:pl-0">
+        <MobileTopbar />
         <OfflineBanner />
         <main className="flex-1">{blockedByModule ? null : children}</main>
-        {showTabBar && <MobileTabBar />}
+        <MobileTabBar
+          moreOpen={moreOpen}
+          onMore={() => setMoreOpenAt(pathname)}
+        />
       </div>
     </div>
   );

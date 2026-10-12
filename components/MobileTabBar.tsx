@@ -1,19 +1,28 @@
 "use client";
 
+import { isNavActive } from "@/components/nav-items";
 import { useAuth } from "@/contexts/auth-context";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
-import { Bell, Bus, Calendar, Home, Plus, UserCircle, Users } from "lucide-react";
+import {
+  Bus,
+  Calendar,
+  House,
+  LayoutGrid,
+  type LucideIcon,
+  Plus,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 interface TabItem {
   key: string;
   label: string;
-  href?: string;
-  icon: typeof Home;
+  href: string;
+  icon: LucideIcon;
 }
 
-const HOME: TabItem = { key: "home", label: "Inicio", href: "/dashboard", icon: Home };
+const HOME: TabItem = { key: "home", label: "Inicio", href: "/dashboard", icon: House };
 const APPOINTMENTS: TabItem = {
   key: "appointments",
   label: "Turnos",
@@ -32,46 +41,40 @@ const CUSTOMERS: TabItem = {
   href: "/dashboard/customers",
   icon: Users,
 };
-const REMINDERS: TabItem = {
-  key: "reminders",
-  label: "Avisos",
-  href: "/dashboard/reminders",
-  icon: Bell,
-};
-const ACCOUNT: TabItem = {
-  key: "account",
-  label: "Cuenta",
-  href: "/dashboard/account",
-  icon: UserCircle,
-};
 
 /**
- * The bar has 4 slots plus the central "+", so it shows what this business
- * actually uses: a bus agency has no appointments to create, and Avisos is
- * about appointment reminders, so its fourth slot is the account instead.
+ * The three destinations next to "+" and "Más", for what this business
+ * actually uses. With both modules on, Clientes moves to the "Más" sheet.
+ * Without a business (an admin) there is only Inicio.
  */
-function tabsFor(appointments: boolean, trips: boolean): TabItem[] {
-  if (trips && !appointments) return [HOME, TRIPS, CUSTOMERS, ACCOUNT];
-  if (trips && appointments) return [HOME, APPOINTMENTS, TRIPS, CUSTOMERS];
-  return [HOME, APPOINTMENTS, CUSTOMERS, REMINDERS];
+export function tabsFor(
+  hasOrg: boolean,
+  appointments: boolean,
+  trips: boolean
+): TabItem[] {
+  if (!hasOrg) return [HOME];
+  if (trips && !appointments) return [HOME, TRIPS, CUSTOMERS];
+  if (trips && appointments) return [HOME, APPOINTMENTS, TRIPS];
+  return [HOME, APPOINTMENTS, CUSTOMERS];
 }
 
-function isTabActive(pathname: string, href: string): boolean {
-  if (href === "/dashboard") return pathname === href;
-  return pathname.startsWith(href);
+interface MobileTabBarProps {
+  moreOpen: boolean;
+  onMore: () => void;
 }
 
 /**
- * Bottom tab bar (mobile only). 5 slots: Inicio, Turnos, central "+", Clientes,
- * Avisos. The "+" lands on a list page with `create=1`, which opens its create
+ * Bottom tab bar (mobile only): two tabs, the central "+", a third tab and
+ * "Más". The "+" lands on a list page with `create=1`, which opens its create
  * form (useCreateParam).
  */
-export function MobileTabBar() {
+export function MobileTabBar({ moreOpen, onMore }: MobileTabBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { profile } = useAuth();
   const { modules } = useOrganizationModules();
-  const tabs = tabsFor(modules.appointments, modules.trips);
+  const hasOrg = !!profile?.organization_id;
+  const tabs = tabsFor(hasOrg, modules.appointments, modules.trips);
   // In Viajes (or a trips-only business) the "+" creates a departure, which
   // only the owner can do (D-14); everywhere else it creates an appointment.
   const canCreateTrips = profile?.role === "admin" || profile?.role === "owner";
@@ -85,48 +88,79 @@ export function MobileTabBar() {
     : modules.appointments
       ? "/dashboard/appointments?create=1"
       : "/dashboard/trips";
+  // "Más" stands for every screen that has no tab of its own
+  const moreActive =
+    moreOpen || !tabs.some((t) => isNavActive(pathname, t.href));
 
   return (
     <div
       data-mobile-tabbar
-      className="sticky bottom-0 z-30 grid grid-cols-5 border-t border-border bg-surface px-1 pt-1.5 lg:hidden print:hidden"
+      className={`sticky bottom-0 z-30 grid items-center border-t border-border bg-surface px-2.5 pt-2 lg:hidden print:hidden ${
+        hasOrg ? "grid-cols-5" : "grid-cols-2"
+      }`}
       style={{
         paddingBottom: "calc(0.5rem + var(--safe-area-inset-bottom, 0px))",
       }}
     >
       {tabs.slice(0, 2).map((t) => (
-        <TabLink key={t.key} tab={t} active={isTabActive(pathname, t.href!)} />
+        <TabLink
+          key={t.key}
+          tab={t}
+          active={!moreOpen && isNavActive(pathname, t.href)}
+        />
       ))}
 
-      <div className="flex items-center justify-center">
-        <button
-          onClick={() => router.push(createHref)}
-          className="mesh-primary flex h-12 w-12 -translate-y-2 items-center justify-center rounded-2xl text-white shadow-glow-primary transition-transform active:scale-95"
-          aria-label={createsTrip ? "Nueva salida" : "Crear turno"}
-        >
-          <Plus className="h-6 w-6" />
-        </button>
-      </div>
+      {hasOrg && (
+        <div className="flex items-center justify-center">
+          <button
+            onClick={() => router.push(createHref)}
+            className="flex h-11 w-14 cursor-pointer items-center justify-center rounded-[14px] bg-primary text-primary-foreground transition-transform active:scale-95"
+            aria-label={createsTrip ? "Nueva salida" : "Crear turno"}
+          >
+            <Plus className="size-6" />
+          </button>
+        </div>
+      )}
 
       {tabs.slice(2).map((t) => (
-        <TabLink key={t.key} tab={t} active={isTabActive(pathname, t.href!)} />
+        <TabLink
+          key={t.key}
+          tab={t}
+          active={!moreOpen && isNavActive(pathname, t.href)}
+        />
       ))}
+
+      <button
+        type="button"
+        onClick={onMore}
+        aria-haspopup="dialog"
+        aria-expanded={moreOpen}
+        className={`${TAB_CLASSES} cursor-pointer ${
+          moreActive ? TAB_ACTIVE : TAB_INACTIVE
+        }`}
+      >
+        <LayoutGrid className="size-[22px]" />
+        Más
+      </button>
     </div>
   );
 }
+
+// Contrast marks the active tab, not colour
+const TAB_CLASSES =
+  "flex h-12 flex-col items-center justify-center gap-1 text-[11px] transition-colors";
+const TAB_ACTIVE = "font-semibold text-foreground";
+const TAB_INACTIVE = "font-medium text-foreground-subtle";
 
 function TabLink({ tab, active }: { tab: TabItem; active: boolean }) {
   const Icon = tab.icon;
   return (
     <Link
-      href={tab.href!}
-      className={`flex flex-col items-center gap-0.5 px-1 py-1 text-[10px] transition-colors ${
-        active
-          ? "font-bold text-primary-600 dark:text-primary-400"
-          : "font-medium text-foreground-muted"
-      }`}
+      href={tab.href}
+      aria-current={active ? "page" : undefined}
+      className={`${TAB_CLASSES} ${active ? TAB_ACTIVE : TAB_INACTIVE}`}
     >
-      <Icon className="h-5 w-5" />
+      <Icon className="size-[22px]" />
       {tab.label}
     </Link>
   );
