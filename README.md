@@ -301,7 +301,8 @@ Todas las tablas tienen políticas RLS que aseguran:
 ### Sistema de Licencias
 
 - ✅ Control de acceso por organización
-- ✅ Período de gracia configurable (7 días default)
+- ✅ Planes por tamaño (Personal, Salón, Salón grande, Pasajes) con 15 días de prueba
+- ✅ 5 días de margen tras el vencimiento (fijos en la base de datos)
 - ✅ Bloqueo automático al expirar
 - ✅ Notificaciones de vencimiento
 
