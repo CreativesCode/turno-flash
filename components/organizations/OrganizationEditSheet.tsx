@@ -8,7 +8,7 @@ import {
   sheetInputClasses as inputClasses,
 } from "@/components/ui";
 import { ORGANIZATION_TIMEZONES } from "@/config/constants";
-import { getGracePeriodDays } from "@/utils/license";
+import { LICENSE_GRACE_DAYS } from "@/config/license-pricing";
 import { FormEvent } from "react";
 
 export interface OrganizationEditForm {
@@ -118,8 +118,9 @@ export function OrganizationEditSheet({
             </Field>
           </div>
           <p className="mt-1 text-[11px] text-foreground-subtle">
-            Deja las fechas vacías para acceso ilimitado. Al vencer tiene{" "}
-            {getGracePeriodDays()} días de gracia.
+            Solo para corregir un error: los cobros se hacen con «Registrar
+            pago», que calcula las fechas. Al vencer tiene {LICENSE_GRACE_DAYS}{" "}
+            días de margen.
           </p>
         </div>
 

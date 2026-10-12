@@ -15,8 +15,13 @@ const WARNING_CHIP =
 
 export function getLicenseMeta(
   status: LicenseStatus,
-  daysRemaining: number | null
+  daysRemaining: number | null,
+  phase?: string | null
 ): { label: string; className: string } {
+  // A pending business is blocked until its first payment, not expired
+  if (phase === "pending") {
+    return { label: "En preparación", className: WARNING_CHIP };
+  }
   if (
     status === "active" &&
     daysRemaining !== null &&
@@ -32,7 +37,7 @@ export function getLicenseMeta(
           "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
       };
     case "grace_period":
-      return { label: "En gracia", className: WARNING_CHIP };
+      return { label: "En margen de pago", className: WARNING_CHIP };
     case "expired":
       return {
         label: "Vencida",
@@ -66,7 +71,11 @@ export function OrganizationCard({
   onViewDetails,
   onDelete,
 }: OrganizationCardProps) {
-  const license = getLicenseMeta(org.license_status, org.days_remaining);
+  const license = getLicenseMeta(
+    org.license_status,
+    org.days_remaining,
+    org.license_phase
+  );
   const ownerName = org.owner
     ? org.owner.full_name || org.owner.email
     : "Sin dueño";

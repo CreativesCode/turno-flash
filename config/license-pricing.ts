@@ -136,3 +136,35 @@ export function formatUsd(amount: number): string {
     maximumFractionDigits: 2,
   }).format(amount)} USD`;
 }
+
+export const LICENSE_PHASE_LABEL: Record<LicensePhase, string> = {
+  pending: "En preparación",
+  trial: "Prueba gratis",
+  paid: "Pago",
+};
+
+/** "6 de noviembre de 2026" for a `YYYY-MM-DD` day (no timezone shift). */
+export function formatLicenseDay(day: string): string {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, date)).toLocaleDateString("es", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+/** The Cuban calendar day (`YYYY-MM-DD`) of a timestamp. */
+export function licenseDayOf(timestamp: string | Date): string {
+  return new Date(timestamp).toLocaleDateString("en-CA", {
+    timeZone: "America/Havana",
+  });
+}
+
+/** Adds days to a `YYYY-MM-DD` day. */
+export function addLicenseDays(day: string, days: number): string {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, date + days))
+    .toISOString()
+    .slice(0, 10);
+}

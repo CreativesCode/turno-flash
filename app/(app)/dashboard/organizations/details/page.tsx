@@ -7,6 +7,8 @@ import {
   OrganizationEditSheet,
   type OrganizationEditForm,
 } from "@/components/organizations/OrganizationEditSheet";
+import { LicensePaymentsCard } from "@/components/organizations/LicensePaymentsCard";
+import { LicensePlanCard } from "@/components/organizations/LicensePlanCard";
 import { ModulesCard } from "@/components/organizations/ModulesCard";
 import { WhatsAppOrgSection } from "@/components/organizations/WhatsAppOrgSection";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -15,6 +17,7 @@ import { ROLE_META } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
 import { UserProfile } from "@/types/auth";
+import { licenseErrorMessage } from "@/services/license.service";
 import { OrganizationWithLicenseStatus } from "@/types/organization";
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
@@ -400,9 +403,12 @@ function OrganizationDetailsContent() {
 
       toast.dismiss(loadingToast);
       if (updateError) {
-        void Logger.error("Error al actualizar organización:", updateError);
-        toast.error("Error al actualizar", updateError.message);
-        setError("Error al actualizar: " + updateError.message);
+        const known = licenseErrorMessage(updateError.message);
+        if (!known) {
+          void Logger.error("Error al actualizar organización:", updateError);
+        }
+        toast.error("Error al actualizar", known ?? updateError.message);
+        setError("Error al actualizar: " + (known ?? updateError.message));
         return;
       }
 
@@ -498,7 +504,8 @@ function OrganizationDetailsContent() {
 
   const license = getLicenseMeta(
     organization.license_status,
-    organization.days_remaining
+    organization.days_remaining,
+    organization.license_phase
   );
   const members = organization.members ?? [];
   const owner = organization.owner;
@@ -609,6 +616,23 @@ function OrganizationDetailsContent() {
               onChanged={loadOrganization}
             />
           </div>
+
+          {/* Plan, cobro e historial de pagos — solo admin */}
+          {isAdmin && (
+            <>
+              <LicensePlanCard
+                key={[
+                  organization.license_plan,
+                  organization.license_founder,
+                  organization.referred_by_organization_id,
+                  organization.owner_phone,
+                ].join("|")}
+                organization={organization}
+                onChanged={loadOrganization}
+              />
+              <LicensePaymentsCard organizationId={organizationId} />
+            </>
+          )}
 
           {/* Sección WhatsApp — solo admin */}
           {isAdmin && <WhatsAppOrgSection organizationId={organizationId} />}
