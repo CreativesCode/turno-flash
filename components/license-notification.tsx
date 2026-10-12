@@ -7,10 +7,7 @@ import {
   getLicenseMessageTitle,
   isLicenseExpiringSoon,
 } from "@/utils/license";
-import {
-  SUPPORT_WHATSAPP_HELP_URL,
-  SUPPORT_WHATSAPP_URL,
-} from "@/config/constants";
+import { useSupportWhatsAppUrl } from "@/hooks/useSupportWhatsAppUrl";
 import { licenseDayOf } from "@/config/license-pricing";
 import { useIsStoreApp } from "@/hooks/useIsStoreApp";
 import { X } from "lucide-react";
@@ -169,11 +166,12 @@ export function LicenseNotification({
 
 function SupportLine() {
   const storeApp = useIsStoreApp();
+  const supportUrl = useSupportWhatsAppUrl(storeApp ? "help" : "license");
   return (
     <p className="mt-1">
       {storeApp ? "Si necesitas ayuda," : "Para seguir usando Turno Flash,"}{" "}
       <a
-        href={storeApp ? SUPPORT_WHATSAPP_HELP_URL : SUPPORT_WHATSAPP_URL}
+        href={supportUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="font-semibold underline"

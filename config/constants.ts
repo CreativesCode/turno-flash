@@ -5,28 +5,34 @@
  * and improve maintainability.
  */
 
+const SUPPORT_WHATSAPP_NUMBER = "5352564206";
+
 /**
- * Licenses can't be paid in-app from Cuba (D-10): owners write to support on
- * WhatsApp and an admin extends the license by hand.
+ * What an owner writes to support about. Licenses can't be paid in-app from
+ * Cuba (D-10), and only an admin changes a plan or connects WhatsApp, so the
+ * owner asks for each of those in a chat.
  */
-export const SUPPORT_WHATSAPP_URL = `https://wa.me/5352564206?text=${encodeURIComponent(
-  "Hola, quiero activar o renovar la licencia de Turno Flash."
-)}`;
+const SUPPORT_MESSAGES = {
+  license: "Hola, quiero activar o renovar la licencia de Turno Flash.",
+  // From the store app, which never mentions the license payment
+  help: "Hola, necesito ayuda con Turno Flash.",
+  plan: "Hola, quiero cambiar el plan de mi negocio en Turno Flash.",
+  connect: "Hola, quiero conectar el WhatsApp de mi negocio en Turno Flash.",
+} as const;
 
-/** Support chat opened from the store app, which never mentions the license payment. */
-export const SUPPORT_WHATSAPP_HELP_URL = `https://wa.me/5352564206?text=${encodeURIComponent(
-  "Hola, necesito ayuda con Turno Flash."
-)}`;
+export type SupportTopic = keyof typeof SUPPORT_MESSAGES;
 
-/** Only an admin changes the plan of a business, so the owner asks for it. */
-export const SUPPORT_WHATSAPP_PLAN_URL = `https://wa.me/5352564206?text=${encodeURIComponent(
-  "Hola, quiero cambiar el plan de mi negocio en Turno Flash."
-)}`;
-
-/** Only an admin can connect a business to WhatsApp, so the owner asks for it. */
-export const SUPPORT_WHATSAPP_CONNECT_URL = `https://wa.me/5352564206?text=${encodeURIComponent(
-  "Hola, quiero conectar el WhatsApp de mi negocio en Turno Flash."
-)}`;
+/** Support chat with the message written, naming the business when known. */
+export function supportWhatsAppUrl(
+  topic: SupportTopic,
+  businessName?: string | null
+): string {
+  const name = businessName?.trim();
+  const message = name
+    ? `${SUPPORT_MESSAGES[topic]} Mi negocio: ${name}.`
+    : SUPPORT_MESSAGES[topic];
+  return `https://wa.me/${SUPPORT_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
 
 /**
  * Appointment Status Constants

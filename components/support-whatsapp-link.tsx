@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  SUPPORT_WHATSAPP_HELP_URL,
-  SUPPORT_WHATSAPP_URL,
-} from "@/config/constants";
 import { useIsStoreApp } from "@/hooks/useIsStoreApp";
+import { useSupportWhatsAppUrl } from "@/hooks/useSupportWhatsAppUrl";
 import { MessageCircle } from "lucide-react";
 
 /**
@@ -13,9 +10,10 @@ import { MessageCircle } from "lucide-react";
  */
 export function SupportWhatsAppLink({ className = "" }: { className?: string }) {
   const storeApp = useIsStoreApp();
+  const href = useSupportWhatsAppUrl(storeApp ? "help" : "license");
   return (
     <a
-      href={storeApp ? SUPPORT_WHATSAPP_HELP_URL : SUPPORT_WHATSAPP_URL}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       className={`bg-primary inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-primary-foreground transition-[filter] hover:brightness-110 ${className}`}

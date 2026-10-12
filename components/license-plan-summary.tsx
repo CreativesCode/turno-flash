@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge, Card } from "@/components/ui";
-import { SUPPORT_WHATSAPP_PLAN_URL } from "@/config/constants";
+import { useSupportWhatsAppUrl } from "@/hooks/useSupportWhatsAppUrl";
 import {
   BILLING_PERIOD_INFO,
   BILLING_PERIODS,
@@ -29,6 +29,7 @@ import { Gift, Wallet } from "lucide-react";
 export function LicensePlanSummary() {
   const { data: license } = useOrganizationLicense();
   const storeApp = useIsStoreApp();
+  const planUrl = useSupportWhatsAppUrl("plan");
   if (!license) return null;
 
   const info = LICENSE_PLAN_INFO[license.plan];
@@ -128,7 +129,7 @@ export function LicensePlanSummary() {
         </ul>
 
         <a
-          href={SUPPORT_WHATSAPP_PLAN_URL}
+          href={planUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-4 inline-block text-sm font-semibold text-primary hover:underline"
