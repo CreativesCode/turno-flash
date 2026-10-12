@@ -1,6 +1,6 @@
 "use client";
 
-import { ApptRow } from "@/components/appointments/ApptRow";
+import { ApptRow, formatTime } from "@/components/appointments/ApptRow";
 import {
   LicenseNotification,
   LicenseNotificationBanner,
@@ -8,170 +8,40 @@ import {
 import { SetupGuide } from "@/components/onboarding/SetupGuide";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Avatar, Button, Card } from "@/components/ui";
+import {
+  Alert,
+  Button,
+  Card,
+  EmptyState,
+  IconTile,
+  ListGroup,
+  SectionLabel,
+} from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
-import { useAppointments } from "@/hooks/useAppointments.query";
+import {
+  useAppointments,
+  useUpdateAppointmentStatus,
+} from "@/hooks/useAppointments.query";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { usePendingTripBookingsCount } from "@/hooks/useTripBookings.query";
 import { useErrorStatsQuery } from "@/hooks/useErrorLogs.query";
 import { useLicense } from "@/hooks/useLicense";
 import type { AppointmentStatus } from "@/types/appointments";
+import { NEXT_ACTIONS } from "@/utils/appointment-status";
 import { shouldShowLicenseNotification } from "@/utils/license";
 import { createClient } from "@/utils/supabase/client";
 import {
-  Activity,
   AlertTriangle,
-  BarChart3,
-  Bell,
-  Building2,
   Bus,
   Calendar,
-  type LucideIcon,
-  Package,
+  ChevronRight,
+  Lock,
   Plus,
-  UserCog,
-  UserPlus,
-  Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Logger } from "@/utils/logger";
-
-interface ShortcutCard {
-  key: string;
-  title: string;
-  subtitle: string;
-  Icon: LucideIcon;
-  mesh: string;
-  href: string;
-  /** If set, only roles in this list see the card. */
-  roles?: string[];
-  /** If true, requires the user to have an organization. */
-  requiresOrg?: boolean;
-  /** Only shown when the organization has this module enabled. */
-  module?: "appointments" | "trips";
-}
-
-const SHORTCUTS: readonly ShortcutCard[] = [
-  {
-    key: "appointments",
-    title: "Turnos",
-    subtitle: "Ver y crear turnos",
-    Icon: Calendar,
-    mesh: "mesh-info",
-    href: "/dashboard/appointments",
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    key: "trips",
-    title: "Viajes",
-    subtitle: "Salidas y pasajeros",
-    Icon: Bus,
-    mesh: "mesh-info",
-    href: "/dashboard/trips",
-    requiresOrg: true,
-    module: "trips",
-  },
-  {
-    key: "customers",
-    title: "Clientes",
-    subtitle: "Base de clientes",
-    Icon: Users,
-    mesh: "mesh-primary",
-    href: "/dashboard/customers",
-    requiresOrg: true,
-  },
-  {
-    key: "reminders",
-    title: "Recordatorios",
-    subtitle: "Enviar por WhatsApp",
-    Icon: Bell,
-    mesh: "mesh-secondary",
-    href: "/dashboard/reminders",
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    key: "services",
-    title: "Servicios",
-    subtitle: "Catálogo y precios",
-    Icon: Package,
-    mesh: "mesh-warn",
-    href: "/dashboard/services",
-    roles: ["admin", "owner"],
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    key: "staff",
-    title: "Profesionales",
-    subtitle: "Equipo de trabajo",
-    Icon: UserCog,
-    mesh: "mesh-violet",
-    href: "/dashboard/staff",
-    roles: ["admin", "owner"],
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    key: "reports",
-    title: "Reportes",
-    subtitle: "Ingresos y estadísticas",
-    Icon: BarChart3,
-    mesh: "mesh-violet",
-    href: "/dashboard/reports",
-    roles: ["admin", "owner"],
-    requiresOrg: true,
-    module: "appointments",
-  },
-  {
-    key: "platform",
-    title: "Plataforma",
-    subtitle: "Salud del sistema",
-    Icon: Activity,
-    mesh: "mesh-warn",
-    href: "/dashboard/platform",
-    roles: ["admin"],
-  },
-  {
-    key: "organizations",
-    title: "Organizaciones",
-    subtitle: "Negocios y licencias",
-    Icon: Building2,
-    mesh: "mesh-info",
-    href: "/dashboard/organizations",
-    roles: ["admin"],
-  },
-  {
-    key: "users",
-    title: "Usuarios",
-    subtitle: "Cuentas del sistema",
-    Icon: Users,
-    mesh: "mesh-primary",
-    href: "/dashboard/users",
-    roles: ["admin"],
-  },
-  {
-    key: "invite",
-    title: "Invitar",
-    subtitle: "Sumar gente al equipo",
-    Icon: UserPlus,
-    mesh: "mesh-secondary",
-    href: "/dashboard/invite",
-    roles: ["admin", "owner"],
-  },
-  {
-    key: "errors",
-    title: "Errores",
-    subtitle: "Logs de la app",
-    Icon: AlertTriangle,
-    mesh: "mesh-warn",
-    href: "/dashboard/errors",
-    // Technical logs: an owner can't act on them (P2-15)
-    roles: ["admin"],
-  },
-];
+import { toast } from "sonner";
 
 // Today in YYYY-MM-DD (local timezone). Computed once per render.
 function getTodayString(): string {
@@ -184,14 +54,28 @@ function getTodayString(): string {
 const TODAY_LABEL_OPTIONS: Intl.DateTimeFormatOptions = {
   weekday: "long",
   day: "numeric",
-  month: "short",
+  month: "long",
 };
 
-function roleLabel(role?: string): string {
-  if (role === "admin") return "Administrador";
-  if (role === "owner") return "Dueño";
-  return "Staff";
+function greeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Buen día";
+  if (hour < 20) return "Buenas tardes";
+  return "Buenas noches";
 }
+
+/** The day's bar and legend, in the order the work moves. */
+const DAY_GROUPS: {
+  key: "completed" | "inProgress" | "checkedIn" | "confirmed" | "pending";
+  label: string;
+  status: AppointmentStatus;
+}[] = [
+  { key: "completed", label: "Terminados", status: "completed" },
+  { key: "inProgress", label: "En curso", status: "in_progress" },
+  { key: "checkedIn", label: "Llegaron", status: "checked_in" },
+  { key: "confirmed", label: "Confirmados", status: "confirmed" },
+  { key: "pending", label: "Pendientes", status: "pending" },
+];
 
 function firstName(profileFullName?: string | null, fallback?: string): string {
   if (profileFullName) {
@@ -218,9 +102,6 @@ export default function DashboardPage() {
 
   // Shared with the license gate instead of a request of its own (P2-04)
   const { licenseStatus, loading: loadingLicense, isBlocked } = useLicense();
-  const organizationName = profile?.organization_id
-    ? modules.name || null
-    : null;
   const [adminCounts, setAdminCounts] = useState<{
     organizations: number;
     users: number;
@@ -288,7 +169,7 @@ export default function DashboardPage() {
     endDate: todayString,
   });
 
-  // Group counts by status — used by both the hero stat and shortcut subtitles.
+  // Group counts by status, for the day's summary.
   const stats = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const a of appointments) {
@@ -303,26 +184,36 @@ export default function DashboardPage() {
         appointments.length - statusCount("cancelled", "no_show"),
       confirmed: statusCount("confirmed", "client_confirmed", "reminded"),
       pending: counts.pending ?? 0,
-      inProgress: statusCount("checked_in", "in_progress"),
+      checkedIn: counts.checked_in ?? 0,
+      inProgress: counts.in_progress ?? 0,
       completed: counts.completed ?? 0,
     };
   }, [appointments]);
 
-  // Visible shortcut cards — filtered by role and org requirement.
-  const visibleShortcuts = useMemo(() => {
-    const role = profile?.role;
-    const hasOrg = !!profile?.organization_id;
-    return SHORTCUTS.filter((s) => {
-      if (s.roles && (!role || !s.roles.includes(role))) return false;
-      if (s.requiresOrg && !hasOrg) return false;
-      if (s.module && hasOrg && !modules[s.module]) return false;
-      return true;
-    }).map((s) =>
-      s.key === "trips" && pendingTripBookings > 0
-        ? { ...s, subtitle: `${pendingTripBookings} por aprobar` }
-        : s
+  // What is happening right now: the turn in progress, or else who arrived
+  const current = useMemo(
+    () =>
+      appointments.find((a) => a.status === "in_progress") ??
+      appointments.find((a) => a.status === "checked_in") ??
+      null,
+    [appointments]
+  );
+  const updateStatusMutation = useUpdateAppointmentStatus();
+  const currentNext = current?.status ? NEXT_ACTIONS[current.status] : null;
+  const advanceCurrent = () => {
+    if (!current || !currentNext) return;
+    updateStatusMutation.mutate(
+      { appointmentId: current.id, newStatus: currentNext.to },
+      {
+        onError: (error) =>
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "No se pudo actualizar el turno"
+          ),
+      }
     );
-  }, [profile?.role, profile?.organization_id, modules, pendingTripBookings]);
+  };
 
   // Next 3 upcoming non-terminal appointments — sorted by start_time.
   const upcoming = useMemo(() => {
@@ -339,11 +230,10 @@ export default function DashboardPage() {
   }, [appointments]);
 
   const greetName = firstName(profile?.full_name, profile?.email ?? undefined);
-  const todayLabel = useMemo(
-    () =>
-      new Date().toLocaleDateString("es", TODAY_LABEL_OPTIONS).replace(",", " ·"),
-    []
-  );
+  const todayLabel = useMemo(() => {
+    const label = new Date().toLocaleDateString("es", TODAY_LABEL_OPTIONS);
+    return label.charAt(0).toUpperCase() + label.slice(1).replace(",", "");
+  }, []);
 
   // Si está bloqueado por licencia expirada, mostrar pantalla de bloqueo
   if (isBlocked && profile?.role !== "admin") {
@@ -354,14 +244,14 @@ export default function DashboardPage() {
             <LicenseNotificationBanner licenseStatus={licenseStatus} />
           )}
           <div className="flex min-h-screen items-center justify-center px-4">
-            <Card className="w-full max-w-md p-8 text-center shadow-lg">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-danger-100 dark:bg-danger-900/20">
-                <span className="text-3xl">🚫</span>
-              </div>
-              <h1 className="mt-6 text-2xl font-bold text-foreground">
-                Acceso Bloqueado
+            <Card className="w-full max-w-md p-8 text-center">
+              <IconTile tone="danger" size={52} className="mx-auto">
+                <Lock />
+              </IconTile>
+              <h1 className="mt-5 text-title font-semibold text-foreground">
+                Acceso bloqueado
               </h1>
-              <p className="mt-4 text-sm text-foreground-muted">
+              <p className="mt-3 text-body text-foreground-muted">
                 La licencia de tu organización ha expirado. Por favor, contacta
                 al administrador para renovarla y continuar usando la
                 aplicación.
@@ -376,7 +266,7 @@ export default function DashboardPage() {
               )}
               <Button
                 variant="danger"
-                size="md"
+                size="lg"
                 className="mt-6 w-full"
                 onClick={() => signOut().then(() => router.push("/login"))}
               >
@@ -395,251 +285,251 @@ export default function DashboardPage() {
         title="Panel de Control"
         description="Accede a tu panel de control de Turno Flash. Gestiona turnos, clientes, servicios y profesionales desde un solo lugar."
       />
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          {/* Header */}
-          <div className="mb-6 flex items-center justify-between gap-4 lg:mb-8">
-            <div className="min-w-0">
-              {organizationName && (
-                <div className="truncate text-xs font-semibold text-foreground-muted lg:text-[13px]">
-                  {organizationName} · {todayLabel}
-                </div>
-              )}
-              <h1 className="mt-0.5 break-words text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-                Hola, {greetName} 👋
-              </h1>
+      <div className="mx-auto max-w-4xl px-5 pb-10 pt-5 lg:px-8 lg:pt-8">
+        {/* Greeting */}
+        <div className="flex items-end justify-between gap-4">
+          <div className="min-w-0">
+            <div className="text-meta font-medium text-foreground-subtle">
+              {todayLabel}
             </div>
-            <div className="flex items-center gap-3">
-              {showAppointments && (
-                <Button
-                  variant="mesh-primary"
-                  size="md"
-                  onClick={() =>
-                    router.push("/dashboard/appointments?create=1")
-                  }
-                  className="max-sm:hidden"
-                >
-                  <Plus className="h-4 w-4" /> Nuevo turno
-                </Button>
-              )}
-              <Avatar
-                name={profile?.full_name || profile?.email || "Usuario"}
-                color="var(--color-secondary-500)"
-                size={40}
-              />
-            </div>
+            <h1 className="mt-1 break-words font-display text-[40px] leading-[1.05] text-foreground">
+              {greeting()}, {greetName}
+            </h1>
           </div>
-
-          {/* Notificación de licencia (versión completa) */}
-          {!loadingLicense &&
-            licenseStatus &&
-            shouldShowLicenseNotification(licenseStatus) &&
-            // Only the owner pays: an employee sees just the block screen
-            profile?.role === "owner" && (
-              <div className="mb-6">
-                <LicenseNotification licenseStatus={licenseStatus} />
-              </div>
-            )}
-
-          {/* Primeros pasos de un dueño nuevo */}
-          <SetupGuide />
-
-          {/* Hero stat de admin (cuando es admin sin organización) */}
-          {isAdminWithoutOrg && (
-            <Card className="relative mb-6 overflow-hidden p-5 lg:mb-8 lg:p-6">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-12 -top-12 h-52 w-52 rounded-full"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(99,179,255,0.18), transparent 70%)",
-                }}
-              />
-              <div className="relative">
-                <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
-                  Resumen del sistema
-                </div>
-                <div className="mt-1 text-sm font-semibold text-foreground-muted">
-                  Vista general de la plataforma
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <AdminStat
-                    label="Organizaciones"
-                    value={adminCounts?.organizations ?? 0}
-                    icon={Building2}
-                    tone="info"
-                  />
-                  <AdminStat
-                    label="Usuarios"
-                    value={adminCounts?.users ?? 0}
-                    icon={Users}
-                    tone="primary"
-                  />
-                  <AdminStat
-                    label="Errores hoy"
-                    value={errorStats?.errors_today ?? 0}
-                    icon={AlertTriangle}
-                    tone="warning"
-                  />
-                  <AdminStat
-                    label="Sin resolver"
-                    value={errorStats?.unresolved_errors ?? 0}
-                    icon={AlertTriangle}
-                    tone="danger"
-                  />
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Hero stat (solo cuando hay org) */}
           {showAppointments && (
-            <Card className="relative mb-6 overflow-hidden p-5 lg:mb-8 lg:p-6">
-              {/* Decorative radial */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-12 -top-12 h-52 w-52 rounded-full"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(34,197,94,0.16), transparent 70%)",
-                }}
-              />
-              <div className="relative">
-                <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
-                  Hoy
-                </div>
-                <div className="mt-1 flex items-baseline gap-2">
-                  <span className="text-4xl font-extrabold leading-none tracking-tighter text-foreground sm:text-5xl">
-                    {stats.total}
-                  </span>
-                  <span className="text-sm font-semibold text-foreground-muted">
-                    turnos
-                  </span>
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <MiniStat
-                    label="Confirmados"
-                    value={stats.confirmed}
-                    status="confirmed"
-                  />
-                  <MiniStat
-                    label="Pendientes"
-                    value={stats.pending}
-                    status="pending"
-                  />
-                  <MiniStat
-                    label="En curso"
-                    value={stats.inProgress}
-                    status="in_progress"
-                  />
-                  <MiniStat
-                    label="Completados"
-                    value={stats.completed}
-                    status="completed"
-                  />
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Sin organización (no admins) */}
-          {!profile?.organization_id && profile?.role !== "admin" && (
-            <Card className="mb-6 flex items-start gap-3 border-warning-200 bg-warning-50 p-5 dark:border-warning-900/40 dark:bg-warning-900/20">
-              <svg
-                className="h-6 w-6 shrink-0 text-warning-600 dark:text-warning-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-              <div>
-                {profile?.is_active === false ? (
-                  <>
-                    <h3 className="text-base font-bold text-warning-900 dark:text-warning-100">
-                      Tu acceso fue desactivado
-                    </h3>
-                    <p className="mt-1 text-sm text-warning-800 dark:text-warning-200">
-                      Ya no tienes acceso a este negocio. Si crees que es un
-                      error, habla con quien lo administra.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="text-base font-bold text-warning-900 dark:text-warning-100">
-                      Sin organización asignada
-                    </h3>
-                    <p className="mt-1 text-sm text-warning-800 dark:text-warning-200">
-                      Necesitas que un administrador te asigne a una
-                      organización para acceder al sistema de gestión de turnos.
-                    </p>
-                  </>
-                )}
-              </div>
-            </Card>
-          )}
-
-          {/* Atajos */}
-          {visibleShortcuts.length > 0 && (
-            <section className="mb-8">
-              <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
-                Atajos
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                {visibleShortcuts.map((s) => (
-                  <ShortcutTile key={s.key} card={s} onClick={() => router.push(s.href)} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Próximos turnos */}
-          {showAppointments && (
-            <section>
-              <div className="mb-3 flex items-center justify-between">
-                <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
-                  Próximos
-                </div>
-                <button
-                  onClick={() => router.push("/dashboard/appointments")}
-                  className="text-xs font-semibold text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-                >
-                  Ver todos →
-                </button>
-              </div>
-              {upcoming.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
-                    <Calendar className="h-5 w-5" />
-                  </div>
-                  <div className="mt-3 text-sm font-bold text-foreground">
-                    No hay turnos próximos hoy
-                  </div>
-                  <div className="mt-1 text-xs text-foreground-muted">
-                    Crea uno o consulta el calendario completo.
-                  </div>
-                </Card>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {upcoming.map((a) => (
-                    <ApptRow
-                      key={a.id}
-                      appointment={a}
-                      onOpen={() =>
-                        router.push(`/dashboard/appointments?id=${a.id}`)
-                      }
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
+            <Button
+              onClick={() => router.push("/dashboard/appointments?create=1")}
+              className="shrink-0 max-lg:hidden"
+            >
+              <Plus className="size-[18px]" /> Nuevo turno
+            </Button>
           )}
         </div>
+
+        {/* Notificación de licencia (versión completa) */}
+        {!loadingLicense &&
+          licenseStatus &&
+          shouldShowLicenseNotification(licenseStatus) &&
+          // Only the owner pays: an employee sees just the block screen
+          profile?.role === "owner" && (
+            <div className="mt-[22px]">
+              <LicenseNotification licenseStatus={licenseStatus} />
+            </div>
+          )}
+
+        {/* Primeros pasos de un dueño nuevo */}
+        <div className="mt-[22px] empty:hidden">
+          <SetupGuide />
+        </div>
+
+        {/* Admin without a business: the platform at a glance */}
+        {isAdminWithoutOrg && (
+          <>
+            <SectionLabel>Resumen del sistema</SectionLabel>
+            <Card className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-4">
+              <AdminStat
+                label="Organizaciones"
+                value={adminCounts?.organizations ?? 0}
+              />
+              <AdminStat label="Usuarios" value={adminCounts?.users ?? 0} />
+              <AdminStat
+                label="Errores hoy"
+                value={errorStats?.errors_today ?? 0}
+              />
+              <AdminStat
+                label="Sin resolver"
+                value={errorStats?.unresolved_errors ?? 0}
+              />
+            </Card>
+          </>
+        )}
+
+        {/* The day at a glance */}
+        {showAppointments && (
+          <Card className="mt-[22px] p-5">
+            <div className="flex items-baseline gap-2.5">
+              <span className="font-display text-[60px] leading-[0.9] text-foreground">
+                {stats.total}
+              </span>
+              <span className="text-body font-medium text-foreground-muted">
+                {stats.total === 1 ? "turno hoy" : "turnos hoy"}
+              </span>
+              <span className="ml-auto text-meta text-foreground-subtle">
+                {stats.completed}{" "}
+                {stats.completed === 1 ? "terminado" : "terminados"}
+              </span>
+            </div>
+            {stats.total > 0 && (
+              <div className="mt-[18px] flex h-2 gap-[3px]">
+                {DAY_GROUPS.filter((group) => stats[group.key] > 0).map(
+                  (group) => (
+                    <span
+                      key={group.key}
+                      className={`st-${group.status} rounded-[4px] bg-[var(--st-c)]`}
+                      style={{ flexGrow: stats[group.key] }}
+                    />
+                  )
+                )}
+              </div>
+            )}
+            <div className="mt-[18px] grid grid-cols-2 gap-x-5 gap-y-2.5">
+              {DAY_GROUPS.map((group) => (
+                <div key={group.key} className="flex items-center gap-2">
+                  <span
+                    aria-hidden
+                    className={`st-${group.status} size-2 shrink-0 rounded-full bg-[var(--st-c)]`}
+                  />
+                  <span className="flex-1 text-meta text-foreground-muted">
+                    {group.label}
+                  </span>
+                  <span className="font-mono font-medium tabular-nums text-foreground">
+                    {stats[group.key]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Sin organización (no admins) */}
+        {!profile?.organization_id && profile?.role !== "admin" && (
+          <Alert variant="warning" icon={<AlertTriangle />} className="mt-[22px]">
+            {profile?.is_active === false ? (
+              <>
+                <h3 className="text-body font-semibold">
+                  Tu acceso fue desactivado
+                </h3>
+                <p className="mt-1">
+                  Ya no tienes acceso a este negocio. Si crees que es un error,
+                  habla con quien lo administra.
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-body font-semibold">
+                  Sin organización asignada
+                </h3>
+                <p className="mt-1">
+                  Necesitas que un administrador te asigne a una organización
+                  para acceder al sistema de gestión de turnos.
+                </p>
+              </>
+            )}
+          </Alert>
+        )}
+
+        {/* Now */}
+        {showAppointments && current && (
+          <section>
+            <SectionLabel>Ahora</SectionLabel>
+            <div className="flex items-center gap-3.5 rounded-card bg-primary-100 p-4 pl-[18px] dark:bg-primary-900">
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(`/dashboard/appointments?id=${current.id}`)
+                }
+                className="flex min-w-0 flex-1 cursor-pointer items-center gap-3.5 text-left"
+              >
+                <div className="flex min-w-12 flex-col gap-0.5">
+                  <span className="font-mono text-[16px] font-semibold tabular-nums text-primary-700 dark:text-primary-400">
+                    {formatTime(current.start_time)}
+                  </span>
+                  <span className="text-caption text-primary-700/80 dark:text-primary-400/80">
+                    hasta {formatTime(current.end_time)}
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[16px] font-semibold text-foreground">
+                    {`${current.customer_first_name} ${current.customer_last_name}`.trim() ||
+                      "Sin nombre"}
+                  </div>
+                  <div className="mt-[3px] truncate text-meta text-foreground-muted">
+                    {[
+                      current.service_name,
+                      current.staff_nickname || current.staff_first_name,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </div>
+                </div>
+              </button>
+              {currentNext && (
+                <Button
+                  size="sm"
+                  onClick={advanceCurrent}
+                  disabled={updateStatusMutation.isPending}
+                  className="shrink-0"
+                >
+                  {currentNext.label}
+                </Button>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Próximos turnos */}
+        {showAppointments && (
+          <section>
+            <SectionLabel
+              action={
+                <button
+                  type="button"
+                  onClick={() => router.push("/dashboard/appointments")}
+                  className="cursor-pointer"
+                >
+                  Ver agenda
+                </button>
+              }
+            >
+              Próximos
+            </SectionLabel>
+            {upcoming.length === 0 ? (
+              <EmptyState icon={<Calendar />} title="No hay turnos próximos hoy">
+                Crea uno o consulta el calendario completo.
+              </EmptyState>
+            ) : (
+              <ListGroup>
+                {upcoming.map((a) => (
+                  <ApptRow
+                    key={a.id}
+                    appointment={a}
+                    onOpen={() =>
+                      router.push(`/dashboard/appointments?id=${a.id}`)
+                    }
+                  />
+                ))}
+              </ListGroup>
+            )}
+          </section>
+        )}
+
+        {/* Seat bookings waiting for the owner's approval */}
+        {pendingTripBookings > 0 && (
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard/trips")}
+            className="mt-4 flex w-full cursor-pointer items-center gap-3.5 rounded-card border border-border bg-surface p-4 text-left shadow-card transition-colors hover:bg-muted"
+          >
+            <IconTile tone="pink">
+              <Bus />
+            </IconTile>
+            <div className="min-w-0 flex-1">
+              <div className="text-body font-semibold text-foreground">
+                {pendingTripBookings}{" "}
+                {pendingTripBookings === 1
+                  ? "reserva por aprobar"
+                  : "reservas por aprobar"}
+              </div>
+              <div className="text-meta text-foreground-muted">
+                Pasajes que esperan tu respuesta
+              </div>
+            </div>
+            <ChevronRight
+              aria-hidden
+              className="size-[18px] text-foreground-subtle"
+            />
+          </button>
+        )}
       </div>
     </ProtectedRoute>
   );
@@ -649,99 +539,13 @@ export default function DashboardPage() {
 // Local helpers (only used by this page)
 // ───────────────────────────────────────────────────────────
 
-function MiniStat({
-  label,
-  value,
-  status,
-}: {
-  label: string;
-  value: number;
-  status: AppointmentStatus;
-}) {
+function AdminStat({ label, value }: { label: string; value: number }) {
   return (
-    <div
-      className={`st-${status} rounded-lg px-3 py-2`}
-      style={{ background: "var(--st-bg)" }}
-    >
-      <div
-        className="text-[11px] font-semibold"
-        style={{ color: "var(--st-cb)" }}
-      >
-        {label}
-      </div>
-      <div
-        className="mt-0.5 text-xl font-extrabold leading-none"
-        style={{ color: "var(--st-cb)" }}
-      >
+    <div className="rounded-control bg-surface-2 p-3">
+      <div className="text-caption text-foreground-muted">{label}</div>
+      <div className="mt-0.5 font-mono text-title tabular-nums text-foreground">
         {value}
       </div>
     </div>
-  );
-}
-
-function AdminStat({
-  label,
-  value,
-  icon: Icon,
-  tone,
-}: {
-  label: string;
-  value: number;
-  icon: LucideIcon;
-  tone: "info" | "primary" | "warning" | "danger";
-}) {
-  const toneStyles: Record<typeof tone, string> = {
-    info: "bg-info-50 text-info-700 dark:bg-info-900/20 dark:text-info-400",
-    primary:
-      "bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400",
-    warning:
-      "bg-warning-50 text-warning-700 dark:bg-warning-900/20 dark:text-warning-400",
-    danger:
-      "bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-400",
-  };
-  return (
-    <div className="rounded-lg border border-border bg-surface px-3 py-2.5">
-      <div className="flex items-center gap-2">
-        <div
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${toneStyles[tone]}`}
-        >
-          <Icon className="h-3.5 w-3.5" />
-        </div>
-        <div className="min-w-0">
-          <div className="truncate text-[10px] font-semibold uppercase tracking-wide text-foreground-muted">
-            {label}
-          </div>
-          <div className="text-lg font-extrabold leading-none text-foreground">
-            {value}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ShortcutTile({
-  card,
-  onClick,
-}: {
-  card: ShortcutCard;
-  onClick: () => void;
-}) {
-  const Icon = card.Icon;
-  return (
-    <button
-      onClick={onClick}
-      className={`${card.mesh} flex min-h-28 flex-col justify-between gap-4 rounded-2xl p-4 text-left text-white shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md active:translate-y-0`}
-    >
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-        <Icon className="h-4 w-4" />
-      </div>
-      <div>
-        <div className="text-[15px] font-bold leading-tight">{card.title}</div>
-        <div className="mt-0.5 text-[11px] text-white/85">
-          {card.subtitle}
-        </div>
-      </div>
-    </button>
   );
 }

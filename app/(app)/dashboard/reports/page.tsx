@@ -72,14 +72,14 @@ function getPeriodRange(period: PeriodKey): { start: string; end: string } {
 const STATUS_LABELS_ES: Record<string, string> = {
   pending: "Pendiente",
   confirmed: "Confirmado",
-  reminded: "Recordado",
-  client_confirmed: "Cliente confirmó",
-  checked_in: "Check-in",
-  in_progress: "En progreso",
-  completed: "Completado",
+  reminded: "Avisado",
+  client_confirmed: "Confirmó",
+  checked_in: "Llegó",
+  in_progress: "En curso",
+  completed: "Terminado",
   cancelled: "Cancelado",
-  no_show: "No asistió",
-  rescheduled: "Reagendado",
+  no_show: "No vino",
+  rescheduled: "Reprogramado",
 };
 
 function getStatusLabel(status: string): string {
@@ -198,7 +198,7 @@ export default function ReportsPage() {
                       tone="info"
                     />
                     <KpiCard
-                      label="Completados"
+                      label="Terminados"
                       value={summary.completed}
                       delta={computeDelta(
                         summary.completed,

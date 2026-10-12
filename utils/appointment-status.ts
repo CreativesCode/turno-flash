@@ -23,14 +23,14 @@ export interface StatusMeta {
 export const STATUSES: readonly StatusMeta[] = [
   { key: "pending", label: "Pendiente", short: "Pend." },
   { key: "confirmed", label: "Confirmado", short: "Conf." },
-  { key: "reminded", label: "Recordatorio enviado", short: "Record." },
-  { key: "client_confirmed", label: "Cliente confirmó", short: "Cliente OK" },
-  { key: "checked_in", label: "Check-in", short: "Check-in" },
+  { key: "reminded", label: "Avisado", short: "Avisado" },
+  { key: "client_confirmed", label: "Confirmó", short: "Confirmó" },
+  { key: "checked_in", label: "Llegó", short: "Llegó" },
   { key: "in_progress", label: "En curso", short: "En curso" },
-  { key: "completed", label: "Completado", short: "Listo" },
+  { key: "completed", label: "Terminado", short: "Listo" },
   { key: "cancelled", label: "Cancelado", short: "Cancel." },
-  { key: "no_show", label: "No asistió", short: "No vino" },
-  { key: "rescheduled", label: "Reagendado", short: "Reagend." },
+  { key: "no_show", label: "No vino", short: "No vino" },
+  { key: "rescheduled", label: "Reprogramado", short: "Reprog." },
 ] as const;
 
 const STATUS_INDEX: Record<AppointmentStatus, StatusMeta> = STATUSES.reduce(
@@ -59,14 +59,14 @@ export interface NextAction {
 }
 
 export const NEXT_ACTIONS: Record<AppointmentStatus, NextAction | null> = {
-  // When the customer arrives: check-in, then complete. Reminders and the
+  // When the customer arrives: arrived, started, finished. Reminders and the
   // customer's own confirmation happen by WhatsApp, not from this button.
   pending: { label: "Confirmar", to: "confirmed" },
-  confirmed: { label: "Hacer check-in", to: "checked_in" },
-  reminded: { label: "Hacer check-in", to: "checked_in" },
-  client_confirmed: { label: "Hacer check-in", to: "checked_in" },
-  checked_in: { label: "Completar", to: "completed" },
-  in_progress: { label: "Completar", to: "completed" },
+  confirmed: { label: "Llegó", to: "checked_in" },
+  reminded: { label: "Llegó", to: "checked_in" },
+  client_confirmed: { label: "Llegó", to: "checked_in" },
+  checked_in: { label: "Empezar", to: "in_progress" },
+  in_progress: { label: "Terminar", to: "completed" },
   completed: null,
   cancelled: null,
   no_show: null,

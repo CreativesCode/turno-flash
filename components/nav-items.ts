@@ -194,6 +194,8 @@ export function visibleNavGroups(
 }
 
 export function isNavActive(pathname: string, href: string): boolean {
-  if (href === "/dashboard") return pathname === href;
-  return pathname.startsWith(href);
+  // Some static hosts serve the route with a trailing slash
+  const path = pathname.replace(/\/$/, "");
+  if (href === "/dashboard") return path === href;
+  return path.startsWith(href);
 }

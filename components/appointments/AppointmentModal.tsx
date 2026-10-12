@@ -490,7 +490,7 @@ export function AppointmentDetailModal({
                 disabled={isProcessing}
                 className="w-full justify-center"
               >
-                Completar
+                Terminar
               </Button>
             )}
             <div className="grid grid-cols-4 gap-2">

@@ -8,7 +8,19 @@ import {
 import { AppointmentRescheduleSheet } from "@/components/appointments/AppointmentRescheduleSheet";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Button, ConfirmSheet } from "@/components/ui";
+import {
+  Alert,
+  Button,
+  ConfirmSheet,
+  EmptyState,
+  FilterChips,
+  ListGroup,
+  PageHeader,
+  SearchInput,
+  SectionLabel,
+  SegmentedControl,
+  Spinner,
+} from "@/components/ui";
 import { CalendarSkeleton } from "@/components/ui/skeleton";
 import {
   APPOINTMENT_SOURCE,
@@ -37,11 +49,8 @@ import { getLocalDateString } from "@/utils/date";
 import {
   AlertCircle,
   Calendar,
-  CalendarDays,
   Download,
-  List,
   Plus,
-  Search,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -70,17 +79,23 @@ const WeekCalendar = dynamic(
 type AppointmentView = "list" | "day" | "week";
 type FilterStatus = AppointmentStatus | "all";
 
-const FILTER_CHIPS: { key: FilterStatus; label: string }[] = [
-  { key: "all", label: "Todos" },
-  { key: "pending", label: "Pendientes" },
-  { key: "confirmed", label: "Confirmados" },
-  { key: "reminded", label: "Recordatorio" },
-  { key: "client_confirmed", label: "Cliente OK" },
-  { key: "checked_in", label: "Check-in" },
-  { key: "in_progress", label: "En curso" },
-  { key: "completed", label: "Completados" },
-  { key: "cancelled", label: "Cancelados" },
-  { key: "no_show", label: "No vino" },
+const FILTER_CHIPS: { value: FilterStatus; label: string }[] = [
+  { value: "all", label: "Todos" },
+  { value: "pending", label: "Pendientes" },
+  { value: "confirmed", label: "Confirmados" },
+  { value: "reminded", label: "Avisados" },
+  { value: "client_confirmed", label: "Confirmaron" },
+  { value: "checked_in", label: "Llegaron" },
+  { value: "in_progress", label: "En curso" },
+  { value: "completed", label: "Terminados" },
+  { value: "cancelled", label: "Cancelados" },
+  { value: "no_show", label: "No vino" },
+];
+
+const VIEW_OPTIONS: { value: AppointmentView; label: string }[] = [
+  { value: "list", label: "Lista" },
+  { value: "day", label: "Día" },
+  { value: "week", label: "Semana" },
 ];
 
 // Only appointments that haven't started can be moved to another time
@@ -610,8 +625,8 @@ function AppointmentsContent() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center justify-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100" />
-            <p className="text-sm text-foreground-muted">Cargando turnos...</p>
+            <Spinner className="mb-3 text-foreground" />
+            <p className="text-meta text-foreground-muted">Cargando turnos...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -634,131 +649,86 @@ function AppointmentsContent() {
         description="Gestiona tus turnos y citas. Visualiza tu calendario, crea nuevas citas, confirma o cancela reservas existentes."
       />
 
-      <div className="relative min-h-screen bg-background pb-24">
-        {/* Sticky controls */}
-        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 pb-3 pt-3 sm:px-6 lg:px-8">
-            {/* Title + desktop "new" button */}
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-                  Turnos
-                </h1>
-                <p className="text-xs text-foreground-muted">
-                  {subtitle}
-                  {refreshing && " · Actualizando…"}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleExportCsv}
-                  title="Exportar turnos del rango visible a CSV"
-                  className="hidden items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
-                >
-                  <Download className="h-4 w-4" />
-                  CSV
-                </button>
-                {canManageAppointments && (
-                  <Button
-                    variant="mesh-primary"
-                    onClick={handleCreate}
-                    className="max-sm:hidden"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Nuevo turno
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* View switcher (segmented) */}
-            <div className="flex items-center rounded-xl border border-border bg-surface-2 p-1">
-              {(
-                [
-                  { k: "list", l: "Lista", I: List },
-                  { k: "day", l: "Día", I: Calendar },
-                  { k: "week", l: "Semana", I: CalendarDays },
-                ] as const
-              ).map(({ k, l, I }) => {
-                const active = view === k;
-                return (
+      <div className="mx-auto max-w-4xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
+        <PageHeader
+          title="Turnos"
+          subtitle={
+            <>
+              {subtitle}
+              {refreshing && " · Actualizando…"}
+            </>
+          }
+          actions={
+            <>
+              <Button
+                variant="secondary"
+                onClick={handleExportCsv}
+                title="Exportar turnos del rango visible a CSV"
+                className="max-sm:hidden"
+              >
+                <Download className="size-[18px]" />
+                CSV
+              </Button>
+              {canManageAppointments && (
+                <Button onClick={handleCreate} className="max-lg:hidden">
+                  <Plus className="size-[18px]" />
+                  Nuevo turno
+                </Button>
+              )}
+            </>
+          }
+        >
+          <SegmentedControl
+            label="Vista"
+            options={VIEW_OPTIONS}
+            value={view}
+            onChange={setView}
+            className="w-full sm:w-auto sm:self-start"
+          />
+          {/* Search + chips (only in list view) */}
+          {view === "list" && (
+            <>
+              <SearchInput
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Cliente, servicio o teléfono"
+                aria-label="Buscar turnos"
+              />
+              <div className="-mx-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {myStaffId && (
                   <button
-                    key={k}
                     type="button"
-                    onClick={() => setView(k)}
-                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-                      active
-                        ? "bg-surface text-foreground shadow-sm"
-                        : "text-foreground-muted hover:text-foreground"
+                    onClick={() =>
+                      setOnlyMineStaffId(onlyMineStaffId ? null : myStaffId)
+                    }
+                    aria-pressed={!!onlyMineStaffId}
+                    className={`flex h-9 shrink-0 cursor-pointer items-center rounded-full border px-3.5 text-meta font-semibold transition-colors ${
+                      onlyMineStaffId
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border-2 bg-surface text-foreground-muted hover:text-foreground"
                     }`}
                   >
-                    <I className="h-4 w-4" />
-                    {l}
+                    Mis turnos
                   </button>
-                );
-              })}
-            </div>
-
-            {/* Search + chips (only in list view) */}
-            {view === "list" && (
-              <>
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-muted" />
-                  <input
-                    type="text"
-                    placeholder="Buscar cliente, servicio o teléfono…"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="block w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-foreground shadow-xs transition-colors focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
-                  />
-                </div>
-                <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5">
-                  {myStaffId && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setOnlyMineStaffId(onlyMineStaffId ? null : myStaffId)
-                      }
-                      aria-pressed={!!onlyMineStaffId}
-                      className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-                        onlyMineStaffId
-                          ? "border-primary-600 bg-primary-600 text-white"
-                          : "border-border bg-surface text-foreground-muted hover:text-foreground"
-                      }`}
-                    >
-                      Mis turnos
-                    </button>
-                  )}
-                  {FILTER_CHIPS.map((c) => {
-                    const active = filterStatus === c.key;
-                    return (
-                      <button
-                        key={c.key}
-                        type="button"
-                        onClick={() => setFilterStatus(c.key)}
-                        className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-                          active
-                            ? "border-foreground bg-foreground text-background"
-                            : "border-border bg-surface text-foreground-muted hover:text-foreground"
-                        }`}
-                      >
-                        {c.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+                )}
+                <FilterChips
+                  label="Estado"
+                  chips={FILTER_CHIPS}
+                  value={filterStatus}
+                  onChange={setFilterStatus}
+                  className="overflow-visible"
+                />
+              </div>
+            </>
+          )}
+        </PageHeader>
 
         {/* Body */}
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="pt-4">
           {error && (
-            <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <Alert variant="danger" icon={<AlertCircle />} className="mb-4">
               {error}
-            </div>
+            </Alert>
           )}
 
           {/* List view */}
@@ -771,78 +741,50 @@ function AppointmentsContent() {
                   onCreate={handleCreate}
                 />
               ) : (
-                <div className="flex flex-col gap-4">
-                  {grouped.map((section) => {
-                    const sectionDate = formatSectionDate(section.date);
-                    return (
-                      <div key={section.date} className="flex flex-col gap-2">
-                        <h2 className="px-1 text-xs font-bold uppercase tracking-[0.05em] text-foreground-subtle">
-                          {sectionDate}
-                        </h2>
-                        {section.morning.length > 0 && (
-                          <SectionHeader
-                            label="Por la mañana"
-                            count={section.morning.length}
-                          />
-                        )}
-                        {section.morning.map((a) => (
-                          <ApptRow
-                            key={a.id}
-                            appointment={a}
-                            onOpen={handleAppointmentClick}
-                            onAdvance={
-                              canManageAppointments
-                                ? (apt, to) =>
-                                    updateStatus(apt.id, to as AppointmentStatus)
-                                : undefined
-                            }
-                            serviceColor={
-                              services.find((s) => s.id === a.service_id)
-                                ?.color ?? null
-                            }
-                            staffColor={
-                              staffMembers.find((s) => s.id === a.staff_id)
-                                ?.color ?? null
-                            }
-                          />
-                        ))}
-                        {section.afternoon.length > 0 && (
-                          <SectionHeader
-                            label="Por la tarde"
-                            count={section.afternoon.length}
-                          />
-                        )}
-                        {section.afternoon.map((a) => (
-                          <ApptRow
-                            key={a.id}
-                            appointment={a}
-                            onOpen={handleAppointmentClick}
-                            onAdvance={
-                              canManageAppointments
-                                ? (apt, to) =>
-                                    updateStatus(apt.id, to as AppointmentStatus)
-                                : undefined
-                            }
-                            serviceColor={
-                              services.find((s) => s.id === a.service_id)
-                                ?.color ?? null
-                            }
-                            staffColor={
-                              staffMembers.find((s) => s.id === a.staff_id)
-                                ?.color ?? null
-                            }
-                          />
-                        ))}
-                      </div>
-                    );
-                  })}
+                <div>
+                  {grouped.map((section) => (
+                    <section key={section.date}>
+                      <h2 className="px-1 pt-5 text-lead font-semibold text-foreground first:pt-0">
+                        {formatSectionDate(section.date)}
+                      </h2>
+                      {(
+                        [
+                          ["Mañana", section.morning],
+                          ["Tarde", section.afternoon],
+                        ] as const
+                      ).map(
+                        ([label, rows]) =>
+                          rows.length > 0 && (
+                            <div key={label}>
+                              <SectionLabel count={rows.length} className="!pt-3">
+                                {label}
+                              </SectionLabel>
+                              <ListGroup>
+                                {rows.map((a) => (
+                                  <ApptRow
+                                    key={a.id}
+                                    appointment={a}
+                                    onOpen={handleAppointmentClick}
+                                    serviceColor={
+                                      services.find(
+                                        (s) => s.id === a.service_id
+                                      )?.color ?? null
+                                    }
+                                  />
+                                ))}
+                              </ListGroup>
+                            </div>
+                          )
+                      )}
+                    </section>
+                  ))}
                 </div>
               )}
 
               {hasNextAppointmentsPage && (
                 <div className="mt-6 flex justify-center">
                   <Button
-                    variant="soft"
+                    variant="secondary"
                     onClick={() => fetchNextAppointmentsPage()}
                     disabled={isFetchingNextAppointmentsPage}
                   >
@@ -991,18 +933,6 @@ function AppointmentsContent() {
 }
 
 /* ────────────────────────────────────────────────────────── */
-function SectionHeader({ label, count }: { label: string; count: number }) {
-  return (
-    <div className="flex items-center gap-2 px-1 pt-1 text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
-      <span>{label}</span>
-      <span className="rounded-full bg-surface-2 px-1.5 py-px text-[10px]">
-        {count}
-      </span>
-      <div className="h-px flex-1 bg-border" />
-    </div>
-  );
-}
-
 function EmptyListState({
   hasFilters,
   canManage,
@@ -1013,29 +943,23 @@ function EmptyListState({
   onCreate: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-10 text-center shadow-sm">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
-        <Calendar className="h-6 w-6" />
-      </div>
-      <h3 className="mt-3 text-base font-bold text-foreground">
-        {hasFilters ? "Sin turnos" : "Aún no hay turnos"}
-      </h3>
-      <p className="mt-1 text-sm text-foreground-muted">
-        {hasFilters
-          ? "No encontramos turnos con esos filtros."
-          : "Cuando crees un turno aparecerá aquí."}
-      </p>
-      {canManage && !hasFilters && (
-        <Button
-          variant="mesh-primary"
-          onClick={onCreate}
-          className="mx-auto mt-4"
-        >
-          <Plus className="h-4 w-4" />
-          Crear turno
-        </Button>
-      )}
-    </div>
+    <EmptyState
+      icon={<Calendar />}
+      title={hasFilters ? "Sin turnos" : "Aún no hay turnos"}
+      action={
+        canManage &&
+        !hasFilters && (
+          <Button size="sm" variant="secondary" onClick={onCreate}>
+            <Plus className="size-4" />
+            Crear turno
+          </Button>
+        )
+      }
+    >
+      {hasFilters
+        ? "No encontramos turnos con esos filtros."
+        : "Cuando crees un turno aparecerá aquí."}
+    </EmptyState>
   );
 }
 
@@ -1048,11 +972,11 @@ function formatSectionDate(date: string): string {
     month: "short",
   });
   const today = getLocalDateString();
-  if (date === today) return `Hoy · ${label}`;
+  if (date === today) return `Hoy, ${label}`;
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  if (date === getLocalDateString(tomorrow)) return `Mañana · ${label}`;
-  return label;
+  if (date === getLocalDateString(tomorrow)) return `Mañana, ${label}`;
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 export default function AppointmentsPage() {
@@ -1062,8 +986,8 @@ export default function AppointmentsPage() {
         <ProtectedRoute>
           <div className="flex min-h-screen w-full items-center justify-center bg-background">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
-              <p className="text-sm text-foreground-muted">Cargando turnos...</p>
+              <Spinner className="mb-3 text-foreground" />
+              <p className="text-meta text-foreground-muted">Cargando turnos...</p>
             </div>
           </div>
         </ProtectedRoute>
