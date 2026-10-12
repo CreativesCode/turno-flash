@@ -1,12 +1,14 @@
 @import "tailwindcss";
 
 /* ──────────────────────────────────────────────────────────────────────────
+ * TurnoFlash redesign v2 (docs/design/handoff). The token NAMES the code
+ * already uses are kept (bg-surface, text-foreground, primary-*, st-*…) and
+ * only their VALUES change; fonts, sizes and radii are added as extra tokens.
+ *
  * Tailwind v4 changed the default `dark:` variant to use the OS-level
  * `prefers-color-scheme: dark` media query. We toggle dark mode via the
  * `.dark` class on <html> (set by ThemeProvider), so we override the variant
- * to be class-based — otherwise users whose OS is in dark mode would see
- * `dark:` styles bleed into the app's "light" theme (e.g. `bg-white
- * dark:bg-info-900/20` rendered as a translucent navy on top of white).
+ * to be class-based.
  * ────────────────────────────────────────────────────────────────────────── */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -17,112 +19,139 @@
   --safe-area-inset-bottom: env(safe-area-inset-bottom);
   --safe-area-inset-left: env(safe-area-inset-left);
 
-  /* Light mode semantic colors */
-  --background: #ffffff;
-  --surface: #ffffff;
-  --surface-2: #f6f7f9;
-  --muted-background: #f8fafc;
-  --subtle-background: #f1f5f9;
-  --border: #e2e8f0;
-  --border-2: #e2e6ec;
-  --foreground: #0f172a;
-  --foreground-muted: #334155;
-  --foreground-subtle: #8590a3;
+  /* Warm neutrals — light */
+  --background: #f5f4f0;        /* page background */
+  --surface: #ffffff;           /* cards, sheets, bars */
+  --surface-2: #efede8;         /* search inputs, neutral pills, segmented */
+  --muted-background: #f5f4f0;  /* hover over surface */
+  --subtle-background: #efede8;
+  --border: #e6e3dc;            /* dividers and card borders */
+  --border-2: #d6d2c8;          /* input and secondary button borders */
+  --foreground: #161714;        /* main text (ink) */
+  --foreground-muted: #4b4c47;  /* secondary text (ink-2) */
+  --foreground-subtle: #85857d; /* metadata, placeholders (ink-3) */
   --primary-foreground: #ffffff;
   --secondary-foreground: #ffffff;
+  --inverse: #161714;           /* active filter chip, selected day */
+  --inverse-foreground: #ffffff;
+  --overlay: rgba(22, 23, 20, 0.38);
 
-  /* Brand glow shadows (used on mesh-gradient buttons / FAB / hero tiles) */
-  --shadow-glow-primary: 0 8px 20px -6px rgba(34, 197, 94, 0.35);
-  --shadow-glow-secondary: 0 8px 20px -6px rgba(219, 39, 119, 0.35);
+  /* No glow: the names stay so existing classes don't break */
+  --shadow-glow-primary: none;
+  --shadow-glow-secondary: none;
+  --shadow-card: 0 1px 2px rgba(22, 23, 20, 0.05);
+  --accent: #147a42; /* action colour, per theme */
+  --pink: #c4206a;
+}
+
+.dark {
+  --accent: #38b86c;
+  --pink: #ee5a9c;
+  --background: #0f100f;
+  --surface: #181a18;
+  --surface-2: #222422;
+  --muted-background: #1d1f1d;
+  --subtle-background: #222422;
+  --border: #2a2d2a;
+  --border-2: #383b38;
+  --foreground: #f2f1ec;
+  --foreground-muted: #b6b5ae;
+  --foreground-subtle: #7c7c75;
+  --primary-foreground: #06210f;  /* in dark the primary button is light green with dark text */
+  --secondary-foreground: #ffffff;
+  --inverse: #f2f1ec;
+  --inverse-foreground: #0f100f;
+  --overlay: rgba(0, 0, 0, 0.55);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
-  /* Primary colors (Green) */
-  --color-primary-50: #f3fbf4;
-  --color-primary-100: #eaf9ec;
-  --color-primary-200: #d8f3dc;
-  --color-primary-300: #bbeac3;
-  --color-primary-400: #91dea0;
-  --color-primary-500: #22c55e;
-  --color-primary-600: #1ba64e;
-  --color-primary-700: #13833c;
-  --color-primary-800: #0a5d29;
-  --color-primary-900: #043916;
-  --color-primary-950: #01210a;
-  --color-primary: #22c55e;
+  /* Primary — the logo's deep green. 600 is the action colour. */
+  --color-primary-50: #eef7f1;
+  --color-primary-100: #e2f0e6;
+  --color-primary-200: #c3e2cd;
+  --color-primary-300: #94cba8;
+  --color-primary-400: #6dd497;
+  --color-primary-500: #38b86c;
+  --color-primary-600: #147a42;
+  --color-primary-700: #0e5e32;
+  --color-primary-800: #0b4a28;
+  --color-primary-900: #16301f;
+  --color-primary-950: #06210f;
+  --color-primary: var(--accent);
 
-  /* Secondary colors (Fuchsia/Pink) */
-  --color-secondary-50: #fff2f5;
-  --color-secondary-100: #ffe8ee;
-  --color-secondary-200: #fed5e0;
-  --color-secondary-300: #fab6c9;
-  --color-secondary-400: #f28aab;
-  --color-secondary-500: #db2777;
-  --color-secondary-600: #b91f63;
-  --color-secondary-700: #92164d;
-  --color-secondary-800: #680d35;
-  --color-secondary-900: #41051f;
-  --color-secondary-950: #260210;
-  --color-secondary: #db2777;
+  /* Secondary — fuchsia. Only WhatsApp / notices / "now". */
+  --color-secondary-50: #fdf2f7;
+  --color-secondary-100: #fae7ef;
+  --color-secondary-200: #f5c8db;
+  --color-secondary-300: #ee9dbf;
+  --color-secondary-400: #ee5a9c;
+  --color-secondary-500: #d42f7a;
+  --color-secondary-600: #c4206a;
+  --color-secondary-700: #9c1854;
+  --color-secondary-800: #741240;
+  --color-secondary-900: #3a1828;
+  --color-secondary-950: #2e0619;
+  --color-secondary: var(--pink);
 
-  /* Success colors (using primary green, can be used interchangeably) */
-  --color-success-50: #f3fbf4;
-  --color-success-100: #eaf9ec;
-  --color-success-200: #d8f3dc;
-  --color-success-300: #bbeac3;
-  --color-success-400: #91dea0;
-  --color-success-500: #22c55e;
-  --color-success-600: #1ba64e;
-  --color-success-700: #13833c;
-  --color-success-800: #0a5d29;
-  --color-success-900: #043916;
-  --color-success-950: #01210a;
-  --color-success: #22c55e;
-  --color-success-foreground: #ffffff;
+  /* Success = primary */
+  --color-success-50: #eef7f1;
+  --color-success-100: #e2f0e6;
+  --color-success-200: #c3e2cd;
+  --color-success-300: #94cba8;
+  --color-success-400: #6dd497;
+  --color-success-500: #38b86c;
+  --color-success-600: #147a42;
+  --color-success-700: #0e5e32;
+  --color-success-800: #0b4a28;
+  --color-success-900: #16301f;
+  --color-success-950: #06210f;
+  --color-success: var(--accent);
+  --color-success-foreground: var(--primary-foreground);
 
-  /* Danger/Error colors (Red) */
-  --color-danger-50: #fef2f2;
-  --color-danger-100: #fee2e2;
-  --color-danger-200: #fecaca;
-  --color-danger-300: #fca5a5;
-  --color-danger-400: #f87171;
-  --color-danger-500: #ef4444;
-  --color-danger-600: #dc2626;
-  --color-danger-700: #b91c1c;
-  --color-danger-800: #991b1b;
-  --color-danger-900: #7f1d1d;
-  --color-danger-950: #450a0a;
-  --color-danger: #ef4444;
+  /* Danger */
+  --color-danger-50: #fdf1ef;
+  --color-danger-100: #fbe5e2;
+  --color-danger-200: #f6c9c3;
+  --color-danger-300: #ee9f95;
+  --color-danger-400: #f0675c;
+  --color-danger-500: #dc3d3d;
+  --color-danger-600: #c0352b;
+  --color-danger-700: #9c2a22;
+  --color-danger-800: #7a211b;
+  --color-danger-900: #3b1a17;
+  --color-danger-950: #2a0f0c;
+  --color-danger: #c0352b;
   --color-danger-foreground: #ffffff;
 
-  /* Warning colors (Orange/Amber) */
-  --color-warning-50: #fffbeb;
-  --color-warning-100: #fef3c7;
-  --color-warning-200: #fde68a;
-  --color-warning-300: #fcd34d;
-  --color-warning-400: #fbbf24;
-  --color-warning-500: #f59e0b;
-  --color-warning-600: #d97706;
-  --color-warning-700: #b45309;
-  --color-warning-800: #92400e;
-  --color-warning-900: #78350f;
-  --color-warning-950: #451a03;
-  --color-warning: #f59e0b;
-  --color-warning-foreground: #ffffff;
+  /* Warning */
+  --color-warning-50: #fdf7e8;
+  --color-warning-100: #fbf0d6;
+  --color-warning-200: #f6dfa6;
+  --color-warning-300: #f0c96c;
+  --color-warning-400: #f0b54a;
+  --color-warning-500: #e0a106;
+  --color-warning-600: #b47d00;
+  --color-warning-700: #9a6200;
+  --color-warning-800: #7a4c00;
+  --color-warning-900: #3a2c0f;
+  --color-warning-950: #251a05;
+  --color-warning: #e0a106;
+  --color-warning-foreground: #161714;
 
-  /* Info colors (Blue) */
-  --color-info-50: #eff6ff;
-  --color-info-100: #dbeafe;
-  --color-info-200: #bfdbfe;
-  --color-info-300: #93c5fd;
-  --color-info-400: #60a5fa;
-  --color-info-500: #3b82f6;
-  --color-info-600: #2563eb;
-  --color-info-700: #1d4ed8;
-  --color-info-800: #1e40af;
-  --color-info-900: #1e3a8a;
-  --color-info-950: #172554;
-  --color-info: #3b82f6;
+  /* Info */
+  --color-info-50: #eff5fd;
+  --color-info-100: #e1ecfb;
+  --color-info-200: #c2d7f5;
+  --color-info-300: #93b7ec;
+  --color-info-400: #6b9be6;
+  --color-info-500: #3b7ddd;
+  --color-info-600: #2a64be;
+  --color-info-700: #214e95;
+  --color-info-800: #1b3e75;
+  --color-info-900: #142a4d;
+  --color-info-950: #0c1a31;
+  --color-info: #3b7ddd;
   --color-info-foreground: #ffffff;
 
   /* Semantic colors (reference CSS variables for dark mode support) */
@@ -138,61 +167,53 @@
   --color-foreground-subtle: var(--foreground-subtle);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-inverse: var(--inverse);
+  --color-inverse-foreground: var(--inverse-foreground);
+  --color-overlay: var(--overlay);
 
-  /* Brand glow shadows exposed as Tailwind utilities */
   --shadow-glow-primary: var(--shadow-glow-primary);
   --shadow-glow-secondary: var(--shadow-glow-secondary);
+  --shadow-card: var(--shadow-card);
 
-  /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  /* System monospace: a second web font was preloaded on every page for a
-     few code snippets (P2-02) */
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
+  /* Fonts — next/font creates the variables in app/layout.tsx */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
 
-.dark {
-  /* Dark mode semantic colors */
-  --background: #020617;
-  --surface: #0f172a;
-  --surface-2: #131a2c;
-  --muted-background: #111827;
-  --subtle-background: #111827;
-  --border: #1e293b;
-  --border-2: #243056;
-  --foreground: #f8fafc;
-  --foreground-muted: #94a3b8;
-  --foreground-subtle: #6c7794;
-  --primary-foreground: #ffffff;
-  --secondary-foreground: #ffffff;
+  /* Type scale — replaces text-[9px]/[10px]/[11px]/[13px] */
+  --text-caption: 12px;    /* duration, small metadata (11px only in the tab bar) */
+  --text-meta: 13px;       /* secondary text, section labels */
+  --text-body: 15px;       /* rows and forms */
+  --text-lead: 17px;       /* card titles, FAQ questions */
+  --text-title: 20px;      /* sheet title, name in the detail */
+  --text-display: 40px;    /* screen title (font-display) */
+  --text-display--line-height: 1.05;
 
-  --shadow-glow-primary: 0 10px 24px -8px rgba(34, 197, 94, 0.55);
-  --shadow-glow-secondary: 0 10px 24px -8px rgba(219, 39, 119, 0.55);
+  /* Radii */
+  --radius-control: 12px;  /* buttons, inputs, segmented */
+  --radius-chip: 999px;
+  --radius-tag: 7px;
+  --radius-card: 20px;     /* cards and ListGroup */
+  --radius-sheet: 28px;    /* top corners of the bottom sheet */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Not var(--font-sans): that one resolves on :root, above the <body>
+     where next/font defines --font-geist, so it would come out empty */
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Utility classes for safe areas */
-.pt-safe {
-  padding-top: env(safe-area-inset-top);
-}
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pl-safe { padding-left: env(safe-area-inset-left); }
+.pr-safe { padding-right: env(safe-area-inset-right); }
 
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.pl-safe {
-  padding-left: env(safe-area-inset-left);
-}
-
-.pr-safe {
-  padding-right: env(safe-area-inset-right);
-}
-
-/* Para evitar que el contenido se oculte bajo el notch o barra de estado.
+/* Keeps content from hiding under the notch or status bar.
    The --safe-area-inset-* vars default to env() (:root above) and Capacitor 8
    overwrites them on Android 15+, where env() reports 0 (P1-23). */
 @supports (padding: max(0px)) {
@@ -204,141 +225,63 @@ body {
   }
   /* The dashboard's mobile bars stick to the edges and pad themselves;
      padding the body too doubled the gap under the notch */
-  body:has([data-mobile-topbar]) {
-    padding-top: 0;
-  }
-  body:has([data-mobile-tabbar]) {
-    padding-bottom: 0;
-  }
+  body:has([data-mobile-topbar]) { padding-top: 0; }
+  body:has([data-mobile-tabbar]) { padding-bottom: 0; }
 }
 
-/* Scrollbar discreto - casi invisible pero funcional */
-.scrollbar-discreet {
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: rgba(148, 163, 184, 0.08) transparent; /* Firefox - muy sutil */
-}
-
-.scrollbar-discreet::-webkit-scrollbar {
-  width: 4px; /* Ancho ultra delgado */
-  height: 4px; /* Para scroll horizontal */
-}
-
-.scrollbar-discreet::-webkit-scrollbar-track {
-  background: transparent; /* Track completamente transparente */
-}
-
-.scrollbar-discreet::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.08); /* Color extremadamente sutil */
-  border-radius: 2px;
-  transition: background-color 0.3s ease;
-  opacity: 0;
-}
-
-/* Solo mostrar scrollbar al hacer hover o cuando se está haciendo scroll */
-.scrollbar-discreet:hover::-webkit-scrollbar-thumb,
-.scrollbar-discreet:active::-webkit-scrollbar-thumb {
-  opacity: 1;
-  background-color: rgba(148, 163, 184, 0.15); /* Ligeramente más visible al interactuar */
-}
-
-.scrollbar-discreet::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(148, 163, 184, 0.25); /* Un poco más visible al hover directo */
-}
-
-/* Dark mode para scrollbar discreto */
-.dark .scrollbar-discreet {
-  scrollbar-color: rgba(148, 163, 184, 0.06) transparent; /* Firefox dark mode - aún más sutil */
-}
-
-.dark .scrollbar-discreet::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.06); /* Extremadamente sutil en dark mode */
-  opacity: 0;
-}
-
-.dark .scrollbar-discreet:hover::-webkit-scrollbar-thumb,
-.dark .scrollbar-discreet:active::-webkit-scrollbar-thumb {
-  opacity: 1;
-  background-color: rgba(148, 163, 184, 0.12); /* Hover en dark mode */
-}
-
-.dark .scrollbar-discreet::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(148, 163, 184, 0.2); /* Hover directo en dark mode */
-}
+.scrollbar-discreet { scrollbar-width: thin; scrollbar-color: rgba(133, 133, 125, 0.12) transparent; }
+.scrollbar-discreet::-webkit-scrollbar { width: 4px; height: 4px; }
+.scrollbar-discreet::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-discreet::-webkit-scrollbar-thumb { background-color: rgba(133, 133, 125, 0.12); border-radius: 2px; }
+.scrollbar-discreet:hover::-webkit-scrollbar-thumb { background-color: rgba(133, 133, 125, 0.25); }
 
 /* ──────────────────────────────────────────────────────────
- * Mesh gradients — for hero tiles, dashboard shortcut cards,
- * FAB buttons, drawer logo, KPI tiles. Apply to a square/rounded
- * container with white text.
+ * Mesh gradients — RETIRED. Left as flat colours so nothing breaks
+ * while their usages are migrated (phase 3 removes them).
  * ────────────────────────────────────────────────────────── */
-.mesh-primary {
-  background:
-    radial-gradient(60% 80% at 0% 0%, rgba(34, 197, 94, 0.18), transparent 60%),
-    radial-gradient(60% 80% at 100% 100%, rgba(20, 131, 60, 0.22), transparent 60%),
-    linear-gradient(135deg, #1ba64e, #0a5d29);
-}
-.mesh-secondary {
-  background:
-    radial-gradient(60% 80% at 0% 0%, rgba(255, 160, 200, 0.30), transparent 60%),
-    radial-gradient(60% 80% at 100% 100%, rgba(146, 22, 77, 0.35), transparent 60%),
-    linear-gradient(135deg, #db2777, #680d35);
-}
-.mesh-info {
-  background:
-    radial-gradient(60% 80% at 0% 0%, rgba(99, 179, 255, 0.25), transparent 60%),
-    radial-gradient(60% 80% at 100% 100%, rgba(29, 78, 216, 0.30), transparent 60%),
-    linear-gradient(135deg, #3b82f6, #1e3a8a);
-}
-.mesh-warn {
-  background:
-    radial-gradient(60% 80% at 0% 0%, rgba(252, 211, 77, 0.30), transparent 60%),
-    radial-gradient(60% 80% at 100% 100%, rgba(180, 83, 9, 0.30), transparent 60%),
-    linear-gradient(135deg, #f59e0b, #92400e);
-}
-.mesh-violet {
-  background:
-    radial-gradient(60% 80% at 0% 0%, rgba(196, 181, 253, 0.30), transparent 60%),
-    radial-gradient(60% 80% at 100% 100%, rgba(91, 33, 182, 0.30), transparent 60%),
-    linear-gradient(135deg, #8b5cf6, #4c1d95);
-}
+.mesh-primary   { background: var(--accent); color: var(--primary-foreground); }
+.mesh-secondary { background: var(--pink); color: #ffffff; }
+.mesh-info,
+.mesh-warn,
+.mesh-violet    { background: var(--inverse); color: var(--inverse-foreground); }
 
 /* ──────────────────────────────────────────────────────────
- * Appointment status palette — apply `.st-{status}` to any element
- * to expose three CSS vars for that status:
- *   --st-c   strong accent (icon, dot, current-time line)
- *   --st-cb  on-bg readable color (text, badge label)
- *   --st-bg  soft tinted background (badge bg, calendar block bg)
- * Used by StatusBadge, ApptRow border, calendar blocks, mini stats.
+ * Appointment status palette — apply `.st-{status}`.
+ * --st-c is the DOT colour (same in both themes). --st-bg stays neutral:
+ * the status no longer tints badges or rows, only the dot. The Day/Week
+ * calendar does use --st-tint for the block.
  * ────────────────────────────────────────────────────────── */
-.st-pending          { --st-c: #94a3b8; --st-cb: #64748b; --st-bg: #f1f5f9; }
-.st-confirmed        { --st-c: #3b82f6; --st-cb: #2563eb; --st-bg: #dbeafe; }
-.st-reminded         { --st-c: #8b5cf6; --st-cb: #7c3aed; --st-bg: #ede9fe; }
-.st-client_confirmed { --st-c: #06b6d4; --st-cb: #0891b2; --st-bg: #cffafe; }
-.st-checked_in       { --st-c: #f59e0b; --st-cb: #d97706; --st-bg: #fef3c7; }
-.st-in_progress      { --st-c: #f97316; --st-cb: #ea580c; --st-bg: #ffedd5; }
-.st-completed        { --st-c: #22c55e; --st-cb: #16a34a; --st-bg: #dcfce7; }
-.st-cancelled        { --st-c: #ef4444; --st-cb: #dc2626; --st-bg: #fee2e2; }
-.st-no_show          { --st-c: #71717a; --st-cb: #52525b; --st-bg: #f4f4f5; }
-.st-rescheduled      { --st-c: #0ea5e9; --st-cb: #0369a1; --st-bg: #e0f2fe; }
+.st-pending          { --st-c: #a8a296; --st-tint: #f1efea; }
+.st-confirmed        { --st-c: #3b7ddd; --st-tint: #e7effb; }
+.st-reminded         { --st-c: #8b5cf6; --st-tint: #efeafd; }
+.st-client_confirmed { --st-c: #0fa3a3; --st-tint: #e0f3f2; }
+.st-checked_in       { --st-c: #e0a106; --st-tint: #fbf0d6; }
+.st-in_progress      { --st-c: #ea6c1b; --st-tint: #fcebdf; }
+.st-completed        { --st-c: #2a9d5c; --st-tint: #e2f0e6; }
+.st-cancelled        { --st-c: #dc3d3d; --st-tint: #fbe5e2; }
+.st-no_show          { --st-c: #77776f; --st-tint: #efede8; }
+.st-rescheduled      { --st-c: #0e8ec9; --st-tint: #e1f1f9; }
+.st-pending, .st-confirmed, .st-reminded, .st-client_confirmed, .st-checked_in,
+.st-in_progress, .st-completed, .st-cancelled, .st-no_show, .st-rescheduled {
+  --st-bg: var(--surface-2);
+  --st-cb: var(--foreground-muted);
+}
 
-/* Dark-mode tinted backgrounds — keep --st-c / --st-cb identical
- * (they're used as foreground/accent) but darken --st-bg for legibility. */
-.dark .st-pending          { --st-bg: #1c2331; }
-.dark .st-confirmed        { --st-bg: #172554; }
-.dark .st-reminded         { --st-bg: #2e1065; }
-.dark .st-client_confirmed { --st-bg: #083344; }
-.dark .st-checked_in       { --st-bg: #451a03; }
-.dark .st-in_progress      { --st-bg: #431407; }
-.dark .st-completed        { --st-bg: #052e16; }
-.dark .st-cancelled        { --st-bg: #450a0a; }
-.dark .st-no_show          { --st-bg: #18181b; }
-.dark .st-rescheduled      { --st-bg: #082f49; }
+.dark .st-pending          { --st-tint: #262622; }
+.dark .st-confirmed        { --st-tint: #17233a; }
+.dark .st-reminded         { --st-tint: #241c3a; }
+.dark .st-client_confirmed { --st-tint: #0f2a2a; }
+.dark .st-checked_in       { --st-tint: #2e2610; }
+.dark .st-in_progress      { --st-tint: #33200f; }
+.dark .st-completed        { --st-tint: #16301f; }
+.dark .st-cancelled        { --st-tint: #3b1a17; }
+.dark .st-no_show          { --st-tint: #222422; }
+.dark .st-rescheduled      { --st-tint: #0f2633; }
 
 /* iOS zooms into any field under 16px when it gets focus (P1-10). Unlayered,
    so it wins over the text-sm utilities on phones only. */
 @media (max-width: 639px) {
   input:not([type="checkbox"]):not([type="radio"]),
   textarea,
-  select {
-    font-size: 16px;
-  }
+  select { font-size: 16px; }
 }

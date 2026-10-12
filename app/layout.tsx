@@ -3,13 +3,20 @@ import { ThemeProviderWrapper } from "@/components/ThemeProviderWrapper";
 import { QueryProvider } from "@/contexts/query-client-provider";
 import { getAbsoluteUrl, getSiteUrl } from "@/utils/metadata";
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-geist-sans",
+const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
 });
 
 // Generar URLs absolutas para metadata (requerido por WhatsApp)
@@ -123,7 +130,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} antialiased`}
+        className={`${geist.variable} ${geistMono.variable} ${instrumentSerif.variable} antialiased`}
       >
         <ErrorBoundary>
           <QueryProvider>
@@ -133,13 +140,13 @@ export default function RootLayout({
             <ThemeProviderWrapper>
               {children}
               <Toaster
-                position="top-right"
-                richColors
-                closeButton
+                position="top-center"
                 duration={4000}
                 expand={true}
                 visibleToasts={5}
                 toastOptions={{
+                  className:
+                    "!rounded-[14px] !border-border !bg-surface !text-foreground !shadow-card !font-sans",
                   style: {
                     zIndex: 9999,
                   },
