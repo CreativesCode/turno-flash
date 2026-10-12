@@ -1,35 +1,37 @@
 "use client";
 
-import React, { HTMLAttributes } from "react";
+import React, { HTMLAttributes, ReactNode } from "react";
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   variant?: "success" | "danger" | "warning" | "info";
+  /** 18px icon shown to the left of the content. */
+  icon?: ReactNode;
 }
+
+const VARIANTS: Record<NonNullable<AlertProps["variant"]>, string> = {
+  success:
+    "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-400",
+  danger:
+    "bg-danger-100 text-danger-600 dark:bg-danger-900 dark:text-danger-400",
+  warning:
+    "bg-warning-100 text-warning-700 dark:bg-warning-900 dark:text-warning-400",
+  info: "bg-surface-2 text-foreground-muted",
+};
 
 export const Alert = React.memo(function Alert({
   variant = "info",
+  icon,
   className = "",
   children,
   ...props
 }: AlertProps) {
-  const baseClasses = "rounded-md p-4 text-sm";
-
-  const variants = {
-    success:
-      "bg-success-50 text-success-800 dark:bg-success-900/20 dark:text-success-400",
-    danger:
-      "bg-danger-50 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400",
-    warning:
-      "bg-warning-50 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400",
-    info: "bg-info-50 text-info-800 dark:bg-info-900/20 dark:text-info-400",
-  };
-
   return (
     <div
-      className={`${baseClasses} ${variants[variant]} ${className}`}
+      className={`rounded-card p-4 text-meta ${icon ? "flex gap-3" : ""} ${VARIANTS[variant]} ${className}`}
       {...props}
     >
-      {children}
+      {icon && <span className="shrink-0 [&>svg]:size-4.5">{icon}</span>}
+      {icon ? <div className="min-w-0 flex-1">{children}</div> : children}
     </div>
   );
 });

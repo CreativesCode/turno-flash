@@ -75,7 +75,7 @@ export function RichTextEditor({
           onClick={() => setShowPreview((prev) => !prev)}
           className={`ml-auto inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
             showPreview
-              ? "border-primary-500 bg-primary-500/10 text-primary-700 dark:text-primary-400"
+              ? "border-primary bg-primary/10 text-primary-700 dark:text-primary-400"
               : "border-border bg-surface text-foreground-muted hover:bg-muted hover:text-foreground"
           }`}
         >

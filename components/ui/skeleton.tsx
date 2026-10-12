@@ -1,7 +1,7 @@
 export function ModalSkeleton() {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-lg bg-surface p-6 shadow-xl animate-pulse">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4">
+      <div className="w-full max-w-2xl rounded-card bg-surface p-6 animate-pulse">
         <div className="flex items-center justify-between mb-4">
           <div className="h-6 w-32 bg-muted rounded"></div>
           <div className="h-5 w-5 bg-muted rounded"></div>
@@ -22,7 +22,7 @@ export function ModalSkeleton() {
 
 export function CalendarSkeleton() {
   return (
-    <div className="rounded-lg bg-surface shadow-sm animate-pulse">
+    <div className="rounded-card border border-border bg-surface animate-pulse">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border p-4">
         <div className="flex items-center gap-2">

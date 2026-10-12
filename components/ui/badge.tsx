@@ -13,33 +13,33 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
     | "muted";
 }
 
+const PRIMARY =
+  "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-400";
+const MUTED = "bg-surface-2 text-foreground-muted";
+
+const VARIANTS: Record<NonNullable<BadgeProps["variant"]>, string> = {
+  primary: PRIMARY,
+  success: PRIMARY,
+  secondary:
+    "bg-secondary-100 text-secondary-600 dark:bg-secondary-900 dark:text-secondary-400",
+  danger:
+    "bg-danger-100 text-danger-600 dark:bg-danger-900 dark:text-danger-400",
+  warning:
+    "bg-warning-100 text-warning-700 dark:bg-warning-900 dark:text-warning-400",
+  info: MUTED,
+  muted: MUTED,
+};
+
+/** The "Tag" of the v2 design: a small flat label, no border. */
 export const Badge = React.memo(function Badge({
   variant = "muted",
   className = "",
   children,
   ...props
 }: BadgeProps) {
-  const baseClasses =
-    "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium";
-
-  const variants = {
-    primary:
-      "bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400",
-    secondary:
-      "bg-secondary-100 text-secondary-800 dark:bg-secondary-900/20 dark:text-secondary-400",
-    success:
-      "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400",
-    danger:
-      "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400",
-    warning:
-      "bg-warning-100 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400",
-    info: "bg-info-100 text-info-800 dark:bg-info-900/20 dark:text-info-400",
-    muted: "bg-muted text-foreground-muted",
-  };
-
   return (
     <span
-      className={`${baseClasses} ${variants[variant]} ${className}`}
+      className={`inline-flex h-6 items-center whitespace-nowrap rounded-tag px-[9px] text-caption font-semibold ${VARIANTS[variant]} ${className}`}
       {...props}
     >
       {children}

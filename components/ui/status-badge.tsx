@@ -10,44 +10,38 @@ export interface StatusBadgeProps {
   size?: "sm" | "md";
   /** Hide the leading colored dot. */
   hideDot?: boolean;
+  /** Text after the label, e.g. the time of the change: "Llegó · 11:24". */
+  suffix?: string;
   className?: string;
 }
 
 /**
- * Pill badge whose colors come from the `.st-{status}` class defined in
- * globals.css. The class exposes --st-c (accent), --st-cb (text on bg) and
- * --st-bg (soft tint), so the badge needs no per-status conditional styling.
+ * Neutral pill; the status only colours the dot, through the --st-c variable
+ * that the `.st-{status}` class of globals.css exposes.
  */
 export const StatusBadge = React.memo(function StatusBadge({
   status,
   size = "md",
   hideDot = false,
+  suffix,
   className = "",
 }: StatusBadgeProps) {
   const meta = getStatusMeta(status);
-  const padding = size === "sm" ? "px-2 py-[2px] text-[10px]" : "px-2.5 py-[3px] text-[11px]";
-  const dotSize = size === "sm" ? 5 : 6;
+  const sizing =
+    size === "sm" ? "h-[22px] px-2 text-[11px]" : "h-[26px] px-2.5 text-caption";
 
   return (
     <span
-      className={`st-${status} inline-flex items-center gap-1.5 rounded-full font-semibold whitespace-nowrap ${padding} ${className}`}
-      style={{
-        background: "var(--st-bg)",
-        color: "var(--st-cb)",
-      }}
+      className={`st-${status} inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-surface-2 font-medium text-foreground-muted ${sizing} ${className}`}
     >
       {!hideDot && (
         <span
           aria-hidden
-          style={{
-            width: dotSize,
-            height: dotSize,
-            borderRadius: "50%",
-            background: "var(--st-c)",
-          }}
+          className="size-[7px] shrink-0 rounded-full bg-[var(--st-c)]"
         />
       )}
       {meta?.label ?? status}
+      {suffix && ` · ${suffix}`}
     </span>
   );
 });

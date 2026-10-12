@@ -13,8 +13,8 @@ export const Card = React.memo(function Card({
   children,
   ...props
 }: CardProps) {
-  const base = "bg-surface rounded-xl";
-  const elevation = flat ? "" : "border border-border shadow-sm";
+  const base = "bg-surface rounded-card";
+  const elevation = flat ? "" : "border border-border shadow-card";
   return (
     <div className={`${base} ${elevation} ${className}`} {...props}>
       {children}

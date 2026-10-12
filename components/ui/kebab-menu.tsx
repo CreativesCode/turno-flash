@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreVertical } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
 export interface KebabMenuItem {
@@ -16,13 +16,19 @@ export interface KebabMenuProps {
   items: KebabMenuItem[];
   /** Accessible label for the trigger button. */
   label?: string;
+  /** Opens upwards: for a trigger at the bottom of the screen. */
+  placement?: "bottom" | "top";
 }
 
 /**
  * Three-dot action menu for entity cards. Closes on outside click and Escape.
  * Same look as the inline menus in StaffCard / CustomerCard.
  */
-export function KebabMenu({ items, label = "Más acciones" }: KebabMenuProps) {
+export function KebabMenu({
+  items,
+  label = "Más acciones",
+  placement = "bottom",
+}: KebabMenuProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -53,15 +59,17 @@ export function KebabMenu({ items, label = "Más acciones" }: KebabMenuProps) {
         aria-label={label}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-control text-foreground-subtle transition-colors hover:bg-muted hover:text-foreground"
       >
-        <MoreVertical className="h-4 w-4" />
+        <EllipsisVertical className="size-5" />
       </button>
       {open && (
         <div
           role="menu"
           data-menu-open
-          className="absolute right-0 top-10 z-20 w-48 overflow-hidden rounded-lg border border-border bg-surface shadow-lg"
+          className={`absolute right-0 z-20 min-w-44 ${
+            placement === "top" ? "bottom-11" : "top-11"
+          } rounded-[14px] border border-border bg-surface p-1.5 shadow-[0_12px_32px_-12px_rgba(22,23,20,.25)]`}
         >
           {items.map((item) => (
             <button
@@ -74,9 +82,9 @@ export function KebabMenu({ items, label = "Más acciones" }: KebabMenuProps) {
                 setOpen(false);
                 item.onClick();
               }}
-              className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`flex h-10 w-full cursor-pointer items-center gap-2 whitespace-nowrap rounded-[9px] px-3 text-left text-body transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                 item.danger
-                  ? "text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20"
+                  ? "text-danger-600 hover:bg-muted dark:text-danger-400"
                   : "text-foreground hover:bg-muted"
               }`}
             >

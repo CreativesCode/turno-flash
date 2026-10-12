@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { Button } from "./button";
-import { Sheet } from "./sheet";
+import { Sheet, SheetFooter } from "./sheet";
 
 export interface ConfirmSheetProps {
   open: boolean;
@@ -41,28 +41,28 @@ export function ConfirmSheet({
       title={title}
       maxWidthClass="sm:max-w-md"
     >
-      <div className="flex flex-col gap-4">
-        <div className="text-sm text-foreground-muted">{children}</div>
-        <div className="flex gap-2">
+      <div className="flex flex-col gap-5">
+        <div className="text-body text-foreground-muted">{children}</div>
+        <SheetFooter>
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={onClose}
             disabled={busy}
-            className="flex-1 justify-center"
+            className="flex-1"
           >
             Cancelar
           </Button>
           <Button
             type="button"
-            variant={confirmVariant}
+            variant={confirmVariant === "danger" ? "danger-solid" : "primary"}
             onClick={onConfirm}
             disabled={busy || confirmDisabled}
-            className="flex-1 justify-center"
+            className="flex-1"
           >
             {busy ? busyLabel : confirmLabel}
           </Button>
-        </div>
+        </SheetFooter>
       </div>
     </Sheet>
   );

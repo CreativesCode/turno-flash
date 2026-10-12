@@ -1,15 +1,19 @@
 "use client";
 
 import React, { ButtonHTMLAttributes, forwardRef } from "react";
+import { Spinner } from "./spinner";
 
 export type ButtonVariant =
   | "primary"
   | "secondary"
-  | "success"
+  | "ghost"
   | "danger"
+  | "danger-solid"
+  | "whatsapp"
+  // Names from before the v2 redesign, kept as aliases (see ALIASES)
+  | "success"
   | "warning"
   | "info"
-  | "ghost"
   | "mesh-primary"
   | "mesh-secondary"
   | "soft";
@@ -19,54 +23,77 @@ export type ButtonSize = "sm" | "md" | "lg" | "icon";
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /** Shows a spinner before the label and marks the button as busy. */
+  loading?: boolean;
 }
 
-const VARIANTS: Record<ButtonVariant, string> = {
-  primary:
-    "bg-primary text-primary-foreground hover:bg-primary-700 focus:ring-primary-500",
+type CoreVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "danger"
+  | "danger-solid"
+  | "whatsapp";
+
+const VARIANTS: Record<CoreVariant, string> = {
+  // One per screen: the main action
+  primary: "bg-primary text-primary-foreground hover:brightness-95",
   secondary:
-    "bg-secondary text-secondary-foreground hover:bg-secondary-700 focus:ring-secondary-500",
-  success:
-    "bg-success text-success-foreground hover:bg-success-700 focus:ring-success-500",
-  danger:
-    "bg-danger text-danger-foreground hover:bg-danger-700 focus:ring-danger-500",
-  warning:
-    "bg-warning text-warning-foreground hover:bg-warning-700 focus:ring-warning-500",
-  info: "bg-info text-info-foreground hover:bg-info-700 focus:ring-info-500",
+    "bg-surface border border-border-2 text-foreground hover:bg-muted",
   ghost:
-    "bg-surface text-foreground hover:bg-muted border border-border focus:ring-border-2",
-  // Brand mesh-gradient buttons (for FAB, hero CTAs, primary dashboard tiles).
-  // The `mesh-*` class defines the gradient; `shadow-glow-*` colors the drop.
-  "mesh-primary":
-    "mesh-primary text-white shadow-glow-primary hover:brightness-110 focus:ring-primary-500",
-  "mesh-secondary":
-    "mesh-secondary text-white shadow-glow-secondary hover:brightness-110 focus:ring-secondary-500",
-  // Tinted soft button — low emphasis but on-brand (e.g. "Invitar usuario").
-  soft: "bg-primary-50 text-primary-700 hover:bg-primary-100 focus:ring-primary-500 dark:bg-primary-900/20 dark:text-primary-400",
+    "bg-transparent text-foreground-muted hover:bg-muted hover:text-foreground",
+  danger:
+    "bg-surface border border-border-2 text-danger-600 dark:text-danger-400 hover:bg-danger-100 dark:hover:bg-danger-900",
+  // Only for the confirm button of ConfirmSheet
+  "danger-solid": "bg-danger text-white hover:brightness-95",
+  whatsapp:
+    "bg-secondary-100 text-secondary-600 dark:bg-secondary-900 dark:text-secondary-400 hover:brightness-95",
+};
+
+const ALIASES: Partial<Record<ButtonVariant, CoreVariant>> = {
+  "mesh-primary": "primary",
+  success: "primary",
+  soft: "secondary",
+  info: "secondary",
+  warning: "secondary",
+  "mesh-secondary": "whatsapp",
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "px-3 py-1.5 text-sm gap-1.5",
-  md: "px-4 py-2 text-sm gap-2",
-  lg: "px-6 py-3 text-base gap-2",
-  icon: "h-9 w-9 text-sm",
+  sm: "h-9 px-3 rounded-[10px] text-meta",
+  md: "h-11 px-[18px] rounded-control text-body",
+  lg: "h-[54px] px-[22px] rounded-[14px] text-[16px]",
+  icon: "h-11 w-11 rounded-control",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { variant = "primary", size = "md", className = "", disabled, ...props },
+    {
+      variant = "primary",
+      size = "md",
+      className = "",
+      disabled,
+      loading = false,
+      children,
+      ...props
+    },
     ref
   ) => {
     const base =
-      "inline-flex items-center justify-center rounded-md font-medium transition-[background-color,filter,box-shadow,transform] focus:outline-none focus:ring-2 focus:ring-offset-2 active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50";
+      "inline-flex items-center justify-center gap-2 font-semibold transition-[background-color,filter] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-100 dark:focus-visible:ring-primary-900";
+    const core = ALIASES[variant] ?? (variant as CoreVariant);
 
     return (
       <button
         ref={ref}
-        className={`${base} ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+        className={`${base} ${VARIANTS[core]} ${SIZES[size]} ${className}`}
         disabled={disabled}
+        aria-busy={loading || undefined}
         {...props}
-      />
+      >
+        {loading && <Spinner size={16} />}
+        {children}
+      </button>
     );
   }
 );
