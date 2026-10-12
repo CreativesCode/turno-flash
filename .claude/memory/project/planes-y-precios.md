@@ -8,9 +8,14 @@ metadata:
 Decidido por Roberto el **2026-10-11** e **implementado ese mismo día** (PRP-003,
 `.claude/PRPs/prp-license-plans-billing.md`; commits `7f9649f` a `236b03d`, sin pushear).
 
-**Pendiente al cierre:** desplegar las edge functions `self-signup` (15 días, plan, WhatsApp del dueño) y
-`license-notices` (envío de avisos): están escritas y sin desplegar. Hasta entonces el registro da 7 días
-y no sale ningún aviso por WhatsApp. Lista completa de lo no verificado en la sección «Cierre» del PRP.
+**Funciones desplegadas el 2026-10-11** con el permiso de Roberto («sí, publica las dos funciones»):
+`self-signup` v9 y `license-notices` v1. Probadas con un registro desechable (plan Salón + pasajes,
+prueba de 15 días y WhatsApp del dueño guardados) que se borró. Lo que sigue sin verificar está en la
+sección «Cierre» del PRP; todavía no ha salido ningún aviso real por WhatsApp.
+
+**Decisiones de Roberto del 2026-10-11:** el precio fundador **no se anuncia** en el landing. Preguntó si
+la app puede estar en Google Play cobrando solo por fuera: pendiente de que decida (ver chat de ese día);
+los Términos y Privacidad se revisan después de esa decisión.
 
 ## Dónde vive cada regla
 

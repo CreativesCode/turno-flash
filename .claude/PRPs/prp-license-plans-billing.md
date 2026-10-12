@@ -1,6 +1,6 @@
 # PRP-003: Planes y cobro de licencias
 
-> **Estado**: IMPLEMENTADO el 2026-10-11 (fases 1 a 9; migraciones 073-077 aplicadas). Pendiente: desplegar las funciones `self-signup` y `license-notices`, y lo listado en «Cierre»
+> **Estado**: IMPLEMENTADO el 2026-10-11 (fases 1 a 9; migraciones 073-077 aplicadas; funciones `self-signup` v9 y `license-notices` v1 desplegadas ese día). Pendiente lo listado en «Cierre»
 > **Fecha**: 2026-10-11
 > **Proyecto**: Turno Flash
 > **Origen**: se porta la lógica de negocio de LensSpace (`../lensspace`, commits `6879d15` y `bc5fb96`,
@@ -542,8 +542,8 @@ supuesto escrito: se le presentaron en el chat y no las cambió.
 - `npx tsc --noEmit` y `npm run build:next` pasan; `npx eslint` sin errores en los archivos tocados.
 
 **Sin hacer o sin verificar**
-- Las funciones `self-signup` y `license-notices` están escritas pero **sin desplegar** (hay que preguntar a Roberto). Hasta entonces el registro sigue dando 7 días y no guarda plan ni WhatsApp del dueño, y ningún aviso sale por WhatsApp.
-- No se envió ningún WhatsApp real ni se probó el registro nuevo de punta a punta (dependen del despliegue).
+- Las funciones se desplegaron después, con permiso de Roberto, y se probaron con un registro desechable (plan, prueba de 15 días y WhatsApp del dueño guardados; `license-notices` rechaza a anónimos y responde bien al rol de servicio).
+- Todavía no ha salido ningún aviso real por WhatsApp: el primero será el 24/10/2026, dos días antes de que venzan las pruebas actuales.
 - No se probaron en navegador el aviso web en cada tramo, la pantalla «En preparación» ni el alta de un negocio por el admin.
 - `get_advisors` no se pudo consultar (conector de Supabase sin autorizar).
 - Los Términos y la Política de privacidad siguen hablando de Google Play como forma de pago: son texto legal y no se tocaron.
