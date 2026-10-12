@@ -2,22 +2,16 @@
 
 import { useMoney } from "@/hooks/useMoney";
 
-import { Card, KebabMenu, RichText, type KebabMenuItem } from "@/components/ui";
-import Link from "next/link";
-import type { TripWithOccupancy } from "@/types/trips";
 import {
-  Bus,
-  CalendarDays,
-  Clock,
-  Copy,
-  Edit3,
-  Eye,
-  EyeOff,
-  MapPin,
-  Share2,
-  Users,
-  XCircle,
-} from "lucide-react";
+  Badge,
+  KebabMenu,
+  type KebabMenuItem,
+  ListRow,
+  TimeBlock,
+} from "@/components/ui";
+import { useRouter } from "next/navigation";
+import type { TripWithOccupancy } from "@/types/trips";
+import { Copy, Edit3, Eye, EyeOff, Share2, Users, XCircle } from "lucide-react";
 
 export interface TripCardProps {
   trip: TripWithOccupancy;
@@ -30,20 +24,10 @@ export interface TripCardProps {
   onCancel: (trip: TripWithOccupancy) => void;
 }
 
-const chipClasses = {
-  warning:
-    "rounded-full border border-warning-600 bg-warning-50 px-2 py-0.5 text-[11px] font-bold text-warning-600 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-300",
-  danger:
-    "rounded-full border border-danger-600 bg-danger-50 px-2 py-0.5 text-[11px] font-bold text-danger-600 dark:border-danger-400 dark:bg-danger-900/20 dark:text-danger-300",
-  muted:
-    "rounded-full border border-border-2 bg-muted px-2 py-0.5 text-[11px] font-bold text-foreground-muted",
-};
-
-/** "2026-09-22" -> "mar 22 sep" in the business locale. */
+/** "2026-09-22" -> "22 sep" in the business locale. */
 function fmtDate(date: string): string {
   const [year, month, day] = date.split("-").map(Number);
   return new Date(year, month - 1, day).toLocaleDateString("es", {
-    weekday: "short",
     day: "numeric",
     month: "short",
   });
@@ -65,6 +49,7 @@ export function TripCard({
   onCancel,
 }: TripCardProps) {
   const { format: money } = useMoney();
+  const router = useRouter();
   const isCancelled = !!trip.cancelled_at;
   const isFull = trip.seats_left === 0;
   const occupancyPct = Math.min(
@@ -114,117 +99,57 @@ export function TripCard({
   ];
 
   return (
-    <Card className="relative flex flex-col gap-3 p-4">
-      <div className="flex items-start gap-3">
-        <div
-          aria-hidden
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground"
-        >
-          <Bus className="h-5 w-5" />
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-start justify-between gap-2">
-            <h3 className="min-w-0 truncate text-sm font-bold text-foreground">
-              {trip.title}
-            </h3>
-            <div className="whitespace-nowrap text-base font-extrabold tracking-tight text-foreground">
-              {trip.price_per_seat > 0 ? money(trip.price_per_seat) : "—"}
-            </div>
-          </div>
-
-          <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-foreground-muted">
-            <span className="inline-flex items-center gap-1">
-              <CalendarDays className="h-3 w-3" />
-              {fmtDate(trip.departure_date)}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {fmtTime(trip.departure_time)}
-              {trip.return_time ? ` – ${fmtTime(trip.return_time)}` : ""}
-            </span>
-            {trip.pickup_location && (
-              <span className="inline-flex min-w-0 items-center gap-1">
-                <MapPin className="h-3 w-3 shrink-0" />
-                <span className="truncate">
-                  <RichText text={trip.pickup_location} />
-                </span>
-              </span>
-            )}
-          </div>
-
-          {trip.description && (
-            <p className="mt-1 line-clamp-2 text-xs text-foreground-muted">
-              <RichText text={trip.description} />
-            </p>
+    <ListRow
+      leading={
+        <TimeBlock
+          time={fmtTime(trip.departure_time)}
+          detail={fmtDate(trip.departure_date)}
+        />
+      }
+      title={trip.title}
+      titleAside={
+        <span className="font-mono text-body font-medium tabular-nums text-foreground">
+          {trip.price_per_seat > 0 ? money(trip.price_per_seat) : "—"}
+        </span>
+      }
+      subtitle={`${trip.seats_taken}/${trip.total_seats} asientos · ${
+        isFull ? "sin lugares" : `${trip.seats_left} libres`
+      }`}
+      trailing={canManage && <KebabMenu items={menuItems} />}
+      dimmed={isCancelled}
+      onClick={() => router.push(`/dashboard/trips/details?id=${trip.id}`)}
+    >
+      <div
+        className="mt-2 h-1 w-full overflow-hidden rounded-full bg-border-2"
+        role="img"
+        aria-label={`${occupancyPct}% ocupado`}
+      >
+        <span
+          className={`block h-full rounded-full transition-[width] ${
+            isFull ? "bg-warning-500" : "bg-primary"
+          }`}
+          style={{ width: `${occupancyPct}%` }}
+        />
+      </div>
+      {(trip.pending_approval > 0 ||
+        !trip.is_published ||
+        isCancelled ||
+        trip.deposit_per_seat > 0) && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {isCancelled && <Badge variant="danger">Cancelada</Badge>}
+          {trip.pending_approval > 0 && !isCancelled && (
+            <Badge variant="warning">{trip.pending_approval} por aprobar</Badge>
           )}
-
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {trip.deposit_per_seat > 0 && (
-              <span className={chipClasses.muted}>
-                Anticipo {money(trip.deposit_per_seat)} por asiento
-              </span>
-            )}
-            {trip.pending_approval > 0 && !isCancelled && (
-              <span className={chipClasses.warning}>
-                {trip.pending_approval} por aprobar
-              </span>
-            )}
-            {trip.requires_approval && trip.pending_approval === 0 && (
-              <span className={chipClasses.warning}>Requiere aprobación</span>
-            )}
-            {!trip.is_published && !isCancelled && (
-              <span className={chipClasses.muted}>Sin publicar</span>
-            )}
-            {isFull && !isCancelled && (
-              <span className={chipClasses.warning}>Completo</span>
-            )}
-            {isCancelled && (
-              <span className={chipClasses.danger}>Cancelada</span>
-            )}
-          </div>
+          {!trip.is_published && !isCancelled && (
+            <Badge variant="muted">Sin publicar</Badge>
+          )}
+          {trip.deposit_per_seat > 0 && (
+            <Badge variant="muted">
+              Anticipo {money(trip.deposit_per_seat)}
+            </Badge>
+          )}
         </div>
-
-        {canManage && (
-          <div className="relative z-10">
-            <KebabMenu items={menuItems} />
-          </div>
-        )}
-      </div>
-
-      <div className="border-t border-border pt-3">
-        <div className="flex items-center justify-between text-xs font-semibold">
-          {/* The ::after covers the whole card, so a tap anywhere opens it (P1-08) */}
-          <Link
-            href={`/dashboard/trips/details?id=${trip.id}`}
-            className="inline-flex items-center gap-1.5 text-foreground-muted transition-colors after:absolute after:inset-0 after:content-[''] hover:text-foreground"
-          >
-            <Users className="h-3.5 w-3.5" />
-            {trip.seats_taken} de {trip.total_seats} asientos
-          </Link>
-          <span
-            className={
-              isFull
-                ? "text-warning-600 dark:text-warning-300"
-                : "text-primary-700 dark:text-primary-400"
-            }
-          >
-            {isFull ? "Sin lugares" : `${trip.seats_left} libres`}
-          </span>
-        </div>
-        <div
-          className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-border-2"
-          role="img"
-          aria-label={`${occupancyPct}% ocupado`}
-        >
-          <span
-            className={`block h-full rounded-full transition-[width] ${
-              isFull ? "bg-warning-500" : "bg-primary"
-            }`}
-            style={{ width: `${occupancyPct}%` }}
-          />
-        </div>
-      </div>
-    </Card>
+      )}
+    </ListRow>
   );
 }

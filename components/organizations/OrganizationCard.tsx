@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, KebabMenu } from "@/components/ui";
+import { Badge, IconTile, KebabMenu, ListRow } from "@/components/ui";
 import type {
   LicenseStatus,
   OrganizationWithOwner,
@@ -11,7 +11,7 @@ import { Building2, Eye, Trash2 } from "lucide-react";
 const EXPIRING_SOON_DAYS = 7;
 
 const WARNING_CHIP =
-  "bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400";
+  "bg-warning-100 text-warning-700 dark:bg-warning-900 dark:text-warning-400";
 
 export function getLicenseMeta(
   status: LicenseStatus,
@@ -34,7 +34,7 @@ export function getLicenseMeta(
       return {
         label: "Activa",
         className:
-          "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
+          "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-400",
       };
     case "grace_period":
       return { label: "En margen de pago", className: WARNING_CHIP };
@@ -42,7 +42,7 @@ export function getLicenseMeta(
       return {
         label: "Vencida",
         className:
-          "bg-danger-100 text-danger-700 dark:bg-danger-900/30 dark:text-danger-400",
+          "bg-danger-100 text-danger-600 dark:bg-danger-900 dark:text-danger-400",
       };
     default:
       return {
@@ -82,59 +82,44 @@ export function OrganizationCard({
   const members = org.member_count ?? 0;
 
   return (
-    <Card className="flex items-start gap-3 p-3.5 transition-shadow hover:shadow-md">
-      <button
-        type="button"
-        onClick={() => onViewDetails(org)}
-        aria-label={`Ver detalles de ${org.name}`}
-        className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 text-left"
-      >
-        <div className="mesh-info flex size-10.5 shrink-0 items-center justify-center rounded-[10px] text-white">
-          <Building2 className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="min-w-0 truncate text-[15px] font-bold text-foreground">
-              {org.name}
-            </span>
-            <span
-              className={`rounded-full px-1.75 py-0.5 text-[10px] font-bold ${license.className}`}
-            >
-              {license.label}
-            </span>
-            {!org.is_active && (
-              <span className="rounded-full border border-danger-600 px-1.75 py-px text-[10px] font-bold text-danger-600 dark:border-danger-400 dark:text-danger-300">
-                Inactiva
-              </span>
-            )}
-          </div>
-          <div className="mt-0.5 truncate text-xs text-foreground-muted">
-            /{org.slug} · {ownerName} · {members}{" "}
-            {members === 1 ? "miembro" : "miembros"}
-          </div>
-          <div className="mt-1 text-[11px] text-foreground-subtle">
-            {org.license_end_date
-              ? `Vence: ${formatDate(org.license_end_date)}`
-              : "Sin vencimiento"}
-          </div>
-        </div>
-      </button>
-
-      <KebabMenu
-        items={[
-          {
-            label: "Ver detalles",
-            icon: <Eye className="h-3.5 w-3.5" />,
-            onClick: () => onViewDetails(org),
-          },
-          {
-            label: "Eliminar",
-            icon: <Trash2 className="h-3.5 w-3.5" />,
-            danger: true,
-            onClick: () => onDelete(org),
-          },
-        ]}
-      />
-    </Card>
+    <ListRow
+      leading={
+        <IconTile>
+          <Building2 />
+        </IconTile>
+      }
+      title={org.name}
+      subtitle={`/${org.slug} · ${ownerName} · ${members} ${
+        members === 1 ? "miembro" : "miembros"
+      }`}
+      trailing={
+        <KebabMenu
+          items={[
+            {
+              label: "Ver detalles",
+              icon: <Eye className="h-3.5 w-3.5" />,
+              onClick: () => onViewDetails(org),
+            },
+            {
+              label: "Eliminar",
+              icon: <Trash2 className="h-3.5 w-3.5" />,
+              danger: true,
+              onClick: () => onDelete(org),
+            },
+          ]}
+        />
+      }
+      onClick={() => onViewDetails(org)}
+    >
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        <Badge className={license.className}>{license.label}</Badge>
+        {!org.is_active && <Badge variant="danger">Inactiva</Badge>}
+        <span className="text-caption text-foreground-subtle">
+          {org.license_end_date
+            ? `Vence ${formatDate(org.license_end_date)}`
+            : "Sin vencimiento"}
+        </span>
+      </div>
+    </ListRow>
   );
 }

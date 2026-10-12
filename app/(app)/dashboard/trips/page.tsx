@@ -4,7 +4,7 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { TripCard } from "@/components/trips/TripCard";
 import { TripFormSheet } from "@/components/trips/TripFormSheet";
-import { Button, ConfirmSheet } from "@/components/ui";
+import { Button, ConfirmSheet, ListGroup } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import {
   useCancelTrip,
@@ -406,7 +406,7 @@ function TripsContent() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ListGroup className="mx-auto max-w-3xl">
               {filteredTrips.map((trip) => (
                 <TripCard
                   key={trip.id}
@@ -428,7 +428,7 @@ function TripsContent() {
                   onCancel={setCancelling}
                 />
               ))}
-            </div>
+            </ListGroup>
           )}
         </div>
 

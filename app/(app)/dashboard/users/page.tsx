@@ -2,7 +2,7 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Button, Card, ConfirmSheet } from "@/components/ui";
+import { Button, Card, ConfirmSheet, ListGroup } from "@/components/ui";
 import { InviteUserSheet } from "@/components/users/InviteUserSheet";
 import { ROLE_META, ROLE_ORDER, UserCard } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
@@ -268,7 +268,7 @@ export default function UsersManagementPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            <ListGroup className="mx-auto max-w-3xl">
               {users.map((user) => (
                 <UserCard
                   key={user.id}
@@ -284,7 +284,7 @@ export default function UsersManagementPage() {
                   onDelete={setUserToDelete}
                 />
               ))}
-            </div>
+            </ListGroup>
           )}
 
           <Card className="mt-6 p-4">

@@ -3,7 +3,8 @@ import { HTMLAttributes, ReactNode } from "react";
 /**
  * Grouped list: one bordered card whose rows are split by hairlines. The
  * dividers come from the 1px gap over the border colour, so rows carry no
- * border of their own.
+ * border of their own. The corners are rounded on the first and last row
+ * instead of clipping the group, which would cut a row's open menu.
  */
 export function ListGroup({
   className = "",
@@ -12,7 +13,7 @@ export function ListGroup({
 }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`grid gap-px overflow-hidden rounded-card border border-border bg-border shadow-card ${className}`}
+      className={`grid gap-px rounded-card border border-border bg-border shadow-card [&>*:first-child]:rounded-t-[19px] [&>*:last-child]:rounded-b-[19px] ${className}`}
       {...props}
     >
       {children}
@@ -29,6 +30,8 @@ export interface ListRowProps {
   subtitle?: ReactNode;
   /** Color of the small square before the subtitle (the service's). */
   subtitleDot?: string;
+  /** Extra content under the subtitle (tags, a progress bar…). */
+  children?: ReactNode;
   /** StatusBadge, Switch, chevron, KebabMenu… */
   trailing?: ReactNode;
   /** Fades the row: completed, cancelled, paused. */
@@ -43,6 +46,7 @@ export function ListRow({
   titleAside,
   subtitle,
   subtitleDot,
+  children,
   trailing,
   dimmed = false,
   onClick,
@@ -70,6 +74,7 @@ export function ListRow({
             <span className="truncate">{subtitle}</span>
           </div>
         )}
+        {children}
       </div>
     </>
   );

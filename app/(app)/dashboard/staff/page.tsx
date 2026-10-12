@@ -5,7 +5,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { StaffCard } from "@/components/staff/StaffCard";
 import { StaffFormModal } from "@/components/staff/StaffFormModal";
 import { StaffScheduleSheet } from "@/components/staff/StaffScheduleSheet";
-import { Button, ConfirmSheet } from "@/components/ui";
+import { Button, ConfirmSheet, ListGroup } from "@/components/ui";
 import { SUPPORT_WHATSAPP_PLAN_URL } from "@/config/constants";
 import { LICENSE_PLAN_INFO } from "@/config/license-pricing";
 import { useAuth } from "@/contexts/auth-context";
@@ -394,7 +394,7 @@ function StaffContent() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ListGroup className="mx-auto max-w-3xl">
               {filteredStaff.map((member) => (
                 <StaffCard
                   key={member.id}
@@ -406,7 +406,7 @@ function StaffContent() {
                   onDelete={setStaffToDeactivate}
                 />
               ))}
-            </div>
+            </ListGroup>
           )}
         </div>
 

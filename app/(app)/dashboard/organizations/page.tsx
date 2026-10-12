@@ -3,7 +3,7 @@
 import { OrganizationCard } from "@/components/organizations/OrganizationCard";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Button, ConfirmSheet } from "@/components/ui";
+import { Button, ConfirmSheet, ListGroup } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
 import { OrganizationWithOwner } from "@/types/organization";
@@ -240,7 +240,7 @@ export default function OrganizationsPage() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <ListGroup className="mx-auto max-w-3xl">
               {organizations.map((org) => (
                 <OrganizationCard
                   key={org.id}
@@ -249,7 +249,7 @@ export default function OrganizationsPage() {
                   onDelete={setOrganizationToDelete}
                 />
               ))}
-            </div>
+            </ListGroup>
           )}
         </div>
 
