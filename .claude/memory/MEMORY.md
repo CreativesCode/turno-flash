@@ -2,7 +2,7 @@
 
 > Archivos organizados por carpeta (tipo). Max 200 lineas.
 > Gestionado por skill memory-manager. Auto-memory de Claude Code DESACTIVADO.
-> Ultima revision: 2026-10-08.
+> Ultima revision: 2026-10-11.
 
 ## user/ — Sobre el usuario/equipo
 - [Roberto](user/roberto.md) — operador y dueno del producto; Windows + VS Code, usar Bash para escribir archivos; prioriza coste $0 sobre infra ya pagada
@@ -15,7 +15,8 @@
 - [QA piloto Cuba](project/qa-piloto-cuba.md) — plan P0-P3 en `.claude/PRPs/qa-piloto-cuba.md`; **todo cerrado** salvo P1-26 (Mac) y `special`; migraciones 067-072 y funciones desplegadas el 2026-10-08; ya subido a GitHub; falta APK nueva + pruebas en teléfono real, SMTP propio y el WhatsApp de cada dueño; RLS rechaza en silencio; roles decididos; cómo probar con un negocio desechable
 - [Modulo reserva de asientos](project/modulo-reserva-asientos.md) — 9/10 fases (migraciones 033-047, edges public-trips y wa-trip-send, dashboard, pagina publica /trips, WhatsApp incl. cancelaciones); solo falta el cron de vencimiento (frenado otra vez 2026-09-12); anticipo y confirmacion son ejes independientes; cambios de P3 del 2026-10-08 al final
 - [WhatsApp y automatizaciones](project/whatsapp-automatizaciones.md) — OpenWA, edge functions por intent, crons cada 15 min, toggles por negocio; los HTTP 500 de OpenWA NO impiden la entrega (por eso no se reintenta nada); clave de servicio sb_secret en Edge; formato y contacto de los mensajes (`wa-message.ts`); 👍 confirma y la nota de voz pide aclaración
-- [Enforcement de licencia](project/license-enforcement.md) — bloqueo de trial vencido (RLS de escritura + LicenseGate); gracia de 7 días fija en SQL y en el cliente; días redondeados hacia arriba (067); **las compras de prueba de RevenueCat ya no extienden la licencia** y una compra nunca la acorta (072)
+- [Enforcement de licencia](project/license-enforcement.md) — (**prueba y gracia cambiaron el 2026-10-11, ver Planes y precios**) bloqueo de trial vencido (RLS de escritura + LicenseGate); gracia de 7 días fija en SQL y en el cliente; días redondeados hacia arriba (067); **las compras de prueba de RevenueCat ya no extienden la licencia** y una compra nunca la acorta (072)
+- [Planes y precios](project/planes-y-precios.md) — implementado 2026-10-11 (PRP-003, migraciones 073-077): Personal 5, Salón 10, Salón grande 15, Pasajes 5 USD/mes (+3 el segundo módulo; fundador 3/6/9/3 por 24 meses); prueba de 15 días, 5 de margen, «Registrar pago», avisos diarios; **faltan desplegar `self-signup` y `license-notices`**; dónde vive cada regla
 - [Tooling](project/turno-flash-tooling.md) — CLI de Supabase via scoop (sin npx); `npm run lint` roto (usar `npx eslint`); tipos via Bash; pg_cron en 025; cómo probar sin los MCP, medir el peso de una página, ensayar migraciones por rol, probar una edge function desde fuera y rehacer una foto de la guía; los heredocs largos rompen los scripts
 
 ## feedback/ — Correcciones y preferencias
