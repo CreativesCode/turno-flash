@@ -25,11 +25,22 @@ Profesionales y el registro muestran plan y fechas, **sin precios ni cómo pagar
 abre un mensaje neutro (`SUPPORT_WHATSAPP_HELP_URL`). La web no cambia.
 **How to apply:** cualquier texto nuevo sobre precios, pagos o cambio de plan va detrás de `!storeApp`.
 
-- La compra por Google Play se quitó de Suscripción. Quedaron **sin uso** `hooks/useSubscription.ts`,
-  `utils/revenuecat.ts`, la dependencia `@revenuecat/purchases-capacitor` y el webhook: no se borraron.
 - No se probó en un teléfono: entra en la próxima APK.
-- Sin tocar: el manual de `/help` (explica cómo se paga y se ve dentro de la app) y los Términos y
-  Privacidad (nombran Google Play como forma de pago); Roberto dijo que los Términos se ven después.
+
+### Cierre del 2026-10-12 (Roberto: «arregla lo que queda abierto y los términos»)
+
+- **Manual en la app:** en `docs/user-manual/` las líneas de precios y de cómo pagar llevan
+  `class="web-only"` y hay alternativas `class="app-only"`; `HelpManual` pone `.store-app` en la app
+  instalada. Al escribir en el manual algo sobre precios o pagos, marcarlo `web-only`.
+- **RevenueCat retirado del cliente** (commit `9e947e4`): se borraron `hooks/useSubscription.ts` y
+  `utils/revenuecat.ts`, se desinstaló `@revenuecat/purchases-capacitor` y se corrió `npx cap sync android`
+  (quedan 4 plugins). **Siguen en el servidor**, sin uso: la función `revenuecat-webhook`,
+  `apply_revenuecat_event`, la tabla `subscription_events` y el bloque «Eventos RevenueCat» de Plataforma.
+  La clave `NEXT_PUBLIC_REVENUECAT_ANDROID_API_KEY` sigue en `.env.local`.
+- **Términos, Privacidad y eliminación de cuenta** reescritos (commit `a9e2850`, fecha 12/10/2026): plan
+  pagado fuera de la app, sin renovación automática, 15 días de prueba, 5 de margen. **No fijan política
+  de reembolsos** («si tienes un problema con un pago, escríbenos»): es decisión de Roberto, sin tomar.
+  Son texto redactado por Claude, sin revisión legal.
 
 ## Dónde vive cada regla
 
