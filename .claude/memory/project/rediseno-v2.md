@@ -1,6 +1,6 @@
 ---
 name: rediseno-v2
-description: Rediseño v2 (paquete en docs/design/handoff) — aplicado entero el 2026-10-12 en la rama redesign-v2, sin subir; qué quedó distinto del diseño, decisiones y trampas
+description: Rediseño v2 (paquete en docs/design/handoff) — aplicado entero, aprobado por Roberto, fusionado en main y subido el 2026-10-12; qué quedó distinto del diseño, decisiones y trampas
 metadata:
   type: project
 ---
@@ -11,9 +11,11 @@ Paquete de diseño en `docs/design/` (llegó el 2026-10-12): `handoff/README.md`
 acción (`#147a42`), fucsia solo para WhatsApp/avisos, sin gradientes, Geist + Geist Mono + Instrument Serif,
 listas agrupadas, logo «3a».
 
-## Estado (2026-10-12): aplicado, pendiente de la revisión de Roberto
+## Estado (2026-10-12): aprobado, en `main` y subido
 
-Rama **`redesign-v2`** (desde `main`), con commits por fase, **sin subir ni fusionar** (el push es de Roberto).
+Roberto lo dio por bueno y pidió pasarlo a `main` y desplegar: `redesign-v2` se fusionó en `main` (fast-forward) y
+se subió a GitHub hasta `e005e8a` (ese push lo pidió él; la regla de no subir sin que lo pida sigue en pie). Con
+el push salieron también los commits de planes y precios que estaban sin subir.
 Compila, `tsc` y `eslint` limpios, y se revisó con capturas en claro y oscuro.
 
 - **Tokens y fuentes:** `app/globals.css` (mismos nombres de token, valores nuevos), tres fuentes en `app/layout.tsx`.
