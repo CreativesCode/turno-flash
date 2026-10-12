@@ -45,7 +45,8 @@ export function ApptRow({ appointment: a, onOpen, serviceColor }: ApptRowProps) 
       // Same number the WhatsApp messages show, to match them at a glance
       titleAside={
         a.appointment_number && (
-          <span className="font-mono text-caption tabular-nums text-foreground-subtle">
+          // On a phone the name needs the room
+          <span className="font-mono text-caption tabular-nums text-foreground-subtle max-sm:hidden">
             N° {a.appointment_number}
           </span>
         )

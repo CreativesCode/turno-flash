@@ -40,7 +40,7 @@ const STEPS: readonly GuideStep[] = [
     title: "Agrega a quien atiende",
     text: [
       "Escribe el nombre y el apellido de cada persona que atiende clientes. Si trabajas solo, anótate tú. Abajo, toca «Crear profesional».",
-      "Después, en los tres puntitos de su tarjeta, toca «Horario y servicios» para decir qué días trabaja.",
+      "Después, en los tres puntitos de su fila, toca «Horario y servicios» para decir qué días trabaja.",
     ],
     action: "Agregar un profesional",
     href: "/dashboard/staff?create=1",

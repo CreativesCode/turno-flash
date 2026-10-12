@@ -56,7 +56,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const base =
-      "inline-flex items-center justify-center gap-2 font-semibold transition-[background-color,filter] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-100 dark:focus-visible:ring-primary-900";
+      "inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold transition-[background-color,filter] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-100 dark:focus-visible:ring-primary-900";
 
     return (
       <button

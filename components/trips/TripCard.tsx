@@ -132,6 +132,7 @@ export function TripCard({
         />
       </div>
       {(trip.pending_approval > 0 ||
+        trip.requires_approval ||
         !trip.is_published ||
         isCancelled ||
         trip.deposit_per_seat > 0) && (
@@ -139,6 +140,9 @@ export function TripCard({
           {isCancelled && <Badge variant="danger">Cancelada</Badge>}
           {trip.pending_approval > 0 && !isCancelled && (
             <Badge variant="warning">{trip.pending_approval} por aprobar</Badge>
+          )}
+          {trip.requires_approval && trip.pending_approval === 0 && (
+            <Badge variant="muted">Requiere aprobación</Badge>
           )}
           {!trip.is_published && !isCancelled && (
             <Badge variant="muted">Sin publicar</Badge>
