@@ -7,7 +7,7 @@ import {
 import { SupportWhatsAppLink } from "@/components/support-whatsapp-link";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
-import { useLicense } from "@/hooks/useLicense";
+import { useLicense, useOrganizationLicense } from "@/hooks/useLicense";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode } from "react";
 
@@ -29,6 +29,11 @@ export function LicenseGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { profile, signOut } = useAuth();
   const { licenseStatus, isBlocked, loading } = useLicense();
+  const { data: organizationLicense } = useOrganizationLicense();
+  // A business created without a trial waits for its first payment
+  const isPending = organizationLicense?.phase === "pending";
+  // Dates and amounts are the owner's business, not the employee's
+  const isOwner = profile?.role === "owner";
 
   const isAllowedPath = ALLOWED_WHILE_BLOCKED.some((p) =>
     pathname?.startsWith(p)
@@ -47,22 +52,25 @@ export function LicenseGate({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
-      {licenseStatus && (
+      {licenseStatus && !isPending && (
         <LicenseNotificationBanner licenseStatus={licenseStatus} />
       )}
       <div className="flex min-h-screen items-center justify-center px-4">
         <Card className="w-full max-w-md p-8 text-center shadow-lg">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-danger-100 dark:bg-danger-900/20">
-            <span className="text-3xl">🚫</span>
+            <span className="text-3xl">{isPending ? "⏳" : "🚫"}</span>
           </div>
           <h1 className="mt-6 text-2xl font-bold text-foreground">
-            Acceso Bloqueado
+            {isPending ? "Tu negocio está en preparación" : "Acceso bloqueado"}
           </h1>
           <p className="mt-4 text-sm text-foreground-muted">
-            La licencia de tu negocio venció. Para activarla o renovarla,
-            escríbenos por WhatsApp y te ayudamos.
+            {isPending
+              ? "Empezará a funcionar cuando registremos tu primer pago. Escríbenos por WhatsApp y te indicamos cómo pagar."
+              : isOwner
+                ? "El acceso de tu negocio venció. Para activarlo, escríbenos por WhatsApp y te indicamos cómo pagar."
+                : "El acceso de este negocio está bloqueado. Avísale al dueño para que lo active."}
           </p>
-          {licenseStatus && (
+          {licenseStatus && isOwner && !isPending && (
             <div className="mt-6">
               <LicenseNotification
                 licenseStatus={licenseStatus}
@@ -71,7 +79,17 @@ export function LicenseGate({ children }: { children: ReactNode }) {
             </div>
           )}
           <div className="mt-6 flex flex-col gap-3">
-            <SupportWhatsAppLink className="w-full" />
+            {isOwner && (
+              <Button
+                variant="mesh-primary"
+                size="md"
+                className="w-full"
+                onClick={() => router.push("/dashboard/subscription")}
+              >
+                Ver mi plan y cómo pagar
+              </Button>
+            )}
+            {isOwner && <SupportWhatsAppLink className="w-full" />}
             <Button
               variant="danger"
               size="md"

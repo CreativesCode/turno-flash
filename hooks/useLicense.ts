@@ -11,7 +11,13 @@ import {
   formatLicenseMessage,
 } from "@/utils/license";
 import { useAuth } from "@/contexts/auth-context";
+import {
+  type LicensePhase,
+  type LicensePlan,
+  isLicensePlan,
+} from "@/config/license-pricing";
 import { Logger } from "@/utils/logger";
+import { createClient } from "@/utils/supabase/client";
 
 export const licenseKeys = {
   org: (orgId: string) => ["license", orgId] as const,
@@ -71,4 +77,47 @@ export function useLicense() {
     hasNoLicense: licenseStatus?.status === "no_license",
     daysRemaining: licenseStatus?.days_remaining || null,
   };
+}
+
+/** Plan and billing data of the user's business, for Suscripción and the gate. */
+export interface OrganizationLicense {
+  plan: LicensePlan;
+  phase: LicensePhase;
+  founder: boolean;
+  /** `YYYY-MM-DD`; null until the first payment of a founder business. */
+  founderPriceUntil: string | null;
+  licenseEndDate: string | null;
+  secondModule: boolean;
+}
+
+export function useOrganizationLicense() {
+  const { profile } = useAuth();
+  const orgId = profile?.organization_id ?? "";
+
+  return useQuery({
+    // Under the license key: refreshed and persisted together with the status
+    queryKey: [...licenseKeys.org(orgId), "plan"] as const,
+    queryFn: async (): Promise<OrganizationLicense> => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("organizations")
+        .select(
+          "license_plan, license_phase, license_founder, founder_price_until, license_end_date, appointments_module_enabled, trips_module_enabled"
+        )
+        .eq("id", orgId)
+        .single();
+      if (error) throw error;
+      return {
+        plan: isLicensePlan(data.license_plan) ? data.license_plan : "personal",
+        phase: data.license_phase as LicensePhase,
+        founder: data.license_founder,
+        founderPriceUntil: data.founder_price_until,
+        licenseEndDate: data.license_end_date,
+        secondModule:
+          !!data.appointments_module_enabled && !!data.trips_module_enabled,
+      };
+    },
+    enabled: !!orgId,
+    staleTime: 1000 * 60 * 5,
+  });
 }

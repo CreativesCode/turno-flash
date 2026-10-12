@@ -5,10 +5,23 @@ import {
   formatLicenseMessage,
   getLicenseAlertType,
   getLicenseMessageTitle,
+  isLicenseExpiringSoon,
 } from "@/utils/license";
 import { SUPPORT_WHATSAPP_URL } from "@/config/constants";
+import { licenseDayOf } from "@/config/license-pricing";
 import { X } from "lucide-react";
 import { useState } from "react";
+
+/** Day (in Cuba) the owner closed the notice: it comes back the next day. */
+const DISMISSED_KEY = "turnoflash:license-notice-dismissed";
+
+function wasDismissedToday(): boolean {
+  try {
+    return window.localStorage.getItem(DISMISSED_KEY) === licenseDayOf(new Date());
+  } catch {
+    return false;
+  }
+}
 
 interface LicenseNotificationProps {
   licenseStatus: LicenseStatusResult;
@@ -21,13 +34,20 @@ export function LicenseNotification({
   onClose,
   dismissible = true,
 }: LicenseNotificationProps) {
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(
+    () => dismissible && typeof window !== "undefined" && wasDismissedToday()
+  );
   const alertType = getLicenseAlertType(licenseStatus);
   const title = getLicenseMessageTitle(licenseStatus);
   const message = formatLicenseMessage(licenseStatus);
 
   const handleDismiss = () => {
     setIsDismissed(true);
+    try {
+      window.localStorage.setItem(DISMISSED_KEY, licenseDayOf(new Date()));
+    } catch {
+      // Private mode: the notice just comes back on the next visit
+    }
     if (onClose) {
       onClose();
     }
@@ -37,12 +57,8 @@ export function LicenseNotification({
     return null;
   }
 
-  // No mostrar notificación si la licencia está activa y tiene más de 7 días
-  if (
-    licenseStatus.status === "active" &&
-    licenseStatus.days_remaining !== null &&
-    licenseStatus.days_remaining > 7
-  ) {
+  // Licencia activa que todavía no está por vencer: nada que avisar
+  if (licenseStatus.status === "active" && !isLicenseExpiringSoon(licenseStatus)) {
     return null;
   }
 
@@ -105,8 +121,8 @@ export function LicenseNotification({
           {licenseStatus.status === "grace_period" && (
             <div className={`mt-3 text-xs ${styles.message}`}>
               <p className="font-medium">
-                ⚠️ Estás en período de gracia. Puedes continuar usando la
-                aplicación, pero debes renovar tu licencia pronto.
+                ⚠️ Puedes seguir trabajando estos días de margen. Si no
+                pagas antes de que terminen, la app se bloquea.
               </p>
               <SupportLine />
             </div>
@@ -115,15 +131,13 @@ export function LicenseNotification({
           {licenseStatus.status === "expired" && (
             <div className={`mt-3 text-xs ${styles.message}`}>
               <p className="font-medium">
-                🚫 Tu licencia ha expirado.
+                🚫 Tu acceso está bloqueado hasta que registremos tu pago.
               </p>
               <SupportLine />
             </div>
           )}
 
-          {licenseStatus.status === "active" &&
-            licenseStatus.days_remaining !== null &&
-            licenseStatus.days_remaining <= 7 && (
+          {isLicenseExpiringSoon(licenseStatus) && (
               <div className={`mt-3 text-xs ${styles.message}`}>
                 <SupportLine />
               </div>
@@ -172,11 +186,7 @@ export function LicenseNotificationBanner({
   const alertType = getLicenseAlertType(licenseStatus);
 
   // No mostrar banner si la licencia está OK
-  if (
-    licenseStatus.status === "active" &&
-    licenseStatus.days_remaining !== null &&
-    licenseStatus.days_remaining > 7
-  ) {
+  if (licenseStatus.status === "active" && !isLicenseExpiringSoon(licenseStatus)) {
     return null;
   }
 
@@ -197,7 +207,7 @@ export function LicenseNotificationBanner({
 
   const getMessage = () => {
     if (licenseStatus.status === "expired") {
-      return "🚫 Licencia expirada - Escríbenos por WhatsApp para renovarla";
+      return "🚫 Acceso bloqueado - Escríbenos por WhatsApp para activarlo";
     }
 
     if (licenseStatus.status === "grace_period") {

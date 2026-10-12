@@ -434,7 +434,8 @@ export default function DashboardPage() {
           {!loadingLicense &&
             licenseStatus &&
             shouldShowLicenseNotification(licenseStatus) &&
-            profile?.role !== "admin" && (
+            // Only the owner pays: an employee sees just the block screen
+            profile?.role === "owner" && (
               <div className="mb-6">
                 <LicenseNotification licenseStatus={licenseStatus} />
               </div>

@@ -3,13 +3,32 @@
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
 import { LicenseStatusResult } from "@/types/organization";
+import {
+  LICENSE_GRACE_DAYS,
+  LICENSE_NOTICE_DAYS_BEFORE,
+} from "@/config/license-pricing";
 
 /**
- * Período de gracia en días. Es fijo: la base de datos usa el mismo valor en
- * org_license_usable (migración 027), y ahí es donde se decide el bloqueo.
+ * Días de margen tras el vencimiento. Es fijo: la base de datos usa el mismo
+ * valor en license_grace_days() (migración 073), y ahí se decide el bloqueo.
  */
 export function getGracePeriodDays(): number {
-  return 7;
+  return LICENSE_GRACE_DAYS;
+}
+
+/**
+ * The owner is warned from 2 days before the license ends (same calendar as
+ * the WhatsApp notices). `days_remaining` is rounded up, so with 2 full days
+ * left it reads 3.
+ */
+export function isLicenseExpiringSoon(
+  licenseStatus: LicenseStatusResult | null
+): boolean {
+  return (
+    licenseStatus?.status === "active" &&
+    licenseStatus.days_remaining !== null &&
+    licenseStatus.days_remaining <= LICENSE_NOTICE_DAYS_BEFORE + 1
+  );
 }
 
 /**
@@ -72,20 +91,16 @@ export function shouldShowLicenseNotification(licenseStatus: LicenseStatusResult
   }
 
   // Mostrar notificación si:
-  // 1. Está en período de gracia
-  // 2. Está activa pero le quedan menos de 7 días
-  // 3. Está expirada
-  const { status, days_remaining } = licenseStatus;
+  // 1. Está en los días de margen
+  // 2. Está activa pero vence en 2 días o menos
+  // 3. Está bloqueada
+  const { status } = licenseStatus;
 
   if (status === 'grace_period' || status === 'expired') {
     return true;
   }
 
-  if (status === 'active' && days_remaining !== null && days_remaining <= 7) {
-    return true;
-  }
-
-  return false;
+  return isLicenseExpiringSoon(licenseStatus);
 }
 
 /**
@@ -100,7 +115,7 @@ export function getLicenseAlertType(
     return 'info';
   }
 
-  const { status, days_remaining } = licenseStatus;
+  const { status } = licenseStatus;
 
   if (status === 'expired') {
     return 'error';
@@ -110,11 +125,7 @@ export function getLicenseAlertType(
     return 'error';
   }
 
-  if (status === 'active' && days_remaining !== null && days_remaining <= 3) {
-    return 'error';
-  }
-
-  if (status === 'active' && days_remaining !== null && days_remaining <= 7) {
+  if (isLicenseExpiringSoon(licenseStatus)) {
     return 'warning';
   }
 
@@ -150,9 +161,9 @@ export function getLicenseMessageTitle(licenseStatus: LicenseStatusResult | null
     case 'active':
       return 'Tu acceso está por vencer';
     case 'grace_period':
-      return '⚠️ Licencia vencida - Período de gracia';
+      return '⚠️ Tu acceso venció: estás en los días de margen';
     case 'expired':
-      return '🚫 Licencia expirada';
+      return '🚫 Acceso bloqueado';
     case 'no_license':
       return 'Sin licencia configurada';
     default:

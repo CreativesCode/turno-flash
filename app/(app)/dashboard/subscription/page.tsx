@@ -1,5 +1,6 @@
 "use client";
 
+import { LicensePlanSummary } from "@/components/license-plan-summary";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SupportWhatsAppLink } from "@/components/support-whatsapp-link";
 import { Badge, Button, Card } from "@/components/ui";
@@ -127,9 +128,11 @@ export default function SubscriptionPage() {
                   PRO activo
                 </Badge>
               ) : license.isActive ? (
-                <Badge variant="success">Licencia activa</Badge>
+                <Badge variant="success">Acceso activo</Badge>
+              ) : license.isInGracePeriod ? (
+                <Badge variant="warning">En días de margen</Badge>
               ) : (
-                <Badge variant="warning">Sin suscripción</Badge>
+                <Badge variant="warning">Sin acceso</Badge>
               )}
             </div>
             {isPro && proExpirationDate && (
@@ -144,16 +147,19 @@ export default function SubscriptionPage() {
             )}
           </Card>
 
+          {/* Plan, precio por periodo y cómo pagar */}
+          <LicensePlanSummary />
+
           {/* Cómo activar o renovar: desde Cuba no hay pago en la app (D-10) */}
           {!isPro && (
             <Card className="p-6 text-center">
               <MessageCircle className="mx-auto mb-3 h-8 w-8 text-foreground-muted" />
               <h2 className="mb-1 text-lg font-semibold text-foreground">
-                Activa o renueva tu licencia
+                Paga o renueva tu plan
               </h2>
               <p className="mb-4 text-sm text-foreground-muted">
-                Para activar o renovar tu licencia, escríbenos por WhatsApp y te
-                indicamos cómo pagar.
+                Escríbenos por WhatsApp y te indicamos cómo pagar. Registramos
+                tu pago el mismo día.
               </p>
               <SupportWhatsAppLink className="w-full sm:w-auto" />
             </Card>
