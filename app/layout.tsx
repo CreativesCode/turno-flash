@@ -118,6 +118,16 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta
+          name="theme-color"
+          content="#f5f4f0"
+          media="(prefers-color-scheme: light)"
+        />
+        <meta
+          name="theme-color"
+          content="#0f100f"
+          media="(prefers-color-scheme: dark)"
+        />
         {/* Meta tags adicionales para WhatsApp - URLs absolutas explícitas */}
         <meta property="og:image" content={ogImageUrl} />
         <meta property="og:image:secure_url" content={ogImageUrl} />

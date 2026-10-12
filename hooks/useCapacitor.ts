@@ -41,10 +41,10 @@ export function useCapacitor() {
           // Cambiar el estilo según el tema
           if (theme === "dark") {
             await StatusBar.setStyle({ style: Style.Dark });
-            await StatusBar.setBackgroundColor({ color: "#1a1a1a" });
+            await StatusBar.setBackgroundColor({ color: "#0f100f" });
           } else {
             await StatusBar.setStyle({ style: Style.Light });
-            await StatusBar.setBackgroundColor({ color: "#ffffff" });
+            await StatusBar.setBackgroundColor({ color: "#f5f4f0" });
           }
         } catch (error) {
           void Logger.error("Error configurando la barra de estado", error, {
