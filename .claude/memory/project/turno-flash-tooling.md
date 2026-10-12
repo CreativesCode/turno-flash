@@ -74,3 +74,12 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
 - **Con `npm run dev` corriendo**, `tsc` puede mostrar errores de `.next/dev/types/validator.ts` al agregar un
   layout nuevo: son tipos generados viejos; se van con `npm run build:next`.
 - `.playwright-mcp/` está en `.gitignore` desde el 2026-10-08.
+
+## Android build: Ionic Appflow, not local (2026-10-12)
+
+Roberto generates the Android app in Ionic's cloud dashboard (`https://dashboard.ionicframework.com/`),
+building from the GitHub repo. Do **not** run `gradlew bundleRelease` locally (it also takes 10+ minutes
+here). "Preparing a release" means: bump `versionCode`/`versionName` in `android/app/build.gradle`,
+commit, and make sure it is pushed; he launches the build and uploads it to Play Console himself.
+State on 2026-10-12: `versionCode 3` / `1.1.0` is on `origin/main` (commit `e0bbe67`); Play still has
+code 2 (1.0.1, June 2026). Production access was requested on 2026-10-12 at 16:21.
