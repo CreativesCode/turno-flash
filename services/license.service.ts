@@ -12,6 +12,8 @@ import { createClient } from "@/utils/supabase/client";
 
 export type LicensePayment =
   Database["public"]["Tables"]["license_payments"]["Row"];
+export type LicenseNotice =
+  Database["public"]["Tables"]["license_notices"]["Row"];
 
 /** What a payment charges and covers, computed by the database. */
 export interface LicensePaymentQuote {
@@ -110,6 +112,22 @@ export class LicenseService {
     if (error) {
       void Logger.error("Error loading license payments:", error);
       throw new Error("No pudimos cargar los pagos.");
+    }
+    return data ?? [];
+  }
+
+  /** Latest WhatsApp notices written for a business. */
+  static async listNotices(organizationId: string): Promise<LicenseNotice[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("license_notices")
+      .select("*")
+      .eq("organization_id", organizationId)
+      .order("created_at", { ascending: false })
+      .limit(15);
+    if (error) {
+      void Logger.error("Error loading license notices:", error);
+      throw new Error("No pudimos cargar los avisos.");
     }
     return data ?? [];
   }

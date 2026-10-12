@@ -12,6 +12,8 @@ export const licenseBillingKeys = {
     [...licenseBillingKeys.all, "payments", orgId] as const,
   quote: (orgId: string, period: BillingPeriod) =>
     [...licenseBillingKeys.all, "quote", orgId, period] as const,
+  notices: (orgId: string) =>
+    [...licenseBillingKeys.all, "notices", orgId] as const,
   referred: (orgId: string) =>
     [...licenseBillingKeys.all, "referred", orgId] as const,
   organizations: () => [...licenseBillingKeys.all, "organizations"] as const,
@@ -21,6 +23,14 @@ export function useLicensePayments(organizationId: string, enabled = true) {
   return useQuery({
     queryKey: licenseBillingKeys.payments(organizationId),
     queryFn: () => LicenseService.listPayments(organizationId),
+    enabled: enabled && !!organizationId,
+  });
+}
+
+export function useLicenseNotices(organizationId: string, enabled = true) {
+  return useQuery({
+    queryKey: licenseBillingKeys.notices(organizationId),
+    queryFn: () => LicenseService.listNotices(organizationId),
     enabled: enabled && !!organizationId,
   });
 }

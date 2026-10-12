@@ -132,7 +132,7 @@ export default function PlatformPage() {
                     <KpiCard
                       label="Licencias activas"
                       value={data.orgs.license_active}
-                      hint={`${data.orgs.license_grace} en gracia · ${data.orgs.license_expired} expiradas`}
+                      hint={`${data.orgs.phase_paid} de pago · ${data.orgs.phase_trial} en prueba · ${data.orgs.license_grace} en margen · ${data.orgs.license_expired} bloqueadas · ${data.orgs.phase_pending} en preparación`}
                       icon={ShieldCheck}
                       tone="primary"
                     />

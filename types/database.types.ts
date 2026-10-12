@@ -646,6 +646,60 @@ export type Database = {
           },
         ]
       }
+      license_notices: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          failure_code: string | null
+          id: string
+          kind: string
+          message: string
+          notice_key: string
+          organization_id: string
+          recipient: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          failure_code?: string | null
+          id?: string
+          kind: string
+          message: string
+          notice_key: string
+          organization_id: string
+          recipient?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          failure_code?: string | null
+          id?: string
+          kind?: string
+          message?: string
+          notice_key?: string
+          organization_id?: string
+          recipient?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "license_notices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "license_notices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       license_payments: {
         Row: {
           amount_usd: number
@@ -2261,6 +2315,15 @@ export type Database = {
         Returns: boolean
       }
       license_grace_days: { Args: never; Returns: number }
+      license_notice_message: {
+        Args: {
+          p_expires_on: string
+          p_kind: string
+          p_org: Database["public"]["Tables"]["organizations"]["Row"]
+          p_today: string
+        }
+        Returns: string
+      }
       license_payment_quote: {
         Args: { p_billing_period: string; p_organization_id: string }
         Returns: Json
@@ -2280,6 +2343,7 @@ export type Database = {
         Args: { p_founder: boolean; p_plan: string; p_second_module: boolean }
         Returns: number
       }
+      license_plan_staff_limit: { Args: { p_plan: string }; Returns: number }
       license_today: { Args: never; Returns: string }
       license_trial_end: { Args: { p_days?: number }; Returns: string }
       my_access_revoked: { Args: never; Returns: boolean }
@@ -2321,6 +2385,7 @@ export type Database = {
         Returns: Json
       }
       release_expired_trip_holds: { Args: never; Returns: number }
+      run_license_notices: { Args: never; Returns: number }
       save_staff_schedule: {
         Args: { p_ranges: Json; p_service_ids: string[]; p_staff_id: string }
         Returns: undefined

@@ -95,6 +95,10 @@ export interface PlatformOrgStats {
   license_grace: number;
   license_expired: number;
   license_none: number;
+  /** Businesses on their free trial, paying, or waiting for a first payment. */
+  phase_trial: number;
+  phase_paid: number;
+  phase_pending: number;
 }
 
 export interface ExpiringOrg {
