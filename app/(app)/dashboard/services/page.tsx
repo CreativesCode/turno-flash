@@ -4,7 +4,14 @@ import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { ServiceFormModal } from "@/components/services/ServiceFormModal";
-import { Button } from "@/components/ui";
+import {
+  Alert,
+  Button,
+  EmptyState,
+  ListGroup,
+  PageHeader,
+  SearchInput,
+} from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useCreateParam } from "@/hooks/useCreateParam";
 import {
@@ -18,7 +25,7 @@ import {
 } from "@/hooks";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { Service, ServiceFormData } from "@/types/appointments";
-import { Package, Plus, Search } from "lucide-react";
+import { AlertCircle, Package, Plus } from "lucide-react";
 import { FormEvent, Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 const EMPTY_FORM: ServiceFormData = {
@@ -212,9 +219,11 @@ function ServicesContent() {
     );
   }
 
-  const subtitle = `${services.length} en el catálogo${
-    debouncedSearch ? ` · filtro: "${debouncedSearch}"` : ""
-  }`;
+  const activeCount = services.filter((s) => s.is_active).length;
+  const pausedCount = services.length - activeCount;
+  const subtitle = `${activeCount} ${
+    activeCount === 1 ? "activo" : "activos"
+  } · ${pausedCount} ${pausedCount === 1 ? "pausado" : "pausados"}`;
 
   return (
     <ProtectedRoute>
@@ -223,86 +232,71 @@ function ServicesContent() {
         description="Gestiona los servicios que ofreces. Configura duración, precios, tiempos de buffer y disponibilidad de cada servicio."
       />
 
-      <div className="relative min-h-screen bg-background pb-24">
-        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 pb-3 pt-3 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-                  Servicios
-                </h1>
-                <p className="text-xs text-foreground-muted">{subtitle}</p>
-              </div>
-              {canManageServices && (
-                <Button
-                  variant="secondary"
-                  onClick={handleCreate}
-                >
-                  <Plus className="h-4 w-4" />
-                  Nuevo servicio
-                </Button>
-              )}
-            </div>
+      <div className="mx-auto max-w-3xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
+        <PageHeader
+          title="Servicios"
+          subtitle={subtitle}
+          actions={
+            canManageServices && (
+              <Button variant="secondary" onClick={handleCreate}>
+                <Plus className="size-[18px]" />
+                Nuevo
+              </Button>
+            )
+          }
+        >
+          <SearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Buscar servicio"
+            aria-label="Buscar servicio"
+          />
+        </PageHeader>
 
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-muted" />
-              <input
-                type="text"
-                placeholder="Buscar servicios…"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-foreground shadow-xs transition-colors focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="pt-5">
           {error && (
-            <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <Alert variant="danger" icon={<AlertCircle />} className="mb-4">
               {error}
-            </div>
+            </Alert>
           )}
 
           {filteredServices.length === 0 ? (
-            <div className="rounded-xl border border-border bg-surface p-10 text-center shadow-sm">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
-                <Package className="h-6 w-6" />
-              </div>
-              <h3 className="mt-3 text-base font-bold text-foreground">
-                {searchTerm ? "Sin resultados" : "Sin servicios"}
-              </h3>
-              <p className="mt-1 text-sm text-foreground-muted">
-                {searchTerm
-                  ? "Prueba con otro término."
-                  : "Agrega los servicios que ofreces."}
-              </p>
-              {canManageServices && !searchTerm && (
-                <Button
-                  variant="mesh-primary"
-                  onClick={handleCreate}
-                  className="mx-auto mt-4"
-                >
-                  <Plus className="h-4 w-4" />
-                  Crear servicio
-                </Button>
-              )}
-            </div>
+            <EmptyState
+              icon={<Package />}
+              title={searchTerm ? "Sin resultados" : "Sin servicios"}
+              action={
+                canManageServices &&
+                !searchTerm && (
+                  <Button size="sm" variant="secondary" onClick={handleCreate}>
+                    <Plus className="size-4" />
+                    Crear servicio
+                  </Button>
+                )
+              }
+            >
+              {searchTerm
+                ? "Prueba con otro término."
+                : "Agrega los servicios que ofreces."}
+            </EmptyState>
           ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredServices.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  canManage={canManageServices}
-                  onEdit={handleEdit}
-                  onToggleActive={handleToggleActive}
-                />
-              ))}
-            </div>
+            <>
+              <ListGroup>
+                {filteredServices.map((service) => (
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    canManage={canManageServices}
+                    onEdit={handleEdit}
+                    onToggleActive={handleToggleActive}
+                  />
+                ))}
+              </ListGroup>
+              <p className="mt-3.5 px-1 text-meta text-foreground-subtle">
+                Los servicios pausados no aparecen en tu página de reservas.
+              </p>
+            </>
           )}
         </div>
-
       </div>
 
       <ServiceFormModal

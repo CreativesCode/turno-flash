@@ -1,25 +1,7 @@
 "use client";
 
-import { Avatar, Card, KebabMenu } from "@/components/ui";
+import { Avatar, Badge, KebabMenu, ListRow } from "@/components/ui";
 import type { Customer } from "@/types/appointments";
-import { Mail, Phone } from "lucide-react";
-import { useMemo } from "react";
-
-const PALETTE = [
-  "#db2777",
-  "#22c55e",
-  "#3b82f6",
-  "#f59e0b",
-  "#8b5cf6",
-  "#06b6d4",
-  "#ef4444",
-];
-
-function pickColor(seed: string): string {
-  if (!seed) return PALETTE[0];
-  const last = seed.charCodeAt(seed.length - 1);
-  return PALETTE[last % PALETTE.length];
-}
 
 export interface CustomerCardProps {
   customer: Customer;
@@ -29,6 +11,7 @@ export interface CustomerCardProps {
   onReactivate?: (c: Customer) => void;
 }
 
+/** One customer as a list row: tapping it opens the edit form. */
 export function CustomerCard({
   customer,
   onEdit,
@@ -37,62 +20,32 @@ export function CustomerCard({
 }: CustomerCardProps) {
   const fullName =
     `${customer.first_name} ${customer.last_name}`.trim() || "Sin nombre";
-  const color = useMemo(() => pickColor(customer.id), [customer.id]);
-  const hasWhatsApp = !!customer.whatsapp_number;
 
   return (
-    <Card className="relative flex items-center gap-3 p-3">
-      <Avatar name={fullName} color={color} size={42} />
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className="truncate text-sm font-bold text-foreground">
-            {fullName}
-          </span>
-          {hasWhatsApp && (
-            <span className="inline-flex items-center gap-0.5 rounded-full border border-primary-600 bg-primary-50 px-2 py-0.5 text-[11px] font-bold text-primary-600 dark:border-primary-400 dark:bg-primary-900/20 dark:text-primary-300">
-              WA
-            </span>
-          )}
-          {!customer.is_active && (
-            <span className="rounded-full border border-danger-600 bg-danger-50 px-2 py-0.5 text-[11px] font-bold text-danger-600 dark:border-danger-400 dark:bg-danger-900/20 dark:text-danger-300">
-              Inactivo
-            </span>
-          )}
-        </div>
-
-        <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-foreground-muted">
-          <span className="inline-flex items-center gap-1">
-            <Phone className="h-3 w-3" />
-            {customer.phone || "—"}
-          </span>
-          {customer.email && (
-            <span className="inline-flex items-center gap-1 truncate">
-              <Mail className="h-3 w-3 shrink-0" />
-              <span className="truncate">{customer.email}</span>
-            </span>
-          )}
-        </div>
-
-        {customer.notes && (
-          <div className="mt-1 truncate text-[11px] italic text-foreground-muted">
-            &ldquo;{customer.notes}&rdquo;
-          </div>
-        )}
-      </div>
-
-      <KebabMenu
-        items={[
-          { label: "Editar", onClick: () => onEdit(customer) },
-          customer.is_active || !onReactivate
-            ? {
-                label: "Desactivar",
-                danger: true,
-                onClick: () => onDelete(customer),
-              }
-            : { label: "Reactivar", onClick: () => onReactivate(customer) },
-        ]}
-      />
-    </Card>
+    <ListRow
+      leading={<Avatar name={fullName} seed={customer.id} size={40} />}
+      title={fullName}
+      titleAside={
+        !customer.is_active && <Badge variant="muted">Inactivo</Badge>
+      }
+      subtitle={
+        <span className="font-mono tabular-nums">{customer.phone || "—"}</span>
+      }
+      trailing={
+        <KebabMenu
+          items={[
+            { label: "Editar", onClick: () => onEdit(customer) },
+            customer.is_active || !onReactivate
+              ? {
+                  label: "Desactivar",
+                  danger: true,
+                  onClick: () => onDelete(customer),
+                }
+              : { label: "Reactivar", onClick: () => onReactivate(customer) },
+          ]}
+        />
+      }
+      onClick={() => onEdit(customer)}
+    />
   );
 }

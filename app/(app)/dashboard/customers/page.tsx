@@ -4,7 +4,17 @@ import { CustomerCard } from "@/components/customers/CustomerCard";
 import { CustomerFormModal } from "@/components/customers/CustomerFormModal";
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Button, ConfirmSheet } from "@/components/ui";
+import {
+  Alert,
+  Button,
+  ConfirmSheet,
+  EmptyState,
+  FilterChips,
+  KebabMenu,
+  PageHeader,
+  SearchInput,
+  Spinner,
+} from "@/components/ui";
 import {
   useCreateCustomer,
   useDeactivateCustomer,
@@ -19,8 +29,14 @@ import { Customer, CustomerFormData } from "@/types/appointments";
 import { downloadCsv, todayForFilename } from "@/utils/csv";
 import { createClient } from "@/utils/supabase/client";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Download, HeartHandshake, Plus, Search, User } from "lucide-react";
-import Link from "next/link";
+import {
+  AlertCircle,
+  Download,
+  HeartHandshake,
+  Plus,
+  User,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
 
 const EMPTY_FORM: CustomerFormData = {
@@ -41,6 +57,7 @@ export default function CustomersPage() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const toast = useToast();
   const { profile } = useAuth();
+  const router = useRouter();
   const canRecover = profile?.role === "owner" || profile?.role === "admin";
 
   const handleExportCsv = useCallback(async () => {
@@ -248,7 +265,7 @@ export default function CustomersPage() {
   const virtualizer = useVirtualizer({
     count: customers.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 92,
+    estimateSize: () => 71,
     overscan: 6,
   });
 
@@ -257,8 +274,8 @@ export default function CustomersPage() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
-            <p className="text-sm text-foreground-muted">
+            <Spinner className="mb-3 text-foreground" />
+            <p className="text-meta text-foreground-muted">
               Cargando clientes...
             </p>
           </div>
@@ -267,7 +284,7 @@ export default function CustomersPage() {
     );
   }
 
-  const subtitle = `${customers.length} en la base${
+  const subtitle = `${customers.length} en tu base${
     debouncedSearch ? ` · filtro: "${debouncedSearch}"` : ""
   }`;
 
@@ -278,111 +295,84 @@ export default function CustomersPage() {
         description="Gestiona tu base de clientes. Agrega, edita y administra la información de tus clientes, incluyendo contacto y notas importantes."
       />
 
-      <div className="relative min-h-screen bg-background pb-24">
-        {/* Sticky header + search */}
-        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 pb-3 pt-3 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-                  Clientes
-                </h1>
-                <p className="text-xs text-foreground-muted">{subtitle}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleExportCsv}
-                  title="Exportar todos los clientes activos a CSV"
-                  className="hidden items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
-                >
-                  <Download className="h-4 w-4" />
-                  CSV
-                </button>
-                {canRecover && (
-                  <Link
-                    href="/dashboard/customers/recover"
-                    className="hidden items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
-                  >
-                    <HeartHandshake className="h-4 w-4" />
-                    Recuperar clientes
-                  </Link>
-                )}
-                <Button
-                  variant="secondary"
-                  onClick={handleCreate}
-                >
-                  <Plus className="h-4 w-4" />
-                  Nuevo cliente
-                </Button>
-              </div>
-            </div>
-
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-muted" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre, teléfono o email…"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-foreground shadow-xs transition-colors focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
+      <div className="mx-auto max-w-3xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
+        <PageHeader
+          title="Clientes"
+          subtitle={subtitle}
+          actions={
+            <>
+              <Button variant="secondary" onClick={handleCreate}>
+                <Plus className="size-[18px]" />
+                Nuevo
+              </Button>
+              <KebabMenu
+                items={[
+                  {
+                    label: "Exportar CSV",
+                    icon: <Download className="size-4" />,
+                    onClick: () => void handleExportCsv(),
+                  },
+                  ...(canRecover
+                    ? [
+                        {
+                          label: "Recuperar clientes",
+                          icon: <HeartHandshake className="size-4" />,
+                          onClick: () =>
+                            router.push("/dashboard/customers/recover"),
+                        },
+                      ]
+                    : []),
+                ]}
               />
-            </div>
-            <div className="mt-2 flex gap-2">
-              {[false, true].map((inactive) => (
-                <button
-                  key={String(inactive)}
-                  type="button"
-                  onClick={() => setShowInactive(inactive)}
-                  className={`min-h-11 rounded-full border px-3 text-xs font-semibold transition-colors ${
-                    showInactive === inactive
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border bg-surface text-foreground hover:bg-muted"
-                  }`}
-                >
-                  {inactive ? "Inactivos" : "Activos"}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        >
+          <SearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Nombre, teléfono o email"
+            aria-label="Buscar clientes"
+          />
+          <FilterChips
+            label="Estado"
+            chips={[
+              { value: "active", label: "Activos" },
+              { value: "inactive", label: "Inactivos" },
+            ]}
+            value={showInactive ? "inactive" : "active"}
+            onChange={(value) => setShowInactive(value === "inactive")}
+          />
+        </PageHeader>
 
         {/* Body */}
-        <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="pt-5">
           {error && (
-            <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <Alert variant="danger" icon={<AlertCircle />} className="mb-4">
               {error}
-            </div>
+            </Alert>
           )}
 
           {customers.length === 0 ? (
-            <div className="rounded-xl border border-border bg-surface p-10 text-center shadow-sm">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
-                <User className="h-6 w-6" />
-              </div>
-              <h3 className="mt-3 text-base font-bold text-foreground">
-                {searchTerm ? "Sin resultados" : "Aún no hay clientes"}
-              </h3>
-              <p className="mt-1 text-sm text-foreground-muted">
-                {searchTerm
-                  ? "Prueba con otro término."
-                  : "Agrega tu primer cliente para empezar."}
-              </p>
-              {!searchTerm && (
-                <Button
-                  variant="mesh-primary"
-                  onClick={handleCreate}
-                  className="mx-auto mt-4"
-                >
-                  <Plus className="h-4 w-4" />
-                  Crear cliente
-                </Button>
-              )}
-            </div>
+            <EmptyState
+              icon={<User />}
+              title={searchTerm ? "Sin resultados" : "Aún no hay clientes"}
+              action={
+                !searchTerm && (
+                  <Button size="sm" variant="secondary" onClick={handleCreate}>
+                    <Plus className="size-4" />
+                    Crear cliente
+                  </Button>
+                )
+              }
+            >
+              {searchTerm
+                ? "Prueba con otro término."
+                : "Agrega tu primer cliente para empezar."}
+            </EmptyState>
           ) : (
             <div
               ref={parentRef}
-              className="scrollbar-discreet h-[calc(100vh-12rem)] overflow-auto"
+              className="scrollbar-discreet h-[calc(100vh-12rem)] overflow-auto rounded-card border border-border bg-surface shadow-card"
               style={{ contain: "strict" }}
             >
               <div
@@ -399,14 +389,13 @@ export default function CustomersPage() {
                       key={virtualRow.key}
                       data-index={virtualRow.index}
                       ref={virtualizer.measureElement}
-                      className="has-data-menu-open:z-30"
+                      className="border-b border-border has-data-menu-open:z-30"
                       style={{
                         position: "absolute",
                         top: 0,
                         left: 0,
                         width: "100%",
                         transform: `translateY(${virtualRow.start}px)`,
-                        paddingBottom: "8px",
                       }}
                     >
                       <CustomerCard
@@ -425,7 +414,7 @@ export default function CustomersPage() {
           {hasNextPage && (
             <div className="mt-6 flex justify-center">
               <Button
-                variant="soft"
+                variant="secondary"
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
               >
