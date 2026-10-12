@@ -63,7 +63,7 @@ const TEAM_SIZE_LABEL: Record<LicensePlan, string> = {
 };
 
 const inputClass =
-  "mt-1.5 block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 text-sm text-foreground placeholder-foreground-subtle transition-shadow focus:border-primary-500 focus:outline-none focus:ring-3 focus:ring-primary-500/15";
+  "mt-1.5 block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 text-sm text-foreground placeholder-foreground-subtle transition-shadow focus:border-primary focus:outline-none focus:ring-3 focus:ring-primary/15";
 const labelClass =
   "text-xs font-semibold tracking-wide text-foreground-muted uppercase";
 
@@ -235,7 +235,7 @@ export default function RegisterPage() {
                       key={option.key}
                       className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
                         kind === option.key
-                          ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                          ? "border-primary bg-primary-50 dark:bg-primary-900/20"
                           : "border-border-2 bg-surface hover:bg-muted"
                       }`}
                     >
@@ -245,7 +245,7 @@ export default function RegisterPage() {
                         value={option.key}
                         checked={kind === option.key}
                         onChange={() => setKind(option.key)}
-                        className="mt-0.5 h-4 w-4 shrink-0 accent-primary-500"
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                       />
                       <span className="text-sm">
                         <span className="block font-semibold text-foreground">
@@ -274,7 +274,7 @@ export default function RegisterPage() {
                         key={option}
                         className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
                           teamPlan === option
-                            ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                            ? "border-primary bg-primary-50 dark:bg-primary-900/20"
                             : "border-border-2 bg-surface hover:bg-muted"
                         }`}
                       >
@@ -284,7 +284,7 @@ export default function RegisterPage() {
                           value={option}
                           checked={teamPlan === option}
                           onChange={() => setTeamPlan(option)}
-                          className="h-4 w-4 shrink-0 accent-primary-500"
+                          className="h-4 w-4 shrink-0 accent-primary"
                         />
                         <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
                           {TEAM_SIZE_LABEL[option]}

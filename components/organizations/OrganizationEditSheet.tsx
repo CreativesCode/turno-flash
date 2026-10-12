@@ -137,7 +137,7 @@ export function OrganizationEditSheet({
         <div className="flex gap-2 pt-1">
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
             className="flex-1 justify-center"

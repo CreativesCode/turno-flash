@@ -227,7 +227,7 @@ export default function RecoverCustomersPage() {
                       }}
                       className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
                         windowDays === w.key
-                          ? "bg-primary-500 text-white shadow-sm"
+                          ? "bg-primary text-primary-foreground shadow-sm"
                           : "text-foreground-muted hover:text-foreground"
                       }`}
                     >
@@ -276,7 +276,7 @@ export default function RecoverCustomersPage() {
                       className="flex w-full items-center gap-2.5 border-b border-border px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-foreground-muted transition-colors hover:bg-muted"
                     >
                       {allSelected ? (
-                        <CheckSquare className="h-4 w-4 text-primary-500" />
+                        <CheckSquare className="h-4 w-4 text-primary" />
                       ) : (
                         <Square className="h-4 w-4" />
                       )}
@@ -305,7 +305,7 @@ export default function RecoverCustomersPage() {
                               }`}
                             >
                               {checked ? (
-                                <CheckSquare className="h-4.5 w-4.5 shrink-0 text-primary-500" />
+                                <CheckSquare className="h-4.5 w-4.5 shrink-0 text-primary" />
                               ) : (
                                 <Square className="h-4.5 w-4.5 shrink-0 text-foreground-subtle" />
                               )}

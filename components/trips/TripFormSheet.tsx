@@ -221,7 +221,7 @@ export function TripFormSheet({
               onChange={(e) =>
                 onChange({ round_trip_enabled: e.target.checked })
               }
-              className="mt-0.5 h-4 w-4 shrink-0 accent-primary-500"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
             />
             <span className="text-xs">
               <span className="block font-semibold text-foreground">
@@ -269,7 +269,7 @@ export function TripFormSheet({
               type="checkbox"
               checked={formData.requires_approval}
               onChange={(e) => onChange({ requires_approval: e.target.checked })}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-primary-500"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
             />
             <span className="text-xs">
               <span className="block font-semibold text-foreground">
@@ -287,7 +287,7 @@ export function TripFormSheet({
               type="checkbox"
               checked={formData.is_published}
               onChange={(e) => onChange({ is_published: e.target.checked })}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-primary-500"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
             />
             <span className="text-xs">
               <span className="block font-semibold text-foreground">
@@ -403,7 +403,7 @@ export function TripFormSheet({
         <SheetFooter>
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
             className="flex-1 justify-center"

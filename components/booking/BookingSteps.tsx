@@ -204,7 +204,7 @@ export function DateTimeStep({
               aria-pressed={selected}
               className={`flex min-w-16 shrink-0 cursor-pointer flex-col items-center rounded-xl border px-3 py-2 transition-colors ${
                 selected
-                  ? "border-primary-500 bg-primary-500 text-white"
+                  ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-surface text-foreground hover:border-border-2"
               }`}
             >
@@ -245,7 +245,7 @@ export function DateTimeStep({
               key={slot.start_time}
               type="button"
               onClick={() => activeDate && onSelect(activeDate, slot)}
-              className="h-10 cursor-pointer rounded-lg border border-border bg-surface text-sm font-semibold text-foreground transition-colors hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+              className="h-10 cursor-pointer rounded-lg border border-border bg-surface text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary-50 dark:hover:bg-primary-900/20"
             >
               {slot.start_time}
             </button>

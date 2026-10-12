@@ -242,7 +242,7 @@ export function SeatsStep({
               <label
                 key={option.id}
                 className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${pickupPointId === option.id
-                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                  ? "border-primary bg-primary-50 dark:bg-primary-900/20"
                   : "border-border bg-surface hover:bg-muted"
                   }`}
               >
@@ -252,7 +252,7 @@ export function SeatsStep({
                   value={option.id}
                   checked={pickupPointId === option.id}
                   onChange={() => setPickupPointId(option.id)}
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-primary-500"
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                 />
                 <span className="min-w-0 flex-1 text-sm">
                   <span className="flex flex-wrap items-baseline justify-between gap-2">

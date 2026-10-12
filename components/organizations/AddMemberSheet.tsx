@@ -65,7 +65,7 @@ export function AddMemberSheet({
                   onClick={() => onSelect(user.id)}
                   className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                     selected
-                      ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                      ? "border-primary bg-primary-50 dark:bg-primary-900/20"
                       : "border-border bg-surface-2 hover:border-border-2"
                   }`}
                 >
@@ -101,7 +101,7 @@ export function AddMemberSheet({
         <div className="flex gap-2 pt-1">
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
             className="flex-1 justify-center"

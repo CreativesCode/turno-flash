@@ -139,7 +139,7 @@ export default function ReportsPage() {
                   onClick={() => setPeriod(p.key)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
                     period === p.key
-                      ? "bg-primary-500 text-white shadow-sm"
+                      ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-foreground-muted hover:text-foreground"
                   }`}
                 >

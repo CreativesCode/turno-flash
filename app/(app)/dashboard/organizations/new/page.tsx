@@ -422,7 +422,7 @@ export default function NewOrganizationPage() {
                       }
                       className={`flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                         selected
-                          ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                          ? "border-primary bg-primary-50 dark:bg-primary-900/20"
                           : "border-border bg-surface-2 hover:border-border-2"
                       }`}
                     >

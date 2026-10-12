@@ -95,7 +95,7 @@ export function HelpManual({ css, panels, displayFontFamily }: HelpManualProps) 
 
   const fonts = {
     "--hm-font-display": displayFontFamily,
-    "--hm-font-body": "var(--font-geist-sans), system-ui, sans-serif",
+    "--hm-font-body": "var(--font-geist), system-ui, sans-serif",
     "--hm-font-mono": "ui-monospace, monospace",
     fontFamily: "var(--hm-font-body)",
   } as CSSProperties;

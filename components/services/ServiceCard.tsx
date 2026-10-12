@@ -98,7 +98,7 @@ export function ServiceCard({
           >
             <span
               aria-hidden
-              className={`relative inline-flex h-[18px] w-8 items-center rounded-full p-0.5 transition-colors ${isActive ? "bg-primary-500" : "bg-border-2"
+              className={`relative inline-flex h-[18px] w-8 items-center rounded-full p-0.5 transition-colors ${isActive ? "bg-primary" : "bg-border-2"
                 }`}
             >
               <span

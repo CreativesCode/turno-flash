@@ -150,7 +150,7 @@ function ModuleToggle({
     <label
       className={`flex items-center gap-2.5 rounded-lg border p-3 text-sm ${
         checked
-          ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+          ? "border-primary bg-primary-50 dark:bg-primary-900/20"
           : "border-border bg-surface"
       } ${disabled ? "opacity-60" : "cursor-pointer"}`}
     >
@@ -159,7 +159,7 @@ function ModuleToggle({
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 shrink-0 accent-primary-500"
+        className="h-4 w-4 shrink-0 accent-primary"
       />
       <Icon className="h-4 w-4 shrink-0 text-foreground-muted" />
       <span className="font-semibold text-foreground">{label}</span>

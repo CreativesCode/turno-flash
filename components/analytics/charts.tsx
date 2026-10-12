@@ -29,7 +29,7 @@ import {
  */
 
 const COLORS = {
-  primary: "var(--color-primary-500, #22c55e)",
+  primary: "var(--color-primary)",
   info: "#3b82f6",
   grid: "var(--color-border, #e5e7eb)",
   text: "var(--color-foreground-muted, #6b7280)",

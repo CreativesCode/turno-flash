@@ -118,7 +118,7 @@ export function TripCard({
       <div className="flex items-start gap-3">
         <div
           aria-hidden
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-500 text-white"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground"
         >
           <Bus className="h-5 w-5" />
         </div>
@@ -219,7 +219,7 @@ export function TripCard({
         >
           <span
             className={`block h-full rounded-full transition-[width] ${
-              isFull ? "bg-warning-500" : "bg-primary-500"
+              isFull ? "bg-warning-500" : "bg-primary"
             }`}
             style={{ width: `${occupancyPct}%` }}
           />

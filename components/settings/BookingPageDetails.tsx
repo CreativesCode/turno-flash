@@ -55,7 +55,7 @@ export function BookingPageDetails({ organizationId, enabled }: BookingPageDetai
       {/* Sharing a link that does not work yet only confuses customers */}
       {enabled && (
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="ghost" size="sm" onClick={copyLink}>
+          <Button type="button" variant="secondary" size="sm" onClick={copyLink}>
             <Copy className="h-4 w-4" />
             Copiar link
           </Button>

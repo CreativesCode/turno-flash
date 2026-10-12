@@ -82,7 +82,7 @@ export function TeamCard({ organizationId }: { organizationId: string }) {
                   </div>
                 </div>
                 <Button
-                  variant={member.is_active ? "ghost" : "soft"}
+                  variant={member.is_active ? "secondary" : "soft"}
                   onClick={() => setTarget(member)}
                   className="min-h-11 shrink-0"
                 >

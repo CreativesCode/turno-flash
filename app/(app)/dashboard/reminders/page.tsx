@@ -247,7 +247,7 @@ export default function RemindersPage() {
                 <p className="text-xs text-foreground-muted">{subtitle}</p>
               </div>
               <Button
-                variant="ghost"
+                variant="secondary"
                 onClick={() => router.push("/dashboard/appointments")}
                 className="max-sm:hidden"
               >
@@ -367,7 +367,7 @@ export default function RemindersPage() {
           {/* Already-sent summary (informational, only when relevant) */}
           {sentCount > 0 && (
             <div className="mt-6 flex items-center gap-2 rounded-lg border border-border bg-surface p-3 text-xs text-foreground-muted">
-              <Check className="h-4 w-4 text-primary-500" />
+              <Check className="h-4 w-4 text-primary" />
               <span>
                 Ya enviaste recordatorios a <strong>{sentCount}</strong> turno
                 {sentCount === 1 ? "" : "s"} de este día. {clientConfirmedCount}
@@ -446,7 +446,7 @@ function ReminderRow({
           type="button"
           onClick={onSend}
           disabled={isSending}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary-500 px-3 py-1.5 text-xs font-bold text-white shadow-glow-primary transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:opacity-60"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-glow-primary transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:opacity-60"
         >
           {isSending ? (
             <>

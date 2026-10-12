@@ -34,7 +34,7 @@ export function StaffCard({
         {isBookable && isActive && (
           <span
             aria-hidden
-            className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-surface bg-primary-500"
+            className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-surface bg-primary"
           />
         )}
       </div>
@@ -69,7 +69,7 @@ export function StaffCard({
               className="h-1.5 w-1.5 rounded-full"
               style={{
                 background: isBookable
-                  ? "var(--color-primary-500)"
+                  ? "var(--color-primary)"
                   : "var(--color-foreground-subtle)",
               }}
             />

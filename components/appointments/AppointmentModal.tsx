@@ -182,7 +182,7 @@ export function AppointmentCreateModal({
                   </Button>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
                     onClick={onToggleNewCustomerForm}
                     disabled={isCreatingCustomer}
@@ -230,7 +230,7 @@ export function AppointmentCreateModal({
                   onClick={() => onServiceChange(s.id)}
                   className={`rounded-lg border p-2.5 text-left transition-colors ${
                     selected
-                      ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                      ? "border-primary bg-primary-50 dark:bg-primary-900/20"
                       : "border-border bg-surface hover:bg-muted"
                   }`}
                 >
@@ -307,7 +307,7 @@ export function AppointmentCreateModal({
         <SheetFooter>
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
             className="flex-1 justify-center"
@@ -485,7 +485,7 @@ export function AppointmentDetailModal({
             )}
             {next && next.to !== "completed" && status !== "pending" && (
               <Button
-                variant="ghost"
+                variant="secondary"
                 onClick={() => onAdvance("completed")}
                 disabled={isProcessing}
                 className="w-full justify-center"

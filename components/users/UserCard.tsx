@@ -18,7 +18,7 @@ export const ROLE_META: Record<
   owner: {
     label: "Dueño",
     chip: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
-    color: "var(--color-primary-500)",
+    color: "var(--color-primary)",
     description:
       "Gestiona su organización, servicios y reservas. No puede gestionar usuarios.",
   },

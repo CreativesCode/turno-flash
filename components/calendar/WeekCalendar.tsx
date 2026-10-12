@@ -144,7 +144,7 @@ export const WeekCalendar = React.memo(
                   <div
                     className={`mx-auto mt-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-extrabold tabular-nums ${
                       isCurrent
-                        ? "bg-primary-500 text-white"
+                        ? "bg-primary text-primary-foreground"
                         : "text-foreground"
                     }`}
                   >

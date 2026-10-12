@@ -163,7 +163,7 @@ export function PeakHoursHeatmap({ cells }: { cells: HeatmapCell[] }) {
                     backgroundColor:
                       count === 0
                         ? "var(--color-surface-2, #f3f4f6)"
-                        : `color-mix(in srgb, var(--color-primary-500, #22c55e) ${Math.round(
+                        : `color-mix(in srgb, var(--color-primary) ${Math.round(
                             20 + intensity * 80
                           )}%, transparent)`,
                   }}
@@ -180,7 +180,7 @@ export function PeakHoursHeatmap({ cells }: { cells: HeatmapCell[] }) {
             key={i}
             className="h-2.5 w-2.5 rounded-[3px]"
             style={{
-              backgroundColor: `color-mix(in srgb, var(--color-primary-500, #22c55e) ${Math.round(
+              backgroundColor: `color-mix(in srgb, var(--color-primary) ${Math.round(
                 20 + i * 80
               )}%, transparent)`,
             }}

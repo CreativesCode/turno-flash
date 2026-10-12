@@ -207,7 +207,7 @@ export function SetupGuide() {
         <div className="mt-4 flex items-center gap-3">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
             <div
-              className="h-full rounded-full bg-primary-500 transition-all"
+              className="h-full rounded-full bg-primary transition-all"
               style={{ width: `${(doneCount / steps.length) * 100}%` }}
             />
           </div>
@@ -234,7 +234,7 @@ export function SetupGuide() {
                     done
                       ? "bg-success-500 text-white"
                       : open
-                        ? "bg-primary-500 text-white"
+                        ? "bg-primary text-primary-foreground"
                         : "bg-surface-2 text-foreground-muted"
                   }`}
                 >

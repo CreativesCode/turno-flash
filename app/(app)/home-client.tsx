@@ -427,7 +427,7 @@ export default function HomePageClient() {
                 <div className="flex-1 rounded-lg bg-primary-50 px-2 py-2 text-center text-[11px] font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
                   ✓ Recordatorio enviado
                 </div>
-                <div className="rounded-lg bg-primary-500 px-3 py-2 text-[11px] font-semibold text-white">
+                <div className="rounded-lg bg-primary px-3 py-2 text-[11px] font-semibold text-primary-foreground">
                   Check-in
                 </div>
               </div>

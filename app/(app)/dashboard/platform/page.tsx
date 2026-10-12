@@ -297,7 +297,7 @@ export default function PlatformPage() {
                               </div>
                               <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-surface-2">
                                 <div
-                                  className="h-full rounded-full bg-primary-500"
+                                  className="h-full rounded-full bg-primary"
                                   style={{
                                     width: `${(org.appointments / max) * 100}%`,
                                   }}

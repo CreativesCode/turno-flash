@@ -196,7 +196,7 @@ function CenteredState({
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="text-center">
           <h1 className="text-xl font-extrabold text-foreground">{title}</h1>
-          <Button variant="ghost" className="mt-4" onClick={onBack}>
+          <Button variant="secondary" className="mt-4" onClick={onBack}>
             <ChevronLeft className="h-4 w-4" />
             Volver a organizaciones
           </Button>

@@ -146,7 +146,7 @@ function ScheduleEditor({
                   onClick={() => toggleService(service.id)}
                   className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     selected
-                      ? "border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400"
+                      ? "border-primary bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400"
                       : "border-border bg-surface-2 text-foreground-muted hover:border-border-2"
                   }`}
                 >
@@ -190,7 +190,7 @@ function ScheduleEditor({
       <div className="flex gap-2">
         <Button
           type="button"
-          variant="ghost"
+          variant="secondary"
           onClick={onDone}
           disabled={saveMutation.isPending}
           className="flex-1 justify-center"
@@ -247,7 +247,7 @@ function DayRow({
             type="checkbox"
             checked={isOpen}
             onChange={(e) => onChange(e.target.checked ? [DEFAULT_RANGE] : [])}
-            className="h-4 w-4 rounded border-border text-primary focus:ring-primary-500"
+            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
           />
         </span>
       </label>

@@ -239,7 +239,7 @@ export function LicensePlanCard({ organization, onChanged }: LicensePlanCardProp
               checked={founder}
               disabled={founderLocked}
               onChange={(e) => setFounder(e.target.checked)}
-              className="h-4 w-4 shrink-0 accent-primary-500"
+              className="h-4 w-4 shrink-0 accent-primary"
             />
             <span className="text-sm text-foreground">Negocio fundador</span>
           </label>

@@ -369,7 +369,7 @@ function Toggle({
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={`relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors ${
-        checked ? "bg-primary-500" : "bg-border-2"
+        checked ? "bg-primary" : "bg-border-2"
       } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
     >
       <span

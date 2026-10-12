@@ -126,7 +126,7 @@ export function AppointmentRescheduleSheet({
         <SheetFooter>
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
             className="flex-1 justify-center"
