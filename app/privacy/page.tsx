@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Política de privacidad de Turno Flash: qué datos recopilamos, cómo los usamos y cuáles son tus derechos.",
 };
 
-const LAST_UPDATED = "11 de junio de 2026";
+const LAST_UPDATED = "12 de octubre de 2026";
 const CONTACT_EMAIL = "robert.cabrer92@gmail.com";
 
 export default function PrivacyPage() {
@@ -55,7 +55,8 @@ export default function PrivacyPage() {
               <li>
                 <strong>Datos de cuenta:</strong> correo electrónico, nombre y
                 contraseña (almacenada de forma cifrada) de los usuarios que se
-                registran.
+                registran, y el número de WhatsApp de quien registra el
+                negocio.
               </li>
               <li>
                 <strong>Datos del negocio:</strong> nombre de la organización,
@@ -71,10 +72,11 @@ export default function PrivacyPage() {
                 profesional asignado y estado de cada turno.
               </li>
               <li>
-                <strong>Datos de suscripción:</strong> si contratas un plan,
-                la tienda (Google Play) y nuestro proveedor RevenueCat procesan
-                el pago; nosotros recibimos únicamente el estado de la
-                suscripción, nunca los datos de tu tarjeta.
+                <strong>Datos del plan y de los pagos:</strong> el plan del
+                negocio y, por cada pago que registramos, la fecha, el importe
+                y el período que cubre. El pago se hace fuera de la Aplicación:
+                no recibimos ni guardamos datos de tarjetas ni de cuentas
+                bancarias.
               </li>
             </ul>
           </section>
@@ -89,7 +91,11 @@ export default function PrivacyPage() {
                 Enviar recordatorios y confirmaciones por WhatsApp a los
                 clientes del negocio, cuando el negocio activa esa función.
               </li>
-              <li>Gestionar suscripciones y licencias de uso.</li>
+              <li>Gestionar los planes y el acceso de cada negocio.</li>
+              <li>
+                Avisar por WhatsApp a quien registró el negocio antes de que
+                venza su acceso.
+              </li>
               <li>Diagnosticar errores y mejorar la Aplicación.</li>
             </ul>
             <p className="mt-2">
@@ -107,12 +113,9 @@ export default function PrivacyPage() {
                 autenticación), con cifrado en tránsito y en reposo.
               </li>
               <li>
-                <strong>RevenueCat y Google Play</strong> (gestión de
-                suscripciones y pagos).
-              </li>
-              <li>
                 <strong>Proveedor de mensajería WhatsApp</strong> para el envío
-                de recordatorios, cuando el negocio lo habilita.
+                de recordatorios, cuando el negocio lo habilita, y de los
+                avisos sobre el acceso del negocio.
               </li>
             </ul>
             <p className="mt-2">

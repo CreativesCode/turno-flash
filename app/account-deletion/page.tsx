@@ -84,9 +84,9 @@ export default function AccountDeletionPage() {
                 citas, servicios), que se completará en un máximo de 30 días.
               </li>
               <li>
-                <strong>Suscripciones:</strong> cancela la renovación desde
-                Google Play; eliminar la cuenta no cancela automáticamente la
-                suscripción.
+                <strong>Plan de pago:</strong> no hay renovaciones automáticas
+                que cancelar. Al eliminar la cuenta dejan de llegarte los
+                avisos sobre el acceso del negocio.
               </li>
             </ul>
           </section>

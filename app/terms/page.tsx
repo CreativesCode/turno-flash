@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Términos y condiciones de uso de Turno Flash: suscripciones, responsabilidades y uso aceptable.",
 };
 
-const LAST_UPDATED = "11 de junio de 2026";
+const LAST_UPDATED = "12 de octubre de 2026";
 const CONTACT_EMAIL = "robert.cabrer92@gmail.com";
 
 export default function TermsPage() {
@@ -61,25 +61,52 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-2 text-lg font-semibold">
-              3. Suscripciones y pagos
+              3. Planes y pagos
             </h2>
             <ul className="list-disc space-y-1 pl-5">
               <li>
-                Algunas funciones requieren una suscripción de pago, que se
-                contrata a través de Google Play y se renueva automáticamente
-                al final de cada período.
+                Cada negocio usa la Aplicación con un plan de pago, que
+                depende de su tamaño y de si da turnos, vende pasajes o hace
+                ambas cosas. Los planes y sus precios vigentes se publican en
+                nuestro sitio web.
               </li>
               <li>
-                Puedes cancelar en cualquier momento desde la configuración de
-                suscripciones de Google Play; mantendrás el acceso hasta el fin
-                del período ya pagado.
+                Al registrar un negocio tienes 15 días de prueba gratis. La
+                prueba se da una sola vez por negocio.
               </li>
               <li>
-                Los reembolsos se rigen por las políticas de Google Play.
+                El plan se paga fuera de la Aplicación, en dólares
+                estadounidenses, por transferencia o en efectivo, coordinándolo
+                con nuestro soporte. Se paga por adelantado un período de 1, 3,
+                6 o 12 meses.
+              </li>
+              <li>
+                No hay renovación automática: no guardamos medios de pago ni
+                hacemos cobros por nuestra cuenta. Antes de que venza tu
+                período te avisamos por WhatsApp y dentro de la Aplicación.
+              </li>
+              <li>
+                Si un período vence sin que registremos un pago, el negocio
+                sigue funcionando 5 días de margen. Después queda bloqueado
+                hasta que se registre un pago. Los días de margen usados
+                cuentan dentro del período siguiente; los días que el negocio
+                estuvo bloqueado, no.
+              </li>
+              <li>
+                Un negocio bloqueado conserva sus datos, con el alcance que
+                indica la{" "}
+                <Link className="underline" href="/privacy">
+                  Política de Privacidad
+                </Link>
+                .
               </li>
               <li>
                 Los precios pueden cambiar; te avisaremos con antelación y el
-                cambio aplicará a partir de la siguiente renovación.
+                cambio aplicará a partir del siguiente período que pagues.
+              </li>
+              <li>
+                Si tienes un problema con un pago, escríbenos y lo revisamos
+                contigo.
               </li>
             </ul>
           </section>
