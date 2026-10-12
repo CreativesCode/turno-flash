@@ -2,6 +2,7 @@
 
 import { Logo } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
+import { useIsStoreApp } from "@/hooks/useIsStoreApp";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { ArrowLeft, Bus, Calendar } from "lucide-react";
 import Link from "next/link";
@@ -41,6 +42,7 @@ function subscribeToHash(onChange: () => void) {
 export function HelpManual({ css, panels, displayFontFamily }: HelpManualProps) {
   const { profile } = useAuth();
   const { modules } = useOrganizationModules();
+  const storeApp = useIsStoreApp();
   // What the reader picked with the switches; wins over everything else.
   const [chosen, setChosen] = useState<string | null>(null);
   const hash = useSyncExternalStore(
@@ -99,7 +101,8 @@ export function HelpManual({ css, panels, displayFontFamily }: HelpManualProps) 
   } as CSSProperties;
 
   return (
-    <div style={fonts}>
+    // .store-app hides the prices and how to pay (rules at the end of the manual CSS)
+    <div style={fonts} className={storeApp ? "store-app" : undefined}>
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
       <header className="topbar">
