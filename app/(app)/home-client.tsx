@@ -1,6 +1,14 @@
 "use client";
 
+import { PricingSection } from "@/components/landing/PricingSection";
 import { Avatar, Button, Card, Logo, StatusBadge } from "@/components/ui";
+import {
+  LICENSE_GRACE_DAYS,
+  LICENSE_PLAN_INFO,
+  SECOND_MODULE_PRICE,
+  TRIAL_DAYS,
+  formatUsd,
+} from "@/config/license-pricing";
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
 import {
@@ -205,41 +213,6 @@ const TRUST_POINTS: readonly Feature[] = [
   },
 ];
 
-const PLANS: readonly {
-  name: string;
-  price: string;
-  period: string;
-  note?: string;
-  features: string[];
-}[] = [
-    {
-      name: "Mensual",
-      price: "$9.99",
-      period: "USD / mes",
-      features: [
-        "Turnos, venta de pasajes o ambos",
-        "Turnos, salidas y clientes ilimitados",
-        "Recordatorios y valoraciones por WhatsApp",
-        "Reportes y estadísticas del negocio",
-        "Campañas para recuperar clientes",
-        "Equipo y servicios ilimitados",
-        "Soporte por correo",
-      ],
-    },
-    {
-      name: "Anual",
-      price: "$79.99",
-      period: "USD / año",
-      note: "Ahorra 33%",
-      features: [
-        "Todo lo del plan mensual",
-        "Equivale a $6.67 / mes",
-        "Un solo pago al año",
-        "Prioridad en soporte",
-      ],
-    },
-  ];
-
 const FAQS: readonly { question: string; answer: string }[] = [
   {
     question: "¿Qué es Turno Flash?",
@@ -254,7 +227,11 @@ const FAQS: readonly { question: string; answer: string }[] = [
   {
     question: "¿Cuánto cuesta?",
     answer:
-      "Ofrecemos un plan mensual de $9.99 USD y un plan anual de $79.99 USD (equivale a $6.67/mes, un 33% de ahorro). La suscripción se contrata desde la app Android a través de Google Play y puedes cancelarla en cualquier momento. También ofrecemos licencias gestionadas directamente para negocios que lo prefieran: contáctanos.",
+`Depende del tamaño de tu negocio. Personal (trabajas por tu cuenta) cuesta ${formatUsd(LICENSE_PLAN_INFO.personal.price)} al mes; Salón (hasta 5 profesionales), ${formatUsd(LICENSE_PLAN_INFO.salon.price)}; Salón grande, ${formatUsd(LICENSE_PLAN_INFO.salon_large.price)}; y Pasajes, ${formatUsd(LICENSE_PLAN_INFO.trips.price)}. Si das turnos y además vendes pasajes, sumas ${formatUsd(SECOND_MODULE_PRICE)} al mes. Puedes pagar por mes, por 3 o 6 meses, o por un año, que cuesta 10 meses. Empiezas con ${TRIAL_DAYS} días gratis.`,
+  },
+  {
+    question: "¿Cómo se paga?",
+    answer: `En dólares, por transferencia o en efectivo: nos escribes por WhatsApp desde la app y te decimos cómo. En cuanto registramos tu pago se extiende tu acceso. Desde 2 días antes de que venza te avisamos por WhatsApp, y si te atrasas tienes ${LICENSE_GRACE_DAYS} días de margen en los que la app sigue funcionando.`,
   },
   {
     question: "¿Necesito instalar algo?",
@@ -289,7 +266,7 @@ const FAQS: readonly { question: string; answer: string }[] = [
   {
     question: "¿Cómo empiezo a usar Turno Flash?",
     answer:
-      "Si eres dueño de un negocio, crea tu cuenta gratis: en un minuto tienes tu negocio listo, con 7 días de prueba. Si trabajas en un negocio que ya usa Turno Flash, pídele al dueño que te invite: te llega un correo para elegir tu contraseña.",
+`Si eres dueño de un negocio, crea tu cuenta gratis: en un minuto tienes tu negocio listo, con ${TRIAL_DAYS} días de prueba. Si trabajas en un negocio que ya usa Turno Flash, pídele al dueño que te invite: te llega un correo para elegir tu contraseña.`,
   },
 ];
 
@@ -646,70 +623,10 @@ export default function HomePageClient() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="px-5 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="text-center">
-            <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
-              Precios
-            </div>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Simple y de bajo costo.
-            </h2>
-            <p className="mt-3 text-base text-foreground-muted">
-              Un solo plan con todo incluido. Elige cómo pagarlo.
-            </p>
-          </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2">
-            {PLANS.map((plan) => (
-              <Card key={plan.name} className="relative flex flex-col p-6">
-                {plan.note && (
-                  <span className="absolute right-4 top-4 rounded-full bg-success-100 px-2.5 py-0.5 text-xs font-semibold text-success-800 dark:bg-success-900/20 dark:text-success-400">
-                    {plan.note}
-                  </span>
-                )}
-                <h3 className="text-base font-bold text-foreground">
-                  {plan.name}
-                </h3>
-                <div className="mt-2 flex items-baseline gap-1.5">
-                  <span className="text-4xl font-extrabold tracking-tight text-foreground">
-                    {plan.price}
-                  </span>
-                  <span className="text-sm text-foreground-muted">
-                    {plan.period}
-                  </span>
-                </div>
-                <ul className="mt-5 flex-1 space-y-2.5">
-                  {plan.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-2 text-sm text-foreground-muted"
-                    >
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success-600 dark:text-success-400" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  variant="mesh-primary"
-                  size="lg"
-                  className="mt-6"
-                  onClick={() => router.push(ctaTarget)}
-                >
-                  {user ? "Ir al Dashboard" : "Comenzar"}
-                </Button>
-              </Card>
-            ))}
-          </div>
-          <p className="mt-6 text-center text-xs text-foreground-muted">
-            La suscripción se gestiona a través de Google Play y se renueva
-            automáticamente; cancela cuando quieras. Consulta los{" "}
-            <Link className="underline" href="/terms">
-              Términos y Condiciones
-            </Link>
-            .
-          </p>
-        </div>
-      </section>
+      <PricingSection
+        ctaLabel={user ? "Ir al Dashboard" : `Probar ${TRIAL_DAYS} días gratis`}
+        onCta={() => router.push(ctaTarget)}
+      />
 
       {/* FAQs */}
       <section className="bg-surface px-5 py-20 sm:px-6 lg:px-8">
