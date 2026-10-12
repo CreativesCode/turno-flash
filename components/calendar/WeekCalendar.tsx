@@ -93,14 +93,14 @@ export const WeekCalendar = React.memo(
           <div className="flex items-center gap-1">
             <button
               onClick={goToPrevWeek}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted transition-colors hover:bg-muted"
+              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-border-2 bg-surface text-foreground-muted transition-colors hover:bg-muted"
               aria-label="Semana anterior"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               onClick={goToNextWeek}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted transition-colors hover:bg-muted"
+              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-border-2 bg-surface text-foreground-muted transition-colors hover:bg-muted"
               aria-label="Semana siguiente"
             >
               <ChevronRight className="h-4 w-4" />
@@ -108,16 +108,16 @@ export const WeekCalendar = React.memo(
             {!containsToday && (
               <button
                 onClick={goToToday}
-                className="ml-1 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+                className="ml-1 h-9 cursor-pointer rounded-[10px] border border-border-2 bg-surface px-3 text-meta font-semibold text-foreground transition-colors hover:bg-muted"
               >
                 Hoy
               </button>
             )}
           </div>
-          <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
+          <h2 className="text-lead font-semibold text-foreground">
             {weekRangeLabel}
           </h2>
-          <div className="rounded-full bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-foreground-muted">
+          <div className="rounded-full bg-surface-2 px-2.5 py-1 text-caption font-medium text-foreground-muted">
             {appointments.length} turno{appointments.length !== 1 ? "s" : ""}
           </div>
         </div>
@@ -125,7 +125,7 @@ export const WeekCalendar = React.memo(
         <Card className="overflow-hidden p-0">
           {/* Day headers */}
           <div
-            className="grid border-b border-border bg-surface-2"
+            className="grid border-b border-border bg-surface"
             style={{ gridTemplateColumns: gridCols }}
           >
             <div />
@@ -138,19 +138,19 @@ export const WeekCalendar = React.memo(
                   key={dStr}
                   className="border-l border-border py-2 text-center"
                 >
-                  <div className="text-[9px] font-bold uppercase tracking-wider text-foreground-muted">
+                  <div className="text-caption font-medium capitalize text-foreground-subtle">
                     {day.toLocaleDateString("es-ES", { weekday: "short" })}
                   </div>
                   <div
-                    className={`mx-auto mt-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-extrabold tabular-nums ${
+                    className={`mx-auto mt-1 flex h-7 w-7 items-center justify-center rounded-full text-meta font-semibold tabular-nums ${
                       isCurrent
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-inverse text-inverse-foreground"
                         : "text-foreground"
                     }`}
                   >
                     {day.getDate()}
                   </div>
-                  <div className="mt-1 text-[9px] text-foreground-subtle">
+                  <div className="mt-1 font-mono text-caption text-foreground-subtle">
                     {dayApts.length || "—"}
                   </div>
                 </div>
@@ -172,7 +172,7 @@ export const WeekCalendar = React.memo(
                 {hours.map((h) => (
                   <div
                     key={h}
-                    className="border-t border-dashed border-border pr-1 text-right text-[9px] font-semibold tabular-nums text-foreground-muted"
+                    className="border-t border-border pr-1 text-right font-mono text-caption tabular-nums text-foreground-subtle"
                     style={{ height: HOUR_PX, paddingTop: 2 }}
                   >
                     {String(h).padStart(2, "0")}
@@ -183,18 +183,12 @@ export const WeekCalendar = React.memo(
               {/* Day columns */}
               {weekDays.map((day) => {
                 const dStr = getLocalDateString(day);
-                const isCurrent = dStr === today;
                 const dayApts = appointmentsByDate.get(dStr) ?? [];
 
                 return (
                   <div
                     key={dStr}
                     className="relative border-l border-border"
-                    style={{
-                      background: isCurrent
-                        ? "rgba(34, 197, 94, 0.04)"
-                        : "transparent",
-                    }}
                   >
                     {/* Hour cells (click targets) */}
                     {hours.map((h) => {
@@ -203,15 +197,15 @@ export const WeekCalendar = React.memo(
                         <div
                           key={`${dStr}-${h}`}
                           onClick={() => onTimeSlotClick?.(dStr, time)}
-                          className={`group relative border-t border-dashed border-border ${
+                          className={`group relative border-t border-border ${
                             onTimeSlotClick
-                              ? "cursor-pointer hover:bg-info-50/60 dark:hover:bg-info-900/15"
+                              ? "cursor-pointer hover:bg-muted"
                               : ""
                           }`}
                           style={{ height: HOUR_PX }}
                         >
                           {onTimeSlotClick && (
-                            <Plus className="absolute right-1 top-1 hidden h-3 w-3 text-info group-hover:block" />
+                            <Plus className="absolute right-1 top-1 hidden h-3 w-3 text-foreground-subtle group-hover:block" />
                           )}
                         </div>
                       );
@@ -274,13 +268,12 @@ function ApptBlock({ appt, startHour, onClick }: ApptBlockProps) {
 
   return (
     <div
-      className={`st-${status} absolute inset-x-0.5 cursor-pointer overflow-hidden rounded border-l-2 px-1 py-0.5 text-[8px] font-bold tabular-nums shadow-xs transition-transform hover:z-10 hover:scale-[1.02]`}
+      className={`st-${status} absolute inset-x-0.5 cursor-pointer overflow-hidden rounded-[6px] border-l-2 px-1 py-0.5 font-mono text-caption font-medium tabular-nums text-foreground hover:z-10`}
       style={{
         top,
         height,
-        background: "var(--st-bg)",
+        background: "var(--st-tint)",
         borderLeftColor: "var(--st-c)",
-        color: "var(--st-cb)",
       }}
       onClick={(e) => {
         e.stopPropagation();

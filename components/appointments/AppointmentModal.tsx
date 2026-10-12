@@ -4,6 +4,7 @@ import {
   Avatar,
   Button,
   Field,
+  KebabMenu,
   Sheet,
   StatusBadge,
   sheetInputClasses as inputClasses,
@@ -24,14 +25,7 @@ import { formatDateForDisplay, parseLocalDate } from "@/utils/date";
 import { toInternationalPhone } from "@/utils/phone";
 import { useMoney } from "@/hooks/useMoney";
 import { fmtDuration } from "@/utils/format";
-import {
-  ChevronRight,
-  Edit3,
-  MessageCircle,
-  Phone,
-  Plus,
-  X,
-} from "lucide-react";
+import { CalendarClock, MessageCircle, Plus, X } from "lucide-react";
 import { FormEvent, ReactNode } from "react";
 
 /* ────────────────────────────────────────────────────────────
@@ -109,21 +103,21 @@ export function AppointmentCreateModal({
             <button
               type="button"
               onClick={onToggleNewCustomerForm}
-              className="flex min-h-11 shrink-0 items-center gap-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-xs font-semibold text-secondary-500 transition-colors hover:bg-secondary-50 dark:hover:bg-secondary-900/20"
+              className="flex h-12 shrink-0 cursor-pointer items-center gap-1 rounded-control border border-border-2 bg-surface px-3 text-meta font-semibold text-foreground transition-colors hover:bg-muted"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="size-4" />
               {showNewCustomerForm ? "Cerrar" : "Nuevo"}
             </button>
           </div>
           {customers.length === 0 && !showNewCustomerForm && (
-            <p className="mt-1.5 text-xs text-warning-600 dark:text-warning-400">
+            <p className="mt-1.5 text-caption text-warning-700 dark:text-warning-400">
               No hay clientes. Crea uno con el botón &quot;Nuevo&quot;.
             </p>
           )}
 
           {showNewCustomerForm && (
-            <div className="mt-3 rounded-xl border border-info-200 bg-info-50 p-3 dark:border-info-800 dark:bg-info-900/20">
-              <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-info-700 dark:text-info-300">
+            <div className="mt-3 rounded-card bg-surface-2 p-3">
+              <h3 className="mb-2 text-meta font-semibold text-foreground-muted">
                 Crear cliente rápido
               </h3>
               <div className="flex flex-col gap-2">
@@ -172,7 +166,7 @@ export function AppointmentCreateModal({
                 <div className="flex gap-2 pt-1">
                   <Button
                     type="button"
-                    variant="mesh-secondary"
+                    variant="primary"
                     size="sm"
                     onClick={onCreateCustomer}
                     disabled={isCreatingCustomer}
@@ -228,23 +222,24 @@ export function AppointmentCreateModal({
                   key={s.id}
                   type="button"
                   onClick={() => onServiceChange(s.id)}
-                  className={`rounded-lg border p-2.5 text-left transition-colors ${
+                  aria-pressed={selected}
+                  className={`cursor-pointer rounded-control border px-3.5 py-2.5 text-left transition-colors ${
                     selected
-                      ? "border-primary bg-primary-50 dark:bg-primary-900/20"
-                      : "border-border bg-surface hover:bg-muted"
+                      ? "border-primary bg-primary-100 dark:bg-primary-900"
+                      : "border-border-2 bg-surface hover:bg-muted"
                   }`}
                 >
                   <div className="flex items-center gap-2">
                     <span
                       aria-hidden
-                      className="h-2 w-2 shrink-0 rounded-full"
+                      className="size-1.5 shrink-0 rounded-[2px]"
                       style={{ background: dot }}
                     />
-                    <span className="truncate text-sm font-semibold text-foreground">
+                    <span className="truncate text-body font-semibold text-foreground">
                       {s.name}
                     </span>
                   </div>
-                  <div className="mt-1 text-[11px] text-foreground-muted">
+                  <div className="mt-0.5 text-caption text-foreground-muted">
                     {fmtDuration(s.duration_minutes)} ·{" "}
                     {s.price != null ? money(s.price) : "Sin precio"}
                   </div>
@@ -253,7 +248,7 @@ export function AppointmentCreateModal({
             })}
           </div>
           {services.length === 0 && (
-            <p className="mt-1.5 text-xs text-warning-600 dark:text-warning-400">
+            <p className="mt-1.5 text-caption text-warning-700 dark:text-warning-400">
               No hay servicios. Crea uno en la sección de servicios.
             </p>
           )}
@@ -282,7 +277,7 @@ export function AppointmentCreateModal({
                 >
                   <span
                     aria-hidden
-                    className="h-2 w-2 shrink-0 rounded-full"
+                    className="size-1.5 shrink-0 rounded-[2px]"
                     style={{ background: dot }}
                   />
                   {label}
@@ -310,17 +305,15 @@ export function AppointmentCreateModal({
             variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex-1 justify-center"
           >
             Cancelar
           </Button>
           <Button
             type="submit"
-            variant="mesh-primary"
             disabled={
               isSubmitting || !formData.customer_id || services.length === 0
             }
-            className="flex-2 justify-center"
+            className="flex-1"
           >
             {isSubmitting ? "Guardando…" : "Crear turno"}
           </Button>
@@ -343,10 +336,11 @@ export function ChipButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+      aria-pressed={selected}
+      className={`flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-control border px-3.5 text-meta font-semibold text-foreground transition-colors ${
         selected
-          ? "border-foreground bg-foreground text-background"
-          : "border-border bg-surface text-foreground hover:bg-muted"
+          ? "border-primary bg-primary-100 dark:bg-primary-900"
+          : "border-border-2 bg-surface hover:bg-muted"
       }`}
     >
       {children}
@@ -401,7 +395,7 @@ export function AppointmentDetailModal({
   const startTime = a.start_time?.slice(0, 5) ?? "";
   const endTime = a.end_time?.slice(0, 5) ?? "";
   const dateLabel = formatDateForDisplay(parseLocalDate(a.appointment_date), {
-    weekday: "long",
+    weekday: "short",
     day: "numeric",
     month: "short",
   });
@@ -409,191 +403,191 @@ export function AppointmentDetailModal({
     status === "completed" || status === "cancelled" || status === "no_show";
 
   return (
-    <Sheet open={open} onClose={onClose} title="Detalle del turno">
-      <div className="flex flex-col gap-4">
-        {/* Customer header */}
-        <div className="flex items-center gap-3">
-          <Avatar name={customerName} size={48} />
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-base font-bold text-foreground">
-              {customerName}
-            </div>
-            <div className="mt-0.5 flex items-center gap-1.5 text-xs text-foreground-muted">
-              <Phone className="h-3 w-3" />
-              {a.customer_phone ? (
-                <a
-                  href={`tel:${toInternationalPhone(a.customer_phone)}`}
-                  className="truncate underline-offset-2 hover:underline"
-                >
-                  {a.customer_phone}
-                </a>
-              ) : (
-                <span>—</span>
-              )}
-            </div>
+    <Sheet open={open} onClose={onClose} title="Detalle del turno" hideTitle>
+      {/* Customer header */}
+      <div className="flex items-center gap-3">
+        <Avatar name={customerName} seed={a.customer_id} size={52} />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-title font-semibold tracking-[-0.01em] text-foreground">
+            {customerName}
           </div>
-          <StatusBadge status={status} />
-        </div>
-
-        {/* Detail grid */}
-        <div className="grid grid-cols-2 gap-3 rounded-xl bg-surface-2 p-3">
-          <DetailItem label="Fecha" value={dateLabel} />
-          <DetailItem label="Hora" value={`${startTime} – ${endTime}`} />
-          <DetailItem
-            label="Servicio"
-            value={a.service_name}
-            dot={serviceColor ?? undefined}
-          />
-          <DetailItem
-            label="Profesional"
-            value={staffName}
-            dot={staffColor ?? undefined}
-          />
-          <DetailItem
-            label="Duración"
-            value={fmtDuration(a.duration_minutes)}
-          />
-          <DetailItem
-            label="Precio"
-            value={a.service_price != null ? money(a.service_price) : "—"}
-          />
-        </div>
-
-        {/* Notes */}
-        {a.notes && (
-          <div className="rounded-xl border border-border bg-surface px-3 py-2">
-            <div className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
-              Notas
-            </div>
-            <p className="mt-1 text-sm text-foreground">{a.notes}</p>
+          <div className="mt-[3px] font-mono text-meta tabular-nums text-foreground-muted">
+            {a.customer_phone ? (
+              <a
+                href={`tel:${toInternationalPhone(a.customer_phone)}`}
+                className="underline-offset-2 hover:underline"
+              >
+                {a.customer_phone}
+              </a>
+            ) : (
+              "—"
+            )}
           </div>
+        </div>
+        {/* The customer is already being attended: they did show up */}
+        {!isTerminal && onMarkNoShow && status !== "in_progress" && (
+          <KebabMenu
+            items={[
+              {
+                label: "No vino",
+                onClick: () => void onMarkNoShow(),
+                disabled: isProcessing,
+              },
+            ]}
+          />
         )}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar"
+          className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-control bg-surface-2 text-foreground-muted transition-colors hover:text-foreground"
+        >
+          <X className="size-[18px]" />
+        </button>
+      </div>
 
-        {/* Actions */}
-        {!isTerminal && (
-          <div className="flex flex-col gap-2">
-            {next && (
-              <Button
-                variant="mesh-primary"
-                onClick={() => onAdvance(next.to)}
-                disabled={isProcessing}
-                className="w-full justify-center"
-              >
-                {next.label}
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-            {next && next.to !== "completed" && status !== "pending" && (
-              <Button
-                variant="secondary"
-                onClick={() => onAdvance("completed")}
-                disabled={isProcessing}
-                className="w-full justify-center"
-              >
-                Terminar
-              </Button>
-            )}
-            <div className="grid grid-cols-4 gap-2">
-              {whatsappUrl && (
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center gap-1 rounded-xl border border-border bg-surface px-2 py-2.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  WhatsApp
-                </a>
-              )}
-              {onEdit && (
-                <ActionTile
-                  icon={<Edit3 className="h-4 w-4" />}
-                  label="Mover"
-                  onClick={onEdit}
-                  disabled={isProcessing}
-                />
-              )}
-              {/* The customer is already being attended: they did show up */}
-              {onMarkNoShow && status !== "in_progress" && (
-                <ActionTile
-                  icon={<X className="h-4 w-4" />}
-                  label="No vino"
-                  tone="warning"
-                  onClick={onMarkNoShow}
-                  disabled={isProcessing}
-                />
-              )}
-              <ActionTile
-                icon={<X className="h-4 w-4" />}
-                label="Cancelar"
-                tone="danger"
-                onClick={onCancel}
-                disabled={isProcessing}
-              />
-            </div>
-          </div>
+      <div className="mt-4 flex items-center gap-2">
+        <StatusBadge status={status} className="!h-7 !text-meta" />
+        {a.appointment_number && (
+          <span className="font-mono text-caption tabular-nums text-foreground-subtle">
+            N° {a.appointment_number}
+          </span>
         )}
       </div>
+
+      {/* Detail grid: the hairlines are the 1px gaps over the border colour */}
+      <div className="mt-[18px] grid grid-cols-2 gap-px overflow-hidden rounded-[18px] border border-border bg-border">
+        <DetailItem label="Fecha" value={dateLabel} />
+        <DetailItem label="Hora" value={`${startTime} – ${endTime}`} mono />
+        <DetailItem
+          label="Servicio"
+          value={a.service_name}
+          dot={serviceColor ?? undefined}
+        />
+        <DetailItem
+          label="Profesional"
+          value={staffName}
+          dot={staffColor ?? undefined}
+        />
+        <DetailItem label="Duración" value={fmtDuration(a.duration_minutes)} />
+        <DetailItem
+          label="Precio"
+          value={a.service_price != null ? money(a.service_price) : "—"}
+          mono
+        />
+      </div>
+
+      {/* Notes */}
+      {a.notes && (
+        <div className="mt-3 rounded-[18px] border border-border px-3.5 py-3">
+          <div className="text-caption text-foreground-subtle">Notas</div>
+          <p className="mt-[3px] text-body text-foreground">{a.notes}</p>
+        </div>
+      )}
+
+      {/* Actions */}
+      {!isTerminal && (
+        <>
+          {next && (
+            <Button
+              size="lg"
+              onClick={() => onAdvance(next.to)}
+              disabled={isProcessing}
+              className="mt-[18px] w-full"
+            >
+              {LONG_ACTION[next.to] ?? next.label}
+            </Button>
+          )}
+          {next && next.to !== "completed" && status !== "pending" && (
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => onAdvance("completed")}
+              disabled={isProcessing}
+              className="mt-2 w-full"
+            >
+              Terminar
+            </Button>
+          )}
+          <div className="mt-2 grid auto-cols-fr grid-flow-col gap-2">
+            {whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={ACTION_TILE}
+              >
+                <MessageCircle className="size-[17px]" />
+                WhatsApp
+              </a>
+            )}
+            {onEdit && (
+              <button
+                type="button"
+                onClick={onEdit}
+                disabled={isProcessing}
+                className={ACTION_TILE}
+              >
+                <CalendarClock className="size-[17px]" />
+                Mover
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => void onCancel()}
+              disabled={isProcessing}
+              className={`${ACTION_TILE} !text-danger-600 dark:!text-danger-400`}
+            >
+              <X className="size-[17px]" />
+              Cancelar
+            </button>
+          </div>
+        </>
+      )}
     </Sheet>
   );
 }
+
+/** The main button spells the step out; the short label is for tight spots. */
+const LONG_ACTION: Partial<Record<AppointmentStatus, string>> = {
+  confirmed: "Confirmar",
+  checked_in: "Marcar llegada",
+  in_progress: "Empezar atención",
+  completed: "Terminar",
+};
+
+const ACTION_TILE =
+  "flex h-12 cursor-pointer items-center justify-center gap-1.5 rounded-[14px] border border-border-2 bg-surface text-meta font-semibold text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
 
 function DetailItem({
   label,
   value,
   dot,
+  mono = false,
 }: {
   label: string;
   value: string;
   dot?: string;
+  /** Times and prices go in the mono face. */
+  mono?: boolean;
 }) {
   return (
-    <div className="min-w-0">
-      <div className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
-        {label}
-      </div>
-      <div className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+    <div className="min-w-0 bg-surface px-3.5 py-3">
+      <div className="text-caption text-foreground-subtle">{label}</div>
+      <div
+        className={`mt-[3px] flex items-center gap-1.5 text-body font-medium text-foreground ${
+          mono ? "font-mono tabular-nums" : ""
+        }`}
+      >
         {dot && (
           <span
             aria-hidden
-            className="h-2 w-2 shrink-0 rounded-full"
+            className="size-1.5 shrink-0 rounded-[2px]"
             style={{ background: dot }}
           />
         )}
         <span className="truncate">{value}</span>
       </div>
     </div>
-  );
-}
-
-function ActionTile({
-  icon,
-  label,
-  onClick,
-  tone = "neutral",
-  disabled,
-}: {
-  icon: ReactNode;
-  label: string;
-  onClick?: () => void | Promise<void>;
-  tone?: "neutral" | "warning" | "danger";
-  disabled?: boolean;
-}) {
-  const toneClasses =
-    tone === "danger"
-      ? "text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20"
-      : tone === "warning"
-        ? "text-warning-700 hover:bg-warning-50 dark:hover:bg-warning-900/20"
-        : "text-foreground hover:bg-muted";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`flex flex-col items-center justify-center gap-1 rounded-xl border border-border bg-surface px-2 py-2.5 text-[11px] font-semibold transition-colors disabled:opacity-50 ${toneClasses}`}
-    >
-      {icon}
-      {label}
-    </button>
   );
 }

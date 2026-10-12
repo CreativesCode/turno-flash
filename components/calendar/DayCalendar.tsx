@@ -69,19 +69,19 @@ export const DayCalendar = React.memo(
 
     return (
       <div className="space-y-3">
-        {/* Header: prev/next/today + uppercase weekday + big date + count */}
+        {/* Header: prev/next/today + weekday + date + count */}
         <div className="flex items-center justify-between gap-2 px-1">
           <div className="flex items-center gap-1">
             <button
               onClick={goToPrevDay}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted transition-colors hover:bg-muted"
+              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-border-2 bg-surface text-foreground-muted transition-colors hover:bg-muted"
               aria-label="Día anterior"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               onClick={goToNextDay}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted transition-colors hover:bg-muted"
+              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-border-2 bg-surface text-foreground-muted transition-colors hover:bg-muted"
               aria-label="Día siguiente"
             >
               <ChevronRight className="h-4 w-4" />
@@ -89,21 +89,21 @@ export const DayCalendar = React.memo(
             {!today && (
               <button
                 onClick={goToToday}
-                className="ml-1 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+                className="ml-1 h-9 cursor-pointer rounded-[10px] border border-border-2 bg-surface px-3 text-meta font-semibold text-foreground transition-colors hover:bg-muted"
               >
                 Hoy
               </button>
             )}
           </div>
           <div className="text-center">
-            <div className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+            <div className="text-meta font-medium capitalize text-foreground-subtle">
               {weekday}
             </div>
-            <div className="text-lg font-extrabold tracking-tight text-foreground sm:text-xl">
+            <div className="text-lead font-semibold text-foreground">
               {dayLabel}
             </div>
           </div>
-          <div className="rounded-full bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-foreground-muted">
+          <div className="rounded-full bg-surface-2 px-2.5 py-1 text-caption font-medium text-foreground-muted">
             {dayAppointments.length} turno
             {dayAppointments.length !== 1 ? "s" : ""}
           </div>
@@ -113,11 +113,11 @@ export const DayCalendar = React.memo(
         <Card className="overflow-hidden p-0">
           <div className="flex max-h-160 overflow-y-auto">
             {/* Hour rail */}
-            <div className="w-11 shrink-0 border-r border-border pt-1">
+            <div className="w-12 shrink-0 border-r border-border pt-1">
               {hours.map((h) => (
                 <div
                   key={h}
-                  className="px-1.5 pt-1 text-right text-[11px] font-semibold tabular-nums text-foreground-muted"
+                  className="px-1.5 pt-1 text-right font-mono text-caption tabular-nums text-foreground-subtle"
                   style={{ height: HOUR_PX }}
                 >
                   {String(h).padStart(2, "0")}:00
@@ -134,12 +134,12 @@ export const DayCalendar = React.memo(
                 return (
                   <div
                     key={h}
-                    className="relative border-t border-dashed border-border"
+                    className="relative border-t border-border"
                     style={{ height: HOUR_PX }}
                   >
                     {/* dotted half-hour separator */}
                     <div
-                      className="absolute inset-x-0 border-t border-dotted border-border-2 opacity-60"
+                      className="absolute inset-x-0 border-t border-dashed border-border/50"
                       style={{ top: "50%" }}
                     />
                     {/* Click targets — hidden but cover top/bottom halves */}
@@ -148,20 +148,20 @@ export const DayCalendar = React.memo(
                         <button
                           type="button"
                           onClick={() => onTimeSlotClick(slotTopHour)}
-                          className="group absolute inset-x-0 top-0 cursor-pointer transition-colors hover:bg-info-50/60 dark:hover:bg-info-900/15"
+                          className="group absolute inset-x-0 top-0 cursor-pointer transition-colors hover:bg-muted"
                           style={{ height: HOUR_PX / 2 }}
                           aria-label={`Crear turno a las ${slotTopHour}`}
                         >
-                          <Plus className="absolute right-2 top-1/2 hidden h-3.5 w-3.5 -translate-y-1/2 text-info group-hover:block" />
+                          <Plus className="absolute right-2 top-1/2 hidden h-3.5 w-3.5 -translate-y-1/2 text-foreground-subtle group-hover:block" />
                         </button>
                         <button
                           type="button"
                           onClick={() => onTimeSlotClick(slotTopHalf)}
-                          className="group absolute inset-x-0 bottom-0 cursor-pointer transition-colors hover:bg-info-50/60 dark:hover:bg-info-900/15"
+                          className="group absolute inset-x-0 bottom-0 cursor-pointer transition-colors hover:bg-muted"
                           style={{ height: HOUR_PX / 2 }}
                           aria-label={`Crear turno a las ${slotTopHalf}`}
                         >
-                          <Plus className="absolute right-2 top-1/2 hidden h-3.5 w-3.5 -translate-y-1/2 text-info group-hover:block" />
+                          <Plus className="absolute right-2 top-1/2 hidden h-3.5 w-3.5 -translate-y-1/2 text-foreground-subtle group-hover:block" />
                         </button>
                       </>
                     )}
@@ -227,26 +227,25 @@ function ApptBlock({ appt, startHour, onClick }: ApptBlockProps) {
 
   return (
     <div
-      className={`st-${status} absolute left-1.5 right-1.5 cursor-pointer overflow-hidden rounded-md border-l-4 px-2 py-1 shadow-xs transition-transform hover:-translate-y-px`}
+      className={`st-${status} absolute left-1.5 right-1.5 cursor-pointer overflow-hidden rounded-[10px] border-l-[3px] px-2 py-1.5`}
       style={{
         top,
         height,
-        background: "var(--st-bg)",
+        background: "var(--st-tint)",
         borderLeftColor: "var(--st-c)",
-        color: "var(--st-cb)",
       }}
       onClick={() => onClick?.(appt)}
       role="button"
       tabIndex={0}
     >
-      <div className="truncate text-[10px] font-bold tabular-nums">
+      <div className="truncate font-mono text-caption tabular-nums text-foreground-muted">
         {time} · {fmtDuration(appt.duration_minutes)}
       </div>
-      <div className="truncate text-[12px] font-bold leading-tight">
+      <div className="truncate text-meta font-semibold leading-tight text-foreground">
         {appt.customer_first_name} {appt.customer_last_name}
       </div>
       {showService && (
-        <div className="truncate text-[11px] leading-tight opacity-90">
+        <div className="truncate text-caption leading-tight text-foreground-muted">
           {appt.service_name}
         </div>
       )}
@@ -271,15 +270,15 @@ function NowIndicator({
   return (
     <div
       className="pointer-events-none absolute inset-x-0 z-10"
-      style={{ top, height: 0, borderTop: "2px solid var(--color-secondary-500)" }}
+      style={{ top, height: 0, borderTop: "1.5px solid var(--color-secondary)" }}
     >
       <span
         aria-hidden
-        className="absolute h-2.5 w-2.5 rounded-full bg-secondary-500"
-        style={{ left: -6, top: -5, boxShadow: "var(--shadow-glow-secondary)" }}
+        className="absolute size-2 rounded-full bg-secondary"
+        style={{ left: -4, top: -5 }}
       />
       <span
-        className="absolute rounded bg-surface px-1.5 py-px text-[10px] font-bold text-secondary-500"
+        className="absolute rounded bg-surface px-1.5 py-px font-mono text-caption text-secondary-600 dark:text-secondary-400"
         style={{ right: 6, top: -10 }}
       >
         {label}
