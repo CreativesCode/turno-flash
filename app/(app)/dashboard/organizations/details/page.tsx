@@ -122,7 +122,7 @@ function SectionHeader({
         >
           {icon}
         </div>
-        <h2 className="text-sm font-bold text-foreground">{title}</h2>
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
       </div>
       {action}
     </div>
@@ -140,7 +140,7 @@ function InfoItem({
 }) {
   return (
     <div className={className}>
-      <dt className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+      <dt className="text-caption font-semibold text-foreground-muted">
         {label}
       </dt>
       <dd className="mt-1 text-sm font-medium text-foreground">{children}</dd>
@@ -151,10 +151,10 @@ function InfoItem({
 function HeroStat({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0 rounded-lg bg-surface-2 px-3 py-2">
-      <div className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+      <div className="text-caption font-semibold text-foreground-muted">
         {label}
       </div>
-      <div className="mt-0.5 truncate text-sm font-bold text-foreground">
+      <div className="mt-0.5 truncate text-sm font-semibold text-foreground">
         {value}
       </div>
     </div>
@@ -171,12 +171,12 @@ function MemberRow({ member }: { member: UserProfile }) {
         <div className="truncate text-sm font-semibold text-foreground">
           {name}
         </div>
-        <div className="truncate text-[11px] text-foreground-muted">
+        <div className="truncate text-caption text-foreground-muted">
           {member.email}
         </div>
       </div>
       <span
-        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em] ${role.chip}`}
+        className={`shrink-0 rounded-full px-2 py-0.5 text-caption font-semibold ${role.chip}`}
       >
         {role.label}
       </span>
@@ -195,7 +195,7 @@ function CenteredState({
     <ProtectedRoute>
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="text-center">
-          <h1 className="text-xl font-extrabold text-foreground">{title}</h1>
+          <h1 className="text-xl font-semibold text-foreground">{title}</h1>
           <Button variant="secondary" className="mt-4" onClick={onBack}>
             <ChevronLeft className="h-4 w-4" />
             Volver a organizaciones
@@ -488,7 +488,7 @@ function OrganizationDetailsContent() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+            <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
             <p className="text-sm text-foreground-muted">
               Cargando organización...
             </p>
@@ -513,7 +513,7 @@ function OrganizationDetailsContent() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background pb-24">
-        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+        <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 sm:px-6 lg:px-8">
             <button
               type="button"
@@ -523,12 +523,12 @@ function OrganizationDetailsContent() {
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <h1 className="min-w-0 flex-1 truncate text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+            <h1 className="min-w-0 flex-1 truncate font-display text-display text-foreground">
               Organización
             </h1>
             {isAdmin && (
               <Button
-                variant="soft"
+                variant="secondary"
                 onClick={() => setShowEdit(true)}
                 className="shrink-0"
               >
@@ -543,21 +543,21 @@ function OrganizationDetailsContent() {
           {/* Hero */}
           <Card className="p-4">
             <div className="flex items-start gap-3">
-              <div className="mesh-info flex size-14 shrink-0 items-center justify-center rounded-2xl text-white">
+              <div className="bg-surface-2 flex size-14 shrink-0 items-center justify-center rounded-2xl text-foreground">
                 <Building2 className="h-6 w-6" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-lg font-extrabold tracking-tight text-foreground">
+                  <span className="text-lg font-semibold tracking-tight text-foreground">
                     {organization.name}
                   </span>
                   <span
-                    className={`rounded-full px-1.75 py-0.5 text-[10px] font-bold ${license.className}`}
+                    className={`rounded-full px-1.75 py-0.5 text-caption font-semibold ${license.className}`}
                   >
                     {license.label}
                   </span>
                   {!organization.is_active && (
-                    <span className="rounded-full border border-danger-600 px-1.75 py-px text-[10px] font-bold text-danger-600 dark:border-danger-400 dark:text-danger-300">
+                    <span className="rounded-full border border-danger-600 px-1.75 py-px text-caption font-semibold text-danger-600 dark:border-danger-400 dark:text-danger-300">
                       Inactiva
                     </span>
                   )}
@@ -585,7 +585,7 @@ function OrganizationDetailsContent() {
           </Card>
 
           {error && (
-            <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {error}
             </div>
           )}
@@ -643,7 +643,7 @@ function OrganizationDetailsContent() {
                 <SectionHeader
                   icon={<Building2 className="h-4 w-4" />}
                   title="Información"
-                  tone="bg-info-100 text-info-700 dark:bg-info-900/20 dark:text-info-400"
+                  tone="bg-info-100 text-info-700 dark:bg-info-900 dark:text-info-400"
                 />
                 <dl className="mt-4 grid gap-4 sm:grid-cols-2">
                   <InfoItem label="Nombre">{organization.name}</InfoItem>
@@ -667,12 +667,12 @@ function OrganizationDetailsContent() {
                 <SectionHeader
                   icon={<KeyRound className="h-4 w-4" />}
                   title="Licencia"
-                  tone="bg-warning-100 text-warning-700 dark:bg-warning-900/20 dark:text-warning-400"
+                  tone="bg-warning-100 text-warning-700 dark:bg-warning-900 dark:text-warning-400"
                 />
                 <dl className="mt-4 grid gap-4 sm:grid-cols-2">
                   <InfoItem label="Estado">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${license.className}`}
+                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${license.className}`}
                     >
                       {license.label}
                     </span>
@@ -704,7 +704,7 @@ function OrganizationDetailsContent() {
                 <SectionHeader
                   icon={<UserCircle2 className="h-4 w-4" />}
                   title="Dueño"
-                  tone="bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400"
+                  tone="bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-400"
                 />
                 {owner ? (
                   <div className="mt-4 flex items-center gap-3">
@@ -714,7 +714,7 @@ function OrganizationDetailsContent() {
                       size={40}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-bold text-foreground">
+                      <div className="truncate text-sm font-semibold text-foreground">
                         {owner.full_name || owner.email}
                       </div>
                       <div className="truncate text-xs text-foreground-muted">
@@ -733,16 +733,16 @@ function OrganizationDetailsContent() {
                 <SectionHeader
                   icon={<Users className="h-4 w-4" />}
                   title="Miembros"
-                  tone="bg-info-100 text-info-700 dark:bg-info-900/20 dark:text-info-400"
+                  tone="bg-info-100 text-info-700 dark:bg-info-900 dark:text-info-400"
                   action={
-                    <span className="rounded-full bg-info-100 px-2 py-0.5 text-xs font-bold text-info-700 dark:bg-info-900/30 dark:text-info-400">
+                    <span className="rounded-full bg-info-100 px-2 py-0.5 text-xs font-semibold text-info-700 dark:bg-info-900 dark:text-info-400">
                       {members.length}
                     </span>
                   }
                 />
                 {canAddMembers && (
                   <Button
-                    variant="soft"
+                    variant="secondary"
                     onClick={openAddMember}
                     className="mt-3 w-full justify-center"
                   >
@@ -802,7 +802,7 @@ export default function OrganizationDetailsPage() {
         <ProtectedRoute>
           <div className="flex min-h-screen w-full items-center justify-center bg-background">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
               <p className="text-sm text-foreground-muted">Cargando...</p>
             </div>
           </div>

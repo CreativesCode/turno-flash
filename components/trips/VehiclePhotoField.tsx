@@ -58,7 +58,7 @@ export function VehiclePhotoField({
 
   return (
     <div>
-      <label className="block text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+      <label className="block text-caption font-semibold text-foreground-muted">
         Foto del vehículo
       </label>
 
@@ -105,7 +105,7 @@ export function VehiclePhotoField({
         </div>
       </div>
 
-      <p className="mt-1 text-[11px] text-foreground-subtle">
+      <p className="mt-1 text-caption text-foreground-subtle">
         La ve el cliente en tu página de reservas. Se achica sola antes de
         subirse.
       </p>

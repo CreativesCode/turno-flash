@@ -146,7 +146,7 @@ function ScheduleEditor({
                   onClick={() => toggleService(service.id)}
                   className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     selected
-                      ? "border-primary bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400"
+                      ? "border-primary bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-400"
                       : "border-border bg-surface-2 text-foreground-muted hover:border-border-2"
                   }`}
                 >
@@ -182,7 +182,7 @@ function ScheduleEditor({
       </Field>
 
       {validationError && (
-        <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+        <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
           {validationError}
         </div>
       )}
@@ -199,7 +199,7 @@ function ScheduleEditor({
         </Button>
         <Button
           type="button"
-          variant="mesh-primary"
+          variant="primary"
           onClick={handleSave}
           disabled={saveMutation.isPending || !!validationError}
           className="flex-2 justify-center"

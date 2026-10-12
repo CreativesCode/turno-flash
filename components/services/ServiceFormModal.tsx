@@ -166,7 +166,7 @@ export function ServiceFormModal({
           </Button>
           <Button
             type="submit"
-            variant="mesh-primary"
+            variant="primary"
             disabled={isSubmitting}
             className="flex-2 justify-center"
           >

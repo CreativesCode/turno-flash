@@ -71,7 +71,7 @@ export function BookingPageDetails({ organizationId, enabled }: BookingPageDetai
       )}
 
       {!enabled && (
-        <p className="text-[11px] text-foreground-subtle">
+        <p className="text-caption text-foreground-subtle">
           Activa la página y guarda los cambios para que el link empiece a funcionar.
         </p>
       )}
@@ -80,7 +80,7 @@ export function BookingPageDetails({ organizationId, enabled }: BookingPageDetai
         <div
           className={`rounded-lg p-3 text-xs ${
             ready.length === 0
-              ? "bg-warning-50 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400"
+              ? "bg-warning-50 text-warning-800 dark:bg-warning-900 dark:text-warning-400"
               : "bg-surface-2 text-foreground-muted"
           }`}
         >

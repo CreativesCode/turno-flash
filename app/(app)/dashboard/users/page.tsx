@@ -200,7 +200,7 @@ export default function UsersManagementPage() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+            <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
             <p className="text-sm text-foreground-muted">
               Verificando permisos...
             </p>
@@ -220,10 +220,10 @@ export default function UsersManagementPage() {
       />
 
       <div className="relative min-h-screen bg-background pb-24">
-        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+        <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
           <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
             <div>
-              <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+              <h1 className="font-display text-display text-foreground">
                 Usuarios
               </h1>
               <p className="text-xs text-foreground-muted">
@@ -231,7 +231,7 @@ export default function UsersManagementPage() {
               </p>
             </div>
             <Button
-              variant="soft"
+              variant="secondary"
               onClick={openInvite}
               className="w-full justify-center sm:w-auto"
             >
@@ -243,14 +243,14 @@ export default function UsersManagementPage() {
 
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           {error && (
-            <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <div className="mb-4 rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {error}
             </div>
           )}
 
           {loading ? (
             <div className="flex flex-col items-center p-12 text-center">
-              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
               <p className="text-sm text-foreground-muted">
                 Cargando usuarios...
               </p>
@@ -260,7 +260,7 @@ export default function UsersManagementPage() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
                 <Users className="h-6 w-6" />
               </div>
-              <h3 className="mt-3 text-base font-bold text-foreground">
+              <h3 className="mt-3 text-base font-semibold text-foreground">
                 Sin usuarios
               </h3>
               <p className="mt-1 text-sm text-foreground-muted">
@@ -288,7 +288,7 @@ export default function UsersManagementPage() {
           )}
 
           <Card className="mt-6 p-4">
-            <h2 className="text-sm font-bold text-foreground">
+            <h2 className="text-sm font-semibold text-foreground">
               Roles disponibles
             </h2>
             <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -296,7 +296,7 @@ export default function UsersManagementPage() {
                 <div key={role}>
                   <dt>
                     <span
-                      className={`rounded-full px-2.25 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em] ${ROLE_META[role].chip}`}
+                      className={`rounded-full px-2.25 py-0.5 text-caption font-semibold ${ROLE_META[role].chip}`}
                     >
                       {ROLE_META[role].label}
                     </span>
@@ -337,7 +337,7 @@ export default function UsersManagementPage() {
           ? Esta acción no se puede deshacer.
         </p>
         {isDeletingSelf && (
-          <div className="mt-3 rounded-lg bg-warning-50 p-3 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+          <div className="mt-3 rounded-lg bg-warning-50 p-3 text-warning-800 dark:bg-warning-900 dark:text-warning-400">
             Estás a punto de eliminar tu propia cuenta. Serás redirigido al
             login después de la eliminación.
           </div>

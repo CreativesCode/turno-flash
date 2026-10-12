@@ -146,16 +146,16 @@ export default function AuthCallbackPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="flex w-full max-w-md flex-col items-center space-y-4 text-center">
           <Logo size={48} priority />
-          <h1 className="text-2xl font-bold text-red-600 dark:text-red-400">
+          <h1 className="text-title font-semibold text-danger-600 dark:text-danger-400">
             Error de autenticación
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400">{error}</p>
+          <p className="text-foreground-muted">{error}</p>
           <a
             href="/login"
-            className="inline-block rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-200"
+            className="inline-flex h-11 items-center rounded-control bg-primary px-[18px] text-body font-semibold text-primary-foreground hover:brightness-95"
           >
             Volver al login
           </a>
@@ -165,11 +165,11 @@ export default function AuthCallbackPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="flex w-full max-w-md flex-col items-center space-y-4 text-center">
         <Logo size={48} priority />
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
-        <p className="text-zinc-600 dark:text-zinc-400">{status}</p>
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground"></div>
+        <p className="text-foreground-muted">{status}</p>
       </div>
     </div>
   );

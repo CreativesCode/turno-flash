@@ -601,7 +601,7 @@ function AppointmentsContent() {
         <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
             <AlertCircle className="mx-auto h-12 w-12 text-warning-500" />
-            <h1 className="mt-4 text-2xl font-bold text-foreground">
+            <h1 className="mt-4 text-2xl font-semibold text-foreground">
               Sin Organización
             </h1>
             <p className="mt-2 text-sm text-foreground-muted">

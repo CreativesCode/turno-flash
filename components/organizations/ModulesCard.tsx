@@ -80,7 +80,7 @@ export function ModulesCard({
           <Blocks className="h-4.5 w-4.5" />
         </div>
         <div>
-          <div className="text-sm font-bold text-foreground">
+          <div className="text-sm font-semibold text-foreground">
             Módulos del negocio
           </div>
           <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
@@ -150,7 +150,7 @@ function ModuleToggle({
     <label
       className={`flex items-center gap-2.5 rounded-lg border p-3 text-sm ${
         checked
-          ? "border-primary bg-primary-50 dark:bg-primary-900/20"
+          ? "border-primary bg-primary-50 dark:bg-primary-900"
           : "border-border bg-surface"
       } ${disabled ? "opacity-60" : "cursor-pointer"}`}
     >

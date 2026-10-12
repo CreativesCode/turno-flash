@@ -209,7 +209,7 @@ function ServicesContent() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+            <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
             <p className="text-sm text-foreground-muted">
               Cargando servicios...
             </p>
@@ -321,7 +321,7 @@ export default function ServicesPage() {
         <ProtectedRoute>
           <div className="flex min-h-screen w-full items-center justify-center bg-background">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
               <p className="text-sm text-foreground-muted">Cargando servicios...</p>
             </div>
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { PageMetadata } from "@/components/page-metadata";
-import { Button, Card, Logo } from "@/components/ui";
+import { Button, Logo } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { createClient } from "@/utils/supabase/client";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
@@ -73,21 +73,18 @@ export default function LoginPage() {
       />
 
       <div className="flex flex-1 items-center justify-center px-5 py-12 sm:px-6">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-sm">
           {/* Brand mark */}
-          <div className="mb-7 flex flex-col items-center gap-3">
-            <Logo size={56} priority />
-            <div className="text-xl font-extrabold tracking-tight text-foreground">
-              TurnoFlash
-            </div>
+          <div className="mb-8">
+            <Logo size={32} withWordmark />
           </div>
 
           {/* Card */}
-          <Card className="p-6 sm:p-7">
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+          <div>
+            <h1 className="font-display text-[40px] leading-[1.05] text-foreground">
               Hola de nuevo
             </h1>
-            <p className="mt-1 text-sm text-foreground-muted">
+            <p className="mt-2 text-body text-foreground-muted">
               Entra con tu cuenta para administrar tu negocio.
             </p>
 
@@ -95,7 +92,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="text-xs font-semibold tracking-wide text-foreground-muted uppercase"
+                  className="text-meta font-medium text-foreground-muted"
                 >
                   Email
                 </label>
@@ -108,7 +105,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@ejemplo.com"
-                  className="mt-1.5 block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 text-sm text-foreground placeholder-foreground-subtle transition-shadow focus:border-primary focus:outline-none focus:ring-3 focus:ring-primary/15"
+                  className="mt-1.5 block w-full min-h-12 rounded-control border border-border-2 bg-surface px-3.5 py-2.5 text-body text-foreground placeholder:text-foreground-subtle transition-[border-color,box-shadow] focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900"
                 />
               </div>
 
@@ -116,13 +113,13 @@ export default function LoginPage() {
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="password"
-                    className="text-xs font-semibold tracking-wide text-foreground-muted uppercase"
+                    className="text-meta font-medium text-foreground-muted"
                   >
                     Contraseña
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="text-xs font-semibold text-primary-700 hover:underline dark:text-primary-400"
+                    className="text-meta font-semibold text-primary-700 hover:underline dark:text-primary-400"
                   >
                     ¿Olvidaste tu contraseña?
                   </Link>
@@ -137,12 +134,12 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 pr-10 text-sm text-foreground placeholder-foreground-subtle transition-shadow focus:border-primary focus:outline-none focus:ring-3 focus:ring-primary/15"
+                    className="block w-full min-h-12 rounded-control border border-border-2 bg-surface px-3.5 py-2.5 text-body text-foreground placeholder:text-foreground-subtle transition-[border-color,box-shadow] focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900 pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
+                    className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
                     aria-label={
                       showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
                     }
@@ -157,24 +154,24 @@ export default function LoginPage() {
               </div>
 
               {error && (
-                <div className="rounded-lg bg-danger-50 px-3 py-2.5 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+                <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
                   {error}
                 </div>
               )}
 
               <Button
                 type="submit"
-                variant="mesh-primary"
-                size="md"
+                variant="primary"
+                size="lg"
                 disabled={loading}
                 className="w-full"
               >
                 {loading ? "Iniciando sesión..." : "Ingresar"}
               </Button>
             </form>
-          </Card>
+          </div>
 
-          <div className="mt-5 text-center text-xs text-foreground-muted">
+          <div className="mt-6 text-meta text-foreground-muted">
             ¿Aún no tienes cuenta?{" "}
             <Link
               href="/register"
@@ -184,7 +181,7 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8">
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 text-sm text-foreground-muted transition-colors hover:text-primary"

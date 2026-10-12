@@ -35,12 +35,12 @@ export function KpiCard({
 }) {
   const toneStyles: Record<string, string> = {
     primary:
-      "bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400",
-    info: "bg-info-50 text-info-700 dark:bg-info-900/20 dark:text-info-400",
+      "bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-400",
+    info: "bg-info-50 text-info-700 dark:bg-info-900 dark:text-info-400",
     warning:
-      "bg-warning-50 text-warning-700 dark:bg-warning-900/20 dark:text-warning-400",
+      "bg-warning-50 text-warning-700 dark:bg-warning-900 dark:text-warning-400",
     danger:
-      "bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-400",
+      "bg-danger-50 text-danger-700 dark:bg-danger-900 dark:text-danger-400",
     violet:
       "bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400",
   };
@@ -53,10 +53,10 @@ export function KpiCard({
     <Card className="p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="truncate text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
+          <div className="truncate text-caption font-semibold text-foreground-muted">
             {label}
           </div>
-          <div className="mt-1.5 text-2xl font-extrabold leading-none tracking-tight text-foreground sm:text-[28px]">
+          <div className="mt-1.5 text-2xl font-semibold leading-none tracking-tight text-foreground sm:text-[28px]">
             {value}
           </div>
         </div>
@@ -66,15 +66,15 @@ export function KpiCard({
           <Icon className="h-4.5 w-4.5" />
         </div>
       </div>
-      <div className="mt-2 flex items-center gap-1.5 text-[11px]">
+      <div className="mt-2 flex items-center gap-1.5 text-caption">
         {delta != null && (
           <span
-            className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-bold ${
+            className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-semibold ${
               deltaNeutral
                 ? "bg-surface-2 text-foreground-muted"
                 : deltaGood
-                ? "bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400"
-                : "bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-400"
+                ? "bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-400"
+                : "bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-400"
             }`}
           >
             {deltaNeutral ? (
@@ -141,14 +141,14 @@ export function PeakHoursHeatmap({ cells }: { cells: HeatmapCell[] }) {
         {hours.map((h) => (
           <div
             key={`h-${h}`}
-            className="text-center text-[10px] font-semibold text-foreground-muted"
+            className="text-center text-caption font-semibold text-foreground-muted"
           >
             {h}
           </div>
         ))}
         {dows.map((dow) => (
           <div key={`row-${dow}`} className="contents">
-            <div className="flex items-center text-[10px] font-semibold text-foreground-muted">
+            <div className="flex items-center text-caption font-semibold text-foreground-muted">
               {DOW_LABELS[dow]}
             </div>
             {hours.map((h) => {
@@ -173,7 +173,7 @@ export function PeakHoursHeatmap({ cells }: { cells: HeatmapCell[] }) {
           </div>
         ))}
       </div>
-      <div className="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-foreground-muted">
+      <div className="mt-2 flex items-center justify-end gap-1.5 text-caption text-foreground-muted">
         Menos
         {[0.15, 0.4, 0.65, 1].map((i) => (
           <span
@@ -195,7 +195,7 @@ export function PeakHoursHeatmap({ cells }: { cells: HeatmapCell[] }) {
 /** Encabezado de sección compacto, consistente con el dashboard principal. */
 export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
+    <div className="mb-3 text-caption font-semibold text-foreground-muted">
       {children}
     </div>
   );

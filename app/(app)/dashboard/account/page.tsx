@@ -86,7 +86,7 @@ export default function AccountPage() {
               <UserCircle className="h-6 w-6 text-foreground-muted" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Mi cuenta</h1>
+              <h1 className="text-2xl font-semibold text-foreground">Mi cuenta</h1>
               <p className="text-sm text-foreground-muted">
                 Información y gestión de tu cuenta
               </p>

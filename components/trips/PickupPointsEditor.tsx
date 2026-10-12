@@ -102,7 +102,7 @@ export function PickupPointsEditor({
               }`}
             >
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+                <label className="block text-caption font-semibold text-foreground-muted">
                   Hora
                 </label>
                 <input
@@ -113,7 +113,7 @@ export function PickupPointsEditor({
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+                <label className="block text-caption font-semibold text-foreground-muted">
                   {roundTrip ? "Solo ida" : "Precio"}
                 </label>
                 <input
@@ -129,7 +129,7 @@ export function PickupPointsEditor({
               </div>
               {roundTrip && (
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+                  <label className="block text-caption font-semibold text-foreground-muted">
                     Ida y vuelta
                   </label>
                   <input
@@ -148,7 +148,7 @@ export function PickupPointsEditor({
                 </div>
               )}
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+                <label className="block text-caption font-semibold text-foreground-muted">
                   Anticipo
                 </label>
                 <input

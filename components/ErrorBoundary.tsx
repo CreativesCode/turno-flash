@@ -146,14 +146,14 @@ function ErrorFallback({
   const isDevelopment = process.env.NODE_ENV === "development";
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
+      <div className="max-w-2xl w-full rounded-card border border-border bg-surface p-6 shadow-card">
         <div className="text-center mb-6">
           <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-semibold text-foreground mb-2">
             Algo salió mal
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-foreground-muted">
             Hemos registrado el error y lo revisaremos pronto. Por favor, intenta
             recargar la página.
           </p>
@@ -173,11 +173,11 @@ function ErrorFallback({
         </div>
 
         {isDevelopment && error && (
-          <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-            <h3 className="text-sm font-semibold text-red-900 dark:text-red-200 mb-2">
+          <div className="mt-6 rounded-card bg-danger-100 p-4 dark:bg-danger-900">
+            <h3 className="text-sm font-semibold text-danger-600 dark:text-danger-400 mb-2">
               Detalles del error (solo en desarrollo):
             </h3>
-            <pre className="text-xs text-red-800 dark:text-red-300 overflow-auto max-h-64">
+            <pre className="text-xs text-danger-600 dark:text-danger-400 overflow-auto max-h-64">
               <div className="mb-2">
                 <strong>Mensaje:</strong> {error.message}
               </div>
@@ -199,7 +199,7 @@ function ErrorFallback({
           </div>
         )}
 
-        <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-4 text-center text-sm text-foreground-muted">
           <p>
             Si el problema persiste, contacta al soporte técnico con el código de
             error: <code className="font-mono">{error?.name || "UNKNOWN"}</code>

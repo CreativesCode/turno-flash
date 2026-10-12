@@ -166,7 +166,7 @@ export function SetupGuide() {
     return (
       <Card className="mb-6 flex flex-col items-center p-6 text-center lg:mb-8">
         <PartyPopper className="h-10 w-10 text-primary-600" />
-        <h2 className="mt-3 text-lg font-extrabold text-foreground">
+        <h2 className="mt-3 text-lg font-semibold text-foreground">
           ¡Listo! Tu negocio ya está en marcha
         </h2>
         <p className="mt-1 text-sm text-foreground-muted">
@@ -174,7 +174,7 @@ export function SetupGuide() {
         </p>
         <Button
           size="lg"
-          variant="soft"
+          variant="secondary"
           onClick={hide}
           className="mt-4 w-full max-w-xs justify-center"
         >
@@ -189,7 +189,7 @@ export function SetupGuide() {
       <div className="p-5 pb-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-extrabold tracking-tight text-foreground">
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">
               Pon en marcha tu negocio
             </h2>
             <p className="mt-0.5 text-sm text-foreground-muted">
@@ -211,7 +211,7 @@ export function SetupGuide() {
               style={{ width: `${(doneCount / steps.length) * 100}%` }}
             />
           </div>
-          <span className="shrink-0 text-xs font-bold text-foreground-muted">
+          <span className="shrink-0 text-xs font-semibold text-foreground-muted">
             {doneCount} de {steps.length} listos
           </span>
         </div>
@@ -230,7 +230,7 @@ export function SetupGuide() {
                 className="flex w-full cursor-pointer items-center gap-3 px-5 py-3.5 text-left"
               >
                 <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-extrabold ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
                     done
                       ? "bg-success-500 text-white"
                       : open
@@ -241,7 +241,7 @@ export function SetupGuide() {
                   {done ? <Check className="h-4 w-4" /> : index + 1}
                 </span>
                 <span
-                  className={`min-w-0 flex-1 text-[15px] font-bold ${
+                  className={`min-w-0 flex-1 text-[15px] font-semibold ${
                     done ? "text-foreground-muted line-through" : "text-foreground"
                   }`}
                 >
@@ -257,7 +257,7 @@ export function SetupGuide() {
               {open && (
                 <div className="flex flex-col gap-4 px-5 pb-5 sm:flex-row sm:items-start">
                   <figure className="mx-auto w-full max-w-60 shrink-0 sm:mx-0">
-                    <figcaption className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-foreground-muted">
+                    <figcaption className="mb-1.5 text-center text-caption font-semibold text-foreground-muted">
                       Así se ve en tu pantalla
                     </figcaption>
                     {/* eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer */}
@@ -277,13 +277,13 @@ export function SetupGuide() {
                       </p>
                     ))}
                     {done ? (
-                      <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-success-700 dark:text-success-400">
+                      <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-success-700 dark:text-success-400">
                         <Check className="h-4 w-4" /> Ya lo hiciste
                       </p>
                     ) : (
                       <Button
                         size="lg"
-                        variant="mesh-primary"
+                        variant="primary"
                         onClick={() => router.push(step.href)}
                         className="mt-2 w-full justify-center sm:w-auto sm:self-start"
                       >

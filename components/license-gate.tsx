@@ -60,10 +60,10 @@ export function LicenseGate({ children }: { children: ReactNode }) {
       )}
       <div className="flex min-h-screen items-center justify-center px-4">
         <Card className="w-full max-w-md p-8 text-center shadow-lg">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-danger-100 dark:bg-danger-900/20">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-danger-100 dark:bg-danger-900">
             <span className="text-3xl">{isPending ? "⏳" : "🚫"}</span>
           </div>
-          <h1 className="mt-6 text-2xl font-bold text-foreground">
+          <h1 className="mt-6 text-2xl font-semibold text-foreground">
             {isPending ? "Tu negocio está en preparación" : "Acceso bloqueado"}
           </h1>
           <p className="mt-4 text-sm text-foreground-muted">
@@ -88,7 +88,7 @@ export function LicenseGate({ children }: { children: ReactNode }) {
           <div className="mt-6 flex flex-col gap-3">
             {isOwner && (
               <Button
-                variant="mesh-primary"
+                variant="primary"
                 size="md"
                 className="w-full"
                 onClick={() => router.push("/dashboard/subscription")}

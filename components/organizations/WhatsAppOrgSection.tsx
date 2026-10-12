@@ -167,11 +167,11 @@ export function WhatsAppOrgSection({
   };
 
   const statusBadge = loading ? null : enabled ? (
-    <span className="rounded-full bg-success-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-800 dark:bg-success-900/20 dark:text-success-400">
+    <span className="rounded-full bg-success-100 px-2 py-0.5 text-caption font-semibold text-success-800 dark:bg-success-900 dark:text-success-400">
       Activa
     </span>
   ) : (
-    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-foreground-muted">
+    <span className="rounded-full bg-muted px-2 py-0.5 text-caption font-semibold text-foreground-muted">
       Inactiva
     </span>
   );
@@ -186,7 +186,7 @@ export function WhatsAppOrgSection({
           collapsed ? "p-5 hover:bg-muted/30 rounded-xl" : "pb-1"
         }`}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-100 text-success-700 dark:bg-success-900/20 dark:text-success-400">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-100 text-success-700 dark:bg-success-900 dark:text-success-400">
           <MessageCircle className="h-4.5 w-4.5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -210,7 +210,7 @@ export function WhatsAppOrgSection({
       {collapsed ? null : (
         <>
       {pageError && (
-        <div className="rounded-md bg-danger-50 px-3 py-2 text-xs text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+        <div className="rounded-md bg-danger-50 px-3 py-2 text-xs text-danger-800 dark:bg-danger-900 dark:text-danger-400">
           {pageError}
         </div>
       )}
@@ -245,7 +245,7 @@ export function WhatsAppOrgSection({
       </div>
 
       {enabled && !sessionId.trim() && (
-        <div className="flex items-start gap-2 rounded-lg bg-warning-50 px-3 py-2 text-xs text-warning-800 dark:bg-warning-900/20 dark:text-warning-300">
+        <div className="flex items-start gap-2 rounded-lg bg-warning-50 px-3 py-2 text-xs text-warning-800 dark:bg-warning-900 dark:text-warning-300">
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>
             Activaste la integración pero falta el ID de sesión. No se enviará
@@ -273,7 +273,7 @@ export function WhatsAppOrgSection({
 
       {/* Webhook URL */}
       <div className="space-y-2">
-        <div className="block text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+        <div className="block text-caption font-semibold text-foreground-muted">
           URL del Webhook
         </div>
         <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2">
@@ -289,17 +289,17 @@ export function WhatsAppOrgSection({
             <Copy className="h-3.5 w-3.5" />
           </button>
         </div>
-        <p className="text-[11px] text-foreground-subtle">
+        <p className="text-caption text-foreground-subtle">
           Registrala en el dashboard de OpenWA → Webhooks (eventos:{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+          <code className="rounded bg-muted px-1 py-0.5 text-caption">
             message.received
           </code>
           ,{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+          <code className="rounded bg-muted px-1 py-0.5 text-caption">
             session.disconnected
           </code>
           ,{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+          <code className="rounded bg-muted px-1 py-0.5 text-caption">
             session.qr
           </code>
           ).
@@ -308,7 +308,7 @@ export function WhatsAppOrgSection({
 
       {/* Save */}
       <div className="flex items-center justify-end">
-        <Button variant="mesh-primary" onClick={save} disabled={!canSave}>
+        <Button variant="primary" onClick={save} disabled={!canSave}>
           {saving && <Loader2 className="h-4 w-4 animate-spin" />}
           {saving ? "Guardando..." : "Guardar"}
         </Button>
@@ -323,7 +323,7 @@ export function WhatsAppOrgSection({
           <button
             type="button"
             onClick={() => void reload()}
-            className="text-[11px] font-medium text-info-700 hover:underline dark:text-info-400"
+            className="text-caption font-medium text-info-700 hover:underline dark:text-info-400"
             disabled={loading}
           >
             Recargar
@@ -359,7 +359,7 @@ export function WhatsAppOrgSection({
                     <td className="px-3 py-2 text-foreground">
                       {INTENT_LABELS[r.intent] ?? r.intent}
                     </td>
-                    <td className="px-3 py-2 font-mono text-[11px] text-foreground-muted">
+                    <td className="px-3 py-2 font-mono text-caption text-foreground-muted">
                       {r.chat_id.replace(/@c\.us$/, "")}
                     </td>
                     <td className="px-3 py-2">
@@ -374,7 +374,7 @@ export function WhatsAppOrgSection({
                       </Badge>
                       {r.error_message && (
                         <p
-                          className="mt-1 max-w-50 truncate text-[10px] text-danger"
+                          className="mt-1 max-w-50 truncate text-caption text-danger"
                           title={r.error_message}
                         >
                           {r.error_message}

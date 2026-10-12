@@ -296,7 +296,7 @@ function TripsContent() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+            <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
             <p className="text-sm text-foreground-muted">Cargando viajes...</p>
           </div>
         </div>
@@ -318,18 +318,18 @@ function TripsContent() {
       />
 
       <div className="relative min-h-screen bg-background pb-24">
-        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+        <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
           <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 pb-3 pt-3 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                <h1 className="font-display text-display text-foreground">
                   Viajes
                 </h1>
                 <p className="text-xs text-foreground-muted">{subtitle}</p>
               </div>
               {canManage && !moduleOff && (
                 <Button
-                  variant="mesh-primary"
+                  variant="primary"
                   onClick={handleCreate}
                   className="max-sm:hidden"
                 >
@@ -354,7 +354,7 @@ function TripsContent() {
                   placeholder="Buscar salidas…"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-foreground shadow-xs transition-colors focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
+                  className="block w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-foreground shadow-xs transition-colors focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900"
                 />
               </div>
             )}
@@ -363,7 +363,7 @@ function TripsContent() {
 
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           {error && (
-            <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <div className="mb-4 rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {error}
             </div>
           )}
@@ -373,7 +373,7 @@ function TripsContent() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
                 <Bus className="h-6 w-6" />
               </div>
-              <h3 className="mt-3 text-base font-bold text-foreground">
+              <h3 className="mt-3 text-base font-semibold text-foreground">
                 La venta de asientos no está activa
               </h3>
               <p className="mx-auto mt-1 max-w-md text-sm text-foreground-muted">
@@ -386,7 +386,7 @@ function TripsContent() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
                 <Bus className="h-6 w-6" />
               </div>
-              <h3 className="mt-3 text-base font-bold text-foreground">
+              <h3 className="mt-3 text-base font-semibold text-foreground">
                 {searchTerm ? "Sin resultados" : "Sin salidas próximas"}
               </h3>
               <p className="mt-1 text-sm text-foreground-muted">
@@ -396,7 +396,7 @@ function TripsContent() {
               </p>
               {canManage && !searchTerm && (
                 <Button
-                  variant="mesh-primary"
+                  variant="primary"
                   onClick={handleCreate}
                   className="mx-auto mt-4"
                 >
@@ -471,7 +471,7 @@ function TripsContent() {
         confirmLabel="Duplicar"
         busyLabel="Duplicando…"
         busy={duplicateTrip.isPending}
-        confirmVariant="mesh-primary"
+        confirmVariant="primary"
         confirmDisabled={!duplicateDate || duplicateDate < getLocalDateString()}
       >
         <p className="text-sm text-foreground-muted">
@@ -483,7 +483,7 @@ function TripsContent() {
           value={duplicateDate}
           min={getLocalDateString()}
           onChange={(e) => setDuplicateDate(e.target.value)}
-          className="mt-3 block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
+          className="mt-3 block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900"
         />
       </ConfirmSheet>
     </ProtectedRoute>
@@ -497,7 +497,7 @@ export default function TripsPage() {
         <ProtectedRoute>
           <div className="flex min-h-screen w-full items-center justify-center bg-background">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
               <p className="text-sm text-foreground-muted">Cargando viajes...</p>
             </div>
           </div>

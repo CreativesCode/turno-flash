@@ -53,7 +53,7 @@ export function LicensePaymentsCard({ organizationId }: LicensePaymentsCardProps
           <Receipt className="h-4.5 w-4.5" />
         </div>
         <div>
-          <div className="text-sm font-bold text-foreground">Pagos</div>
+          <div className="text-sm font-semibold text-foreground">Pagos</div>
           <p className="mt-0.5 text-xs text-foreground-muted">
             {payments.isPending
               ? "Cargando…"
@@ -75,7 +75,7 @@ export function LicensePaymentsCard({ organizationId }: LicensePaymentsCardProps
           {rows.map((row) => (
             <li key={row.id} className="py-2.5">
               <div className="flex items-baseline justify-between gap-3">
-                <span className="text-sm font-bold text-foreground">
+                <span className="text-sm font-semibold text-foreground">
                   {formatUsd(Number(row.amount_usd))}
                 </span>
                 <span className="text-xs text-foreground-muted">
@@ -113,7 +113,7 @@ export function LicensePaymentsCard({ organizationId }: LicensePaymentsCardProps
 
       {(referred.data?.length ?? 0) > 0 && (
         <div className="mt-3 border-t border-border pt-3">
-          <div className="text-[11px] font-bold uppercase tracking-wide text-foreground-muted">
+          <div className="text-caption font-semibold text-foreground-muted">
             Negocios que recomendó
           </div>
           <ul className="mt-1.5 flex flex-col gap-1">
@@ -134,7 +134,7 @@ export function LicensePaymentsCard({ organizationId }: LicensePaymentsCardProps
 
       {(notices.data?.length ?? 0) > 0 && (
         <div className="mt-3 border-t border-border pt-3">
-          <div className="text-[11px] font-bold uppercase tracking-wide text-foreground-muted">
+          <div className="text-caption font-semibold text-foreground-muted">
             Avisos de cobro por WhatsApp
           </div>
           <ul className="mt-1.5 flex flex-col gap-1">

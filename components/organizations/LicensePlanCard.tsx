@@ -111,7 +111,7 @@ export function LicensePlanCard({ organization, onChanged }: LicensePlanCardProp
             <CreditCard className="h-4.5 w-4.5" />
           </div>
           <div>
-            <div className="text-sm font-bold text-foreground">Plan y cobro</div>
+            <div className="text-sm font-semibold text-foreground">Plan y cobro</div>
             <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
               {LICENSE_PLAN_INFO[savedPlan].label}
               {secondModule ? " + segundo módulo" : ""} ·{" "}
@@ -126,14 +126,14 @@ export function LicensePlanCard({ organization, onChanged }: LicensePlanCardProp
             </p>
           </div>
         </div>
-        <Button variant="mesh-primary" onClick={() => setShowPayment(true)}>
+        <Button variant="primary" onClick={() => setShowPayment(true)}>
           Registrar pago
         </Button>
       </div>
 
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
         <div>
-          <dt className="text-[11px] font-bold uppercase tracking-wide text-foreground-muted">
+          <dt className="text-caption font-semibold text-foreground-muted">
             Tiene acceso hasta
           </dt>
           <dd className="mt-0.5 font-semibold text-foreground">
@@ -145,7 +145,7 @@ export function LicensePlanCard({ organization, onChanged }: LicensePlanCardProp
           </dd>
         </div>
         <div>
-          <dt className="text-[11px] font-bold uppercase tracking-wide text-foreground-muted">
+          <dt className="text-caption font-semibold text-foreground-muted">
             Se bloquea el
           </dt>
           <dd className="mt-0.5 font-semibold text-foreground">
@@ -155,7 +155,7 @@ export function LicensePlanCard({ organization, onChanged }: LicensePlanCardProp
           </dd>
         </div>
         <div>
-          <dt className="text-[11px] font-bold uppercase tracking-wide text-foreground-muted">
+          <dt className="text-caption font-semibold text-foreground-muted">
             Precio fundador
           </dt>
           <dd className="mt-0.5 font-semibold text-foreground">
@@ -243,7 +243,7 @@ export function LicensePlanCard({ organization, onChanged }: LicensePlanCardProp
             />
             <span className="text-sm text-foreground">Negocio fundador</span>
           </label>
-          <p className="mt-1 text-[11px] text-foreground-subtle">
+          <p className="mt-1 text-caption text-foreground-subtle">
             {founderLocked
               ? "El precio fundador ya empezó a contar con su primer pago."
               : `Paga ${formatUsd(LICENSE_PLAN_INFO[plan].founderPrice)} en vez de ${formatUsd(LICENSE_PLAN_INFO[plan].price)} durante ${FOUNDER_LOCK_MONTHS} meses. Márcalo antes de su primer pago.`}
@@ -254,7 +254,7 @@ export function LicensePlanCard({ organization, onChanged }: LicensePlanCardProp
       {dirty && (
         <div className="mt-3 flex justify-end">
           <Button
-            variant="mesh-primary"
+            variant="primary"
             onClick={handleSave}
             disabled={updateBilling.isPending}
           >

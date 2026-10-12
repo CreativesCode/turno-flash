@@ -317,7 +317,7 @@ export default function NewOrganizationPage() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background px-4">
           <div className="flex flex-col items-center justify-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
+            <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground"></div>
             <p className="text-sm text-foreground-muted">
               {checkingAuth
                 ? "Verificando permisos..."
@@ -332,7 +332,7 @@ export default function NewOrganizationPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background pb-24">
-        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+        <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
           <div className="mx-auto flex max-w-2xl items-center gap-2 px-4 py-3 sm:px-6">
             <button
               type="button"
@@ -342,7 +342,7 @@ export default function NewOrganizationPage() {
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+            <h1 className="font-display text-display text-foreground">
               Nueva organización
             </h1>
           </div>
@@ -422,7 +422,7 @@ export default function NewOrganizationPage() {
                       }
                       className={`flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                         selected
-                          ? "border-primary bg-primary-50 dark:bg-primary-900/20"
+                          ? "border-primary bg-primary-50 dark:bg-primary-900"
                           : "border-border bg-surface-2 hover:border-border-2"
                       }`}
                     >
@@ -435,7 +435,7 @@ export default function NewOrganizationPage() {
                         <div className="truncate text-sm font-semibold text-foreground">
                           {name}
                         </div>
-                        <div className="truncate text-[11px] text-foreground-muted">
+                        <div className="truncate text-caption text-foreground-muted">
                           {user.email}
                         </div>
                       </div>
@@ -463,7 +463,7 @@ export default function NewOrganizationPage() {
                 </option>
               ))}
             </Select>
-            <p className="mt-1 text-[11px] text-foreground-subtle">
+            <p className="mt-1 text-caption text-foreground-subtle">
               Un negocio que solo vende pasajes pasa al plan Pasajes cuando le
               cambias los módulos en su ficha.
             </p>
@@ -482,7 +482,7 @@ export default function NewOrganizationPage() {
                 </option>
               ))}
             </Select>
-            <p className="mt-1 text-[11px] text-foreground-subtle">
+            <p className="mt-1 text-caption text-foreground-subtle">
               {formData.start_mode === "pending"
                 ? "No podrá trabajar hasta que registres su primer pago, y ese pago empieza a contar ese día. Después no se le puede dar una prueba."
                 : `Al vencer la prueba tiene ${LICENSE_GRACE_DAYS} días de margen con avisos diarios. La prueba solo se da ahora, al crear el negocio.`}
@@ -526,20 +526,20 @@ export default function NewOrganizationPage() {
           </Field>
 
           {error && (
-            <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="rounded-lg bg-success-50 p-3 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
+            <div className="rounded-lg bg-success-50 p-3 text-sm text-success-800 dark:bg-success-900 dark:text-success-400">
               {success}
             </div>
           )}
 
           <Button
             type="submit"
-            variant="mesh-primary"
+            variant="primary"
             disabled={loading}
             className="mt-2 w-full justify-center"
           >

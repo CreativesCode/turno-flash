@@ -56,7 +56,7 @@ export function PassengerPrintSheet({
   return (
     <div className="hidden print:block print:text-black">
       <header className="border-b-2 border-black pb-2">
-        <h1 className="text-lg font-bold">{organizationName || "Lista de pasajeros"}</h1>
+        <h1 className="text-lg font-semibold">{organizationName || "Lista de pasajeros"}</h1>
         <p className="text-base font-semibold">{trip.title}</p>
         <p className="text-xs">
           Salida: {departureDateLabel(trip.departure_date)} a las{" "}
@@ -85,17 +85,17 @@ export function PassengerPrintSheet({
       <table className="mt-3 w-full border-collapse text-xs">
         <thead>
           <tr className="border-b border-black text-left">
-            <th className="py-1 pr-2 font-bold">#</th>
-            <th className="py-1 pr-2 font-bold">Pasajero</th>
-            <th className="py-1 pr-2 font-bold">Recogida</th>
-            <th className="py-1 pr-2 font-bold">Reservó</th>
-            <th className="py-1 pr-2 font-bold">Teléfono</th>
-            <th className="py-1 pr-2 font-bold">Reserva</th>
-            <th className="py-1 pr-2 font-bold">Estado</th>
-            <th className="py-1 pr-2 font-bold">Extra</th>
-            <th className="py-1 pr-2 text-right font-bold">Total</th>
-            <th className="py-1 pr-2 text-right font-bold">Pagó</th>
-            <th className="py-1 text-right font-bold">A cobrar</th>
+            <th className="py-1 pr-2 font-semibold">#</th>
+            <th className="py-1 pr-2 font-semibold">Pasajero</th>
+            <th className="py-1 pr-2 font-semibold">Recogida</th>
+            <th className="py-1 pr-2 font-semibold">Reservó</th>
+            <th className="py-1 pr-2 font-semibold">Teléfono</th>
+            <th className="py-1 pr-2 font-semibold">Reserva</th>
+            <th className="py-1 pr-2 font-semibold">Estado</th>
+            <th className="py-1 pr-2 font-semibold">Extra</th>
+            <th className="py-1 pr-2 text-right font-semibold">Total</th>
+            <th className="py-1 pr-2 text-right font-semibold">Pagó</th>
+            <th className="py-1 text-right font-semibold">A cobrar</th>
           </tr>
         </thead>
         <tbody>
@@ -109,14 +109,14 @@ export function PassengerPrintSheet({
               <td className="py-1 pr-2">{row.bookingNumber}</td>
               <td className="py-1 pr-2">
                 {row.status}
-                <span className="block text-[10px]">{row.tripType}</span>
+                <span className="block text-caption">{row.tripType}</span>
               </td>
               <td className="py-1 pr-2">{row.extra}</td>
               <td className="py-1 pr-2 text-right">{money(row.priceEach)}</td>
               <td className="py-1 pr-2 text-right">{money(row.paidEach)}</td>
               <td
                 className={`py-1 text-right ${
-                  row.pendingEach > 0 ? "font-bold" : ""
+                  row.pendingEach > 0 ? "font-semibold" : ""
                 }`}
               >
                 {money(row.pendingEach)}
@@ -125,7 +125,7 @@ export function PassengerPrintSheet({
           ))}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-black font-bold">
+          <tr className="border-t-2 border-black font-semibold">
             <td className="py-1 pr-2" colSpan={8}>
               Totales
             </td>
@@ -136,11 +136,11 @@ export function PassengerPrintSheet({
         </tfoot>
       </table>
 
-      <p className="mt-2 text-[11px] font-bold">
+      <p className="mt-2 text-caption font-semibold">
         A cobrar en el ómnibus: {money(totalPending)}
       </p>
 
-      <p className="mt-6 text-[10px]">
+      <p className="mt-6 text-caption">
         Firma del chofer: ______________________________
       </p>
     </div>

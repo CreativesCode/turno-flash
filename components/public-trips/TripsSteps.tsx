@@ -66,7 +66,7 @@ export function TripListStep({
     return (
       <Card className="p-8 text-center">
         <Bus className="mx-auto h-10 w-10 text-foreground-subtle" />
-        <h2 className="mt-3 text-base font-bold text-foreground">
+        <h2 className="mt-3 text-base font-semibold text-foreground">
           No hay salidas próximas
         </h2>
         <p className="mt-1 text-sm text-foreground-muted">
@@ -95,7 +95,7 @@ export function TripListStep({
               />
             )}
             <div className="p-4">
-              <h2 className="text-base font-extrabold tracking-tight text-foreground">
+              <h2 className="text-base font-semibold tracking-tight text-foreground">
                 {trip.title}
               </h2>
               <p className="mt-0.5 text-xs text-foreground-muted first-letter:uppercase">
@@ -112,7 +112,7 @@ export function TripListStep({
                       ? "Queda 1 asiento"
                       : `Quedan ${trip.seats_left} asientos`}
                 </span>
-                <span className="font-bold text-foreground ml-1">
+                <span className="font-semibold text-foreground ml-1">
                   Desde {money(fromPrice(trip), currency)}
                 </span>
               </div>
@@ -126,7 +126,7 @@ export function TripListStep({
                 </div>
               ) : (
                 <Button size="lg"
-                  variant="mesh-primary"
+                  variant="primary"
                   onClick={() => onSelect(trip)}
                   disabled={soldOut}
                   className="mt-3 w-full justify-center"
@@ -234,7 +234,7 @@ export function SeatsStep({
 
       {trip.pickup_points.length > 0 && (
         <div>
-          <h3 className="text-sm font-bold text-foreground">
+          <h3 className="text-sm font-semibold text-foreground">
             ¿Dónde te recogemos?
           </h3>
           <div className="mt-2 flex flex-col gap-2">
@@ -242,7 +242,7 @@ export function SeatsStep({
               <label
                 key={option.id}
                 className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${pickupPointId === option.id
-                  ? "border-primary bg-primary-50 dark:bg-primary-900/20"
+                  ? "border-primary bg-primary-50 dark:bg-primary-900"
                   : "border-border bg-surface hover:bg-muted"
                   }`}
               >
@@ -256,10 +256,10 @@ export function SeatsStep({
                 />
                 <span className="min-w-0 flex-1 text-sm">
                   <span className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className="font-bold text-foreground">
+                    <span className="font-semibold text-foreground">
                       {option.name}
                     </span>
-                    <span className="font-bold text-foreground">
+                    <span className="font-semibold text-foreground">
                       {money(seatPriceOf(trip, option, roundTrip), currency)}
                     </span>
                   </span>
@@ -283,7 +283,7 @@ export function SeatsStep({
 
       {trip.round_trip_enabled && (
         <div>
-          <h3 className="text-sm font-bold text-foreground">Tipo de viaje</h3>
+          <h3 className="text-sm font-semibold text-foreground">Tipo de viaje</h3>
           <Select
             value={roundTrip ? "round_trip" : "one_way"}
             onChange={(e) => setRoundTrip(e.target.value === "round_trip")}
@@ -300,18 +300,18 @@ export function SeatsStep({
       )}
 
       <div>
-        <h3 className="text-sm font-bold text-foreground">¿Cuántos asientos?</h3>
+        <h3 className="text-sm font-semibold text-foreground">¿Cuántos asientos?</h3>
         <div className="mt-2 flex items-center gap-3">
           <button
             type="button"
             onClick={() => changeSeats(seats - 1)}
             disabled={seats <= 1}
             aria-label="Un asiento menos"
-            className="h-11 w-11 shrink-0 rounded-lg border border-border bg-surface text-lg font-bold text-foreground disabled:opacity-40"
+            className="h-11 w-11 shrink-0 rounded-lg border border-border bg-surface text-lg font-semibold text-foreground disabled:opacity-40"
           >
             −
           </button>
-          <span className="w-10 text-center text-lg font-extrabold text-foreground">
+          <span className="w-10 text-center text-lg font-semibold text-foreground">
             {seats}
           </span>
           <button
@@ -319,7 +319,7 @@ export function SeatsStep({
             onClick={() => changeSeats(seats + 1)}
             disabled={seats >= maxSeats}
             aria-label="Un asiento más"
-            className="h-11 w-11 shrink-0 rounded-lg border border-border bg-surface text-lg font-bold text-foreground disabled:opacity-40"
+            className="h-11 w-11 shrink-0 rounded-lg border border-border bg-surface text-lg font-semibold text-foreground disabled:opacity-40"
           >
             +
           </button>
@@ -330,7 +330,7 @@ export function SeatsStep({
       </div>
 
       <div>
-        <h3 className="text-sm font-bold text-foreground">
+        <h3 className="text-sm font-semibold text-foreground">
           Nombre de cada pasajero
         </h3>
         <p className="mt-0.5 text-xs text-foreground-muted">
@@ -361,7 +361,7 @@ export function SeatsStep({
         <span className="text-sm text-foreground-muted">
           {seats} × {money(price, currency)}
         </span>
-        <span className="text-lg font-extrabold text-foreground">
+        <span className="text-lg font-semibold text-foreground">
           {money(price * seats, currency)}
         </span>
       </Card>
@@ -381,7 +381,7 @@ export function SeatsStep({
         <Button
           size="lg"
           type="submit"
-          variant="mesh-primary"
+          variant="primary"
           disabled={busy}
           className="w-full justify-center"
         >

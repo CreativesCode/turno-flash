@@ -61,7 +61,7 @@ export function ProtectedRoute({
       <div className="flex min-h-screen w-full items-center justify-center bg-background px-5">
         <div className="flex max-w-xs flex-col items-center text-center">
           <WifiOff className="h-10 w-10 text-foreground-subtle" />
-          <h1 className="mt-3 text-lg font-extrabold text-foreground">
+          <h1 className="mt-3 text-lg font-semibold text-foreground">
             {connectionError ? "Sin conexión" : "Conectando…"}
           </h1>
           <p className="mt-1 text-sm text-foreground-muted">
@@ -69,7 +69,7 @@ export function ProtectedRoute({
             conexión.
           </p>
           <Button
-            variant="soft"
+            variant="secondary"
             onClick={() => void handleRetry()}
             disabled={retrying}
             className="mt-4 w-full justify-center"
@@ -84,7 +84,7 @@ export function ProtectedRoute({
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background">
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
+        <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-border-2 border-t-foreground"></div>
         <p className="text-sm text-foreground-muted">
           {signedOut ? "Redirigiendo..." : "Verificando autenticación..."}
         </p>

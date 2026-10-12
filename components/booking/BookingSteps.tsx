@@ -56,7 +56,7 @@ export function ServiceStep({
               style={{ background: service.color ?? "#3b82f6" }}
             />
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-bold text-foreground">
+              <span className="block text-sm font-semibold text-foreground">
                 {service.name}
               </span>
               {service.description && (
@@ -72,7 +72,7 @@ export function ServiceStep({
                   </span>
                 )}
                 {service.requires_approval && (
-                  <span className="rounded-full bg-warning-100 px-1.5 py-px text-[10px] font-bold text-warning-700 dark:bg-warning-900/30 dark:text-warning-400">
+                  <span className="rounded-full bg-warning-100 px-1.5 py-px text-caption font-semibold text-warning-700 dark:bg-warning-900 dark:text-warning-400">
                     Sujeto a aprobación
                   </span>
                 )}
@@ -102,11 +102,11 @@ export function StaffStep({
     <ul className="flex flex-col gap-2">
       <li>
         <button type="button" onClick={() => onSelect(null)} className={optionClasses}>
-          <span className="mesh-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white">
+          <span className="bg-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-primary-foreground">
             <Shuffle className="h-4.5 w-4.5" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-bold text-foreground">Sin preferencia</span>
+            <span className="block text-sm font-semibold text-foreground">Sin preferencia</span>
             <span className="block text-xs text-foreground-muted">
               Te asignamos el primer profesional libre
             </span>
@@ -118,7 +118,7 @@ export function StaffStep({
         <li key={member.id}>
           <button type="button" onClick={() => onSelect(member.id)} className={optionClasses}>
             <Avatar name={member.name} color={member.color ?? undefined} size={40} />
-            <span className="min-w-0 flex-1 truncate text-sm font-bold text-foreground">
+            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
               {member.name}
             </span>
             <ChevronRight className="h-4 w-4 shrink-0 text-foreground-subtle" />
@@ -208,10 +208,10 @@ export function DateTimeStep({
                   : "border-border bg-surface text-foreground hover:border-border-2"
               }`}
             >
-              <span className="text-[10px] font-bold uppercase tracking-wide opacity-80">
+              <span className="text-caption font-semibold opacity-80">
                 {d.weekday}
               </span>
-              <span className="text-sm font-bold">{d.day}</span>
+              <span className="text-sm font-semibold">{d.day}</span>
             </button>
           );
         })}
@@ -227,7 +227,7 @@ export function DateTimeStep({
         <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-foreground-muted">
           No pudimos cargar los horarios. Revisa tu conexión.
           <Button size="lg"
-            variant="soft"
+            variant="secondary"
             onClick={() => void refetch()}
             className="mt-3 w-full justify-center"
           >
@@ -245,7 +245,7 @@ export function DateTimeStep({
               key={slot.start_time}
               type="button"
               onClick={() => activeDate && onSelect(activeDate, slot)}
-              className="h-10 cursor-pointer rounded-lg border border-border bg-surface text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary-50 dark:hover:bg-primary-900/20"
+              className="h-10 cursor-pointer rounded-lg border border-border bg-surface text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary-50 dark:hover:bg-primary-900"
             >
               {slot.start_time}
             </button>
@@ -404,7 +404,7 @@ export function DetailsStep({
   };
 
   const fieldError = (key: string) =>
-    errors[key] && <p className="mt-1 text-[11px] text-danger-600">{errors[key]}</p>;
+    errors[key] && <p className="mt-1 text-caption text-danger-600">{errors[key]}</p>;
 
   return (
     <form
@@ -511,7 +511,7 @@ export function DetailsStep({
       <div className={stickyActionClasses} style={stickyActionStyle}>
         <Button
           type="submit"
-          variant="mesh-primary"
+          variant="primary"
           size="lg"
           disabled={isSubmitting}
           className="w-full justify-center"

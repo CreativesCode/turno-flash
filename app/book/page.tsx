@@ -21,7 +21,7 @@ export default function BookPage() {
       fallback={
         // Static HTML: on 3G this is what shows while the scripts arrive (P2-02)
         <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
           <p className="text-sm text-foreground-muted">Cargando la página de reservas…</p>
         </div>
       }

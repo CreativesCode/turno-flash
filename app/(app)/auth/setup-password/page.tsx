@@ -148,11 +148,11 @@ export default function SetupPasswordPage() {
   // Mostrar pantalla de carga mientras verificamos la sesión
   if (checkingSession) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-black">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="flex w-full max-w-md flex-col items-center space-y-4 text-center">
           <Logo size={48} priority />
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-zinc-50"></div>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground"></div>
+          <p className="text-foreground-muted">
             Verificando sesión...
           </p>
         </div>
@@ -161,31 +161,31 @@ export default function SetupPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-12 dark:bg-black sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center text-center">
           <Logo size={56} priority className="mb-4" />
-          <h1 className="text-3xl font-bold tracking-tight text-black dark:text-zinc-50">
+          <h1 className="font-display text-[40px] leading-[1.05] text-foreground">
             {isRecovery ? "Elige una contraseña nueva" : "¡Te damos la bienvenida a Turno Flash!"}
           </h1>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-2 text-sm text-foreground-muted">
             {isRecovery
               ? "La usarás desde ahora para entrar con tu email"
               : "Configura tu contraseña para completar tu registro"}
           </p>
           {userEmail && (
-            <p className="mt-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <p className="mt-1 text-sm font-medium text-foreground-muted">
               {userEmail}
             </p>
           )}
         </div>
 
-        <div className="rounded-lg bg-white p-8 shadow-sm dark:bg-zinc-900">
+        <div className="rounded-card border border-border bg-surface p-8 shadow-card">
           <form onSubmit={handleSetupPassword} className="space-y-6">
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                className="block text-meta font-medium text-foreground-muted"
               >
                 Nueva contraseña
               </label>
@@ -197,7 +197,7 @@ export default function SetupPasswordPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 sm:text-sm"
+                className="mt-1.5 block w-full min-h-12 rounded-control border border-border-2 bg-surface px-3.5 py-2.5 text-body text-foreground placeholder:text-foreground-subtle transition-[border-color,box-shadow] focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900"
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
@@ -205,7 +205,7 @@ export default function SetupPasswordPage() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                className="block text-meta font-medium text-foreground-muted"
               >
                 Confirmar contraseña
               </label>
@@ -217,13 +217,13 @@ export default function SetupPasswordPage() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-black placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 sm:text-sm"
+                className="mt-1.5 block w-full min-h-12 rounded-control border border-border-2 bg-surface px-3.5 py-2.5 text-body text-foreground placeholder:text-foreground-subtle transition-[border-color,box-shadow] focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900"
                 placeholder="Repite tu contraseña"
               />
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+              <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
                 {error}
               </div>
             )}
@@ -231,12 +231,12 @@ export default function SetupPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-200"
+              className="flex h-[54px] w-full cursor-pointer items-center justify-center rounded-[14px] bg-primary px-[22px] text-[16px] font-semibold text-primary-foreground transition-[filter] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? "Configurando..." : "Configurar contraseña"}
             </button>
 
-            <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-center text-xs text-foreground-muted">
               Una vez configurada tu contraseña, podrás iniciar sesión con tu
               correo y contraseña
             </p>

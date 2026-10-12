@@ -65,7 +65,7 @@ export function AddMemberSheet({
                   onClick={() => onSelect(user.id)}
                   className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                     selected
-                      ? "border-primary bg-primary-50 dark:bg-primary-900/20"
+                      ? "border-primary bg-primary-50 dark:bg-primary-900"
                       : "border-border bg-surface-2 hover:border-border-2"
                   }`}
                 >
@@ -74,12 +74,12 @@ export function AddMemberSheet({
                     <div className="truncate text-sm font-semibold text-foreground">
                       {name}
                     </div>
-                    <div className="truncate text-[11px] text-foreground-muted">
+                    <div className="truncate text-caption text-foreground-muted">
                       {user.email}
                     </div>
                   </div>
                   <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em] ${role.chip}`}
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-caption font-semibold ${role.chip}`}
                   >
                     {role.label}
                   </span>
@@ -93,7 +93,7 @@ export function AddMemberSheet({
         )}
 
         {error && (
-          <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+          <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
             {error}
           </div>
         )}
@@ -110,7 +110,7 @@ export function AddMemberSheet({
           </Button>
           <Button
             type="submit"
-            variant="mesh-primary"
+            variant="primary"
             disabled={isSubmitting || !selectedUserId}
             className="flex-2 justify-center"
           >

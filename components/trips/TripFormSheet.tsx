@@ -312,10 +312,10 @@ export function TripFormSheet({
           </summary>
           <div className="flex flex-col gap-4 border-t border-border p-3">
             <div className="rounded-lg border border-border bg-surface-2 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+              <p className="text-caption font-semibold text-foreground-muted">
                 Chofer y vehículo (opcional)
               </p>
-              <p className="mt-0.5 text-[11px] text-foreground-subtle">
+              <p className="mt-0.5 text-caption text-foreground-subtle">
                 Se suele avisar el día antes del viaje. Puedes dejarlo vacío y
                 completarlo después.
               </p>
@@ -361,10 +361,10 @@ export function TripFormSheet({
             </div>
 
             <div className="rounded-lg border border-border bg-surface-2 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.05em] text-foreground-muted">
+              <p className="text-caption font-semibold text-foreground-muted">
                 Cuándo se puede reservar (opcional)
               </p>
-              <p className="mt-0.5 text-[11px] text-foreground-subtle">
+              <p className="mt-0.5 text-caption text-foreground-subtle">
                 Para abrir las reservas a partir de un día y hora concretos. Vacío = se
                 puede reservar desde que publicas y hasta que sale.
               </p>
@@ -412,7 +412,7 @@ export function TripFormSheet({
           </Button>
           <Button
             type="submit"
-            variant="mesh-primary"
+            variant="primary"
             disabled={isSubmitting}
             className="flex-2 justify-center"
           >

@@ -147,7 +147,7 @@ export function PaymentSheet({
           <div className="flex items-center justify-between">
             <span className="text-foreground-muted">Falta por cobrar</span>
             <span
-              className={`text-sm font-extrabold ${
+              className={`text-sm font-semibold ${
                 pending === 0
                   ? "text-success-600 dark:text-success-300"
                   : "text-warning-600 dark:text-warning-300"
@@ -173,7 +173,7 @@ export function PaymentSheet({
           </Button>
           <Button
             type="button"
-            variant="mesh-primary"
+            variant="primary"
             onClick={() =>
               onSave({
                 amountPaid: paid,

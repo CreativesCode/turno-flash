@@ -96,14 +96,14 @@ export function TripBookingDetails({
       )}
 
       {!enabled && (
-        <p className="text-[11px] text-foreground-subtle">
+        <p className="text-caption text-foreground-subtle">
           Activa la página y guarda los cambios para que el link empiece a
           funcionar.
         </p>
       )}
 
       {enabled && published.length === 0 && (
-        <div className="flex items-start gap-1.5 rounded-lg bg-warning-50 p-3 text-xs text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+        <div className="flex items-start gap-1.5 rounded-lg bg-warning-50 p-3 text-xs text-warning-800 dark:bg-warning-900 dark:text-warning-400">
           <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>
             No tienes ninguna salida publicada, así que el cliente va a ver la
@@ -136,7 +136,7 @@ export function TripBookingDetails({
       </Field>
 
       {enabled && !depositInstructions.trim() && (
-        <div className="flex items-start gap-1.5 rounded-lg bg-warning-50 p-3 text-xs text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+        <div className="flex items-start gap-1.5 rounded-lg bg-warning-50 p-3 text-xs text-warning-800 dark:bg-warning-900 dark:text-warning-400">
           <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>
             Todavía no escribiste cómo se paga el anticipo: el cliente no va a
@@ -159,7 +159,7 @@ export function TripBookingDetails({
               seat_booking_hold_hours: Number(e.target.value) || 1,
             })
           }
-          className="w-28 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
+          className="w-28 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900"
         />
       </Field>
     </div>

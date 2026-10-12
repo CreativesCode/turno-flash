@@ -117,7 +117,7 @@ export function OrganizationEditSheet({
               />
             </Field>
           </div>
-          <p className="mt-1 text-[11px] text-foreground-subtle">
+          <p className="mt-1 text-caption text-foreground-subtle">
             Solo para corregir un error: los cobros se hacen con «Registrar
             pago», que calcula las fechas. Al vencer tiene {LICENSE_GRACE_DAYS}{" "}
             días de margen.
@@ -146,7 +146,7 @@ export function OrganizationEditSheet({
           </Button>
           <Button
             type="submit"
-            variant="mesh-primary"
+            variant="primary"
             disabled={isSubmitting}
             className="flex-2 justify-center"
           >

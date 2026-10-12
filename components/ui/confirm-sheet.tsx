@@ -16,7 +16,7 @@ export interface ConfirmSheetProps {
   /** While true, both buttons are disabled and the sheet can't be dismissed. */
   busy?: boolean;
   /** Red for destructive actions (default); primary for constructive ones. */
-  confirmVariant?: "danger" | "mesh-primary";
+  confirmVariant?: "danger" | "primary";
   /** Keeps the confirm button off until the sheet's input is valid. */
   confirmDisabled?: boolean;
 }

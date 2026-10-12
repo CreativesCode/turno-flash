@@ -21,7 +21,7 @@ export default function TermsPage() {
           ← Volver al inicio
         </Link>
 
-        <h1 className="mb-2 text-3xl font-bold text-foreground">
+        <h1 className="mb-2 text-3xl font-semibold text-foreground">
           Términos y Condiciones
         </h1>
         <p className="mb-10 text-sm text-foreground-muted">

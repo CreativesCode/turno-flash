@@ -129,7 +129,7 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
                 <div className="truncate text-sm font-semibold text-foreground">
                   {formatRange(exception.start_datetime, exception.end_datetime, timezone)}
                 </div>
-                <div className="truncate text-[11px] text-foreground-muted">
+                <div className="truncate text-caption text-foreground-muted">
                   {exception.title}
                 </div>
               </div>
@@ -148,7 +148,7 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
       )}
 
       <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-        <label className="flex flex-col gap-1 text-[11px] font-semibold text-foreground-muted">
+        <label className="flex flex-col gap-1 text-caption font-semibold text-foreground-muted">
           Desde
           <input
             type="date"
@@ -157,7 +157,7 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
             className={sheetInputClasses}
           />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] font-semibold text-foreground-muted">
+        <label className="flex flex-col gap-1 text-caption font-semibold text-foreground-muted">
           Hasta (opcional)
           <input
             type="date"
@@ -179,7 +179,7 @@ export function ExceptionsEditor({ organizationId, staffId }: ExceptionsEditorPr
         />
         <Button
           type="button"
-          variant="soft"
+          variant="secondary"
           onClick={handleAdd}
           disabled={!from || createMutation.isPending}
           className="shrink-0"

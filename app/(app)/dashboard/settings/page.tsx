@@ -112,11 +112,11 @@ export default function SettingsPage() {
         <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {/* Header */}
           <div className="mb-6 flex items-center gap-3">
-            <div className="mesh-info flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm">
+            <div className="bg-surface-2 flex h-10 w-10 items-center justify-center rounded-xl text-foreground shadow-sm">
               <SettingsIcon className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                 Ajustes
               </h1>
               <p className="text-sm text-foreground-muted">
@@ -127,14 +127,14 @@ export default function SettingsPage() {
 
           {profile && !canView && (
             <Card className="p-8 text-center">
-              <div className="text-sm font-bold text-foreground">
+              <div className="text-sm font-semibold text-foreground">
                 Solo los dueños pueden cambiar los ajustes
               </div>
             </Card>
           )}
 
           {canView && error && (
-            <Card className="border-danger-200 bg-danger-50 p-5 text-sm text-danger-800 dark:border-danger-900/40 dark:bg-danger-900/20 dark:text-danger-200">
+            <Card className="border-danger-200 bg-danger-50 p-5 text-sm text-danger-800 dark:border-danger-900/40 dark:bg-danger-900 dark:text-danger-200">
               {error.message}
             </Card>
           )}
@@ -206,7 +206,7 @@ export default function SettingsPage() {
                       <CalendarOff className="h-4.5 w-4.5" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-foreground">
+                      <div className="text-sm font-semibold text-foreground">
                         Feriados y cierres del negocio
                       </div>
                       <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
@@ -224,14 +224,14 @@ export default function SettingsPage() {
                 <div
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                     waEnabled
-                      ? "bg-success-100 text-success-700 dark:bg-success-900/20 dark:text-success-400"
-                      : "bg-warning-100 text-warning-700 dark:bg-warning-900/20 dark:text-warning-400"
+                      ? "bg-success-100 text-success-700 dark:bg-success-900 dark:text-success-400"
+                      : "bg-warning-100 text-warning-700 dark:bg-warning-900 dark:text-warning-400"
                   }`}
                 >
                   <MessageSquare className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-foreground">
+                  <div className="text-sm font-semibold text-foreground">
                     WhatsApp {waEnabled ? "conectado" : "no conectado"}
                   </div>
                   <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
@@ -280,7 +280,7 @@ export default function SettingsPage() {
                             onChange={(e) =>
                               patchDraft({ daily_summary_time: e.target.value })
                             }
-                            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-foreground focus:border-info-500 focus:outline-none focus:ring-1 focus:ring-info-500"
+                            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900"
                           />
                           <span className="font-normal">
                             (hora local de tu negocio)
@@ -294,7 +294,7 @@ export default function SettingsPage() {
 
               <div className="mt-5 flex justify-end">
                 <Button
-                  variant="mesh-primary"
+                  variant="primary"
                   onClick={handleSave}
                   disabled={!dirty || updateMutation.isPending || isLoading}
                 >
@@ -339,7 +339,7 @@ function SettingRow({
             <Icon className="h-4.5 w-4.5" />
           </div>
           <div>
-            <div className="text-sm font-bold text-foreground">{title}</div>
+            <div className="text-sm font-semibold text-foreground">{title}</div>
             <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
               {description}
             </p>

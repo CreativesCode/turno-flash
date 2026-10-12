@@ -242,7 +242,7 @@ export function ManualBookingSheet({
           </Field>
 
           <Field label="Falta por cobrar">
-            <div className="rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm font-bold text-foreground">
+            <div className="rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm font-semibold text-foreground">
               {money(Math.max(priceTotal + extra - paid, 0))}
             </div>
           </Field>
@@ -297,7 +297,7 @@ export function ManualBookingSheet({
           </Button>
           <Button
             type="submit"
-            variant="mesh-primary"
+            variant="primary"
             disabled={isSubmitting || trip.seats_left <= 0}
             className="flex-2 justify-center"
           >

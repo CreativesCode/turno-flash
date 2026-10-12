@@ -20,7 +20,7 @@ export function OfflineBanner() {
   if (online && !connectionError) return null;
 
   return (
-    <p className="flex items-center justify-center gap-1.5 bg-warning-50 px-4 py-2 text-center text-xs font-semibold text-warning-800 dark:bg-warning-900/20 dark:text-warning-400 print:hidden">
+    <p className="flex items-center justify-center gap-1.5 bg-warning-50 px-4 py-2 text-center text-xs font-semibold text-warning-800 dark:bg-warning-900 dark:text-warning-400 print:hidden">
       <WifiOff className="h-3.5 w-3.5 shrink-0" />
       Sin conexión. Ves los últimos datos guardados; para hacer cambios necesitas señal.
     </p>

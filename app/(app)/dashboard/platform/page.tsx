@@ -84,7 +84,7 @@ export default function PlatformPage() {
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <div className="mb-6">
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
               Plataforma
             </h1>
             <p className="mt-0.5 text-sm text-foreground-muted">
@@ -94,7 +94,7 @@ export default function PlatformPage() {
 
           {profile && !isAdmin && (
             <Card className="p-8 text-center">
-              <div className="text-sm font-bold text-foreground">
+              <div className="text-sm font-semibold text-foreground">
                 Solo administradores
               </div>
               <div className="mt-1 text-xs text-foreground-muted">
@@ -104,7 +104,7 @@ export default function PlatformPage() {
           )}
 
           {isAdmin && error && (
-            <Card className="border-danger-200 bg-danger-50 p-5 text-sm text-danger-800 dark:border-danger-900/40 dark:bg-danger-900/20 dark:text-danger-200">
+            <Card className="border-danger-200 bg-danger-50 p-5 text-sm text-danger-800 dark:border-danger-900/40 dark:bg-danger-900 dark:text-danger-200">
               {error.message}
             </Card>
           )}
@@ -181,7 +181,7 @@ export default function PlatformPage() {
                   ) : (
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-border text-left text-[11px] font-bold uppercase tracking-wide text-foreground-muted">
+                        <tr className="border-b border-border text-left text-caption font-semibold text-foreground-muted">
                           <th className="px-4 py-3">Organización</th>
                           <th className="px-4 py-3">Vence</th>
                           <th className="px-4 py-3">Origen</th>
@@ -213,7 +213,7 @@ export default function PlatformPage() {
                                   : "Licencia manual"}
                               </td>
                               <td
-                                className={`px-4 py-2.5 text-right font-bold ${
+                                className={`px-4 py-2.5 text-right font-semibold ${
                                   days <= 7
                                     ? "text-danger-600 dark:text-danger-400"
                                     : "text-foreground"
@@ -261,7 +261,7 @@ export default function PlatformPage() {
                             <span className="text-xs font-semibold text-foreground-muted">
                               {EVENT_LABELS[e.event_type] ?? e.event_type}
                             </span>
-                            <span className="text-sm font-extrabold text-foreground">
+                            <span className="text-sm font-semibold text-foreground">
                               {e.count}
                             </span>
                           </div>
@@ -289,7 +289,7 @@ export default function PlatformPage() {
                           const max = data.top_orgs_30d[0]?.appointments || 1;
                           return (
                             <div key={org.id} className="flex items-center gap-3">
-                              <div className="w-5 shrink-0 text-xs font-bold text-foreground-subtle">
+                              <div className="w-5 shrink-0 text-xs font-semibold text-foreground-subtle">
                                 {i + 1}
                               </div>
                               <div className="w-36 min-w-0 shrink-0 truncate text-xs font-semibold text-foreground">
@@ -303,7 +303,7 @@ export default function PlatformPage() {
                                   }}
                                 />
                               </div>
-                              <div className="w-10 shrink-0 text-right text-xs font-bold text-foreground">
+                              <div className="w-10 shrink-0 text-right text-xs font-semibold text-foreground">
                                 {org.appointments}
                               </div>
                             </div>
@@ -327,7 +327,7 @@ export default function PlatformPage() {
                         {data.inactive_orgs_14d.map((org) => (
                           <div
                             key={org.id}
-                            className="flex items-center justify-between gap-3 rounded-lg bg-warning-50 px-3 py-2 dark:bg-warning-900/15"
+                            className="flex items-center justify-between gap-3 rounded-lg bg-warning-50 px-3 py-2 dark:bg-warning-900"
                           >
                             <Link
                               href={`/dashboard/organizations/details?id=${org.id}`}
@@ -335,7 +335,7 @@ export default function PlatformPage() {
                             >
                               {org.name}
                             </Link>
-                            <span className="shrink-0 text-[11px] text-foreground-muted">
+                            <span className="shrink-0 text-caption text-foreground-muted">
                               {org.last_appointment_at
                                 ? `Último: ${formatDate(org.last_appointment_at)}`
                                 : "Nunca creó un turno"}
@@ -363,7 +363,7 @@ export default function PlatformPage() {
                           </div>
                           <div className="h-5 flex-1 overflow-hidden rounded-md bg-surface-2">
                             <div
-                              className="flex h-full items-center rounded-md bg-info-500 px-2 text-[10px] font-bold text-white"
+                              className="flex h-full items-center rounded-md bg-info-500 px-2 text-caption font-semibold text-white"
                               style={{
                                 width: `${Math.max(
                                   6,

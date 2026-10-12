@@ -125,7 +125,7 @@ export default function ReportsPage() {
           {/* Header */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 Reportes
               </h1>
               <p className="mt-0.5 text-sm text-foreground-muted">
@@ -152,7 +152,7 @@ export default function ReportsPage() {
           {/* Sin permisos */}
           {profile && !canView && (
             <Card className="p-8 text-center">
-              <div className="text-sm font-bold text-foreground">
+              <div className="text-sm font-semibold text-foreground">
                 Solo los dueños pueden ver los reportes
               </div>
               <div className="mt-1 text-xs text-foreground-muted">
@@ -163,7 +163,7 @@ export default function ReportsPage() {
 
           {/* Error */}
           {canView && error && (
-            <Card className="border-danger-200 bg-danger-50 p-5 text-sm text-danger-800 dark:border-danger-900/40 dark:bg-danger-900/20 dark:text-danger-200">
+            <Card className="border-danger-200 bg-danger-50 p-5 text-sm text-danger-800 dark:border-danger-900/40 dark:bg-danger-900 dark:text-danger-200">
               {error.message}
             </Card>
           )}
@@ -277,7 +277,7 @@ export default function ReportsPage() {
                           {data.status_counts.map((s) => (
                             <span
                               key={s.status}
-                              className="text-[11px] font-semibold text-foreground-muted"
+                              className="text-caption font-semibold text-foreground-muted"
                             >
                               {getStatusLabel(s.status)}: {s.count}
                             </span>
@@ -315,7 +315,7 @@ export default function ReportsPage() {
                     ) : (
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-border text-left text-[11px] font-bold uppercase tracking-wide text-foreground-muted">
+                          <tr className="border-b border-border text-left text-caption font-semibold text-foreground-muted">
                             <th className="px-4 py-3">Profesional</th>
                             <th className="px-4 py-3 text-right">Turnos</th>
                             <th className="px-4 py-3 text-right">Ingresos</th>
@@ -382,7 +382,7 @@ export default function ReportsPage() {
                               }}
                             />
                           </div>
-                          <div className="w-10 shrink-0 text-right text-xs font-bold text-foreground">
+                          <div className="w-10 shrink-0 text-right text-xs font-semibold text-foreground">
                             {s.count}
                           </div>
                         </div>

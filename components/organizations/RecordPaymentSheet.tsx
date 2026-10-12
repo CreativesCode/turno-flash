@@ -78,7 +78,7 @@ export function RecordPaymentSheet({
     >
       <div className="flex flex-col gap-4">
         <div>
-          <div className="text-xs font-bold uppercase tracking-[0.05em] text-foreground-muted">
+          <div className="text-xs font-semibold text-foreground-muted">
             Periodo que paga
           </div>
           <div
@@ -98,14 +98,14 @@ export function RecordPaymentSheet({
                   onClick={() => setPeriod(option)}
                   className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
                     selected
-                      ? "border-primary bg-primary-50 dark:bg-primary-900/20"
+                      ? "border-primary bg-primary-50 dark:bg-primary-900"
                       : "border-border bg-surface-2 hover:border-border-2"
                   }`}
                 >
                   <div className="text-sm font-semibold text-foreground">
                     {info.label}
                   </div>
-                  <div className="text-[11px] text-foreground-muted">
+                  <div className="text-caption text-foreground-muted">
                     {info.covered === 1 ? "1 mes" : `${info.covered} meses`}
                     {info.charged < info.covered
                       ? ` · paga ${info.charged}`
@@ -126,10 +126,10 @@ export function RecordPaymentSheet({
             </p>
           ) : (
             <>
-              <div className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <div className="text-xs font-semibold text-foreground-muted">
                 Se cobra
               </div>
-              <div className="mt-0.5 text-3xl font-extrabold tracking-tight text-foreground">
+              <div className="mt-0.5 text-3xl font-semibold tracking-tight text-foreground">
                 {formatUsd(data.amount_usd)}
               </div>
               <p className="mt-2 text-sm text-foreground">
@@ -176,7 +176,7 @@ export function RecordPaymentSheet({
           </Button>
           <Button
             type="button"
-            variant="mesh-primary"
+            variant="primary"
             onClick={handleConfirm}
             disabled={!data || quote.isFetching || recordPayment.isPending}
             className="flex-2 justify-center"

@@ -42,11 +42,11 @@ export function TeamCard({ organizationId }: { organizationId: string }) {
   return (
     <Card className="p-4">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-info-100 text-info-700 dark:bg-info-900/20 dark:text-info-400">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-info-100 text-info-700 dark:bg-info-900 dark:text-info-400">
           <Users className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-sm font-bold text-foreground">Tu equipo</h2>
+          <h2 className="text-sm font-semibold text-foreground">Tu equipo</h2>
           <p className="mt-0.5 text-xs text-foreground-muted">
             Si alguien deja de trabajar contigo, quítale el acceso.
           </p>
@@ -77,12 +77,12 @@ export function TeamCard({ organizationId }: { organizationId: string }) {
                   <div className="truncate text-sm font-semibold text-foreground">
                     {name}
                   </div>
-                  <div className="truncate text-[11px] text-foreground-muted">
+                  <div className="truncate text-caption text-foreground-muted">
                     {member.is_active ? member.email : "Sin acceso"}
                   </div>
                 </div>
                 <Button
-                  variant={member.is_active ? "secondary" : "soft"}
+                  variant={member.is_active ? "secondary" : "secondary"}
                   onClick={() => setTarget(member)}
                   className="min-h-11 shrink-0"
                 >

@@ -50,10 +50,10 @@ export function LicensePlanSummary() {
       <Card className="mb-6 p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+            <p className="text-xs font-semibold text-foreground-muted">
               Tu plan
             </p>
-            <h2 className="mt-0.5 text-xl font-extrabold tracking-tight text-foreground">
+            <h2 className="mt-0.5 text-xl font-semibold tracking-tight text-foreground">
               {info.label}
               {license.secondModule ? " + Pasajes" : ""}
             </h2>
@@ -72,7 +72,7 @@ export function LicensePlanSummary() {
 
         {!storeApp && (
           <>
-        <p className="mt-4 text-3xl font-extrabold tracking-tight text-foreground">
+        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
           {formatUsd(monthly)}
           <span className="ml-1 text-sm font-medium text-foreground-muted">
             al mes
@@ -114,11 +114,11 @@ export function LicensePlanSummary() {
                 <div className="text-xs text-foreground-muted">
                   {periodInfo.label}
                 </div>
-                <div className="text-sm font-bold text-foreground">
+                <div className="text-sm font-semibold text-foreground">
                   {formatUsd(amount)}
                 </div>
                 {saved > 0 && (
-                  <div className="text-[11px] font-semibold text-success-700 dark:text-success-400">
+                  <div className="text-caption font-semibold text-success-700 dark:text-success-400">
                     Ahorras {formatUsd(saved)}
                   </div>
                 )}

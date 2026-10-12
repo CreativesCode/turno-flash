@@ -110,7 +110,7 @@ export function TripsFlow({ slug }: { slug: string }) {
           ) : (
             <CalendarX className="mx-auto h-10 w-10 text-foreground-subtle" />
           )}
-          <h1 className="mt-3 text-lg font-extrabold text-foreground">
+          <h1 className="mt-3 text-lg font-semibold text-foreground">
             {offline ? "Sin conexión" : "Reservas no disponibles"}
           </h1>
           <p className="mt-1 text-sm text-foreground-muted">
@@ -120,7 +120,7 @@ export function TripsFlow({ slug }: { slug: string }) {
           </p>
           {offline && (
             <Button size="lg"
-              variant="soft"
+              variant="secondary"
               onClick={() => void refetch()}
               className="mt-4 w-full justify-center"
             >
@@ -136,7 +136,7 @@ export function TripsFlow({ slug }: { slug: string }) {
     return (
       <Shell>
         <div className="flex justify-center py-16">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
         </div>
       </Shell>
     );
@@ -281,7 +281,7 @@ export function TripsFlow({ slug }: { slug: string }) {
       onBack={previous ? () => back() : undefined}
     >
       {offline && (
-        <p className="mb-3 flex items-center gap-1.5 rounded-lg bg-warning-50 px-3 py-2 text-xs font-semibold text-warning-800 dark:bg-warning-900/20 dark:text-warning-400">
+        <p className="mb-3 flex items-center gap-1.5 rounded-lg bg-warning-50 px-3 py-2 text-xs font-semibold text-warning-800 dark:bg-warning-900 dark:text-warning-400">
           <WifiOff className="h-3.5 w-3.5 shrink-0" />
           Sin conexión, reintentando… Lo que escribiste se mantiene.
         </p>
@@ -358,7 +358,7 @@ export function TripsFlow({ slug }: { slug: string }) {
           ) : (
             <Hourglass className="mx-auto h-12 w-12 text-warning-600" />
           )}
-          <h2 className="mt-3 text-xl font-extrabold tracking-tight text-foreground">
+          <h2 className="mt-3 text-xl font-semibold tracking-tight text-foreground">
             {confirmation.status === "confirmed"
               ? "¡Asiento reservado!"
               : "Solicitud enviada"}
@@ -400,8 +400,8 @@ export function TripsFlow({ slug }: { slug: string }) {
 
           {confirmation.deposit_status === "pending" &&
             (confirmation.deposit_amount ?? 0) > 0 && (
-              <div className="mt-4 rounded-xl border border-warning-600 bg-warning-50 p-4 text-left text-sm dark:border-warning-400 dark:bg-warning-900/20">
-                <p className="font-bold text-warning-800 dark:text-warning-300">
+              <div className="mt-4 rounded-xl border border-warning-600 bg-warning-50 p-4 text-left text-sm dark:border-warning-400 dark:bg-warning-900">
+                <p className="font-semibold text-warning-800 dark:text-warning-300">
                   Falta el anticipo de {money(confirmation.deposit_amount ?? 0)}
                 </p>
                 {confirmation.hold_expires_at && (
@@ -421,7 +421,7 @@ export function TripsFlow({ slug }: { slug: string }) {
                       <RichText text={info.organization.deposit_instructions} />
                     </div>
                     <Button
-                      variant="soft"
+                      variant="secondary"
                       onClick={() => void copyInstructions()}
                       className="mt-3 w-full justify-center"
                     >
@@ -438,7 +438,7 @@ export function TripsFlow({ slug }: { slug: string }) {
             className="mt-5"
           />
           <Button size="lg"
-            variant="soft"
+            variant="secondary"
             onClick={reset}
             className="mt-3 w-full justify-center"
           >
@@ -464,7 +464,7 @@ function Shell({
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {businessName && (
-        <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+        <header className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
           <div className="mx-auto flex max-w-lg items-center gap-2 px-4 py-3">
             {onBack && (
               <button
@@ -477,7 +477,7 @@ function Shell({
               </button>
             )}
             <div className="min-w-0 flex-1">
-              <div className="truncate text-base font-extrabold tracking-tight text-foreground">
+              <div className="truncate text-base font-semibold tracking-tight text-foreground">
                 {businessName}
               </div>
               {subtitle && (
@@ -488,7 +488,7 @@ function Shell({
         </header>
       )}
       <main className="mx-auto w-full max-w-lg flex-1 px-4 py-5">{children}</main>
-      <footer className="flex items-center justify-center gap-1.5 pb-8 pt-4 text-[11px] text-foreground-subtle">
+      <footer className="flex items-center justify-center gap-1.5 pb-8 pt-4 text-caption text-foreground-subtle">
         <Logo size={14} />
         Reservas con TurnoFlash
       </footer>

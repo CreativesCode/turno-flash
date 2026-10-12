@@ -1,7 +1,7 @@
 "use client";
 
 import { PageMetadata } from "@/components/page-metadata";
-import { Button, Card, Logo } from "@/components/ui";
+import { Button, Logo } from "@/components/ui";
 import {
   LICENSE_PLAN_INFO,
   LICENSE_PLANS,
@@ -63,9 +63,9 @@ const TEAM_SIZE_LABEL: Record<LicensePlan, string> = {
 };
 
 const inputClass =
-  "mt-1.5 block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 text-sm text-foreground placeholder-foreground-subtle transition-shadow focus:border-primary focus:outline-none focus:ring-3 focus:ring-primary/15";
+  "mt-1.5 block w-full min-h-12 rounded-control border border-border-2 bg-surface px-3.5 py-2.5 text-body text-foreground placeholder:text-foreground-subtle transition-[border-color,box-shadow] focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900";
 const labelClass =
-  "text-xs font-semibold tracking-wide text-foreground-muted uppercase";
+  "text-xs font-semibold text-foreground-muted";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -176,20 +176,17 @@ export default function RegisterPage() {
       />
 
       <div className="flex flex-1 items-center justify-center px-5 py-12 sm:px-6">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-sm">
           {/* Brand mark */}
-          <div className="mb-7 flex flex-col items-center gap-3">
-            <Logo size={56} priority />
-            <div className="text-xl font-extrabold tracking-tight text-foreground">
-              TurnoFlash
-            </div>
+          <div className="mb-8">
+            <Logo size={32} withWordmark />
           </div>
 
-          <Card className="p-6 sm:p-7">
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+          <div>
+            <h1 className="font-display text-[40px] leading-[1.05] text-foreground">
               Registra tu negocio
             </h1>
-            <p className="mt-1 text-sm text-foreground-muted">
+            <p className="mt-2 text-body text-foreground-muted">
               Crea tu cuenta y empieza tu prueba gratis de {TRIAL_DAYS} días.
             </p>
 
@@ -235,7 +232,7 @@ export default function RegisterPage() {
                       key={option.key}
                       className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
                         kind === option.key
-                          ? "border-primary bg-primary-50 dark:bg-primary-900/20"
+                          ? "border-primary bg-primary-50 dark:bg-primary-900"
                           : "border-border-2 bg-surface hover:bg-muted"
                       }`}
                     >
@@ -274,7 +271,7 @@ export default function RegisterPage() {
                         key={option}
                         className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
                           teamPlan === option
-                            ? "border-primary bg-primary-50 dark:bg-primary-900/20"
+                            ? "border-primary bg-primary-50 dark:bg-primary-900"
                             : "border-border-2 bg-surface hover:bg-muted"
                         }`}
                       >
@@ -348,7 +345,7 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
+                    className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
                     aria-label={
                       showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
                     }
@@ -436,24 +433,24 @@ export default function RegisterPage() {
               </p>
 
               {error && (
-                <div className="rounded-lg bg-danger-50 px-3 py-2.5 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+                <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
                   {error}
                 </div>
               )}
 
               <Button
                 type="submit"
-                variant="mesh-primary"
-                size="md"
+                variant="primary"
+                size="lg"
                 disabled={loading}
                 className="w-full"
               >
                 {loading ? "Creando tu cuenta..." : "Crear cuenta y empezar"}
               </Button>
             </form>
-          </Card>
+          </div>
 
-          <div className="mt-5 text-center text-xs text-foreground-muted">
+          <div className="mt-6 text-meta text-foreground-muted">
             ¿Ya tienes cuenta?{" "}
             <Link
               href="/login"
@@ -463,7 +460,7 @@ export default function RegisterPage() {
             </Link>
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8">
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 text-sm text-foreground-muted transition-colors hover:text-primary"

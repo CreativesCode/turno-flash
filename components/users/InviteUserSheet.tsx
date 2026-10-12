@@ -53,12 +53,12 @@ export function InviteUserSheet({
         </Field>
 
         {error && (
-          <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+          <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
             {error}
           </div>
         )}
         {success && (
-          <div className="rounded-lg bg-success-50 p-3 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
+          <div className="rounded-lg bg-success-50 p-3 text-sm text-success-800 dark:bg-success-900 dark:text-success-400">
             {success}
           </div>
         )}
@@ -75,7 +75,7 @@ export function InviteUserSheet({
           </Button>
           <Button
             type="submit"
-            variant="mesh-primary"
+            variant="primary"
             disabled={isSubmitting}
             className="flex-2 justify-center"
           >

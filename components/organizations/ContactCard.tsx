@@ -96,7 +96,7 @@ function ContactForm({
       {error && <p className="text-xs text-danger-600">{error}</p>}
       {canEdit && (
         <Button
-          variant="mesh-primary"
+          variant="primary"
           onClick={handleSave}
           disabled={!dirty || saving}
           className="self-start"
@@ -138,7 +138,7 @@ export function ContactCard({ organizationId }: { organizationId: string }) {
           <MessageCircle className="h-4.5 w-4.5" />
         </div>
         <div>
-          <div className="text-sm font-bold text-foreground">Contacto para tus clientes</div>
+          <div className="text-sm font-semibold text-foreground">Contacto para tus clientes</div>
           <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
             Los avisos de WhatsApp salen de un número automático que no lee
             mensajes. Cuando el cliente pueda necesitar hablar con alguien, el

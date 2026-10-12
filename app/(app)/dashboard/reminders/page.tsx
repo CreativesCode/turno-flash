@@ -2,7 +2,14 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Avatar, Button, Card } from "@/components/ui";
+import {
+  Avatar,
+  Button,
+  Card,
+  ListGroup,
+  ListRow,
+  SectionLabel,
+} from "@/components/ui";
 import { APPOINTMENT_STATUS } from "@/config/constants";
 import { useAuth } from "@/contexts/auth-context";
 import { useAppointments, useSendReminder, useToast } from "@/hooks";
@@ -14,7 +21,6 @@ import { addDays, getLocalDateString, parseLocalDate } from "@/utils/date";
 import {
   AlertCircle,
   BellRing,
-  Calendar as CalendarIcon,
   Check,
   MessageCircle,
   Send,
@@ -192,7 +198,7 @@ export default function RemindersPage() {
         <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
             <AlertCircle className="mx-auto h-12 w-12 text-warning-500" />
-            <h1 className="mt-4 text-2xl font-bold text-foreground">
+            <h1 className="mt-4 text-2xl font-semibold text-foreground">
               Sin organización
             </h1>
             <p className="mt-2 text-sm text-foreground-muted">
@@ -216,7 +222,7 @@ export default function RemindersPage() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+            <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
             <p className="text-sm text-foreground-muted">
               Cargando recordatorios...
             </p>
@@ -237,11 +243,11 @@ export default function RemindersPage() {
 
       <div className="relative min-h-screen bg-background pb-24">
         {/* Sticky header */}
-        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+        <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
           <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 pb-3 pt-3 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                <h1 className="font-display text-display text-foreground">
                   Recordatorios
                 </h1>
                 <p className="text-xs text-foreground-muted">{subtitle}</p>
@@ -265,15 +271,16 @@ export default function RemindersPage() {
                     key={offset}
                     type="button"
                     onClick={() => setFilterDays(offset)}
-                    className={`flex shrink-0 flex-col items-center gap-0.5 rounded-xl border px-4 py-2 transition-colors ${
+                    aria-pressed={active}
+                    className={`flex shrink-0 cursor-pointer flex-col items-center gap-1 rounded-[14px] px-4 py-2 pb-2.5 transition-colors ${
                       active
-                        ? "border-foreground bg-foreground text-background"
-                        : "border-border bg-surface text-foreground hover:bg-muted"
+                        ? "bg-inverse text-inverse-foreground"
+                        : "text-foreground hover:bg-surface-2"
                     }`}
                   >
-                    <span className="text-sm font-bold leading-none">{label}</span>
+                    <span className="text-body font-semibold leading-none">{label}</span>
                     <span
-                      className={`text-[10px] leading-none ${
+                      className={`text-caption leading-none ${
                         active ? "opacity-70" : "text-foreground-muted"
                       }`}
                     >
@@ -288,41 +295,30 @@ export default function RemindersPage() {
 
         <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6 lg:px-8">
           {appointmentsError && (
-            <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <div className="mb-4 rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {appointmentsError}
             </div>
           )}
 
-          {/* Stats — 3 mesh cards */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <MeshStat
-              mesh="mesh-info"
-              icon={<CalendarIcon className="h-4 w-4" />}
-              value={toSend.length.toString()}
-              label="Por enviar"
-            />
-            <MeshStat
-              mesh="mesh-primary"
-              icon={<Check className="h-4 w-4" />}
-              value={sentCount.toString()}
-              label="Enviados"
-            />
-            <MeshStat
-              mesh="mesh-secondary"
-              icon={<MessageCircle className="h-4 w-4" />}
+          {/* Stats */}
+          <Card className="grid grid-cols-3 divide-x divide-border p-4">
+            <Stat value={toSend.length.toString()} label="Por enviar" />
+            <Stat value={sentCount.toString()} label="Enviados" />
+            <Stat
               value={responseRate == null ? "—" : `${responseRate}%`}
-              label="Tasa de respuesta"
+              label="Respondieron"
             />
-          </div>
+          </Card>
 
           {/* Batch CTA */}
           {canSendReminders && toSend.length > 0 && (
             <div className="mt-4">
               <Button
-                variant="mesh-primary"
+                variant="whatsapp"
+                size="lg"
                 onClick={sendBatch}
                 disabled={batchSending}
-                className="h-12 w-full justify-center text-sm"
+                className="w-full"
               >
                 <Send className="h-4 w-4" />
                 {batchSending
@@ -338,16 +334,9 @@ export default function RemindersPage() {
           {toSend.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className="mt-5">
-              <div className="mb-2 flex items-center gap-2 px-1 text-[11px] font-bold uppercase tracking-[0.06em] text-foreground-muted">
-                <span>Por enviar</span>
-                <span className="rounded-full bg-surface-2 px-1.5 py-px text-[10px]">
-                  {toSend.length}
-                </span>
-                <div className="h-px flex-1 bg-border" />
-              </div>
-
-              <div className="flex flex-col gap-2">
+            <div>
+              <SectionLabel count={toSend.length}>Por enviar</SectionLabel>
+              <ListGroup>
                 {toSend.map((apt) => (
                   <ReminderRow
                     key={apt.id}
@@ -360,13 +349,13 @@ export default function RemindersPage() {
                     onSend={() => sendReminder(apt)}
                   />
                 ))}
-              </div>
+              </ListGroup>
             </div>
           )}
 
           {/* Already-sent summary (informational, only when relevant) */}
           {sentCount > 0 && (
-            <div className="mt-6 flex items-center gap-2 rounded-lg border border-border bg-surface p-3 text-xs text-foreground-muted">
+            <div className="mt-6 flex items-center gap-2 px-1 text-meta text-foreground-muted">
               <Check className="h-4 w-4 text-primary" />
               <span>
                 Ya enviaste recordatorios a <strong>{sentCount}</strong> turno
@@ -381,42 +370,18 @@ export default function RemindersPage() {
   );
 }
 
-/* ────────────────────────────────────────────────────────────
- * MeshStat — 3-up dashboard tile with mesh background and white
- * text. Inlined (only used here for now); extract if a 2nd usage
- * appears (likely on dashboard desktop KPIs).
- * ──────────────────────────────────────────────────────────── */
-function MeshStat({
-  mesh,
-  icon,
-  value,
-  label,
-}: {
-  mesh: string;
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-}) {
+function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div
-      className={`${mesh} flex flex-col gap-2 rounded-xl p-3 text-white shadow-sm`}
-    >
-      {icon}
-      <div>
-        <div className="text-2xl font-extrabold leading-none tracking-tight">
-          {value}
-        </div>
-        <div className="mt-1 text-[10px] text-white/85">{label}</div>
+    <div className="px-2 text-center">
+      <div className="font-display text-[40px] leading-none text-foreground">
+        {value}
       </div>
+      <div className="mt-1.5 text-meta text-foreground-muted">{label}</div>
     </div>
   );
 }
 
-/* ────────────────────────────────────────────────────────────
- * ReminderRow — one appointment to remind: avatar + customer +
- * time/service + green pill "Enviar". Mirrors the design's
- * "Por enviar" list row.
- * ──────────────────────────────────────────────────────────── */
+/** One appointment to remind, as a row with its "Enviar" button. */
 function ReminderRow({
   appointment: a,
   isSending,
@@ -431,37 +396,25 @@ function ReminderRow({
   const fullName = `${a.customer_first_name} ${a.customer_last_name}`.trim();
   const time = a.start_time.length > 5 ? a.start_time.slice(0, 5) : a.start_time;
   return (
-    <Card className="flex items-center gap-3 p-3">
-      <Avatar name={fullName} size={36} />
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-bold text-foreground">
-          {fullName}
-        </div>
-        <div className="mt-0.5 truncate text-xs text-foreground-muted">
-          {time} · {a.service_name}
-        </div>
-      </div>
-      {canSend && (
-        <button
-          type="button"
-          onClick={onSend}
-          disabled={isSending}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-glow-primary transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:opacity-60"
-        >
-          {isSending ? (
-            <>
-              <span className="block h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Enviando…
-            </>
-          ) : (
-            <>
-              <MessageCircle className="h-3.5 w-3.5" />
-              Enviar
-            </>
-          )}
-        </button>
-      )}
-    </Card>
+    <ListRow
+      leading={<Avatar name={fullName} seed={a.customer_id} size={40} />}
+      title={fullName}
+      subtitle={`${time} · ${a.service_name}`}
+      trailing={
+        canSend && (
+          <Button
+            variant="whatsapp"
+            size="sm"
+            onClick={onSend}
+            loading={isSending}
+            disabled={isSending}
+          >
+            {!isSending && <MessageCircle className="size-4" />}
+            {isSending ? "Enviando…" : "Enviar"}
+          </Button>
+        )
+      }
+    />
   );
 }
 
@@ -471,7 +424,7 @@ function EmptyState() {
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
         <BellRing className="h-6 w-6" />
       </div>
-      <h3 className="mt-3 text-base font-bold text-foreground">
+      <h3 className="mt-3 text-base font-semibold text-foreground">
         Sin recordatorios pendientes
       </h3>
       <p className="mt-1 text-sm text-foreground-muted">

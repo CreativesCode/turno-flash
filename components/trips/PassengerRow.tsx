@@ -30,14 +30,14 @@ export interface PassengerRowProps {
 }
 
 const chip =
-  "rounded-full border px-2 py-0.5 text-[11px] font-bold whitespace-nowrap";
+  "rounded-full border px-2 py-0.5 text-caption font-semibold whitespace-nowrap";
 
 const STATUS_CHIP: Record<string, string> = {
-  pending: `${chip} border-warning-600 bg-warning-50 text-warning-600 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-300`,
-  confirmed: `${chip} border-success-600 bg-success-50 text-success-600 dark:border-success-400 dark:bg-success-900/20 dark:text-success-300`,
-  cancelled: `${chip} border-danger-600 bg-danger-50 text-danger-600 dark:border-danger-400 dark:bg-danger-900/20 dark:text-danger-300`,
+  pending: `${chip} border-warning-600 bg-warning-50 text-warning-600 dark:border-warning-400 dark:bg-warning-900 dark:text-warning-300`,
+  confirmed: `${chip} border-success-600 bg-success-50 text-success-600 dark:border-success-400 dark:bg-success-900 dark:text-success-300`,
+  cancelled: `${chip} border-danger-600 bg-danger-50 text-danger-600 dark:border-danger-400 dark:bg-danger-900 dark:text-danger-300`,
   completed: `${chip} border-border-2 bg-muted text-foreground-muted`,
-  no_show: `${chip} border-danger-600 bg-danger-50 text-danger-600 dark:border-danger-400 dark:bg-danger-900/20 dark:text-danger-300`,
+  no_show: `${chip} border-danger-600 bg-danger-50 text-danger-600 dark:border-danger-400 dark:bg-danger-900 dark:text-danger-300`,
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -49,8 +49,8 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const DEPOSIT_CHIP: Record<string, string> = {
-  pending: `${chip} border-warning-600 bg-warning-50 text-warning-600 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-300`,
-  paid: `${chip} border-success-600 bg-success-50 text-success-600 dark:border-success-400 dark:bg-success-900/20 dark:text-success-300`,
+  pending: `${chip} border-warning-600 bg-warning-50 text-warning-600 dark:border-warning-400 dark:bg-warning-900 dark:text-warning-300`,
+  paid: `${chip} border-success-600 bg-success-50 text-success-600 dark:border-success-400 dark:bg-success-900 dark:text-success-300`,
   refunded: `${chip} border-border-2 bg-muted text-foreground-muted`,
   waived: `${chip} border-border-2 bg-muted text-foreground-muted`,
 };
@@ -139,14 +139,14 @@ export function PassengerRow({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-sm font-bold text-foreground">
+            <h3 className="truncate text-sm font-semibold text-foreground">
               {bookedBy}
             </h3>
-            <span className="text-[11px] font-semibold text-foreground-subtle">
+            <span className="text-caption font-semibold text-foreground-subtle">
               {booking.booking_number ?? "—"}
             </span>
             {booking.trip_type === "round_trip" && (
-              <span className={`${chip} border-info-600 bg-info-50 text-info-600 dark:border-info-400 dark:bg-info-900/20 dark:text-info-300`}>
+              <span className={`${chip} border-info-600 bg-info-50 text-info-600 dark:border-info-400 dark:bg-info-900 dark:text-info-300`}>
                 Ida y vuelta
               </span>
             )}
@@ -191,12 +191,12 @@ export function PassengerRow({
               </span>
             )}
             {pending > 0 && !isCancelled && (
-              <span className={`${chip} border-warning-600 bg-warning-50 text-warning-600 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-300`}>
+              <span className={`${chip} border-warning-600 bg-warning-50 text-warning-600 dark:border-warning-400 dark:bg-warning-900 dark:text-warning-300`}>
                 Falta {money(pending)}
               </span>
             )}
             {pending === 0 && total > 0 && !isCancelled && (
-              <span className={`${chip} border-success-600 bg-success-50 text-success-600 dark:border-success-400 dark:bg-success-900/20 dark:text-success-300`}>
+              <span className={`${chip} border-success-600 bg-success-50 text-success-600 dark:border-success-400 dark:bg-success-900 dark:text-success-300`}>
                 Pagó completo
               </span>
             )}
@@ -207,7 +207,7 @@ export function PassengerRow({
               {booking.passenger_names.map((name, index) => (
                 <li
                   key={`${booking.id}-${index}`}
-                  className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] text-foreground"
+                  className="rounded-md bg-surface-2 px-2 py-0.5 text-caption text-foreground"
                 >
                   {index + 1}. {name}
                 </li>
@@ -216,7 +216,7 @@ export function PassengerRow({
           )}
 
           {missingNames > 0 && !isCancelled && (
-            <p className="mt-1.5 text-[11px] font-semibold text-warning-600 dark:text-warning-300">
+            <p className="mt-1.5 text-caption font-semibold text-warning-600 dark:text-warning-300">
               Faltan {missingNames} nombre{missingNames === 1 ? "" : "s"} para la
               lista del chofer
             </p>
@@ -249,7 +249,7 @@ export function PassengerRow({
             <button
               type="button"
               onClick={() => onApprove(booking)}
-              className="mesh-primary inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-transform hover:-translate-y-px"
+              className="bg-primary inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-transform hover:-translate-y-px"
             >
               <Check className="h-3.5 w-3.5" />
               Aprobar

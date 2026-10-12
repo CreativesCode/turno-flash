@@ -74,7 +74,7 @@ export function CurrencyCard({ organizationId, currency }: CurrencyCardProps) {
           <Coins className="h-4.5 w-4.5" />
         </div>
         <div>
-          <div className="text-sm font-bold text-foreground">
+          <div className="text-sm font-semibold text-foreground">
             Moneda en la que cobras
           </div>
           <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
@@ -108,7 +108,7 @@ export function CurrencyCard({ organizationId, currency }: CurrencyCardProps) {
 
             {canEdit && (
               <Button
-                variant="mesh-primary"
+                variant="primary"
                 onClick={handleSave}
                 disabled={!dirty || saving}
                 className="shrink-0"

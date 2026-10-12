@@ -115,7 +115,7 @@ export default function ErrorsPage() {
               <ArrowLeft size={16} />
               Volver al dashboard
             </button>
-            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+            <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">
               Logs de Errores
             </h1>
             <p className="mt-1 text-sm text-foreground-muted">
@@ -132,7 +132,7 @@ export default function ErrorsPage() {
                     <p className="truncate text-xs font-medium text-foreground-muted sm:text-sm">
                       Total Errores
                     </p>
-                    <p className="mt-1 text-xl font-bold text-foreground sm:text-2xl">
+                    <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">
                       {stats.total_errors || 0}
                     </p>
                   </div>
@@ -146,7 +146,7 @@ export default function ErrorsPage() {
                     <p className="truncate text-xs font-medium text-foreground-muted sm:text-sm">
                       Sin Resolver
                     </p>
-                    <p className="mt-1 text-xl font-bold text-danger sm:text-2xl">
+                    <p className="mt-1 text-xl font-semibold text-danger sm:text-2xl">
                       {stats.unresolved_errors || 0}
                     </p>
                   </div>
@@ -160,7 +160,7 @@ export default function ErrorsPage() {
                     <p className="truncate text-xs font-medium text-foreground-muted sm:text-sm">
                       Resueltos
                     </p>
-                    <p className="mt-1 text-xl font-bold text-success sm:text-2xl">
+                    <p className="mt-1 text-xl font-semibold text-success sm:text-2xl">
                       {stats.resolved_errors || 0}
                     </p>
                   </div>
@@ -174,7 +174,7 @@ export default function ErrorsPage() {
                     <p className="truncate text-xs font-medium text-foreground-muted sm:text-sm">
                       Hoy
                     </p>
-                    <p className="mt-1 text-xl font-bold text-foreground sm:text-2xl">
+                    <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">
                       {stats.errors_today || 0}
                     </p>
                   </div>
@@ -234,7 +234,7 @@ export default function ErrorsPage() {
               <p className="text-foreground-muted">Cargando errores...</p>
             </div>
           ) : error ? (
-            <div className="rounded-lg border border-danger bg-danger-50 dark:bg-danger-900/20 p-4 text-danger">
+            <div className="rounded-lg border border-danger bg-danger-50 dark:bg-danger-900 p-4 text-danger">
               Error al cargar errores: {error instanceof Error ? error.message : "Error desconocido"}
             </div>
           ) : errorLogs.length === 0 ? (
@@ -256,8 +256,8 @@ export default function ErrorsPage() {
                   key={errorLog.id}
                   className={`rounded-lg border ${
                     errorLog.resolved
-                      ? "border-success bg-success-50 dark:bg-success-900/20"
-                      : "border-danger bg-danger-50 dark:bg-danger-900/20"
+                      ? "border-success bg-success-50 dark:bg-success-900"
+                      : "border-danger bg-danger-50 dark:bg-danger-900"
                   } p-4`}
                 >
                   <div className="flex items-start justify-between">
@@ -320,7 +320,7 @@ export default function ErrorsPage() {
                         <button
                           onClick={() => handleUnresolve(errorLog.id)}
                           disabled={unresolveMutation.isPending}
-                          className="rounded px-3 py-1 text-sm font-medium text-success hover:bg-success-100 dark:hover:bg-success-900/40"
+                          className="rounded px-3 py-1 text-sm font-medium text-success hover:bg-success-100 dark:hover:bg-success-900"
                         >
                           {unresolveMutation.isPending ? "..." : "Marcar sin resolver"}
                         </button>
@@ -328,7 +328,7 @@ export default function ErrorsPage() {
                         <button
                           onClick={() => handleResolve(errorLog.id)}
                           disabled={resolveMutation.isPending}
-                          className="rounded px-3 py-1 text-sm font-medium text-success hover:bg-success-100 dark:hover:bg-success-900/40"
+                          className="rounded px-3 py-1 text-sm font-medium text-success hover:bg-success-100 dark:hover:bg-success-900"
                         >
                           {resolveMutation.isPending ? "..." : "Marcar resuelto"}
                         </button>

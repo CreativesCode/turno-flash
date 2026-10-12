@@ -427,7 +427,7 @@ function TripDetailsContent() {
       <ProtectedRoute>
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+            <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
             <p className="text-sm text-foreground-muted">Cargando pasajeros...</p>
           </div>
         </div>
@@ -440,14 +440,14 @@ function TripDetailsContent() {
       <ProtectedRoute>
         <div className="mx-auto max-w-3xl px-4 py-10 text-center">
           <WifiOff className="mx-auto h-10 w-10 text-foreground-subtle" />
-          <h1 className="mt-3 text-base font-bold text-foreground">
+          <h1 className="mt-3 text-base font-semibold text-foreground">
             Sin conexión
           </h1>
           <p className="mt-1 text-sm text-foreground-muted">
             No pudimos cargar la salida. Revisa tu conexión.
           </p>
           <Button
-            variant="soft"
+            variant="secondary"
             onClick={() => void refetchTrips()}
             className="mt-4"
           >
@@ -462,7 +462,7 @@ function TripDetailsContent() {
     return (
       <ProtectedRoute>
         <div className="mx-auto max-w-3xl px-4 py-10 text-center">
-          <h1 className="text-base font-bold text-foreground">
+          <h1 className="text-base font-semibold text-foreground">
             No encontramos esa salida
           </h1>
           <Link
@@ -491,7 +491,7 @@ function TripDetailsContent() {
       />
 
       <div className="relative min-h-screen bg-background pb-24 print:hidden">
-        <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80 print:hidden">
+        <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur print:hidden">
           <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 pb-3 pt-3 sm:px-6 lg:px-8">
             <Link
               href="/dashboard/trips"
@@ -503,7 +503,7 @@ function TripDetailsContent() {
 
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <h1 className="line-clamp-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                <h1 className="line-clamp-2 font-display text-display text-foreground">
                   {trip.title}
                 </h1>
                 <p className="text-xs text-foreground-muted">
@@ -515,7 +515,7 @@ function TripDetailsContent() {
 
               {canLoadBookings && (
                 <Button
-                  variant="mesh-primary"
+                  variant="primary"
                   onClick={() => {
                     setManualForm(EMPTY_BOOKING);
                     setShowManual(true);
@@ -555,7 +555,7 @@ function TripDetailsContent() {
 
         <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
           {error && (
-            <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+            <div className="mb-4 rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {error}
             </div>
           )}
@@ -573,7 +573,7 @@ function TripDetailsContent() {
                 />
               )}
               <div className="min-w-0 text-xs">
-                <p className="font-bold text-foreground">
+                <p className="font-semibold text-foreground">
                   {trip.vehicle_description || "Vehículo"}
                 </p>
                 {trip.driver_name && (
@@ -590,7 +590,7 @@ function TripDetailsContent() {
           )}
 
           {trip.cancelled_at && (
-            <div className="mb-4 rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm font-semibold text-danger-700 dark:border-danger-900/40 dark:bg-danger-900/20 dark:text-danger-300 print:hidden">
+            <div className="mb-4 rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm font-semibold text-danger-700 dark:border-danger-900/40 dark:bg-danger-900 dark:text-danger-300 print:hidden">
               Salida cancelada: ya no acepta reservas.
             </div>
           )}
@@ -598,7 +598,7 @@ function TripDetailsContent() {
           {(pendingApproval > 0 || pendingDeposits > 0 || owed > 0) && (
             <div className="mb-4 flex flex-wrap gap-2 text-xs font-semibold print:hidden">
               {pendingApproval > 0 && (
-                <span className="rounded-full border border-warning-600 bg-warning-50 px-3 py-1 text-warning-600 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-300">
+                <span className="rounded-full border border-warning-600 bg-warning-50 px-3 py-1 text-warning-600 dark:border-warning-400 dark:bg-warning-900 dark:text-warning-300">
                   {pendingApproval} por aprobar
                 </span>
               )}
@@ -620,7 +620,7 @@ function TripDetailsContent() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-foreground-subtle">
                 <Users className="h-6 w-6" />
               </div>
-              <h3 className="mt-3 text-base font-bold text-foreground">
+              <h3 className="mt-3 text-base font-semibold text-foreground">
                 Todavía no hay pasajeros
               </h3>
               <p className="mt-1 text-sm text-foreground-muted">
@@ -629,7 +629,7 @@ function TripDetailsContent() {
               </p>
               {canLoadBookings && (
                 <Button
-                  variant="mesh-primary"
+                  variant="primary"
                   onClick={() => {
                     setManualForm(EMPTY_BOOKING);
                     setShowManual(true);
@@ -744,7 +744,7 @@ function TripDetailsContent() {
             </Button>
             <Button
               type="button"
-              variant="mesh-primary"
+              variant="primary"
               onClick={handleSaveNames}
               disabled={updateNames.isPending}
               className="flex-2 justify-center"
@@ -765,7 +765,7 @@ export default function TripDetailsPage() {
         <ProtectedRoute>
           <div className="flex min-h-screen w-full items-center justify-center bg-background">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
+              <div className="mb-4 h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground" />
               <p className="text-sm text-foreground-muted">Cargando...</p>
             </div>
           </div>

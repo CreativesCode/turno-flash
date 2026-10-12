@@ -1,7 +1,7 @@
 "use client";
 
 import { PageMetadata } from "@/components/page-metadata";
-import { Button, Card, Logo } from "@/components/ui";
+import { Button, Logo } from "@/components/ui";
 import { getSiteUrl } from "@/utils/metadata";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { ArrowLeft, MailCheck } from "lucide-react";
@@ -59,19 +59,19 @@ export default function ForgotPasswordPage() {
         description="Recibe un enlace para elegir una contraseña nueva."
       />
       <div className="flex flex-1 items-center justify-center px-5 py-12 sm:px-6">
-        <div className="w-full max-w-md">
-          <div className="mb-7 flex flex-col items-center gap-3">
-            <Logo size={56} priority />
-            <div className="text-xl font-extrabold tracking-tight text-foreground">
-              Recuperar contraseña
-            </div>
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <Logo size={32} withWordmark />
           </div>
+          <h1 className="mb-2 font-display text-[40px] leading-[1.05] text-foreground">
+            Recuperar contraseña
+          </h1>
 
-          <Card className="p-6">
+          <div>
             {sent ? (
-              <div className="text-center">
-                <MailCheck className="mx-auto h-10 w-10 text-primary-600" />
-                <p className="mt-3 text-sm text-foreground">
+              <div>
+                <MailCheck className="h-8 w-8 text-primary" />
+                <p className="mt-3 text-body text-foreground">
                   Si hay una cuenta con <strong>{email.trim()}</strong>, te
                   enviamos un enlace para elegir una contraseña nueva. Revisa
                   también la carpeta de spam.
@@ -79,14 +79,14 @@ export default function ForgotPasswordPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <p className="text-sm text-foreground-muted">
+                <p className="text-body text-foreground-muted">
                   Escribe el email con el que entras y te mandamos un enlace
                   para elegir una contraseña nueva.
                 </p>
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-1.5 block text-xs font-bold uppercase tracking-[0.05em] text-foreground-muted"
+                    className="mb-1.5 block text-meta font-medium text-foreground-muted"
                   >
                     Email
                   </label>
@@ -98,17 +98,17 @@ export default function ForgotPasswordPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="tu@email.com"
-                    className="block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 text-sm text-foreground placeholder-foreground-subtle focus:border-primary focus:outline-none focus:ring-3 focus:ring-primary/15"
+                    className="block w-full min-h-12 rounded-control border border-border-2 bg-surface px-3.5 py-2.5 text-body text-foreground placeholder:text-foreground-subtle transition-[border-color,box-shadow] focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900"
                   />
                 </div>
                 {error && (
-                  <div className="rounded-lg bg-danger-50 px-3 py-2.5 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+                  <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
                     {error}
                   </div>
                 )}
                 <Button
                   type="submit"
-                  variant="mesh-primary"
+                  variant="primary"
                   size="lg"
                   disabled={sending}
                   className="w-full justify-center"
@@ -117,9 +117,9 @@ export default function ForgotPasswordPage() {
                 </Button>
               </form>
             )}
-          </Card>
+          </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8">
             <Link
               href="/login"
               className="inline-flex items-center gap-1.5 text-sm text-foreground-muted transition-colors hover:text-primary"

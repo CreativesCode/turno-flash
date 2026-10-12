@@ -191,11 +191,11 @@ export default function RecoverCustomersPage() {
               Volver a clientes
             </Link>
             <div className="flex items-center gap-3">
-              <div className="mesh-secondary flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm">
+              <div className="bg-secondary-100 dark:bg-secondary-900 flex h-10 w-10 items-center justify-center rounded-xl text-secondary-600 dark:text-secondary-400 shadow-sm">
                 <HeartHandshake className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                   Recuperar clientes
                 </h1>
                 <p className="text-sm text-foreground-muted">
@@ -207,7 +207,7 @@ export default function RecoverCustomersPage() {
 
           {profile && !canView && (
             <Card className="p-8 text-center">
-              <div className="text-sm font-bold text-foreground">
+              <div className="text-sm font-semibold text-foreground">
                 Solo los dueños pueden enviar campañas
               </div>
             </Card>
@@ -236,7 +236,7 @@ export default function RecoverCustomersPage() {
                   ))}
                 </div>
                 <Button
-                  variant="mesh-primary"
+                  variant="primary"
                   onClick={handleSend}
                   disabled={selected.size === 0 || sending}
                 >
@@ -262,7 +262,7 @@ export default function RecoverCustomersPage() {
                   </div>
                 ) : customers.length === 0 ? (
                   <div className="p-10 text-center">
-                    <div className="text-sm font-bold text-foreground">
+                    <div className="text-sm font-semibold text-foreground">
                       No hay clientes dormidos en este rango 🎉
                     </div>
                     <div className="mt-1 text-xs text-foreground-muted">
@@ -273,7 +273,7 @@ export default function RecoverCustomersPage() {
                   <>
                     <button
                       onClick={toggleAll}
-                      className="flex w-full items-center gap-2.5 border-b border-border px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-foreground-muted transition-colors hover:bg-muted"
+                      className="flex w-full items-center gap-2.5 border-b border-border px-4 py-3 text-left text-xs font-semibold text-foreground-muted transition-colors hover:bg-muted"
                     >
                       {allSelected ? (
                         <CheckSquare className="h-4 w-4 text-primary" />
@@ -320,7 +320,7 @@ export default function RecoverCustomersPage() {
                                 </div>
                               </div>
                               {throttled && (
-                                <span className="shrink-0 rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-semibold text-foreground-muted">
+                                <span className="shrink-0 rounded-full bg-surface-2 px-2 py-0.5 text-caption font-semibold text-foreground-muted">
                                   Contactado {formatDate(c.last_reactivation_sent_at)}
                                 </span>
                               )}
@@ -333,7 +333,7 @@ export default function RecoverCustomersPage() {
                 )}
               </Card>
 
-              <p className="mt-3 text-center text-[11px] text-foreground-muted">
+              <p className="mt-3 text-center text-caption text-foreground-muted">
                 Para no molestar, cada cliente recibe como máximo 1 mensaje de
                 reactivación cada {THROTTLE_DAYS} días.
               </p>

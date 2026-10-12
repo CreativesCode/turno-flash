@@ -73,7 +73,7 @@ export function RichTextEditor({
         <button
           type="button"
           onClick={() => setShowPreview((prev) => !prev)}
-          className={`ml-auto inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
+          className={`ml-auto inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-caption font-semibold transition-colors ${
             showPreview
               ? "border-primary bg-primary/10 text-primary-700 dark:text-primary-400"
               : "border-border bg-surface text-foreground-muted hover:bg-muted hover:text-foreground"
@@ -107,7 +107,7 @@ export function RichTextEditor({
         />
       )}
 
-      <p className="text-[11px] text-foreground-subtle">
+      <p className="text-caption text-foreground-subtle">
         Se escribe como en WhatsApp: *negrita*, _cursiva_, ~tachado~. Lo que
         escribas aquí se pega igual en un chat.
       </p>

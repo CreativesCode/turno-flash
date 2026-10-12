@@ -84,7 +84,7 @@ export default function InvitePage() {
   ) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
+        <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-foreground"></div>
       </div>
     );
   }
@@ -93,9 +93,9 @@ export default function InvitePage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
+      <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
         <div className="mx-auto max-w-2xl px-4 py-3 sm:px-6">
-          <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+          <h1 className="font-display text-display text-foreground">
             Invitar usuario
           </h1>
           <p className="text-xs text-foreground-muted">
@@ -109,11 +109,11 @@ export default function InvitePage() {
       <div className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-5 sm:px-6">
         <Card className="p-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-400">
               <Mail className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-foreground">
+              <h2 className="text-sm font-semibold text-foreground">
                 Enviar invitación
               </h2>
               <p className="mt-0.5 text-xs text-foreground-muted">
@@ -158,20 +158,20 @@ export default function InvitePage() {
             )}
 
             {error && (
-              <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
+              <div className="rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="rounded-lg bg-success-50 p-3 text-sm text-success-800 dark:bg-success-900/20 dark:text-success-400">
+              <div className="rounded-lg bg-success-50 p-3 text-sm text-success-800 dark:bg-success-900 dark:text-success-400">
                 {success}
               </div>
             )}
 
             <Button
               type="submit"
-              variant="mesh-primary"
+              variant="primary"
               disabled={loading}
               className="w-full justify-center"
             >
@@ -185,11 +185,11 @@ export default function InvitePage() {
         )}
 
         <Card className="p-4">
-          <h3 className="text-sm font-bold text-foreground">Cómo funciona</h3>
+          <h3 className="text-sm font-semibold text-foreground">Cómo funciona</h3>
           <ol className="mt-3 flex flex-col gap-2.5">
             {STEPS.map((step, i) => (
               <li key={step} className="flex items-start gap-2.5">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-2 text-[11px] font-bold text-foreground-muted">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-2 text-caption font-semibold text-foreground-muted">
                   {i + 1}
                 </span>
                 <span className="text-sm text-foreground-muted">{step}</span>
