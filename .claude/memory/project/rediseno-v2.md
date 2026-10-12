@@ -13,7 +13,7 @@ Geist + Geist Mono + Instrument Serif, listas agrupadas, logo «3a». El plan po
 
 ## Estado (2026-10-12)
 
-Rama **`redesign-v2`** (creada desde `main`; **sin commits todavía**, todo en el árbol de trabajo).
+Rama **`redesign-v2`** (creada desde `main`), **con commits por fase** y sin subir (el push es de Roberto).
 
 - **Fase 1 hecha:** `app/globals.css` (tokens nuevos, mismos nombres), fuentes en `app/layout.tsx`,
   `manifest.json`, y `primary-500` → `primary` en 33 archivos.
@@ -23,8 +23,31 @@ Rama **`redesign-v2`** (creada desde `main`; **sin commits todavía**, todo en e
 - **Fase 3, la navegación, hecha:** `MobileTopbar` (logo, negocio, campana, avatar), `MobileTabBar` con «Más»,
   `MoreSheet` (reemplaza a `Drawer.tsx`, borrado), `Sidebar`, `components/nav-items.ts` compartido, y los 5
   botones flotantes de crear eliminados.
-- **Falta:** quitar los `mesh-*` del JSX (~116 usos en 47 archivos), Fase 4 (Inicio, Turnos, detalle, Servicios,
-  Clientes, resto de listas, login/registro, landing) y Fase 5 (íconos, favicon, OpenGraph, Capacitor).
+- **Fase 4, a medias:** hechos Inicio (saludo por hora, resumen con barra, «Ahora», «Próximos»; sin atajos),
+  la lista de Turnos, Servicios y Clientes. `ApptRow`, `ServiceCard` y `CustomerCard` conservan el nombre pero
+  ya son filas de `ListGroup`.
+- **Fase 5, parte web hecha:** isotipo, favicon, íconos PWA, apple-touch, OpenGraph, `theme-color` y barra de
+  estado nativa.
+- **Falta:** detalle y alta de turno (`AppointmentModal`), calendarios Día/Semana, Profesionales, Usuarios,
+  Organizaciones, Recordatorios, Viajes, login/registro, quitar los `mesh-*` que quedan y sus clases, la landing
+  (al final), íconos y splash nativos, y **rehacer toda la guía de primeros pasos y el manual** al terminar.
+
+## Decisiones de Roberto (2026-10-12)
+
+- Nombres de estado nuevos aprobados: Avisado, Confirmó, Llegó, Terminado, No vino, Reprogramado; acciones
+  «Llegó» → «Empezar» → «Terminar». **Ojo:** «Llegó» ya no salta a terminado: `checked_in` pasa a `in_progress`.
+  El botón «Terminar» del detalle sigue cerrando de una vez.
+- Fuera la grilla de atajos del Inicio. Landing al final. Las tres tipografías se quedan, también en `/book` y
+  `/trips`. Commits por fase. Guía y manual se rehacen enteros al terminar, no pantalla a pantalla.
+
+## Pendiente dentro de lo ya hecho
+
+- Turnos: los filtros siguen siendo de un solo estado (el diseño los agrupa en «Por atender», etc., y eso pide
+  tocar la consulta); no hay tira de días ni contadores en los filtros; el buscador sigue visible.
+- Clientes: sin agrupar por inicial (la lista es virtualizada y paginada); desactivar sigue en el menú de la fila.
+- Inicio: sin la tarjeta «avisos para mañana» (pide una consulta nueva). En su lugar hay una de pasajes por
+  aprobar, que antes vivía en los atajos.
+- La cuenta demo no tiene turnos de hoy: las filas de turno y la tarjeta «Ahora» **no se vieron con datos**.
 
 ## Trampas
 
