@@ -1,4 +1,10 @@
-import { SUPPORT_WHATSAPP_URL } from "@/config/constants";
+"use client";
+
+import {
+  SUPPORT_WHATSAPP_HELP_URL,
+  SUPPORT_WHATSAPP_URL,
+} from "@/config/constants";
+import { useIsStoreApp } from "@/hooks/useIsStoreApp";
 import { MessageCircle } from "lucide-react";
 
 /**
@@ -6,9 +12,10 @@ import { MessageCircle } from "lucide-react";
  * chat with support. Styled like the primary button.
  */
 export function SupportWhatsAppLink({ className = "" }: { className?: string }) {
+  const storeApp = useIsStoreApp();
   return (
     <a
-      href={SUPPORT_WHATSAPP_URL}
+      href={storeApp ? SUPPORT_WHATSAPP_HELP_URL : SUPPORT_WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
       className={`mesh-primary inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white shadow-glow-primary transition-[filter] hover:brightness-110 ${className}`}

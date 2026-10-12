@@ -15,7 +15,7 @@ function staffLimitMessage(error: {
   const limit = Number(error.details);
   const allowed =
     limit === 1 ? "1 profesional activo" : `${limit} profesionales activos`;
-  return `Tu plan admite ${allowed}. Para sumar más, pide el cambio de plan desde Suscripción.`;
+  return `Tu plan admite ${allowed}.`;
 }
 
 /**

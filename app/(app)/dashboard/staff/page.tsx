@@ -10,6 +10,7 @@ import { SUPPORT_WHATSAPP_PLAN_URL } from "@/config/constants";
 import { LICENSE_PLAN_INFO } from "@/config/license-pricing";
 import { useAuth } from "@/contexts/auth-context";
 import { useCreateParam } from "@/hooks/useCreateParam";
+import { useIsStoreApp } from "@/hooks/useIsStoreApp";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { TeamService } from "@/services";
 import { useQuery } from "@tanstack/react-query";
@@ -99,6 +100,8 @@ function StaffContent() {
   // The plan caps the active professionals; the database enforces it (076)
   // and this only tells the owner before trying.
   const { modules, ready: planReady } = useOrganizationModules();
+  // The store app does not point to a paid upgrade (see useIsStoreApp)
+  const storeApp = useIsStoreApp();
   const planInfo = LICENSE_PLAN_INFO[modules.plan];
   const activeCount = useMemo(
     () => staffMembers.filter((member) => member.is_active).length,
@@ -115,13 +118,15 @@ function StaffContent() {
     if (atStaffLimit) {
       toast.error(
         "No caben más profesionales",
-        `${staffLimitText} Pide el cambio de plan para sumar más.`
+        storeApp
+          ? staffLimitText
+          : `${staffLimitText} Pide el cambio de plan para sumar más.`
       );
       return;
     }
     resetForm();
     setShowModal(true);
-  }, [resetForm, atStaffLimit, staffLimitText, toast]);
+  }, [resetForm, atStaffLimit, staffLimitText, storeApp, toast]);
 
   useCreateParam(handleCreate, canManageStaff);
 
@@ -349,9 +354,10 @@ function StaffContent() {
               <p>
                 <span className="font-semibold text-foreground">
                   {staffLimitText}
-                </span>{" "}
-                Para sumar más, pásate a un plan mayor.
+                </span>
+                {storeApp ? "" : " Para sumar más, pásate a un plan mayor."}
               </p>
+              {!storeApp && (
               <a
                 href={SUPPORT_WHATSAPP_PLAN_URL}
                 target="_blank"
@@ -360,6 +366,7 @@ function StaffContent() {
               >
                 Pedir cambio de plan
               </a>
+              )}
             </div>
           )}
 

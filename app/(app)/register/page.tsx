@@ -10,6 +10,7 @@ import {
   formatUsd,
   licenseMonthlyPrice,
 } from "@/config/license-pricing";
+import { useIsStoreApp } from "@/hooks/useIsStoreApp";
 import { createClient } from "@/utils/supabase/client";
 import { Logger } from "@/utils/logger";
 import { toInternationalPhone } from "@/utils/phone";
@@ -85,6 +86,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // The store app does not show prices (see useIsStoreApp)
+  const storeApp = useIsStoreApp();
   const plan: LicensePlan = kind === "trips" ? "trips" : teamPlan;
   const monthlyPrice = formatUsd(
     licenseMonthlyPrice(plan, { secondModule: kind === "both" })
@@ -299,10 +302,13 @@ export default function RegisterPage() {
                 Tu plan:{" "}
                 <span className="font-semibold text-foreground">
                   {LICENSE_PLAN_INFO[plan].label}
-                  {kind === "both" ? " + Pasajes" : ""}, {monthlyPrice} al mes
+                  {kind === "both" ? " + Pasajes" : ""}
+                  {storeApp ? "" : `, ${monthlyPrice} al mes`}
                 </span>
-                . Hoy no pagas nada: tienes {TRIAL_DAYS} días gratis para
-                probarlo.
+                .{" "}
+                {storeApp
+                  ? `Tienes ${TRIAL_DAYS} días gratis para probarlo.`
+                  : `Hoy no pagas nada: tienes ${TRIAL_DAYS} días gratis para probarlo.`}
               </p>
 
               <div>
@@ -426,7 +432,7 @@ export default function RegisterPage() {
               {/* D-06: registration stays open, but the data must be real */}
               <p className="text-xs text-foreground-muted">
                 Usa tus datos reales: con ese email y ese WhatsApp te
-                contactamos para activar tu licencia.
+                contactamos.
               </p>
 
               {error && (

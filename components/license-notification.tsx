@@ -7,8 +7,12 @@ import {
   getLicenseMessageTitle,
   isLicenseExpiringSoon,
 } from "@/utils/license";
-import { SUPPORT_WHATSAPP_URL } from "@/config/constants";
+import {
+  SUPPORT_WHATSAPP_HELP_URL,
+  SUPPORT_WHATSAPP_URL,
+} from "@/config/constants";
 import { licenseDayOf } from "@/config/license-pricing";
+import { useIsStoreApp } from "@/hooks/useIsStoreApp";
 import { X } from "lucide-react";
 import { useState } from "react";
 
@@ -40,6 +44,8 @@ export function LicenseNotification({
   const alertType = getLicenseAlertType(licenseStatus);
   const title = getLicenseMessageTitle(licenseStatus);
   const message = formatLicenseMessage(licenseStatus);
+  // The store app never talks about paying (see useIsStoreApp)
+  const storeApp = useIsStoreApp();
 
   const handleDismiss = () => {
     setIsDismissed(true);
@@ -121,8 +127,9 @@ export function LicenseNotification({
           {licenseStatus.status === "grace_period" && (
             <div className={`mt-3 text-xs ${styles.message}`}>
               <p className="font-medium">
-                ⚠️ Puedes seguir trabajando estos días de margen. Si no
-                pagas antes de que terminen, la app se bloquea.
+                {storeApp
+                  ? "⚠️ Puedes seguir trabajando estos días de margen. Cuando terminen, la app se bloquea."
+                  : "⚠️ Puedes seguir trabajando estos días de margen. Si no pagas antes de que terminen, la app se bloquea."}
               </p>
               <SupportLine />
             </div>
@@ -131,7 +138,9 @@ export function LicenseNotification({
           {licenseStatus.status === "expired" && (
             <div className={`mt-3 text-xs ${styles.message}`}>
               <p className="font-medium">
-                🚫 Tu acceso está bloqueado hasta que registremos tu pago.
+                {storeApp
+                  ? "🚫 Tu acceso está bloqueado."
+                  : "🚫 Tu acceso está bloqueado hasta que registremos tu pago."}
               </p>
               <SupportLine />
             </div>
@@ -159,11 +168,12 @@ export function LicenseNotification({
 }
 
 function SupportLine() {
+  const storeApp = useIsStoreApp();
   return (
     <p className="mt-1">
-      Para seguir usando Turno Flash,{" "}
+      {storeApp ? "Si necesitas ayuda," : "Para seguir usando Turno Flash,"}{" "}
       <a
-        href={SUPPORT_WHATSAPP_URL}
+        href={storeApp ? SUPPORT_WHATSAPP_HELP_URL : SUPPORT_WHATSAPP_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="font-semibold underline"
@@ -207,7 +217,7 @@ export function LicenseNotificationBanner({
 
   const getMessage = () => {
     if (licenseStatus.status === "expired") {
-      return "🚫 Acceso bloqueado - Escríbenos por WhatsApp para activarlo";
+      return "🚫 Acceso bloqueado";
     }
 
     if (licenseStatus.status === "grace_period") {

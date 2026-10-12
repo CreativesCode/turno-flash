@@ -3,54 +3,22 @@
 import { LicensePlanSummary } from "@/components/license-plan-summary";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SupportWhatsAppLink } from "@/components/support-whatsapp-link";
-import { Badge, Button, Card } from "@/components/ui";
+import { Badge, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
-import { useLicense } from "@/hooks/useLicense";
-import { useSubscription } from "@/hooks/useSubscription";
-import type { PurchasesPackage } from "@revenuecat/purchases-capacitor";
-import {
-  ArrowLeft,
-  BadgeCheck,
-  Crown,
-  MessageCircle,
-  RefreshCw,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { useIsStoreApp } from "@/hooks/useIsStoreApp";
+import { useLicense, useOrganizationLicense } from "@/hooks/useLicense";
+import { ArrowLeft, Crown, MessageCircle, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useToast } from "@/hooks/useToast";
-
-const PACKAGE_LABELS: Record<string, { title: string; note?: string }> = {
-  $rc_monthly: { title: "Plan Mensual" },
-  $rc_annual: { title: "Plan Anual", note: "Mejor precio" },
-};
-
-function packageLabel(pkg: PurchasesPackage): { title: string; note?: string } {
-  return (
-    PACKAGE_LABELS[pkg.identifier] ?? {
-      title: pkg.product.title || pkg.identifier,
-    }
-  );
-}
 
 export default function SubscriptionPage() {
   const { profile, loading: authLoading } = useAuth();
   const router = useRouter();
-  const toast = useToast();
   const license = useLicense();
-  const {
-    isAvailable,
-    loading,
-    purchasing,
-    error,
-    packages,
-    isPro,
-    proExpirationDate,
-    purchase,
-    restore,
-  } = useSubscription();
+  const { data: organizationLicense } = useOrganizationLicense();
+  // The store app never talks about paying (see useIsStoreApp)
+  const storeApp = useIsStoreApp();
 
   // Solo owner/admin gestionan la suscripción (igual que la licencia)
   useEffect(() => {
@@ -64,23 +32,11 @@ export default function SubscriptionPage() {
     }
   }, [profile, authLoading, router]);
 
-  const handlePurchase = async (pkg: PurchasesPackage) => {
-    const result = await purchase(pkg);
-    if (result.success) {
-      toast.success("¡Suscripción activada! Gracias por tu compra.");
-    } else if (!result.cancelled) {
-      toast.error(result.error ?? "No se pudo completar la compra");
-    }
-  };
-
-  const handleRestore = async () => {
-    const restored = await restore();
-    if (restored) {
-      toast.success("Compras restauradas correctamente");
-    } else {
-      toast.info("No se encontraron compras para restaurar");
-    }
-  };
+  // The database message of a pending business mentions the first payment
+  const statusMessage =
+    storeApp && organizationLicense?.phase === "pending"
+      ? "Tu negocio está en preparación."
+      : license.message;
 
   return (
     <ProtectedRoute>
@@ -103,7 +59,7 @@ export default function SubscriptionPage() {
                 Suscripción
               </h1>
               <p className="text-sm text-foreground-muted">
-                Gestiona el plan de tu organización
+                El plan de tu negocio
               </p>
             </div>
           </div>
@@ -118,16 +74,11 @@ export default function SubscriptionPage() {
                     Estado actual
                   </p>
                   <p className="text-sm text-foreground-muted">
-                    {license.message}
+                    {statusMessage}
                   </p>
                 </div>
               </div>
-              {isPro ? (
-                <Badge variant="success">
-                  <BadgeCheck className="mr-1 h-3.5 w-3.5" />
-                  PRO activo
-                </Badge>
-              ) : license.isActive ? (
+              {license.isActive ? (
                 <Badge variant="success">Acceso activo</Badge>
               ) : license.isInGracePeriod ? (
                 <Badge variant="warning">En días de margen</Badge>
@@ -135,114 +86,23 @@ export default function SubscriptionPage() {
                 <Badge variant="warning">Sin acceso</Badge>
               )}
             </div>
-            {isPro && proExpirationDate && (
-              <p className="mt-3 text-xs text-foreground-muted">
-                Próxima renovación:{" "}
-                {new Date(proExpirationDate).toLocaleDateString("es", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </p>
-            )}
           </Card>
 
-          {/* Plan, precio por periodo y cómo pagar */}
+          {/* Plan y, solo en la web, precio por periodo y cómo pagar */}
           <LicensePlanSummary />
 
-          {/* Cómo activar o renovar: desde Cuba no hay pago en la app (D-10) */}
-          {!isPro && (
-            <Card className="p-6 text-center">
-              <MessageCircle className="mx-auto mb-3 h-8 w-8 text-foreground-muted" />
-              <h2 className="mb-1 text-lg font-semibold text-foreground">
-                Paga o renueva tu plan
-              </h2>
-              <p className="mb-4 text-sm text-foreground-muted">
-                Escríbenos por WhatsApp y te indicamos cómo pagar. Registramos
-                tu pago el mismo día.
-              </p>
-              <SupportWhatsAppLink className="w-full sm:w-auto" />
-            </Card>
-          )}
-
-          {/* Google Play: solo en Android y con planes configurados */}
-          {isAvailable && loading && (
-            <Card className="p-6">
-              <div className="flex items-center justify-center gap-3 py-6">
-                <div className="h-6 w-6 animate-spin rounded-full border-4 border-border border-t-foreground"></div>
-                <p className="text-sm text-foreground-muted">
-                  Cargando planes...
-                </p>
-              </div>
-            </Card>
-          )}
-          {isAvailable && !loading && packages.length > 0 && (
-            <>
-              <p className="mt-6 mb-3 text-sm text-foreground-muted">
-                También puedes suscribirte con Google Play:
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {packages.map((pkg) => {
-                  const label = packageLabel(pkg);
-                  return (
-                    <Card key={pkg.identifier} className="flex flex-col p-5">
-                      <div className="mb-2 flex items-center justify-between">
-                        <h3 className="font-semibold text-foreground">
-                          {label.title}
-                        </h3>
-                        {label.note && (
-                          <Badge variant="info">
-                            <Sparkles className="mr-1 h-3 w-3" />
-                            {label.note}
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="mb-1 text-2xl font-bold text-foreground">
-                        {pkg.product.priceString}
-                      </p>
-                      <p className="mb-4 flex-1 text-sm text-foreground-muted">
-                        {pkg.product.description ||
-                          "Acceso completo a Turno Flash para tu organización."}
-                      </p>
-                      <Button
-                        variant="mesh-primary"
-                        disabled={purchasing || isPro}
-                        onClick={() => handlePurchase(pkg)}
-                      >
-                        {isPro
-                          ? "Ya tienes PRO"
-                          : purchasing
-                            ? "Procesando..."
-                            : "Suscribirme"}
-                      </Button>
-                    </Card>
-                  );
-                })}
-              </div>
-
-              {error && (
-                <p className="mt-4 text-sm text-danger-600 dark:text-danger-400">
-                  {error}
-                </p>
-              )}
-
-              <div className="mt-6 flex items-center justify-between">
-                <p className="text-xs text-foreground-muted">
-                  La suscripción se renueva automáticamente. Puedes cancelarla
-                  en cualquier momento desde Google Play.
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={purchasing}
-                  onClick={handleRestore}
-                >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  Restaurar compras
-                </Button>
-              </div>
-            </>
-          )}
+          <Card className="p-6 text-center">
+            <MessageCircle className="mx-auto mb-3 h-8 w-8 text-foreground-muted" />
+            <h2 className="mb-1 text-lg font-semibold text-foreground">
+              {storeApp ? "¿Necesitas ayuda?" : "Paga o renueva tu plan"}
+            </h2>
+            <p className="mb-4 text-sm text-foreground-muted">
+              {storeApp
+                ? "Escríbenos por WhatsApp y te atendemos."
+                : "Escríbenos por WhatsApp y te indicamos cómo pagar. Registramos tu pago el mismo día."}
+            </p>
+            <SupportWhatsAppLink className="w-full sm:w-auto" />
+          </Card>
         </div>
       </div>
     </ProtectedRoute>

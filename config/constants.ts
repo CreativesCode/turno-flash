@@ -13,6 +13,11 @@ export const SUPPORT_WHATSAPP_URL = `https://wa.me/5352564206?text=${encodeURICo
   "Hola, quiero activar o renovar la licencia de Turno Flash."
 )}`;
 
+/** Support chat opened from the store app, which never mentions the license payment. */
+export const SUPPORT_WHATSAPP_HELP_URL = `https://wa.me/5352564206?text=${encodeURIComponent(
+  "Hola, necesito ayuda con Turno Flash."
+)}`;
+
 /** Only an admin changes the plan of a business, so the owner asks for it. */
 export const SUPPORT_WHATSAPP_PLAN_URL = `https://wa.me/5352564206?text=${encodeURIComponent(
   "Hola, quiero cambiar el plan de mi negocio en Turno Flash."

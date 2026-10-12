@@ -15,15 +15,20 @@ import {
   licenseMonthlyPrice,
   licensePeriodAmount,
 } from "@/config/license-pricing";
+import { useIsStoreApp } from "@/hooks/useIsStoreApp";
 import { useOrganizationLicense } from "@/hooks/useLicense";
 import { Gift, Wallet } from "lucide-react";
 
 /**
  * What the owner pays and until when: plan, price per billing period, how to
  * pay and how to earn days by referring another business.
+ *
+ * In the store app it shows only the plan and the dates: no prices and no
+ * way to pay (see useIsStoreApp).
  */
 export function LicensePlanSummary() {
   const { data: license } = useOrganizationLicense();
+  const storeApp = useIsStoreApp();
   if (!license) return null;
 
   const info = LICENSE_PLAN_INFO[license.plan];
@@ -65,6 +70,8 @@ export function LicensePlanSummary() {
           </Badge>
         </div>
 
+        {!storeApp && (
+          <>
         <p className="mt-4 text-3xl font-extrabold tracking-tight text-foreground">
           {formatUsd(monthly)}
           <span className="ml-1 text-sm font-medium text-foreground-muted">
@@ -80,16 +87,20 @@ export function LicensePlanSummary() {
             . Después, {formatUsd(licenseMonthlyPrice(license.plan, { secondModule: license.secondModule }))} al mes.
           </p>
         )}
+          </>
+        )}
 
         {license.phase !== "pending" && expiresOn && (
           <p className="mt-3 text-sm text-foreground">
             Tienes acceso hasta el{" "}
             <span className="font-semibold">{formatLicenseDay(expiresOn)}</span>
-            . Después tienes {LICENSE_GRACE_DAYS} días de margen para pagar
-            antes de que la app se bloquee.
+            . Después tienes {LICENSE_GRACE_DAYS} días de margen
+            {storeApp ? "" : " para pagar"} antes de que la app se bloquee.
           </p>
         )}
 
+        {!storeApp && (
+          <>
         <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {BILLING_PERIODS.map((period) => {
             const periodInfo = BILLING_PERIOD_INFO[period];
@@ -124,8 +135,11 @@ export function LicensePlanSummary() {
         >
           Pedir un cambio de plan
         </a>
+          </>
+        )}
       </Card>
 
+      {!storeApp && (
       <Card className="mb-6 p-5">
         <div className="flex items-start gap-3">
           <Wallet className="mt-0.5 h-5 w-5 shrink-0 text-foreground-muted" />
@@ -153,6 +167,7 @@ export function LicensePlanSummary() {
           </div>
         </div>
       </Card>
+      )}
     </>
   );
 }
