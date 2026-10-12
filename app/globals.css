@@ -36,9 +36,6 @@
   --inverse-foreground: #ffffff;
   --overlay: rgba(22, 23, 20, 0.38);
 
-  /* No glow: the names stay so existing classes don't break */
-  --shadow-glow-primary: none;
-  --shadow-glow-secondary: none;
   --shadow-card: 0 1px 2px rgba(22, 23, 20, 0.05);
   --accent: #147a42; /* action colour, per theme */
   --pink: #c4206a;
@@ -171,8 +168,6 @@
   --color-inverse-foreground: var(--inverse-foreground);
   --color-overlay: var(--overlay);
 
-  --shadow-glow-primary: var(--shadow-glow-primary);
-  --shadow-glow-secondary: var(--shadow-glow-secondary);
   --shadow-card: var(--shadow-card);
 
   /* Fonts — next/font creates the variables in app/layout.tsx */
@@ -234,16 +229,6 @@ body {
 .scrollbar-discreet::-webkit-scrollbar-track { background: transparent; }
 .scrollbar-discreet::-webkit-scrollbar-thumb { background-color: rgba(133, 133, 125, 0.12); border-radius: 2px; }
 .scrollbar-discreet:hover::-webkit-scrollbar-thumb { background-color: rgba(133, 133, 125, 0.25); }
-
-/* ──────────────────────────────────────────────────────────
- * Mesh gradients — RETIRED. Left as flat colours so nothing breaks
- * while their usages are migrated (phase 3 removes them).
- * ────────────────────────────────────────────────────────── */
-.mesh-primary   { background: var(--accent); color: var(--primary-foreground); }
-.mesh-secondary { background: var(--pink); color: #ffffff; }
-.mesh-info,
-.mesh-warn,
-.mesh-violet    { background: var(--inverse); color: var(--inverse-foreground); }
 
 /* ──────────────────────────────────────────────────────────
  * Appointment status palette — apply `.st-{status}`.

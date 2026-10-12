@@ -1,7 +1,7 @@
 "use client";
 
 import { PricingSection } from "@/components/landing/PricingSection";
-import { Avatar, Button, Card, Logo, StatusBadge } from "@/components/ui";
+import { Button, Card, IconTile, Logo, StatusBadge } from "@/components/ui";
 import {
   LICENSE_GRACE_DAYS,
   LICENSE_PLAN_INFO,
@@ -10,35 +10,32 @@ import {
   formatUsd,
 } from "@/config/license-pricing";
 import { useAuth } from "@/contexts/auth-context";
-import { useTheme } from "@/contexts/theme-context";
 import {
   ArrowRight,
   Banknote,
-  BarChart3,
   Building2,
   Bus,
   Calendar,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
+  CalendarCheck,
+  ChartColumn,
+  Check,
+  CircleCheck,
   ClipboardList,
-  Clock,
   Globe,
   HeartHandshake,
   KeyRound,
+  ListOrdered,
   Lock,
   type LucideIcon,
-  Mail,
   MapPin,
+  MessageCircle,
   MessageSquare,
-  Moon,
+  Minus,
+  Plus,
   ServerCog,
   Smartphone,
-  Sparkles,
-  Sun,
   Users,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { Capacitor } from "@capacitor/core";
 import { useRouter } from "next/navigation";
@@ -50,7 +47,6 @@ interface Feature {
   Icon: LucideIcon;
   title: string;
   description: string;
-  mesh: string;
 }
 
 const FEATURES: readonly Feature[] = [
@@ -59,56 +55,48 @@ const FEATURES: readonly Feature[] = [
     title: "Calendario Intuitivo",
     description:
       "Gestiona tus turnos con un calendario móvil-first. Vista lista, día y semana.",
-    mesh: "mesh-info",
   },
   {
     Icon: MessageSquare,
     title: "WhatsApp en piloto automático",
     description:
       "Confirmaciones, recordatorios, valoraciones post-visita y resumen diario para el dueño. Sin configurar nada.",
-    mesh: "mesh-primary",
   },
   {
     Icon: Users,
     title: "Clientes",
     description:
       "Historial, notas y datos. Búsqueda instantánea por nombre o teléfono.",
-    mesh: "mesh-secondary",
   },
   {
     Icon: Smartphone,
     title: "Móvil nativo",
     description:
       "iOS y Android. Bajo consumo de datos, ideal para conexiones lentas.",
-    mesh: "mesh-warn",
   },
   {
-    Icon: Clock,
+    Icon: CalendarCheck,
     title: "Sin dobles reservas",
     description:
       "Tu calendario siempre actualizado en tiempo real, sin solapes.",
-    mesh: "mesh-violet",
   },
   {
-    Icon: BarChart3,
+    Icon: ChartColumn,
     title: "Reportes y estadísticas",
     description:
       "Ingresos, servicios top, horas pico y rendimiento de tu equipo. Decide con datos, no con intuición.",
-    mesh: "mesh-info",
   },
   {
     Icon: HeartHandshake,
     title: "Recupera clientes",
     description:
       "Detecta clientes que dejaron de venir y envíales una invitación por WhatsApp con un clic.",
-    mesh: "mesh-secondary",
   },
   {
-    Icon: Users,
+    Icon: ListOrdered,
     title: "Lista de espera inteligente",
     description:
       "Si se cancela un turno, avisamos automáticamente al primer cliente en espera.",
-    mesh: "mesh-warn",
   },
 ];
 
@@ -118,42 +106,36 @@ const TRIP_FEATURES: readonly Feature[] = [
     title: "Salidas y asientos",
     description:
       "Publica cada salida con sus asientos, su precio y la foto del vehículo. Nunca se venden más asientos de los que hay.",
-    mesh: "mesh-info",
   },
   {
     Icon: Globe,
     title: "Tu página de pasajes",
     description:
       "Tus pasajeros reservan solos desde un enlace, sin llamar: eligen la salida, cuántos viajan y dónde los recoges.",
-    mesh: "mesh-primary",
   },
   {
     Icon: MapPin,
     title: "Puntos de recogida",
     description:
       "Cada parada con su hora y su precio. Solo ida o ida y vuelta.",
-    mesh: "mesh-secondary",
   },
   {
     Icon: Banknote,
     title: "Anticipos bajo control",
     description:
       "Pide un anticipo para guardar el asiento y registra cada cobro: siempre sabes quién pagó y cuánto falta.",
-    mesh: "mesh-warn",
   },
   {
     Icon: ClipboardList,
     title: "La lista del chofer",
     description:
       "Pasajeros, paradas, teléfonos y lo que falta cobrar, lista para compartir por WhatsApp o imprimir.",
-    mesh: "mesh-violet",
   },
   {
     Icon: MessageSquare,
     title: "Avisos por WhatsApp",
     description:
       "El pasajero recibe la confirmación de su reserva y cómo pagar el anticipo, sin que escribas nada.",
-    mesh: "mesh-info",
   },
 ];
 
@@ -163,19 +145,19 @@ const HOW_IT_WORKS: readonly {
   description: string;
 }[] = [
     {
-      step: "1",
+      step: "01",
       title: "Crea tu negocio",
       description:
         "Regístrate y elige si trabajas con turnos, con pasajes o con ambos. Luego carga tus servicios y tu equipo, o tus salidas.",
     },
     {
-      step: "2",
+      step: "02",
       title: "Agenda turnos o publica salidas",
       description:
         "Carga las reservas en segundos desde el móvil o comparte tu página para que reserven solos. El sistema evita solapes y asientos vendidos de más.",
     },
     {
-      step: "3",
+      step: "03",
       title: "WhatsApp hace el resto",
       description:
         "Confirmaciones y recordatorios automáticos. En los turnos, tus clientes responden OK o CANCELAR y la agenda se actualiza sola.",
@@ -188,28 +170,24 @@ const TRUST_POINTS: readonly Feature[] = [
     title: "Datos aislados por negocio",
     description:
       "Cada organización solo accede a su propia información, con aislamiento a nivel de base de datos (Row Level Security).",
-    mesh: "mesh-primary",
   },
   {
     Icon: KeyRound,
     title: "Roles y permisos",
     description:
       "Dueño y empleados: cada miembro del equipo ve exactamente lo que necesita.",
-    mesh: "mesh-secondary",
   },
   {
     Icon: ServerCog,
     title: "Infraestructura confiable",
     description:
       "Cifrado en tránsito (HTTPS/TLS), respaldos automáticos y sincronización en tiempo real.",
-    mesh: "mesh-info",
   },
   {
     Icon: Building2,
     title: "Hecho para tu día a día",
     description:
       "Salones, barberías, clínicas, estéticas, talleres y negocios de viajes y excursiones: flujos pensados para el trabajo real.",
-    mesh: "mesh-violet",
   },
 ];
 
@@ -270,11 +248,36 @@ const FAQS: readonly { question: string; answer: string }[] = [
   },
 ];
 
+/** What WhatsApp sends on its own, in the order it happens. */
+const WHATSAPP_TIMELINE: readonly { when: string; what: string; detail: string }[] = [
+  { when: "Al reservar", what: "Confirmación", detail: "Con el día, la hora y el servicio." },
+  { when: "24 h antes", what: "Recordatorio", detail: "El cliente responde OK o CANCELAR." },
+  { when: "1 h antes", what: "Último aviso", detail: "Para que nadie llegue tarde." },
+  { when: "Al terminar", what: "Valoración", detail: "De 1 a 5 estrellas." },
+  { when: "Cada mañana", what: "Resumen para el dueño", detail: "Tus turnos e ingresos del día." },
+];
+
+const BUSINESS_TYPES = [
+  "Peluquerías",
+  "Barberías",
+  "Clínicas",
+  "Estéticas",
+  "Talleres",
+  "Agencias de viaje",
+];
+
+const SECTION = "mx-auto max-w-[1240px] px-5 sm:px-8 lg:px-12";
+const SECTION_GAP = "pt-16 sm:pt-24 lg:pt-[120px]";
+const EYEBROW = "text-sm font-semibold text-primary-700 dark:text-primary-400";
+const H2 = "mt-2.5 font-display text-[40px] leading-none text-foreground lg:text-[68px]";
+// Over the inverted sections (dark in the light theme, light in the dark one)
+const ON_INVERSE_MUTED = "text-inverse-foreground/70";
+const ON_INVERSE_ACCENT = "text-primary-400 dark:text-primary-700";
+
 export default function HomePageClient() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   // The app is for owners already signed up: skip the marketing page (P2-12).
   // The panel sends to /login without a session and waits on a bad network.
@@ -292,53 +295,35 @@ export default function HomePageClient() {
   }, []);
 
   const ctaTarget = user ? "/dashboard" : "/register";
-  const ctaLabel = user ? "Ir al Dashboard" : "Comenzar";
+  const ctaLabel = user ? "Ir al Dashboard" : "Probar gratis";
+  const whatsappFeature = FEATURES.find((f) => f.Icon === MessageSquare);
+  const gridFeatures = FEATURES.filter((f) => f !== whatsappFeature);
 
   return (
     <div className="min-h-screen bg-background">
       {/* Top nav */}
-      <nav className="border-b border-border bg-surface/80 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2.5">
-            <Logo size={32} priority />
-            <span className="text-base font-extrabold tracking-tight text-foreground">
-              TurnoFlash
-            </span>
+      <nav className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
+        <div className={`${SECTION} flex h-[68px] items-center gap-6`}>
+          <Logo size={30} withWordmark />
+          <div className="flex flex-1 items-center justify-center gap-7 text-sm font-medium text-foreground-muted max-md:hidden">
+            <a href="#features" className="hover:text-foreground">Funciones</a>
+            <a href="#trips" className="hover:text-foreground">Pasajes</a>
+            <a href="#pricing" className="hover:text-foreground">Precios</a>
+            <a href="#faq" className="hover:text-foreground">Preguntas</a>
+            <Link href="/help" className="hover:text-foreground">Ayuda</Link>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={toggleTheme}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-muted transition-colors hover:bg-muted hover:text-foreground"
-              aria-label={
-                theme === "dark"
-                  ? "Cambiar a tema claro"
-                  : "Cambiar a tema oscuro"
-              }
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              )}
-            </button>
-            <Link
-              href="/help"
-              className="hidden text-sm font-semibold text-foreground-muted transition-colors hover:text-foreground sm:inline"
-            >
-              Ayuda
-            </Link>
+          <div className="ml-auto flex items-center gap-4">
             {!user && (
               <Link
                 href="/login"
-                className="hidden text-sm font-semibold text-foreground-muted transition-colors hover:text-foreground sm:inline"
+                className="text-sm font-semibold text-foreground max-sm:hidden"
               >
                 Iniciar sesión
               </Link>
             )}
             <Button
-              variant="mesh-primary"
-              size="md"
               onClick={() => router.push(ctaTarget)}
+              className="!h-10"
             >
               {ctaLabel}
             </Button>
@@ -347,233 +332,247 @@ export default function HomePageClient() {
       </nav>
 
       {/* Hero */}
-      <section className="mesh-primary relative overflow-hidden text-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-24">
-          <div className="flex flex-col justify-center">
-            <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur-md">
-              <Sparkles className="h-3.5 w-3.5" />
-              Recordatorios automáticos por WhatsApp
-            </div>
-            <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-              Tu agenda,
-              <br />
-              en piloto automático.
-            </h1>
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">
-              Turnos para peluquerías, barberías, consultorios y estéticas, y
-              venta de pasajes para viajes y excursiones. Todo desde el
-              celular.
-            </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Button
-                size="lg"
-                onClick={() => router.push(ctaTarget)}
-                className="group bg-white! text-primary-700! shadow-md hover:bg-primary-50!"
-              >
-                {user ? "Ir al Dashboard" : "Probar gratis"}
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-              <Button
-                size="lg"
-                onClick={() => {
-                  document
-                    .getElementById("features")
-                    ?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="border! border-white/30! bg-white/15! text-white! backdrop-blur-md hover:bg-white/25!"
-              >
-                Conocer más
-              </Button>
-            </div>
-            <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/85">
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4" />
-                Sin dobles reservas
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4" />
-                Confirmaciones WhatsApp
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4" />
-                Página de reservas propia
-              </span>
-            </div>
+      <section className={`${SECTION} grid items-center gap-14 py-12 lg:grid-cols-2 lg:py-24`}>
+        <div>
+          <div className="inline-flex h-8 items-center gap-2 rounded-full bg-secondary-100 px-3.5 text-meta font-semibold text-secondary-600 dark:bg-secondary-900 dark:text-secondary-400">
+            <MessageCircle className="size-4" />
+            Recordatorios automáticos por WhatsApp
           </div>
-
-          {/* Floating mockup card */}
-          <div className="relative hidden items-center justify-center lg:flex">
-            <Card
-              className="w-full max-w-sm -rotate-2 p-3"
-              style={{ boxShadow: "0 25px 50px -12px rgba(0,0,0,0.35)" }}
+          <h1 className="mt-6 font-display text-[56px] font-normal leading-[0.94] tracking-[-0.02em] text-foreground sm:text-[80px] lg:text-[108px]">
+            Tu agenda,
+            <br />
+            en piloto <em className="text-primary">automático.</em>
+          </h1>
+          <p className="mt-6 max-w-[520px] text-[17px] leading-relaxed text-foreground-muted lg:text-[20px]">
+            Turnos para peluquerías, barberías, consultorios y estéticas, y
+            venta de pasajes para viajes y excursiones. Todo desde el celular.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-2.5">
+            <Button size="lg" onClick={() => router.push(ctaTarget)}>
+              {user ? "Ir al Dashboard" : `Probar ${TRIAL_DAYS} días gratis`}
+              <ArrowRight className="size-[18px]" />
+            </Button>
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() =>
+                document
+                  .getElementById("pricing")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
             >
-              <div className="mb-2.5 flex items-center gap-2.5">
-                <Avatar
-                  name="Martina Gómez"
-                  color="var(--color-secondary-500)"
-                  size={32}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-foreground">
-                    Martina Gómez
-                  </div>
-                  <div className="text-[11px] text-foreground-muted">
-                    Coloración · 09:30
-                  </div>
-                </div>
-                <StatusBadge status="confirmed" size="sm" />
+              Ver precios
+            </Button>
+          </div>
+          <div className="mt-7 flex flex-wrap gap-x-[22px] gap-y-2.5 text-sm text-foreground-muted">
+            {[
+              "Sin dobles reservas",
+              "Confirmaciones por WhatsApp",
+              "Página de reservas propia",
+            ].map((item) => (
+              <span key={item} className="inline-flex items-center gap-1.5">
+                <Check className="size-4 text-primary" />
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* A still of the Inicio screen, plus the WhatsApp exchange */}
+        <div className="relative min-h-[520px] max-lg:hidden" aria-hidden>
+          <div className="absolute inset-[40px_6%_0_18%] rounded-[40px] bg-primary-100 dark:bg-primary-900" />
+          <div className="absolute right-[10%] top-0 w-[320px] rounded-[36px] border border-border bg-background p-5 shadow-[0_24px_48px_-20px_rgba(22,23,20,.28)]">
+            <div className="text-meta font-medium text-foreground-subtle">
+              Viernes 12 de junio
+            </div>
+            <div className="mt-1 font-display text-[32px] leading-[1.05] text-foreground">
+              Buen día, Lucía
+            </div>
+            <Card className="mt-4 p-4">
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-[44px] leading-[0.9] text-foreground">
+                  8
+                </span>
+                <span className="text-meta font-medium text-foreground-muted">
+                  turnos hoy
+                </span>
               </div>
-              <div className="flex gap-1.5">
-                <div className="flex-1 rounded-lg bg-primary-50 px-2 py-2 text-center text-[11px] font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
-                  ✓ Recordatorio enviado
-                </div>
-                <div className="rounded-lg bg-primary px-3 py-2 text-[11px] font-semibold text-primary-foreground">
-                  Check-in
-                </div>
+              <div className="mt-3.5 flex h-2 gap-[3px]">
+                <span className="st-completed grow-[3] rounded-[4px] bg-[var(--st-c)]" />
+                <span className="st-in_progress grow rounded-[4px] bg-[var(--st-c)]" />
+                <span className="st-confirmed grow-[3] rounded-[4px] bg-[var(--st-c)]" />
+                <span className="st-pending grow rounded-[4px] bg-[var(--st-c)]" />
               </div>
             </Card>
+            <div className="mt-3 grid gap-px overflow-hidden rounded-card border border-border bg-border">
+              {(
+                [
+                  ["11:30", "Sofía Hernández", "Coloración", "in_progress"],
+                  ["13:00", "Carlos Pérez", "Corte + barba", "client_confirmed"],
+                  ["14:30", "Martina Gómez", "Corte de cabello", "confirmed"],
+                ] as const
+              ).map(([time, name, service, status]) => (
+                <div
+                  key={time}
+                  className="flex items-center gap-3 bg-surface px-3.5 py-3"
+                >
+                  <span className="font-mono text-meta font-medium tabular-nums text-foreground">
+                    {time}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-meta font-semibold text-foreground">
+                      {name}
+                    </div>
+                    <div className="truncate text-caption text-foreground-muted">
+                      {service}
+                    </div>
+                  </div>
+                  <StatusBadge status={status} size="sm" />
+                </div>
+              ))}
+            </div>
           </div>
+          <div className="absolute bottom-6 left-0 flex w-[300px] flex-col gap-2 rounded-[22px] bg-surface p-4 shadow-[0_0_0_1px_var(--color-border),0_24px_48px_-20px_rgba(22,23,20,.28)]">
+            <div className="flex items-center gap-2 text-caption font-semibold text-foreground-subtle">
+              <span className="size-2 rounded-full bg-primary" />
+              WhatsApp · Barbería Demo
+            </div>
+            <div className="rounded-[4px_16px_16px_16px] bg-surface-2 px-3 py-2.5 text-sm text-foreground">
+              Hola Carlos, te esperamos mañana a las 13:00 para tu Corte +
+              barba. Responde OK para confirmar.
+            </div>
+            <div className="self-end rounded-[16px_4px_16px_16px] bg-primary-100 px-3 py-2 text-sm font-semibold text-primary-700 dark:bg-primary-900 dark:text-primary-400">
+              OK
+            </div>
+            <div className="flex items-center gap-1.5 text-caption text-primary-700 dark:text-primary-400">
+              <CircleCheck className="size-4" />
+              Turno confirmado · la agenda se actualizó sola
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Business types */}
+      <div className="border-y border-border py-6">
+        <div className={`${SECTION} flex flex-wrap items-baseline justify-center gap-x-7 gap-y-2`}>
+          <span className="text-meta font-semibold text-foreground-muted">
+            Hecho para
+          </span>
+          {BUSINESS_TYPES.map((type) => (
+            <span
+              key={type}
+              className="font-display text-[22px] text-foreground-subtle lg:text-[30px]"
+            >
+              {type}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* How it works */}
+      <section className={`${SECTION} ${SECTION_GAP}`}>
+        <div className={EYEBROW}>Cómo funciona</div>
+        <h2 className={H2}>Listo en tres pasos.</h2>
+        <div className="mt-12 grid gap-10 md:grid-cols-3">
+          {HOW_IT_WORKS.map((item) => (
+            <div key={item.step} className="border-t border-border-2 pt-5">
+              <div className="font-display text-[64px] leading-none text-primary">
+                {item.step}
+              </div>
+              <h3 className="mt-4 text-title font-semibold text-foreground">
+                {item.title}
+              </h3>
+              <p className="mt-2 text-body leading-relaxed text-foreground-muted">
+                {item.description}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* Features */}
-      <section
-        id="features"
-        className="bg-surface px-5 py-20 sm:px-6 lg:px-8"
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
-              Negocios de turnos
+      <section id="features" className={`${SECTION} ${SECTION_GAP} scroll-mt-20`}>
+        <div className={EYEBROW}>Funciones</div>
+        <h2 className={H2}>Todo lo que necesita tu agenda.</h2>
+
+        {whatsappFeature && (
+          <div className="mt-12 grid gap-10 rounded-[28px] bg-inverse p-6 text-inverse-foreground lg:grid-cols-2 lg:p-12">
+            <div>
+              <IconTile tone="pink" size={48}>
+                <MessageCircle />
+              </IconTile>
+              <h3 className="mt-5 font-display text-[34px] leading-none lg:text-[48px]">
+                {whatsappFeature.title}
+              </h3>
+              <p className={`mt-4 max-w-md text-body leading-relaxed ${ON_INVERSE_MUTED}`}>
+                {whatsappFeature.description}
+              </p>
             </div>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Todo lo que necesitas, en un solo lugar.
-            </h2>
-          </div>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((feature) => {
-              const Icon = feature.Icon;
-              return (
-                <Card
-                  key={feature.title}
-                  className="flex items-start gap-3 p-4"
+            <div>
+              {WHATSAPP_TIMELINE.map((row) => (
+                <div
+                  key={row.when}
+                  className="flex gap-4 border-t border-inverse-foreground/15 py-3.5"
                 >
-                  <div
-                    className={`${feature.mesh} flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-white shadow-sm`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
+                  <span className={`w-[110px] shrink-0 font-mono text-meta ${ON_INVERSE_MUTED}`}>
+                    {row.when}
+                  </span>
                   <div>
-                    <div className="text-sm font-bold text-foreground">
-                      {feature.title}
-                    </div>
-                    <div className="mt-1 text-[13px] leading-relaxed text-foreground-muted">
-                      {feature.description}
+                    <div className="text-body font-semibold">{row.what}</div>
+                    <div className={`text-meta ${ON_INVERSE_MUTED}`}>
+                      {row.detail}
                     </div>
                   </div>
-                </Card>
-              );
-            })}
+                </div>
+              ))}
+            </div>
           </div>
+        )}
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {gridFeatures.map((feature) => (
+            <Card key={feature.title} className="flex flex-col gap-3.5 p-6">
+              <IconTile size={42}>
+                <feature.Icon />
+              </IconTile>
+              <h3 className="text-lead font-semibold text-foreground">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-foreground-muted">
+                {feature.description}
+              </p>
+            </Card>
+          ))}
         </div>
       </section>
 
       {/* Trips */}
-      <section id="trips" className="px-5 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
-              Viajes y excursiones
-            </div>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              ¿Vendes pasajes? También es para ti.
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-base text-foreground-muted">
-              Deja de anotar asientos en una libreta: tus pasajeros reservan
-              desde un enlace y tú ves quién viaja, quién pagó y dónde sube.
-            </p>
+      <section
+        id="trips"
+        className="mt-16 scroll-mt-16 bg-inverse py-16 text-inverse-foreground sm:mt-24 lg:mt-[120px] lg:py-[104px]"
+      >
+        <div className={SECTION}>
+          <div className="text-sm font-semibold text-secondary-400 dark:text-secondary-600">
+            Venta de pasajes
           </div>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {TRIP_FEATURES.map((feature) => {
-              const Icon = feature.Icon;
-              return (
-                <Card
-                  key={feature.title}
-                  className="flex items-start gap-3 p-4"
-                >
-                  <div
-                    className={`${feature.mesh} flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-white shadow-sm`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-foreground">
-                      {feature.title}
-                    </div>
-                    <div className="mt-1 text-[13px] leading-relaxed text-foreground-muted">
-                      {feature.description}
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="bg-surface px-5 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
-              Cómo funciona
-            </div>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              En marcha en menos de un día.
-            </h2>
-          </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-3">
-            {HOW_IT_WORKS.map((item) => (
-              <Card key={item.step} className="p-6">
-                <div className="mesh-primary flex h-10 w-10 items-center justify-center rounded-full text-base font-extrabold text-white shadow-sm">
-                  {item.step}
-                </div>
-                <h3 className="mt-4 text-base font-bold text-foreground">
-                  {item.title}
+          <h2 className="mt-2.5 font-display text-[40px] leading-none lg:text-[68px]">
+            ¿Vendes pasajes?{" "}
+            <em className={ON_INVERSE_ACCENT}>También es para ti.</em>
+          </h2>
+          <p className={`mt-5 max-w-2xl text-body leading-relaxed lg:text-[17px] ${ON_INVERSE_MUTED}`}>
+            Guaguas, excursiones y viajes: publica tus salidas, cobra el
+            anticipo y lleva la lista de pasajeros sin libretas ni llamadas.
+          </p>
+          <div className="mt-12 grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
+            {TRIP_FEATURES.map((feature) => (
+              <div key={feature.title}>
+                <feature.Icon className={`size-[22px] ${ON_INVERSE_ACCENT}`} />
+                <h3 className="mt-3 text-lead font-semibold">
+                  {feature.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-foreground-muted">
-                  {item.description}
+                <p className={`mt-1.5 text-sm ${ON_INVERSE_MUTED}`}>
+                  {feature.description}
                 </p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Image gallery */}
-      <section className="bg-muted px-5 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Así funciona Turno Flash
-            </h2>
-            <p className="mt-3 text-base text-foreground-muted">
-              Interfaz intuitiva y fácil de usar
-            </p>
-          </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="relative aspect-video overflow-hidden rounded-2xl bg-white shadow-sm"
-              >
-                <Image
-                  src={`/images/tf-${item}.webp`}
-                  alt={`Vista previa de la aplicación ${item}`}
-                  fill
-                  loading="lazy"
-                  className="object-contain"
-                />
               </div>
             ))}
           </div>
@@ -581,44 +580,33 @@ export default function HomePageClient() {
       </section>
 
       {/* Trust / security */}
-      <section className="bg-surface px-5 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <div className="text-xs font-bold uppercase tracking-[0.08em] text-primary-600">
-              Seguridad y confianza
+      <section className={`${SECTION} ${SECTION_GAP}`}>
+        <div className="grid items-end gap-6 lg:grid-cols-2">
+          <div>
+            <div className={EYEBROW}>Seguridad</div>
+            <h2 className={H2}>Tus datos, solo tuyos.</h2>
+          </div>
+          <p className="text-body leading-relaxed text-foreground-muted">
+            La información de tu negocio y de tus clientes está aislada y
+            protegida. Lee cómo la tratamos en la{" "}
+            <Link className="underline" href="/privacy">
+              Política de Privacidad
+            </Link>
+            .
+          </p>
+        </div>
+        <div className="mt-10 grid gap-px overflow-hidden rounded-[22px] border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+          {TRUST_POINTS.map((point) => (
+            <div key={point.title} className="bg-surface p-6">
+              <point.Icon className="size-[22px] text-primary" />
+              <h3 className="mt-3 text-lead font-semibold text-foreground">
+                {point.title}
+              </h3>
+              <p className="mt-1.5 text-sm text-foreground-muted">
+                {point.description}
+              </p>
             </div>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Los datos de tu negocio, protegidos.
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-base text-foreground-muted">
-              Tratamos la información de tu negocio y de tus clientes con el
-              mismo cuidado con el que tú atiendes tu agenda. Consulta nuestra{" "}
-              <Link className="underline" href="/privacy">
-                Política de Privacidad
-              </Link>
-              .
-            </p>
-          </div>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {TRUST_POINTS.map((point) => {
-              const Icon = point.Icon;
-              return (
-                <Card key={point.title} className="p-5">
-                  <div
-                    className={`${point.mesh} flex h-10 w-10 items-center justify-center rounded-[10px] text-white shadow-sm`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="mt-3 text-sm font-bold text-foreground">
-                    {point.title}
-                  </h3>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-foreground-muted">
-                    {point.description}
-                  </p>
-                </Card>
-              );
-            })}
-          </div>
+          ))}
         </div>
       </section>
 
@@ -629,186 +617,126 @@ export default function HomePageClient() {
       />
 
       {/* FAQs */}
-      <section className="bg-surface px-5 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Preguntas Frecuentes
-            </h2>
-            <p className="mt-3 text-base text-foreground-muted">
-              Todo lo que necesitas saber sobre Turno Flash
-            </p>
-          </div>
-          <div className="mt-10 space-y-3">
-            {FAQS.map((faq, index) => {
-              const isOpen = openFaq === index;
-              return (
-                <Card key={faq.question} className="overflow-hidden p-0">
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : index)}
-                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-muted"
-                  >
-                    <span className="text-sm font-semibold text-foreground sm:text-base">
-                      {faq.question}
-                    </span>
-                    {isOpen ? (
-                      <ChevronUp className="h-5 w-5 shrink-0 text-primary" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 shrink-0 text-foreground-muted" />
-                    )}
-                  </button>
-                  {isOpen && (
-                    <div className="border-t border-border bg-surface-2 px-5 py-4 text-sm leading-relaxed text-foreground-muted">
-                      {faq.answer}
-                    </div>
+      <section id="faq" className={`${SECTION} ${SECTION_GAP} scroll-mt-20 grid gap-10 lg:grid-cols-2`}>
+        <div>
+          <h2 className="font-display text-[40px] leading-none text-foreground lg:text-[68px]">
+            Preguntas frecuentes
+          </h2>
+          <p className="mt-5 text-body text-foreground-muted">
+            ¿No encuentras lo que buscas? Escríbenos a{" "}
+            <a className="underline" href={`mailto:${CONTACT_EMAIL}`}>
+              {CONTACT_EMAIL}
+            </a>
+            .
+          </p>
+        </div>
+        <div className="border-t border-border-2">
+          {FAQS.map((faq, index) => {
+            const isOpen = openFaq === index;
+            return (
+              <div key={faq.question} className="border-b border-border">
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(isOpen ? null : index)}
+                  aria-expanded={isOpen}
+                  className="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left text-lead font-semibold text-foreground"
+                >
+                  {faq.question}
+                  {isOpen ? (
+                    <Minus className="size-5 shrink-0 text-foreground-subtle" />
+                  ) : (
+                    <Plus className="size-5 shrink-0 text-foreground-subtle" />
                   )}
-                </Card>
-              );
-            })}
-          </div>
+                </button>
+                {isOpen && (
+                  <p className="pb-[22px] pr-10 text-body leading-relaxed text-foreground-muted">
+                    {faq.answer}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="px-5 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl">
-          <div className="mesh-secondary rounded-3xl px-8 py-12 text-center text-white shadow-glow-secondary sm:px-12">
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+      <section className={`${SECTION} ${SECTION_GAP}`}>
+        <div className="flex flex-wrap items-end justify-between gap-8 rounded-[32px] bg-primary p-10 text-primary-foreground lg:p-[88px]">
+          <div>
+            <h2 className="font-display text-[56px] leading-[0.92] lg:text-[112px]">
               ¿Empezamos?
             </h2>
-            <p className="mt-3 text-base text-white/85 sm:text-lg">
+            <p className="mt-5 max-w-md text-[18px] opacity-85">
               {user
-                ? "Tu cuenta está activa. Vuelve al panel de control."
-                : "Crea tu cuenta gratis y simplifica la gestión de tu negocio."}
+                ? "Tu panel te espera con la agenda de hoy."
+                : `Crea tu negocio en un minuto y prueba ${TRIAL_DAYS} días gratis, sin dar una tarjeta.`}
             </p>
-            <div className="mt-7 flex justify-center">
-              <Button
-                size="lg"
-                onClick={() => router.push(ctaTarget)}
-                className="group bg-white! text-secondary-700! shadow-md hover:bg-secondary-50!"
-              >
-                {ctaLabel}
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => router.push(ctaTarget)}
+            className="flex h-14 cursor-pointer items-center gap-2 rounded-[14px] bg-surface px-6 text-[16px] font-semibold text-primary-700 transition-[filter] hover:brightness-95 dark:text-primary-400"
+          >
+            {user ? "Ir al Dashboard" : "Comenzar gratis"}
+            <ArrowRight className="size-[18px]" />
+          </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-surface px-5 pb-8 pt-12 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="lg:col-span-2">
-              <div className="flex items-center gap-2.5">
-                <Logo size={28} />
-                <span className="text-sm font-bold tracking-tight text-foreground">
-                  TurnoFlash
-                </span>
-              </div>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-foreground-muted">
-                Turnos y venta de pasajes para tu negocio. Reservas online,
-                avisos por WhatsApp y control total de tu agenda y de tus
-                salidas, desde el móvil.
-              </p>
-              <a
-                href={`mailto:${CONTACT_EMAIL}`}
-                className="mt-4 inline-flex items-center gap-2 text-sm text-foreground-muted transition-colors hover:text-foreground"
-              >
-                <Mail className="h-4 w-4" />
-                {CONTACT_EMAIL}
-              </a>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-foreground">
-                Producto
-              </h3>
-              <ul className="mt-3 space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#features"
-                    className="text-foreground-muted transition-colors hover:text-foreground"
-                  >
-                    Funcionalidades
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#trips"
-                    className="text-foreground-muted transition-colors hover:text-foreground"
-                  >
-                    Venta de pasajes
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#pricing"
-                    className="text-foreground-muted transition-colors hover:text-foreground"
-                  >
-                    Precios
-                  </a>
-                </li>
-                <li>
-                  <Link
-                    href="/help"
-                    className="text-foreground-muted transition-colors hover:text-foreground"
-                  >
-                    Ayuda
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/login"
-                    className="text-foreground-muted transition-colors hover:text-foreground"
-                  >
-                    Iniciar sesión
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-foreground">
-                Legal
-              </h3>
-              <ul className="mt-3 space-y-2 text-sm">
-                <li>
-                  <Link
-                    href="/privacy"
-                    className="text-foreground-muted transition-colors hover:text-foreground"
-                  >
-                    Política de Privacidad
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/terms"
-                    className="text-foreground-muted transition-colors hover:text-foreground"
-                  >
-                    Términos y Condiciones
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/account-deletion"
-                    className="text-foreground-muted transition-colors hover:text-foreground"
-                  >
-                    Eliminación de cuenta
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-10 border-t border-border pt-6">
-            <p className="text-center text-xs text-foreground-subtle">
-              © {new Date().getFullYear()} Turno Flash. Todos los derechos
-              reservados.
+      <footer className={`${SECTION} pb-8 pt-16`}>
+        <div className="flex flex-wrap gap-x-16 gap-y-10">
+          <div className="max-w-sm flex-1 basis-64">
+            <Logo size={28} withWordmark />
+            <p className="mt-3 text-sm leading-relaxed text-foreground-muted">
+              Turnos y venta de pasajes para tu negocio. Reservas online,
+              avisos por WhatsApp y control total de tu agenda y de tus
+              salidas, desde el móvil.
             </p>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="mt-4 inline-block text-sm text-foreground-muted underline-offset-2 hover:underline"
+            >
+              {CONTACT_EMAIL}
+            </a>
           </div>
+          <FooterColumn title="Producto">
+            <a href="#features">Funciones</a>
+            <a href="#trips">Pasajes</a>
+            <a href="#pricing">Precios</a>
+            <Link href="/help">Ayuda</Link>
+            <Link href="/login">Iniciar sesión</Link>
+          </FooterColumn>
+          <FooterColumn title="Legal">
+            <Link href="/privacy">Política de Privacidad</Link>
+            <Link href="/terms">Términos y Condiciones</Link>
+            <Link href="/account-deletion">Eliminar cuenta</Link>
+          </FooterColumn>
+        </div>
+        <div className="mt-12 border-t border-border pt-5 text-meta text-foreground-subtle">
+          © {new Date().getFullYear()} Turno Flash. Todos los derechos
+          reservados.
         </div>
       </footer>
+    </div>
+  );
+}
+
+function FooterColumn({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="text-meta font-semibold text-foreground-subtle">
+        {title}
+      </div>
+      <div className="mt-3 flex flex-col gap-2.5 text-sm text-foreground-muted [&>a:hover]:text-foreground">
+        {children}
+      </div>
     </div>
   );
 }

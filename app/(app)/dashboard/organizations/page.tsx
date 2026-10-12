@@ -207,7 +207,7 @@ export default function OrganizationsPage() {
               onClick={handleCreate}
             >
               <Plus className="h-4 w-4" />
-              Nueva organización
+              Nueva
             </Button>
           </div>
         </div>

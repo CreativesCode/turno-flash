@@ -608,7 +608,7 @@ function AppointmentsContent() {
               Necesitas pertenecer a una organización para gestionar turnos
             </p>
             <Button
-              variant="info"
+              variant="secondary"
               onClick={() => router.push("/dashboard")}
               className="mt-4"
             >

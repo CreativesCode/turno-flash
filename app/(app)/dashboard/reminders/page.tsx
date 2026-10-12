@@ -205,7 +205,7 @@ export default function RemindersPage() {
               Necesitas pertenecer a una organización para enviar recordatorios.
             </p>
             <Button
-              variant="info"
+              variant="secondary"
               onClick={() => router.push("/dashboard")}
               className="mt-4"
             >

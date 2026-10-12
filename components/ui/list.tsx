@@ -13,7 +13,7 @@ export function ListGroup({
 }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`grid gap-px rounded-card border border-border bg-border shadow-card [&>*:first-child]:rounded-t-[19px] [&>*:last-child]:rounded-b-[19px] ${className}`}
+      className={`grid grid-cols-1 gap-px rounded-card border border-border bg-border shadow-card [&>*:first-child]:rounded-t-[19px] [&>*:last-child]:rounded-b-[19px] ${className}`}
       {...props}
     >
       {children}

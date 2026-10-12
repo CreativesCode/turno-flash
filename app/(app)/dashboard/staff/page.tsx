@@ -323,7 +323,7 @@ function StaffContent() {
                   onClick={handleCreate}
                 >
                   <Plus className="h-4 w-4" />
-                  Nuevo profesional
+                  Nuevo
                 </Button>
               )}
             </div>

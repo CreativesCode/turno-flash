@@ -9,14 +9,7 @@ export type ButtonVariant =
   | "ghost"
   | "danger"
   | "danger-solid"
-  | "whatsapp"
-  // Names from before the v2 redesign, kept as aliases (see ALIASES)
-  | "success"
-  | "warning"
-  | "info"
-  | "mesh-primary"
-  | "mesh-secondary"
-  | "soft";
+  | "whatsapp";
 
 export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
@@ -27,15 +20,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
-type CoreVariant =
-  | "primary"
-  | "secondary"
-  | "ghost"
-  | "danger"
-  | "danger-solid"
-  | "whatsapp";
-
-const VARIANTS: Record<CoreVariant, string> = {
+const VARIANTS: Record<ButtonVariant, string> = {
   // One per screen: the main action
   primary: "bg-primary text-primary-foreground hover:brightness-95",
   secondary:
@@ -48,15 +33,6 @@ const VARIANTS: Record<CoreVariant, string> = {
   "danger-solid": "bg-danger text-white hover:brightness-95",
   whatsapp:
     "bg-secondary-100 text-secondary-600 dark:bg-secondary-900 dark:text-secondary-400 hover:brightness-95",
-};
-
-const ALIASES: Partial<Record<ButtonVariant, CoreVariant>> = {
-  "mesh-primary": "primary",
-  success: "primary",
-  soft: "secondary",
-  info: "secondary",
-  warning: "secondary",
-  "mesh-secondary": "whatsapp",
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -81,12 +57,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const base =
       "inline-flex items-center justify-center gap-2 font-semibold transition-[background-color,filter] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-100 dark:focus-visible:ring-primary-900";
-    const core = ALIASES[variant] ?? (variant as CoreVariant);
 
     return (
       <button
         ref={ref}
-        className={`${base} ${VARIANTS[core]} ${SIZES[size]} ${className}`}
+        className={`${base} ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
         disabled={disabled}
         aria-busy={loading || undefined}
         {...props}
