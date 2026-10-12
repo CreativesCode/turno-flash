@@ -71,6 +71,13 @@ Compila, `tsc` y `eslint` limpios, y se revisó con capturas en claro y oscuro.
   `plan`, `connect` en `config/constants.ts`) agrega «Mi negocio: <nombre>.». Ya no existen las constantes
   `SUPPORT_WHATSAPP_*_URL`.
 
+## Mi cuenta editable (2026-10-12, a pedido de Roberto)
+
+`/dashboard/account` deja cambiar el nombre (`user_profiles.full_name`), la contraseña (nueva + repetir, sin pedir
+la actual) y, solo al dueño, su WhatsApp (`organizations.owner_phone`, donde llegan los avisos de licencia).
+Todo pasa por `services/account.service.ts` y `schemas/account.schema.ts`; no hizo falta migración (la RLS de la
+048 ya lo permite). El correo no se puede cambiar desde la app.
+
 ## Trampas
 
 - **La fuente no se aplicaba con el `globals.css` del paquete:** `font-family: var(--font-sans)` en `body` se
@@ -89,6 +96,8 @@ Compila, `tsc` y `eslint` limpios, y se revisó con capturas en claro y oscuro.
   «Nuevo profesional»). `?create=1` no abre el formulario en una carga directa del `.html` exportado.
 - **Fotos de la guía:** viewport 520x933 con `document.documentElement.style.zoom = 1.3333` (equivale a 390 de
   ancho), contorno naranja inyectado en el botón clave, y `sharp` a webp calidad 72.
+- **Sesión vieja en el navegador de pruebas:** si quedó guardada la de un negocio de prueba ya borrado, el login
+  parece entrar pero las escrituras devuelven cero filas. Limpiar `localStorage` antes de entrar.
 - **431 en `localhost:3000`:** son cookies de Supabase de varios proyectos acumuladas en `localhost`; se arregla
   borrándolas en el navegador.
 

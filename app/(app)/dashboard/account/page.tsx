@@ -1,18 +1,233 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/protected-route";
-import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  PageHeader,
+  sheetInputClasses as inputClasses,
+} from "@/components/ui";
 import { ROLE_META } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/useToast";
+import {
+  accountNameSchema,
+  accountPasswordSchema,
+  accountPhoneSchema,
+} from "@/schemas/account.schema";
+import { AccountService } from "@/services/account.service";
 import { Logger } from "@/utils/logger";
+import { toInternationalPhone } from "@/utils/phone";
 import { createClient } from "@/utils/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 const CONFIRM_WORD = "ELIMINAR";
+
+function NameForm() {
+  const { profile, refreshProfile } = useAuth();
+  const toast = useToast();
+  const current = profile?.full_name ?? "";
+  // null until the user types, so the field follows the profile once it loads
+  const [draft, setDraft] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const name = draft ?? current;
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!profile || saving) return;
+
+    const parsed = accountNameSchema.safeParse({ full_name: name });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
+
+    setSaving(true);
+    const result = await AccountService.updateName(
+      profile.user_id,
+      parsed.data.full_name,
+    );
+    if (result.success) {
+      await refreshProfile();
+      setDraft(null);
+      toast.success("Nombre guardado");
+    } else {
+      toast.error(result.error ?? "No pudimos guardar tu nombre.");
+    }
+    setSaving(false);
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-3 sm:flex-row sm:items-end"
+    >
+      <div className="flex-1">
+        <Field label="Nombre">
+          <input
+            type="text"
+            autoComplete="name"
+            value={name}
+            onChange={(e) => setDraft(e.target.value)}
+            className={inputClasses}
+            placeholder="Tu nombre"
+          />
+        </Field>
+      </div>
+      <Button
+        type="submit"
+        loading={saving}
+        disabled={name.trim() === current.trim()}
+      >
+        Guardar
+      </Button>
+    </form>
+  );
+}
+
+/** Owners only: the number where the notices about the subscription arrive. */
+function OwnerPhoneForm({ organizationId }: { organizationId: string }) {
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  const { data: current } = useQuery({
+    queryKey: ["owner-phone", organizationId],
+    queryFn: () => AccountService.getOwnerPhone(organizationId),
+  });
+  const [draft, setDraft] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const phone = draft ?? current ?? "";
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (saving) return;
+
+    const parsed = accountPhoneSchema.safeParse({ owner_phone: phone });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
+
+    setSaving(true);
+    const result = await AccountService.updateOwnerPhone(
+      organizationId,
+      toInternationalPhone(parsed.data.owner_phone)
+    );
+    if (result.success) {
+      await queryClient.invalidateQueries({
+        queryKey: ["owner-phone", organizationId],
+      });
+      setDraft(null);
+      toast.success("Teléfono guardado");
+    } else {
+      toast.error(result.error ?? "No pudimos guardar tu teléfono.");
+    }
+    setSaving(false);
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-3 sm:flex-row sm:items-start"
+    >
+      <div className="flex-1">
+        <Field
+          label="Tu WhatsApp"
+          hint="Aquí te llegan los avisos de tu suscripción."
+        >
+          <input
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={phone}
+            disabled={current === undefined}
+            onChange={(e) => setDraft(e.target.value)}
+            className={inputClasses}
+            placeholder="+53 5 123 4567"
+          />
+        </Field>
+      </div>
+      <Button
+        type="submit"
+        loading={saving}
+        disabled={phone.trim() === (current ?? "").trim()}
+        className="sm:mt-6.5"
+      >
+        Guardar
+      </Button>
+    </form>
+  );
+}
+
+function PasswordForm() {
+  const toast = useToast();
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (saving) return;
+
+    const parsed = accountPasswordSchema.safeParse({ password, confirm });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
+
+    setSaving(true);
+    const result = await AccountService.changePassword(parsed.data.password);
+    if (result.success) {
+      setPassword("");
+      setConfirm("");
+      toast.success("Contraseña cambiada");
+    } else {
+      toast.error(result.error ?? "No pudimos cambiar la contraseña.");
+    }
+    setSaving(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="Contraseña nueva">
+          <input
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={inputClasses}
+            placeholder="Mínimo 6 caracteres"
+          />
+        </Field>
+        <Field label="Repítela">
+          <input
+            type="password"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className={inputClasses}
+          />
+        </Field>
+      </div>
+      <div>
+        <Button
+          type="submit"
+          variant="secondary"
+          loading={saving}
+          disabled={!password || !confirm}
+        >
+          Cambiar contraseña
+        </Button>
+      </div>
+    </form>
+  );
+}
 
 export default function AccountPage() {
   const { user, profile, signOut } = useAuth();
@@ -46,7 +261,7 @@ export default function AccountPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ confirm: true }),
-        }
+        },
       );
 
       const result = await response.json();
@@ -81,19 +296,19 @@ export default function AccountPage() {
 
           {/* Información de la cuenta */}
           <Card className="mb-6 p-5">
-            <dl className="space-y-3 text-sm">
-              <div className="flex items-center justify-between">
-                <dt className="text-foreground-muted">Correo</dt>
-                <dd className="font-medium text-foreground">{user?.email}</dd>
+            <NameForm />
+            {profile?.role === "owner" && profile.organization_id && (
+              <div className="mt-4">
+                <OwnerPhoneForm organizationId={profile.organization_id} />
               </div>
-              {profile?.full_name && (
-                <div className="flex items-center justify-between">
-                  <dt className="text-foreground-muted">Nombre</dt>
-                  <dd className="font-medium text-foreground">
-                    {profile.full_name}
-                  </dd>
-                </div>
-              )}
+            )}
+            <dl className="mt-5 space-y-3 border-t border-border pt-4 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-foreground-muted">Correo</dt>
+                <dd className="min-w-0 break-all text-right font-medium text-foreground">
+                  {user?.email}
+                </dd>
+              </div>
               <div className="flex items-center justify-between">
                 <dt className="text-foreground-muted">Rol</dt>
                 <dd>
@@ -103,6 +318,11 @@ export default function AccountPage() {
                 </dd>
               </div>
             </dl>
+          </Card>
+
+          <Card className="mb-6 p-5">
+            <h2 className="mb-3 font-semibold text-foreground">Contraseña</h2>
+            <PasswordForm />
           </Card>
 
           {/* Zona de peligro */}
