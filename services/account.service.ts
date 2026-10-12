@@ -8,11 +8,12 @@
 
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 export class AccountService {
   static async updateName(
     userId: string,
-    fullName: string
+    fullName: string,
   ): Promise<{ success: boolean; error?: string }> {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -44,7 +45,7 @@ export class AccountService {
 
   static async updateOwnerPhone(
     organizationId: string,
-    phone: string
+    phone: string,
   ): Promise<{ success: boolean; error?: string }> {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -63,9 +64,44 @@ export class AccountService {
     return { success: true };
   }
 
+  /**
+   * The current password is checked on a throwaway client that keeps no
+   * session, so the check never touches the session of the app.
+   */
   static async changePassword(
-    password: string
+    email: string,
+    currentPassword: string,
+    password: string,
   ): Promise<{ success: boolean; error?: string }> {
+    const verifier = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      },
+    );
+    const { error: verifyError } = await verifier.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    });
+    if (verifyError) {
+      if (verifyError.code === "invalid_credentials") {
+        return {
+          success: false,
+          error: "La contraseña actual no es correcta.",
+        };
+      }
+      void Logger.error("Error verifying current password:", verifyError);
+      return {
+        success: false,
+        error: "No pudimos comprobar tu contraseña. Inténtalo de nuevo.",
+      };
+    }
+
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
 

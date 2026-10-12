@@ -16,13 +16,16 @@ export const accountPhoneSchema = z.object({
     .trim()
     .regex(
       /^\+?[\d\s-]{8,20}$/,
-      "Escribe un WhatsApp válido, por ejemplo +53 5 123 4567"
+      "Escribe un WhatsApp válido, por ejemplo +53 5 123 4567",
     ),
 });
 
 export const accountPasswordSchema = z
   .object({
-    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+    current: z.string().min(1, "Escribe tu contraseña actual"),
+    password: z
+      .string()
+      .min(6, "La contraseña debe tener al menos 6 caracteres"),
     confirm: z.string(),
   })
   .refine((v) => v.password === v.confirm, {

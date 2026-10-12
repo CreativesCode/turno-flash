@@ -73,10 +73,10 @@ Compila, `tsc` y `eslint` limpios, y se revisó con capturas en claro y oscuro.
 
 ## Mi cuenta editable (2026-10-12, a pedido de Roberto)
 
-`/dashboard/account` deja cambiar el nombre (`user_profiles.full_name`), la contraseña (nueva + repetir, sin pedir
-la actual) y, solo al dueño, su WhatsApp (`organizations.owner_phone`, donde llegan los avisos de licencia).
+`/dashboard/account` deja cambiar el nombre (`user_profiles.full_name`), la contraseña (pide la actual, que se comprueba en un cliente
+desechable sin sesión para no tocar la de la app) y, solo al dueño, su WhatsApp (`organizations.owner_phone`, donde llegan los avisos de licencia).
 Todo pasa por `services/account.service.ts` y `schemas/account.schema.ts`; no hizo falta migración (la RLS de la
-048 ya lo permite). El correo no se puede cambiar desde la app.
+048 ya lo permite). El correo no se cambia desde la app (decisión de Roberto).
 
 ## Trampas
 

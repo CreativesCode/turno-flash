@@ -116,7 +116,7 @@ function OwnerPhoneForm({ organizationId }: { organizationId: string }) {
     setSaving(true);
     const result = await AccountService.updateOwnerPhone(
       organizationId,
-      toInternationalPhone(parsed.data.owner_phone)
+      toInternationalPhone(parsed.data.owner_phone),
     );
     if (result.success) {
       await queryClient.invalidateQueries({
@@ -165,24 +165,35 @@ function OwnerPhoneForm({ organizationId }: { organizationId: string }) {
 }
 
 function PasswordForm() {
+  const { user } = useAuth();
   const toast = useToast();
+  const [current, setCurrent] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (saving) return;
+    if (saving || !user?.email) return;
 
-    const parsed = accountPasswordSchema.safeParse({ password, confirm });
+    const parsed = accountPasswordSchema.safeParse({
+      current,
+      password,
+      confirm,
+    });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
 
     setSaving(true);
-    const result = await AccountService.changePassword(parsed.data.password);
+    const result = await AccountService.changePassword(
+      user.email,
+      parsed.data.current,
+      parsed.data.password,
+    );
     if (result.success) {
+      setCurrent("");
       setPassword("");
       setConfirm("");
       toast.success("Contraseña cambiada");
@@ -194,7 +205,16 @@ function PasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Field label="Contraseña actual">
+          <input
+            type="password"
+            autoComplete="current-password"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+            className={inputClasses}
+          />
+        </Field>
         <Field label="Contraseña nueva">
           <input
             type="password"
@@ -220,7 +240,7 @@ function PasswordForm() {
           type="submit"
           variant="secondary"
           loading={saving}
-          disabled={!password || !confirm}
+          disabled={!current || !password || !confirm}
         >
           Cambiar contraseña
         </Button>
