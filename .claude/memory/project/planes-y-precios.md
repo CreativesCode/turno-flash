@@ -14,8 +14,22 @@ prueba de 15 días y WhatsApp del dueño guardados) que se borró. Lo que sigue 
 sección «Cierre» del PRP; todavía no ha salido ningún aviso real por WhatsApp.
 
 **Decisiones de Roberto del 2026-10-11:** el precio fundador **no se anuncia** en el landing. Preguntó si
-la app puede estar en Google Play cobrando solo por fuera: pendiente de que decida (ver chat de ese día);
-los Términos y Privacidad se revisan después de esa decisión.
+la app puede estar en Google Play cobrando solo por fuera y aprobó prepararla así («sí, preparemos eso»).
+
+## App de tienda «solo de consumo» (2026-10-11, commit `52b0248`)
+
+Google Play permite una app que solo consume un servicio pagado fuera, siempre que dentro no se pueda
+comprar nada ni se lleve al usuario a otro medio de pago. Por eso, **dentro de la app instalada**
+(`useIsStoreApp()`, `hooks/useIsStoreApp.ts`): Suscripción, el aviso de licencia, la pantalla de bloqueo,
+Profesionales y el registro muestran plan y fechas, **sin precios ni cómo pagar**; el botón de soporte
+abre un mensaje neutro (`SUPPORT_WHATSAPP_HELP_URL`). La web no cambia.
+**How to apply:** cualquier texto nuevo sobre precios, pagos o cambio de plan va detrás de `!storeApp`.
+
+- La compra por Google Play se quitó de Suscripción. Quedaron **sin uso** `hooks/useSubscription.ts`,
+  `utils/revenuecat.ts`, la dependencia `@revenuecat/purchases-capacitor` y el webhook: no se borraron.
+- No se probó en un teléfono: entra en la próxima APK.
+- Sin tocar: el manual de `/help` (explica cómo se paga y se ve dentro de la app) y los Términos y
+  Privacidad (nombran Google Play como forma de pago); Roberto dijo que los Términos se ven después.
 
 ## Dónde vive cada regla
 
