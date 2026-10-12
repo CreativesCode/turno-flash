@@ -82,9 +82,9 @@ export default function PlatformPage() {
         description="Estadísticas globales de la plataforma: organizaciones, licencias, suscripciones y actividad."
       />
       <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="font-display text-display text-foreground">
               Plataforma
             </h1>
             <p className="mt-0.5 text-sm text-foreground-muted">

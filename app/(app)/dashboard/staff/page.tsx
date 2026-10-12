@@ -6,7 +6,7 @@ import { StaffCard } from "@/components/staff/StaffCard";
 import { StaffFormModal } from "@/components/staff/StaffFormModal";
 import { StaffScheduleSheet } from "@/components/staff/StaffScheduleSheet";
 import { Button, ConfirmSheet, ListGroup } from "@/components/ui";
-import { SUPPORT_WHATSAPP_PLAN_URL } from "@/config/constants";
+import { useSupportWhatsAppUrl } from "@/hooks/useSupportWhatsAppUrl";
 import { LICENSE_PLAN_INFO } from "@/config/license-pricing";
 import { useAuth } from "@/contexts/auth-context";
 import { useCreateParam } from "@/hooks/useCreateParam";
@@ -102,6 +102,7 @@ function StaffContent() {
   const { modules, ready: planReady } = useOrganizationModules();
   // The store app does not point to a paid upgrade (see useIsStoreApp)
   const storeApp = useIsStoreApp();
+  const planUrl = useSupportWhatsAppUrl("plan");
   const planInfo = LICENSE_PLAN_INFO[modules.plan];
   const activeCount = useMemo(
     () => staffMembers.filter((member) => member.is_active).length,
@@ -309,7 +310,7 @@ function StaffContent() {
 
       <div className="relative min-h-screen bg-background pb-24">
         <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 pb-3 pt-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-5xl flex-col gap-3 px-5 pb-3 pt-4 lg:px-8 lg:pt-8">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h1 className="font-display text-display text-foreground">
@@ -341,7 +342,7 @@ function StaffContent() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl px-5 py-4 lg:px-8">
           {error && (
             <div className="mb-4 rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {error}
@@ -358,7 +359,7 @@ function StaffContent() {
               </p>
               {!storeApp && (
               <a
-                href={SUPPORT_WHATSAPP_PLAN_URL}
+                href={planUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="shrink-0 font-semibold text-primary hover:underline"
@@ -394,7 +395,7 @@ function StaffContent() {
               )}
             </div>
           ) : (
-            <ListGroup className="mx-auto max-w-3xl">
+            <ListGroup className="mx-auto max-w-5xl">
               {filteredStaff.map((member) => (
                 <StaffCard
                   key={member.id}

@@ -121,11 +121,11 @@ export default function ReportsPage() {
         description="Reportes y estadísticas de tu negocio: ingresos, servicios más pedidos, horas pico y rendimiento del equipo."
       />
       <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
           {/* Header */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="font-display text-display text-foreground">
                 Reportes
               </h1>
               <p className="mt-0.5 text-sm text-foreground-muted">

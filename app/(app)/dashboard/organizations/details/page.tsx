@@ -514,7 +514,7 @@ function OrganizationDetailsContent() {
     <ProtectedRoute>
       <div className="min-h-screen bg-background pb-24">
         <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-5xl items-center gap-2 px-5 pb-3 pt-4 lg:px-8 lg:pt-8">
             <button
               type="button"
               onClick={goBack}
@@ -539,7 +539,7 @@ function OrganizationDetailsContent() {
           </div>
         </div>
 
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-5 py-4 lg:px-8">
           {/* Hero */}
           <Card className="p-4">
             <div className="flex items-start gap-3">

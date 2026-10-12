@@ -8,11 +8,12 @@ import {
   Card,
   ListGroup,
   ListRow,
+  LoadingRegion,
   SectionLabel,
 } from "@/components/ui";
 import { APPOINTMENT_STATUS } from "@/config/constants";
 import { useAuth } from "@/contexts/auth-context";
-import { useAppointments, useSendReminder, useToast } from "@/hooks";
+import { useAppointmentsQuery, useSendReminder, useToast } from "@/hooks";
 import {
   AppointmentStatus,
   AppointmentWithDetails,
@@ -95,8 +96,9 @@ export default function RemindersPage() {
   const {
     appointments,
     loading,
+    stale,
     error: appointmentsError,
-  } = useAppointments(appointmentsFilters);
+  } = useAppointmentsQuery(appointmentsFilters);
 
   const sendReminderMutation = useSendReminder();
 
@@ -244,7 +246,7 @@ export default function RemindersPage() {
       <div className="relative min-h-screen bg-background pb-24">
         {/* Sticky header */}
         <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
-          <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 pb-3 pt-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-5xl flex-col gap-3 px-5 pb-3 pt-4 lg:px-8 lg:pt-8">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h1 className="font-display text-display text-foreground">
@@ -293,7 +295,7 @@ export default function RemindersPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6 lg:px-8">
+        <LoadingRegion busy={stale} className="mx-auto max-w-5xl px-5 py-4 lg:px-8">
           {appointmentsError && (
             <div className="mb-4 rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {appointmentsError}
@@ -364,7 +366,7 @@ export default function RemindersPage() {
               </span>
             </div>
           )}
-        </div>
+        </LoadingRegion>
       </div>
     </ProtectedRoute>
   );

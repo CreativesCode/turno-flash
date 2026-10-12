@@ -7,8 +7,8 @@ import { TripBookingDetails } from "@/components/settings/TripBookingDetails";
 import { ExceptionsEditor } from "@/components/staff/ExceptionsEditor";
 import { CurrencyCard } from "@/components/organizations/CurrencyCard";
 import { ContactCard } from "@/components/organizations/ContactCard";
-import { Button, Card } from "@/components/ui";
-import { SUPPORT_WHATSAPP_CONNECT_URL } from "@/config/constants";
+import { Button, Card, PageHeader } from "@/components/ui";
+import { useSupportWhatsAppUrl } from "@/hooks/useSupportWhatsAppUrl";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
@@ -23,7 +23,6 @@ import {
   CalendarOff,
   Loader2,
   MessageSquare,
-  Settings as SettingsIcon,
   Star,
   Sunrise,
 } from "lucide-react";
@@ -40,6 +39,7 @@ export default function SettingsPage() {
   const toast = useToast();
   const { data: settings, isLoading, error } = useBusinessSettings();
   const { modules, ready: modulesReady } = useOrganizationModules();
+  const connectUrl = useSupportWhatsAppUrl("connect");
   const updateMutation = useUpdateBusinessSettings();
 
   const canView =
@@ -109,21 +109,12 @@ export default function SettingsPage() {
         description="Configura tu negocio: página de reservas online, cierres, valoraciones post-cita y resumen diario por WhatsApp."
       />
       <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          {/* Header */}
-          <div className="mb-6 flex items-center gap-3">
-            <div className="bg-surface-2 flex h-10 w-10 items-center justify-center rounded-xl text-foreground shadow-sm">
-              <SettingsIcon className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                Ajustes
-              </h1>
-              <p className="text-sm text-foreground-muted">
-                Reservas online y automatizaciones de tu negocio.
-              </p>
-            </div>
-          </div>
+        <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
+          <PageHeader
+            title="Ajustes"
+            subtitle="Reservas online y automatizaciones de tu negocio."
+            className="mb-6"
+          />
 
           {profile && !canView && (
             <Card className="p-8 text-center">
@@ -241,7 +232,7 @@ export default function SettingsPage() {
                   </p>
                   {!waEnabled && (
                     <a
-                      href={SUPPORT_WHATSAPP_CONNECT_URL}
+                      href={connectUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-primary-600 underline dark:text-primary-400"

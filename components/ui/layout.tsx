@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { Spinner } from "./spinner";
 
 export interface PageHeaderProps {
   title: string;
@@ -134,6 +135,42 @@ export function EmptyState({
         <p className="text-meta text-foreground-muted">{children}</p>
       )}
       {action && <div className="mt-2.5">{action}</div>}
+    </div>
+  );
+}
+
+export interface LoadingRegionProps {
+  /** True while the data shown is the previous one and the new is on its way. */
+  busy: boolean;
+  children: ReactNode;
+  className?: string;
+}
+
+/**
+ * The data part of a screen. While a filter or a day loads, the header and
+ * controls stay put: only this area dims, under a small spinner.
+ */
+export function LoadingRegion({
+  busy,
+  children,
+  className = "",
+}: LoadingRegionProps) {
+  return (
+    <div aria-busy={busy || undefined} className={`relative ${className}`}>
+      {busy && (
+        <div className="pointer-events-none absolute inset-x-0 top-6 z-10 flex justify-center">
+          <span className="flex size-9 items-center justify-center rounded-full border border-border bg-surface text-foreground shadow-card">
+            <Spinner size={16} />
+          </span>
+        </div>
+      )}
+      <div
+        className={`transition-opacity ${
+          busy ? "pointer-events-none opacity-40" : ""
+        }`}
+      >
+        {children}
+      </div>
     </div>
   );
 }

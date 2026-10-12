@@ -232,7 +232,7 @@ function ServicesContent() {
         description="Gestiona los servicios que ofreces. Configura duración, precios, tiempos de buffer y disponibilidad de cada servicio."
       />
 
-      <div className="mx-auto max-w-3xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
+      <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
         <PageHeader
           title="Servicios"
           subtitle={subtitle}

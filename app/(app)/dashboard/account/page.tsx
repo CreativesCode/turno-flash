@@ -1,13 +1,13 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/protected-route";
-import { Badge, Button, Card } from "@/components/ui";
+import { Badge, Button, Card, PageHeader } from "@/components/ui";
 import { ROLE_META } from "@/components/users/UserCard";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/useToast";
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
-import { AlertTriangle, ArrowLeft, UserCircle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -72,26 +72,12 @@ export default function AccountPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-          <Link
-            href="/dashboard"
-            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-foreground-muted transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Volver al dashboard
-          </Link>
-
-          <div className="mb-8 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-              <UserCircle className="h-6 w-6 text-foreground-muted" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground">Mi cuenta</h1>
-              <p className="text-sm text-foreground-muted">
-                Información y gestión de tu cuenta
-              </p>
-            </div>
-          </div>
+        <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
+          <PageHeader
+            title="Mi cuenta"
+            subtitle="Información y gestión de tu cuenta"
+            className="mb-6"
+          />
 
           {/* Información de la cuenta */}
           <Card className="mb-6 p-5">

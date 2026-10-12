@@ -192,7 +192,7 @@ export default function OrganizationsPage() {
 
       <div className="relative min-h-screen bg-background pb-24">
         <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-5 pb-3 pt-4 lg:px-8 lg:pt-8">
             <div>
               <h1 className="font-display text-display text-foreground">
                 Organizaciones
@@ -212,7 +212,7 @@ export default function OrganizationsPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl px-5 py-4 lg:px-8">
           {error && (
             <div className="mb-4 rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {error}
@@ -240,7 +240,7 @@ export default function OrganizationsPage() {
               </Button>
             </div>
           ) : (
-            <ListGroup className="mx-auto max-w-3xl">
+            <ListGroup className="mx-auto max-w-5xl">
               {organizations.map((org) => (
                 <OrganizationCard
                   key={org.id}

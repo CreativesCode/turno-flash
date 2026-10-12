@@ -15,6 +15,7 @@ import {
   EmptyState,
   FilterChips,
   ListGroup,
+  LoadingRegion,
   PageHeader,
   SearchInput,
   SectionLabel,
@@ -28,6 +29,7 @@ import {
 } from "@/config/constants";
 import { useAuth } from "@/contexts/auth-context";
 import {
+  useAppointmentsQuery,
   useCreateAppointment,
   useCreateCustomer,
   useDebounce,
@@ -49,8 +51,11 @@ import { getLocalDateString } from "@/utils/date";
 import {
   AlertCircle,
   Calendar,
+  ChevronLeft,
+  ChevronRight,
   Download,
   Plus,
+  Search,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -77,20 +82,46 @@ const WeekCalendar = dynamic(
 );
 
 type AppointmentView = "list" | "day" | "week";
-type FilterStatus = AppointmentStatus | "all";
+type FilterGroup = "all" | "upcoming" | "in_progress" | "done" | "cancelled";
 
-const FILTER_CHIPS: { value: FilterStatus; label: string }[] = [
-  { value: "all", label: "Todos" },
-  { value: "pending", label: "Pendientes" },
-  { value: "confirmed", label: "Confirmados" },
-  { value: "reminded", label: "Avisados" },
-  { value: "client_confirmed", label: "Confirmaron" },
-  { value: "checked_in", label: "Llegaron" },
-  { value: "in_progress", label: "En curso" },
-  { value: "completed", label: "Terminados" },
-  { value: "cancelled", label: "Cancelados" },
-  { value: "no_show", label: "No vino" },
+/** The statuses behind each filter chip; "all" filters nothing. */
+const FILTER_GROUPS: {
+  value: FilterGroup;
+  label: string;
+  statuses: AppointmentStatus[];
+}[] = [
+  { value: "all", label: "Todos", statuses: [] },
+  {
+    value: "upcoming",
+    label: "Por atender",
+    statuses: [
+      "pending",
+      "confirmed",
+      "reminded",
+      "client_confirmed",
+      "checked_in",
+    ],
+  },
+  { value: "in_progress", label: "En curso", statuses: ["in_progress"] },
+  { value: "done", label: "Terminados", statuses: ["completed"] },
+  { value: "cancelled", label: "Cancelados", statuses: ["cancelled", "no_show"] },
 ];
+
+function groupStatuses(group: FilterGroup): AppointmentStatus[] {
+  return FILTER_GROUPS.find((g) => g.value === group)?.statuses ?? [];
+}
+
+/** Monday to Sunday of the week that holds `date`. */
+function weekOf(date: Date): Date[] {
+  const monday = new Date(date);
+  const day = monday.getDay();
+  monday.setDate(monday.getDate() - day + (day === 0 ? -6 : 1));
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
 
 const VIEW_OPTIONS: { value: AppointmentView; label: string }[] = [
   { value: "list", label: "Lista" },
@@ -118,7 +149,9 @@ function AppointmentsContent() {
   /* ── State ────────────────────────────────────────────────── */
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 300);
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [filterGroup, setFilterGroup] = useState<FilterGroup>("all");
+  // The search replaces the day strip and looks beyond the selected day
+  const [searchOpen, setSearchOpen] = useState(false);
   /** Professional id of the signed-in employee while "Mis turnos" is on. */
   const [onlyMineStaffId, setOnlyMineStaffId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -169,8 +202,9 @@ function AppointmentsContent() {
 
   /* ── Date range based on view ────────────────────────────── */
   const dateRange = useMemo(() => {
-    // Vista Lista: mostrar últimos 7 días + próximos 60 días (agenda amplia)
-    if (view === "list") {
+    // Searching the list looks from last week to two months ahead; without a
+    // search the list shows the selected day, like the Day view
+    if (view === "list" && searchOpen) {
       const past = new Date(selectedDate);
       past.setDate(past.getDate() - 7);
       const future = new Date(selectedDate);
@@ -195,7 +229,7 @@ function AppointmentsContent() {
       start: getLocalDateString(selectedDate),
       end: getLocalDateString(selectedDate),
     };
-  }, [selectedDate, view]);
+  }, [selectedDate, view, searchOpen]);
 
   /* ── Data queries ────────────────────────────────────────── */
   const {
@@ -204,6 +238,7 @@ function AppointmentsContent() {
     hasNextPage: hasNextAppointmentsPage,
     isFetchingNextPage: isFetchingNextAppointmentsPage,
     isFetching: appointmentsFetching,
+    isPlaceholderData: appointmentsStale,
     isLoading: appointmentsLoading,
     error: appointmentsError,
   } = useInfiniteAppointments(
@@ -213,8 +248,8 @@ function AppointmentsContent() {
       // The list filters on the server, so a match beyond the first page is
       // found too; the calendars always show everything
       ...(view === "list" && {
-        status: filterStatus !== "all" ? [filterStatus] : undefined,
-        search: debouncedSearch || undefined,
+        status: filterGroup !== "all" ? groupStatuses(filterGroup) : undefined,
+        search: (searchOpen && debouncedSearch) || undefined,
         staffId: onlyMineStaffId ?? undefined,
       }),
     },
@@ -224,6 +259,40 @@ function AppointmentsContent() {
   const appointments = useMemo(
     () => appointmentsData?.pages.flat() ?? [],
     [appointmentsData]
+  );
+
+  // The visible week, unfiltered: marks the days that have turns and counts
+  // the selected day per filter chip
+  const weekDays = useMemo(() => weekOf(selectedDate), [selectedDate]);
+  const { appointments: weekAppointments } = useAppointmentsQuery({
+    startDate: getLocalDateString(weekDays[0]),
+    endDate: getLocalDateString(weekDays[6]),
+    staffId: onlyMineStaffId ?? undefined,
+  });
+  const selectedDay = getLocalDateString(selectedDate);
+  const daysWithTurns = useMemo(
+    () => new Set(weekAppointments.map((a) => a.appointment_date)),
+    [weekAppointments]
+  );
+  const dayAppointments = useMemo(
+    () => weekAppointments.filter((a) => a.appointment_date === selectedDay),
+    [weekAppointments, selectedDay]
+  );
+  const filterChips = useMemo(
+    () =>
+      FILTER_GROUPS.map(({ value, label, statuses }) => ({
+        value,
+        label,
+        // Counts are of the selected day; a search spans many days
+        count: searchOpen
+          ? undefined
+          : value === "all"
+            ? dayAppointments.length
+            : dayAppointments.filter(
+                (a) => !!a.status && statuses.includes(a.status)
+              ).length,
+      })),
+    [dayAppointments, searchOpen]
   );
 
   const normalizedData = useNormalizedData({
@@ -494,13 +563,14 @@ function AppointmentsContent() {
   /* ── List filtering / grouping ───────────────────────────── */
   const filteredAppointments = useMemo(() => {
     let list = appointments;
-    if (filterStatus !== "all") {
-      list = list.filter((a) => a.status === filterStatus);
+    if (filterGroup !== "all") {
+      const statuses = groupStatuses(filterGroup);
+      list = list.filter((a) => !!a.status && statuses.includes(a.status));
     }
     if (onlyMineStaffId) {
       list = list.filter((a) => a.staff_id === onlyMineStaffId);
     }
-    if (debouncedSearch) {
+    if (searchOpen && debouncedSearch) {
       const term = debouncedSearch.toLowerCase();
       list = list.filter(
         (a) =>
@@ -519,7 +589,7 @@ function AppointmentsContent() {
       }
       return a.start_time.localeCompare(b.start_time);
     });
-  }, [appointments, filterStatus, debouncedSearch, onlyMineStaffId]);
+  }, [appointments, filterGroup, searchOpen, debouncedSearch, onlyMineStaffId]);
 
   const grouped = useMemo(() => {
     // Group by date, then morning/afternoon
@@ -633,12 +703,32 @@ function AppointmentsContent() {
     );
   }
 
+  const isTodaySelected = selectedDay === getLocalDateString();
+  const dayTotal = dayAppointments.filter(
+    (a) => a.status !== "cancelled" && a.status !== "no_show"
+  ).length;
+  const dayDone = dayAppointments.filter(
+    (a) => a.status === "completed"
+  ).length;
   const subtitle =
     view === "week"
       ? `Semana · ${appointments.length} turno${
           appointments.length !== 1 ? "s" : ""
         }`
-      : `${appointments.length} turno${appointments.length !== 1 ? "s" : ""}`;
+      : view === "list" && searchOpen
+        ? `${appointments.length} encontrado${appointments.length !== 1 ? "s" : ""}`
+        : `${dayTotal} ${
+            isTodaySelected ? "hoy" : dayTotal === 1 ? "turno" : "turnos"
+          } · ${dayDone} ${dayDone === 1 ? "terminado" : "terminados"}`;
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setSearchTerm("");
+  };
+  const shiftWeek = (weeks: number) => {
+    const next = new Date(selectedDate);
+    next.setDate(next.getDate() + weeks * 7);
+    setSelectedDate(next);
+  };
   // The previous range stays on screen while the new one loads
   const refreshing = appointmentsFetching && !isFetchingNextAppointmentsPage;
 
@@ -649,7 +739,7 @@ function AppointmentsContent() {
         description="Gestiona tus turnos y citas. Visualiza tu calendario, crea nuevas citas, confirma o cancela reservas existentes."
       />
 
-      <div className="mx-auto max-w-4xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
+      <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
         <PageHeader
           title="Turnos"
           subtitle={
@@ -660,11 +750,17 @@ function AppointmentsContent() {
           }
           actions={
             <>
+              <SegmentedControl
+                label="Vista"
+                options={VIEW_OPTIONS}
+                value={view}
+                onChange={setView}
+              />
               <Button
                 variant="secondary"
                 onClick={handleExportCsv}
                 title="Exportar turnos del rango visible a CSV"
-                className="max-sm:hidden"
+                className="max-lg:hidden"
               >
                 <Download className="size-[18px]" />
                 CSV
@@ -678,53 +774,145 @@ function AppointmentsContent() {
             </>
           }
         >
-          <SegmentedControl
-            label="Vista"
-            options={VIEW_OPTIONS}
-            value={view}
-            onChange={setView}
-            className="w-full sm:w-auto sm:self-start"
-          />
-          {/* Search + chips (only in list view) */}
-          {view === "list" && (
-            <>
+          {view === "list" && searchOpen ? (
+            <div className="flex items-center gap-2">
               <SearchInput
+                autoFocus
                 value={searchTerm}
                 onChange={setSearchTerm}
                 placeholder="Cliente, servicio o teléfono"
                 aria-label="Buscar turnos"
+                wrapperClassName="min-w-0 flex-1"
               />
-              <div className="-mx-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {myStaffId && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOnlyMineStaffId(onlyMineStaffId ? null : myStaffId)
-                    }
-                    aria-pressed={!!onlyMineStaffId}
-                    className={`flex h-9 shrink-0 cursor-pointer items-center rounded-full border px-3.5 text-meta font-semibold transition-colors ${
-                      onlyMineStaffId
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border-2 bg-surface text-foreground-muted hover:text-foreground"
-                    }`}
+              <Button variant="ghost" onClick={closeSearch}>
+                Cancelar
+              </Button>
+            </div>
+          ) : (
+            view !== "week" && (
+              <div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => shiftWeek(-1)}
+                    aria-label="Semana anterior"
+                    className="-ml-2"
                   >
-                    Mis turnos
-                  </button>
-                )}
-                <FilterChips
-                  label="Estado"
-                  chips={FILTER_CHIPS}
-                  value={filterStatus}
-                  onChange={setFilterStatus}
-                  className="overflow-visible"
-                />
+                    <ChevronLeft className="size-5" />
+                  </Button>
+                  <span className="flex-1 text-center text-meta font-semibold text-foreground-muted first-letter:uppercase">
+                    {selectedDate.toLocaleDateString("es", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                  {!isTodaySelected && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedDate(new Date())}
+                    >
+                      Hoy
+                    </Button>
+                  )}
+                  {view === "list" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setSearchOpen(true)}
+                      aria-label="Buscar turnos"
+                    >
+                      <Search className="size-5" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => shiftWeek(1)}
+                    aria-label="Semana siguiente"
+                    className="-mr-2"
+                  >
+                    <ChevronRight className="size-5" />
+                  </Button>
+                </div>
+                <div className="-mx-1 mt-1 grid grid-cols-7 gap-1">
+                  {weekDays.map((day) => {
+                    const key = getLocalDateString(day);
+                    const selected = key === selectedDay;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setSelectedDate(day)}
+                        aria-pressed={selected}
+                        aria-label={day.toLocaleDateString("es", {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                        })}
+                        className={`flex cursor-pointer flex-col items-center gap-1 rounded-[14px] pb-2.5 pt-2 transition-colors ${
+                          selected
+                            ? "bg-inverse text-inverse-foreground"
+                            : "text-foreground hover:bg-surface-2"
+                        }`}
+                      >
+                        <span className="text-[11px] font-medium capitalize opacity-75">
+                          {day
+                            .toLocaleDateString("es", { weekday: "short" })
+                            .replace(".", "")}
+                        </span>
+                        <span className="text-[17px] font-semibold tabular-nums">
+                          {day.getDate()}
+                        </span>
+                        <span
+                          aria-hidden
+                          className={`size-1 rounded-full ${
+                            !daysWithTurns.has(key)
+                              ? "bg-transparent"
+                              : selected
+                                ? "bg-inverse-foreground"
+                                : "bg-border-2"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </>
+            )
+          )}
+          {view === "list" && (
+            <div className="-mx-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {myStaffId && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setOnlyMineStaffId(onlyMineStaffId ? null : myStaffId)
+                  }
+                  aria-pressed={!!onlyMineStaffId}
+                  className={`flex h-9 shrink-0 cursor-pointer items-center rounded-full border px-3.5 text-meta font-semibold transition-colors ${
+                    onlyMineStaffId
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border-2 bg-surface text-foreground-muted hover:text-foreground"
+                  }`}
+                >
+                  Mis turnos
+                </button>
+              )}
+              <FilterChips
+                label="Estado"
+                chips={filterChips}
+                value={filterGroup}
+                onChange={setFilterGroup}
+                className="overflow-visible"
+              />
+            </div>
           )}
         </PageHeader>
 
         {/* Body */}
-        <div className="pt-4">
+        <LoadingRegion busy={appointmentsStale} className="pt-4">
           {error && (
             <Alert variant="danger" icon={<AlertCircle />} className="mb-4">
               {error}
@@ -736,7 +924,7 @@ function AppointmentsContent() {
             <>
               {filteredAppointments.length === 0 ? (
                 <EmptyListState
-                  hasFilters={!!searchTerm || filterStatus !== "all"}
+                  hasFilters={searchOpen || filterGroup !== "all"}
                   canManage={canManageAppointments}
                   onCreate={handleCreate}
                 />
@@ -744,9 +932,12 @@ function AppointmentsContent() {
                 <div>
                   {grouped.map((section) => (
                     <section key={section.date}>
-                      <h2 className="px-1 pt-5 text-lead font-semibold text-foreground first:pt-0">
-                        {formatSectionDate(section.date)}
-                      </h2>
+                      {/* One day at a time needs no date; a search spans several */}
+                      {searchOpen && (
+                        <h2 className="px-1 pt-5 text-lead font-semibold text-foreground">
+                          {formatSectionDate(section.date)}
+                        </h2>
+                      )}
                       {(
                         [
                           ["Mañana", section.morning],
@@ -756,7 +947,10 @@ function AppointmentsContent() {
                         ([label, rows]) =>
                           rows.length > 0 && (
                             <div key={label}>
-                              <SectionLabel count={rows.length} className="!pt-3">
+                              <SectionLabel
+                                count={rows.length}
+                                className={searchOpen ? "!pt-3" : "!pt-[22px]"}
+                              >
                                 {label}
                               </SectionLabel>
                               <ListGroup>
@@ -821,7 +1015,7 @@ function AppointmentsContent() {
               }
             />
           )}
-        </div>
+        </LoadingRegion>
       </div>
 
       {/* Create modal */}
@@ -945,7 +1139,7 @@ function EmptyListState({
   return (
     <EmptyState
       icon={<Calendar />}
-      title={hasFilters ? "Sin turnos" : "Aún no hay turnos"}
+      title={hasFilters ? "Sin turnos" : "Sin turnos este día"}
       action={
         canManage &&
         !hasFilters && (
@@ -958,7 +1152,7 @@ function EmptyListState({
     >
       {hasFilters
         ? "No encontramos turnos con esos filtros."
-        : "Cuando crees un turno aparecerá aquí."}
+        : "Cuando crees un turno para este día aparecerá aquí."}
     </EmptyState>
   );
 }

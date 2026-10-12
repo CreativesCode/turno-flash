@@ -180,7 +180,7 @@ export default function RecoverCustomersPage() {
         description="Reactiva clientes dormidos enviándoles un mensaje de WhatsApp para que vuelvan a agendar."
       />
       <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
           {/* Header */}
           <div className="mb-6">
             <Link
@@ -195,7 +195,7 @@ export default function RecoverCustomersPage() {
                 <HeartHandshake className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                <h1 className="font-display text-display text-foreground">
                   Recuperar clientes
                 </h1>
                 <p className="text-sm text-foreground-muted">

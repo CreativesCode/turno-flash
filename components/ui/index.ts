@@ -26,6 +26,7 @@ export {
 export {
   EmptyState,
   IconTile,
+  LoadingRegion,
   PageHeader,
   SectionLabel,
   type IconTileTone,

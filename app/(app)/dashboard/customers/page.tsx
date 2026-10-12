@@ -11,6 +11,7 @@ import {
   EmptyState,
   FilterChips,
   KebabMenu,
+  LoadingRegion,
   PageHeader,
   SearchInput,
   Spinner,
@@ -123,6 +124,7 @@ export default function CustomersPage() {
     hasNextPage,
     isFetchingNextPage,
     isLoading: loading,
+    isPlaceholderData: stale,
     error: queryError,
   } = useInfiniteCustomers(
     { search: debouncedSearch, isActive: !showInactive },
@@ -295,7 +297,7 @@ export default function CustomersPage() {
         description="Gestiona tu base de clientes. Agrega, edita y administra la información de tus clientes, incluyendo contacto y notas importantes."
       />
 
-      <div className="mx-auto max-w-3xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
+      <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
         <PageHeader
           title="Clientes"
           subtitle={subtitle}
@@ -345,7 +347,7 @@ export default function CustomersPage() {
         </PageHeader>
 
         {/* Body */}
-        <div className="pt-5">
+        <LoadingRegion busy={stale} className="pt-5">
           {error && (
             <Alert variant="danger" icon={<AlertCircle />} className="mb-4">
               {error}
@@ -424,7 +426,7 @@ export default function CustomersPage() {
               </Button>
             </div>
           )}
-        </div>
+        </LoadingRegion>
 
       </div>
 

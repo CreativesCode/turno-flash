@@ -3,12 +3,11 @@
 import { LicensePlanSummary } from "@/components/license-plan-summary";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SupportWhatsAppLink } from "@/components/support-whatsapp-link";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Card, PageHeader } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useIsStoreApp } from "@/hooks/useIsStoreApp";
 import { useLicense, useOrganizationLicense } from "@/hooks/useLicense";
-import { ArrowLeft, Crown, MessageCircle, ShieldCheck } from "lucide-react";
-import Link from "next/link";
+import { MessageCircle, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -41,28 +40,12 @@ export default function SubscriptionPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-          <Link
-            href="/dashboard"
-            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-foreground-muted transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Volver al dashboard
-          </Link>
-
-          <div className="mb-8 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900">
-              <Crown className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground">
-                Suscripción
-              </h1>
-              <p className="text-sm text-foreground-muted">
-                El plan de tu negocio
-              </p>
-            </div>
-          </div>
+        <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
+          <PageHeader
+            title="Suscripción"
+            subtitle="El plan de tu negocio"
+            className="mb-6"
+          />
 
           {/* Estado actual de la licencia */}
           <Card className="mb-6 p-5">

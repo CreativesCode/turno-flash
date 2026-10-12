@@ -438,7 +438,7 @@ function TripDetailsContent() {
   if (!trip && tripsError) {
     return (
       <ProtectedRoute>
-        <div className="mx-auto max-w-3xl px-4 py-10 text-center">
+        <div className="mx-auto max-w-5xl px-4 py-10 text-center">
           <WifiOff className="mx-auto h-10 w-10 text-foreground-subtle" />
           <h1 className="mt-3 text-base font-semibold text-foreground">
             Sin conexión
@@ -461,7 +461,7 @@ function TripDetailsContent() {
   if (!trip) {
     return (
       <ProtectedRoute>
-        <div className="mx-auto max-w-3xl px-4 py-10 text-center">
+        <div className="mx-auto max-w-5xl px-4 py-10 text-center">
           <h1 className="text-base font-semibold text-foreground">
             No encontramos esa salida
           </h1>
@@ -492,7 +492,7 @@ function TripDetailsContent() {
 
       <div className="relative min-h-screen bg-background pb-24 print:hidden">
         <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur print:hidden">
-          <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 pb-3 pt-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-5xl flex-col gap-3 px-5 pb-3 pt-4 lg:px-8 lg:pt-8">
             <Link
               href="/dashboard/trips"
               className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-foreground-muted transition-colors hover:text-foreground"
@@ -553,7 +553,7 @@ function TripDetailsContent() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl px-5 py-4 lg:px-8">
           {error && (
             <div className="mb-4 rounded-card bg-danger-100 p-4 text-meta text-danger-600 dark:bg-danger-900 dark:text-danger-400">
               {error}

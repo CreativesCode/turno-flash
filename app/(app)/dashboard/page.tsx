@@ -285,7 +285,7 @@ export default function DashboardPage() {
         title="Panel de Control"
         description="Accede a tu panel de control de Turno Flash. Gestiona turnos, clientes, servicios y profesionales desde un solo lugar."
       />
-      <div className="mx-auto max-w-4xl px-5 pb-10 pt-5 lg:px-8 lg:pt-8">
+      <div className="mx-auto max-w-5xl px-5 pb-10 pt-5 lg:px-8 lg:pt-8">
         {/* Greeting */}
         <div className="flex items-end justify-between gap-4">
           <div className="min-w-0">

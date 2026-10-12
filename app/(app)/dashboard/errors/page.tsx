@@ -104,8 +104,8 @@ export default function ErrorsPage() {
         title="Logs de Errores"
         description="Monitoreo y gestión de errores de la aplicación"
       />
-      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
-        <div className="mx-auto max-w-7xl">
+      <div className="min-h-screen bg-background">
+        <div className="mx-auto max-w-5xl px-5 pb-10 pt-4 lg:px-8 lg:pt-8">
           {/* Header */}
           <div className="mb-6">
             <button
@@ -115,7 +115,7 @@ export default function ErrorsPage() {
               <ArrowLeft size={16} />
               Volver al dashboard
             </button>
-            <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">
+            <h1 className="font-display text-display text-foreground">
               Logs de Errores
             </h1>
             <p className="mt-1 text-sm text-foreground-muted">

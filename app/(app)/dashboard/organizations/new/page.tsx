@@ -333,7 +333,7 @@ export default function NewOrganizationPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-background pb-24">
         <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
-          <div className="mx-auto flex max-w-2xl items-center gap-2 px-4 py-3 sm:px-6">
+          <div className="mx-auto flex max-w-5xl items-center gap-2 px-5 pb-3 pt-4 lg:px-8 lg:pt-8">
             <button
               type="button"
               onClick={() => router.push("/dashboard/organizations")}
@@ -350,7 +350,7 @@ export default function NewOrganizationPage() {
 
         <form
           onSubmit={handleSubmit}
-          className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-5 sm:px-6"
+          className="mx-auto flex max-w-5xl flex-col gap-4 px-5 py-5 lg:px-8"
         >
           <Field label="Nombre del negocio">
             <input
@@ -503,7 +503,7 @@ export default function NewOrganizationPage() {
           <Field label="Zona horaria">
             <Select
               value={formData.org_timezone}
-              onChange={(e) => patchForm({ org_timezone: e.target.value })}
+              onChange={(e) => patchForm({ org_timezone: e.target.value })}
             >
               {TIMEZONES.map((tz) => (
                 <option key={tz} value={tz}>

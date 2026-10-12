@@ -94,7 +94,7 @@ export default function InvitePage() {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="lg:sticky lg:top-0 lg:z-20 lg:bg-background/90 lg:backdrop-blur">
-        <div className="mx-auto max-w-2xl px-4 py-3 sm:px-6">
+        <div className="mx-auto max-w-5xl px-5 pb-3 pt-4 lg:px-8 lg:pt-8">
           <h1 className="font-display text-display text-foreground">
             Invitar usuario
           </h1>
@@ -106,7 +106,7 @@ export default function InvitePage() {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-5 sm:px-6">
+      <div className="mx-auto flex max-w-5xl flex-col gap-4 px-5 py-5 lg:px-8">
         <Card className="p-4">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-400">

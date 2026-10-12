@@ -142,12 +142,17 @@ export function useAppointments(
     },
     enabled: !!profile?.organization_id,
     staleTime: 1000 * 60, // 1 minuto
+    // Another day or filter keeps the previous rows on screen until the new
+    // ones arrive, instead of blanking the page
+    placeholderData: keepPreviousData,
     ...options,
   });
 
   return {
     appointments: query.data || [],
     loading: query.isLoading,
+    /** The rows are still the previous filter's; the new ones are loading. */
+    stale: query.isPlaceholderData,
     error: query.error?.message || null,
     isRefetching: query.isRefetching,
     refetch: query.refetch,
