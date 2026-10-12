@@ -1,3 +1,4 @@
+import { type LicensePlan, isLicensePlan } from "@/config/license-pricing";
 import { useAuth } from "@/contexts/auth-context";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +20,8 @@ export interface OrganizationModules {
   currency: string;
   /** Used to build the public booking links. */
   slug: string;
+  /** License plan; it sets how many active professionals fit. */
+  plan: LicensePlan;
 }
 
 export const organizationModuleKeys = {
@@ -34,6 +37,7 @@ const FALLBACK: OrganizationModules = {
   name: "",
   currency: "USD",
   slug: "",
+  plan: "personal",
 };
 
 export function useOrganizationModules() {
@@ -47,7 +51,7 @@ export function useOrganizationModules() {
       const { data, error } = await supabase
         .from("organizations")
         .select(
-          "appointments_module_enabled, trips_module_enabled, timezone, name, currency, slug"
+          "appointments_module_enabled, trips_module_enabled, timezone, name, currency, slug, license_plan"
         )
         .eq("id", orgId)
         .single();
@@ -59,6 +63,7 @@ export function useOrganizationModules() {
         name: data.name ?? "",
         currency: data.currency || "USD",
         slug: data.slug ?? "",
+        plan: isLicensePlan(data.license_plan) ? data.license_plan : "personal",
       };
     },
     enabled: !!orgId,

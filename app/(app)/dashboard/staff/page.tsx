@@ -6,8 +6,11 @@ import { StaffCard } from "@/components/staff/StaffCard";
 import { StaffFormModal } from "@/components/staff/StaffFormModal";
 import { StaffScheduleSheet } from "@/components/staff/StaffScheduleSheet";
 import { Button, ConfirmSheet } from "@/components/ui";
+import { SUPPORT_WHATSAPP_PLAN_URL } from "@/config/constants";
+import { LICENSE_PLAN_INFO } from "@/config/license-pricing";
 import { useAuth } from "@/contexts/auth-context";
 import { useCreateParam } from "@/hooks/useCreateParam";
+import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { TeamService } from "@/services";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -93,10 +96,32 @@ function StaffContent() {
     setEditingStaff(null);
   }, []);
 
+  // The plan caps the active professionals; the database enforces it (076)
+  // and this only tells the owner before trying.
+  const { modules, ready: planReady } = useOrganizationModules();
+  const planInfo = LICENSE_PLAN_INFO[modules.plan];
+  const activeCount = useMemo(
+    () => staffMembers.filter((member) => member.is_active).length,
+    [staffMembers]
+  );
+  const atStaffLimit =
+    planReady && planInfo.staffLimit !== null && activeCount >= planInfo.staffLimit;
+  const staffLimitText =
+    planInfo.staffLimit === 1
+      ? `Tu plan ${planInfo.label} admite 1 profesional activo.`
+      : `Tu plan ${planInfo.label} admite hasta ${planInfo.staffLimit} profesionales activos.`;
+
   const handleCreate = useCallback(() => {
+    if (atStaffLimit) {
+      toast.error(
+        "No caben más profesionales",
+        `${staffLimitText} Pide el cambio de plan para sumar más.`
+      );
+      return;
+    }
     resetForm();
     setShowModal(true);
-  }, [resetForm]);
+  }, [resetForm, atStaffLimit, staffLimitText, toast]);
 
   useCreateParam(handleCreate, canManageStaff);
 
@@ -316,6 +341,25 @@ function StaffContent() {
           {error && (
             <div className="mb-4 rounded-lg bg-danger-50 p-3 text-sm text-danger-800 dark:bg-danger-900/20 dark:text-danger-400">
               {error}
+            </div>
+          )}
+
+          {canManageStaff && atStaffLimit && (
+            <div className="mb-4 flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3 text-sm text-foreground-muted sm:flex-row sm:items-center sm:justify-between">
+              <p>
+                <span className="font-semibold text-foreground">
+                  {staffLimitText}
+                </span>{" "}
+                Para sumar más, pásate a un plan mayor.
+              </p>
+              <a
+                href={SUPPORT_WHATSAPP_PLAN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 font-semibold text-primary hover:underline"
+              >
+                Pedir cambio de plan
+              </a>
             </div>
           )}
 

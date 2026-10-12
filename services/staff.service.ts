@@ -3,6 +3,22 @@ import { createClient } from "@/utils/supabase/client";
 import { Logger } from "@/utils/logger";
 
 /**
+ * The database rejects the professional that does not fit in the plan
+ * (migration 076, `staff_limit_reached` with the limit in `details`).
+ * Returns the message for the owner, or null for any other error.
+ */
+function staffLimitMessage(error: {
+  message: string;
+  details?: string | null;
+}): string | null {
+  if (!error.message.includes("staff_limit_reached")) return null;
+  const limit = Number(error.details);
+  const allowed =
+    limit === 1 ? "1 profesional activo" : `${limit} profesionales activos`;
+  return `Tu plan admite ${allowed}. Para sumar más, pide el cambio de plan desde Suscripción.`;
+}
+
+/**
  * Service Layer for Staff Management
  * Handles all business logic related to staff members
  */
@@ -119,6 +135,8 @@ export class StaffService {
         .single();
 
       if (insertError) {
+        const limitMessage = staffLimitMessage(insertError);
+        if (limitMessage) return { success: false, error: limitMessage };
         void Logger.error("Error creating staff member:", insertError);
         return {
           success: false,
@@ -192,6 +210,8 @@ export class StaffService {
         .single();
 
       if (updateError) {
+        const limitMessage = staffLimitMessage(updateError);
+        if (limitMessage) return { success: false, error: limitMessage };
         void Logger.error("Error updating staff member:", updateError);
         return {
           success: false,
@@ -422,6 +442,8 @@ export class StaffService {
         .eq("organization_id", organizationId);
 
       if (error) {
+        const limitMessage = staffLimitMessage(error);
+        if (limitMessage) return { success: false, error: limitMessage };
         void Logger.error("Error reactivating staff member:", error);
         return {
           success: false,
