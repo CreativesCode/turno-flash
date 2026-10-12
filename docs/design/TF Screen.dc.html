@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+</helmet>
+<div style="position:relative;width:390px;height:844px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Geist, system-ui, sans-serif;box-shadow:0 0 0 1px var(--line-2), 0 40px 80px -40px rgba(0,0,0,.35)">
+  <div style="height:50px;display:flex;align-items:flex-end;padding:0 34px 4px;font-size:15px;font-weight:600">9:41</div>
+
+  <div style="display:flex;align-items:center;gap:10px;padding:0 16px 0 20px;height:52px">
+    <svg viewBox="0 0 48 48" width="26" height="26" aria-label="TurnoFlash" style="flex:none"><g transform="skewX(-20)"><rect x="17" y="8" width="30" height="10" rx="5" fill="var(--accent)"></rect><rect x="19" y="21" width="20" height="10" rx="5" fill="var(--accent)"></rect></g><circle cx="12.5" cy="39" r="5.2" fill="var(--pink)"></circle></svg>
+    <div style="display:flex;align-items:center;gap:4px;font-size:15px;font-weight:600;letter-spacing:-0.01em">Barbería Demo<span style="width:16px;height:16px;background:var(--ink-3);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/chevron-down.svg) center/contain no-repeat"></span></div>
+    <div style="flex:1"></div>
+    <div style="position:relative;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">
+      <span style="width:21px;height:21px;background:var(--ink-2);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/bell.svg) center/contain no-repeat"></span>
+      <span style="position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px var(--bg)"></span>
+    </div>
+    <div style="width:34px;height:34px;border-radius:50%;background:var(--pink-soft);color:var(--pink);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">CD</div>
+  </div>
+
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:20px 20px 0">
+      <div style="font-size:13px;font-weight:500;color:var(--ink-3)">Viernes 12 de junio</div>
+      <div style="font-family:'Instrument Serif', serif;font-size:40px;line-height:1.05;letter-spacing:-0.01em;margin-top:4px">Buen día, Cuenta</div>
+    </div>
+    <div style="margin:22px 20px 0;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow)">
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-family:'Instrument Serif', serif;font-size:60px;line-height:0.9">8</span>
+        <span style="font-size:15px;font-weight:500;color:var(--ink-2)">turnos hoy</span>
+        <span style="flex:1"></span>
+        <span style="font-size:13px;color:var(--ink-3)">3 terminados</span>
+      </div>
+      <div style="display:flex;gap:3px;height:8px;margin-top:18px">
+        <sc-for list="{{ summary }}" as="s" hint-placeholder-count="5">
+          <span style="flex:{{ s.n }};border-radius:4px;background:{{ s.c }}"></span>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-top:18px">
+        <sc-for list="{{ summary }}" as="s" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)">
+            <span style="width:8px;height:8px;border-radius:50%;background:{{ s.c }}"></span>
+            <span style="flex:1">{{ s.label }}</span>
+            <span style="font-family:'Geist Mono', monospace;font-weight:500;color:var(--ink)">{{ s.n }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:28px 24px 10px">
+      <span style="font-size:13px;font-weight:600;color:var(--ink-2)">Ahora</span>
+    </div>
+    <div style="margin:0 20px;background:var(--accent-soft);border-radius:20px;padding:16px 16px 16px 18px;display:flex;align-items:center;gap:14px">
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:52px">
+        <span style="font-family:'Geist Mono', monospace;font-size:16px;font-weight:600;color:var(--accent-text)">10:30</span>
+        <span style="font-size:12px;color:var(--accent-text);opacity:.8">hasta 11:15</span>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:16px;font-weight:600">Carlos Pérez</div>
+        <div style="font-size:13px;color:var(--ink-2);margin-top:2px">Corte + barba · Diego R.</div>
+      </div>
+      <div style="height:40px;padding:0 16px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;font-size:14px;font-weight:600">Terminar</div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:28px 24px 10px">
+      <span style="font-size:13px;font-weight:600;color:var(--ink-2)">Próximos</span>
+      <span style="font-size:13px;font-weight:600;color:var(--accent-text)">Ver agenda</span>
+    </div>
+    <div style="margin:0 20px;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--line);display:grid;gap:1px;box-shadow:var(--shadow)">
+      <sc-for list="{{ upcoming }}" as="a" hint-placeholder-count="3">
+        <div style="background:var(--surface);display:flex;align-items:center;gap:14px;padding:14px 16px">
+          <div style="display:flex;flex-direction:column;gap:2px;min-width:48px">
+            <span style="font-family:'Geist Mono', monospace;font-size:15px;font-weight:500">{{ a.time }}</span>
+            <span style="font-size:12px;color:var(--ink-3)">{{ a.dur }}</span>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.name }}</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);margin-top:3px">
+              <span style="width:6px;height:6px;border-radius:2px;background:{{ a.svcColor }}"></span>{{ a.svc }} · {{ a.staff }}
+            </div>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:var(--surface-2);font-size:12px;font-weight:500;color:var(--ink-2);white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:{{ a.c }}"></span>{{ a.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin:16px 20px 0;border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;align-items:center;gap:14px;background:var(--surface)">
+      <div style="width:40px;height:40px;border-radius:12px;background:var(--pink-soft);display:flex;align-items:center;justify-content:center;flex:none">
+        <span style="width:20px;height:20px;background:var(--pink);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/message-circle.svg) center/contain no-repeat"></span>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:600">5 avisos para mañana</div>
+        <div style="font-size:13px;color:var(--ink-2);margin-top:2px">Clientes sin recordatorio enviado</div>
+      </div>
+      <span style="width:20px;height:20px;background:var(--ink-3);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/chevron-right.svg) center/contain no-repeat"></span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isTurnos }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:16px 20px 0">
+      <div>
+        <div style="font-family:'Instrument Serif', serif;font-size:40px;line-height:1.05">Turnos</div>
+        <div style="font-size:13px;color:var(--ink-3);margin-top:2px">8 hoy · 3 terminados</div>
+      </div>
+      <div style="display:flex;padding:3px;border-radius:12px;background:var(--surface-2)">
+        <sc-for list="{{ views }}" as="v" hint-placeholder-count="3">
+          <span style="height:34px;padding:0 12px;border-radius:9px;display:flex;align-items:center;font-size:13px;font-weight:600;background:{{ v.bg }};color:{{ v.fg }};box-shadow:{{ v.sh }}">{{ v.label }}</span>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:18px 16px 0">
+      <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 10px;border-radius:14px;background:{{ d.bg }};color:{{ d.fg }}">
+          <span style="font-size:11px;font-weight:500;opacity:.75">{{ d.w }}</span>
+          <span style="font-size:17px;font-weight:600">{{ d.n }}</span>
+          <span style="width:4px;height:4px;border-radius:50%;background:{{ d.dot }}"></span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;gap:8px;padding:16px 20px 0;overflow:hidden">
+      <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+        <span style="flex:none;height:36px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }}<span style="font-family:'Geist Mono', monospace;font-weight:500;opacity:.6">{{ f.n }}</span></span>
+      </sc-for>
+    </div>
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+      <div style="display:flex;align-items:center;gap:8px;padding:22px 24px 10px;font-size:13px;font-weight:600;color:var(--ink-2)">{{ g.label }}<span style="font-family:'Geist Mono', monospace;font-weight:500;color:var(--ink-3)">{{ g.count }}</span></div>
+      <div style="margin:0 20px;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--line);display:grid;gap:1px;box-shadow:var(--shadow)">
+        <sc-for list="{{ g.items }}" as="a" hint-placeholder-count="4">
+          <div style="background:var(--surface);display:flex;align-items:center;gap:14px;padding:14px 16px;opacity:{{ a.op }}">
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:48px">
+              <span style="font-family:'Geist Mono', monospace;font-size:15px;font-weight:500">{{ a.time }}</span>
+              <span style="font-size:12px;color:var(--ink-3)">{{ a.dur }}</span>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.name }}</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);margin-top:3px;white-space:nowrap">
+                <span style="width:6px;height:6px;border-radius:2px;background:{{ a.svcColor }};flex:none"></span>{{ a.svc }} · {{ a.staff }}
+              </div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:var(--surface-2);font-size:12px;font-weight:500;color:var(--ink-2);white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:{{ a.c }}"></span>{{ a.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </sc-if>
+
+  <sc-if value="{{ isServicios }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:16px 20px 0">
+      <div>
+        <div style="font-family:'Instrument Serif', serif;font-size:40px;line-height:1.05">Servicios</div>
+        <div style="font-size:13px;color:var(--ink-3);margin-top:2px">3 activos · 1 pausado</div>
+      </div>
+      <div style="height:40px;padding:0 14px 0 12px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600">
+        <span style="width:18px;height:18px;background:var(--ink);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/plus.svg) center/contain no-repeat"></span>Nuevo
+      </div>
+    </div>
+    <div style="margin:18px 20px 0;height:48px;border-radius:14px;background:var(--surface-2);display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--ink-3);font-size:15px">
+      <span style="width:18px;height:18px;background:var(--ink-3);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/search.svg) center/contain no-repeat"></span>Buscar servicio
+    </div>
+    <div style="margin:20px 20px 0;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--line);display:grid;gap:1px;box-shadow:var(--shadow)">
+      <sc-for list="{{ services }}" as="s" hint-placeholder-count="4">
+        <div style="background:var(--surface);display:flex;align-items:center;gap:14px;padding:16px">
+          <div style="width:42px;height:42px;border-radius:13px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;flex:none;opacity:{{ s.op }}">
+            <span style="width:12px;height:12px;border-radius:4px;background:{{ s.color }}"></span>
+          </div>
+          <div style="flex:1;min-width:0;opacity:{{ s.op }}">
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <span style="font-size:15px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</span>
+              <span style="font-family:'Geist Mono', monospace;font-size:15px;font-weight:500">{{ s.price }}</span>
+            </div>
+            <div style="font-size:13px;color:var(--ink-2);margin-top:3px">{{ s.meta }}</div>
+          </div>
+          <span style="width:44px;height:26px;border-radius:13px;background:{{ s.track }};padding:2px;flex:none;display:flex;justify-content:{{ s.align }}"><span style="width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)"></span></span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin:14px 24px 0;font-size:13px;color:var(--ink-3);line-height:1.45">Los servicios pausados no aparecen en tu página de reservas.</div>
+  </sc-if>
+
+  <sc-if value="{{ isClientes }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:16px 20px 0">
+      <div style="font-family:'Instrument Serif', serif;font-size:40px;line-height:1.05">Clientes</div>
+      <div style="font-size:13px;color:var(--ink-3);margin-top:2px">248 en tu base</div>
+    </div>
+    <div style="margin:18px 20px 0;height:48px;border-radius:14px;background:var(--surface-2);display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--ink-3);font-size:15px">
+      <span style="width:18px;height:18px;background:var(--ink-3);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/search.svg) center/contain no-repeat"></span>Nombre, teléfono o email
+    </div>
+    <sc-for list="{{ customerGroups }}" as="g" hint-placeholder-count="3">
+      <div style="padding:20px 24px 8px;font-size:13px;font-weight:600;color:var(--ink-3)">{{ g.letter }}</div>
+      <div style="margin:0 20px;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--line);display:grid;gap:1px;box-shadow:var(--shadow)">
+        <sc-for list="{{ g.items }}" as="c" hint-placeholder-count="2">
+          <div style="background:var(--surface);display:flex;align-items:center;gap:12px;padding:12px 14px 12px 16px">
+            <div style="width:40px;height:40px;border-radius:50%;background:{{ c.tint }};color:{{ c.color }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex:none">{{ c.ini }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:600">{{ c.name }}</div>
+              <div style="font-size:13px;color:var(--ink-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.meta }}</div>
+            </div>
+            <span style="width:18px;height:18px;background:var(--ink-3);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/chevron-right.svg) center/contain no-repeat"></span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </sc-if>
+
+  <div style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:8px 10px 30px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+      <sc-if value="{{ t.plus }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;justify-content:center"><div style="width:56px;height:44px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center"><span style="width:24px;height:24px;background:var(--accent-ink);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/plus.svg) center/contain no-repeat"></span></div></div>
+      </sc-if>
+      <sc-if value="{{ t.tab }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;height:48px;justify-content:center;color:{{ t.fg }}">
+          <span style="width:22px;height:22px;background:currentColor;mask:url({{ t.icon }}) center/contain no-repeat"></span>
+          <span style="font-size:11px;font-weight:{{ t.fw }}">{{ t.label }}</span>
+        </div>
+      </sc-if>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ isDetalle }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:28px 28px 0 0;padding:10px 20px 34px">
+      <div style="display:flex;justify-content:center;padding-bottom:12px"><span style="width:40px;height:5px;border-radius:3px;background:var(--line-2)"></span></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:52px;height:52px;border-radius:50%;background:#fbe9d3;color:#9a5a0f;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600">SH</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:20px;font-weight:600;letter-spacing:-0.01em">Sofía Hernández</div>
+          <div style="font-family:'Geist Mono', monospace;font-size:13px;color:var(--ink-2);margin-top:3px">+54 9 11 4823-1190</div>
+        </div>
+        <div style="width:40px;height:40px;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center"><span style="width:18px;height:18px;background:var(--ink-2);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/x.svg) center/contain no-repeat"></span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:16px">
+        <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;background:var(--surface-2);font-size:13px;font-weight:500;color:var(--ink-2)"><span style="width:7px;height:7px;border-radius:50%;background:#e0a106"></span>Llegó · 11:24</span>
+        <span style="font-family:'Geist Mono', monospace;font-size:12px;color:var(--ink-3)">N° 0147</span>
+      </div>
+      <div style="margin-top:18px;border:1px solid var(--line);border-radius:18px;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;background:var(--line);gap:1px">
+        <sc-for list="{{ detail }}" as="d" hint-placeholder-count="4">
+          <div style="background:var(--surface);padding:12px 14px">
+            <div style="font-size:12px;color:var(--ink-3)">{{ d.k }}</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:500;margin-top:3px"><span style="width:6px;height:6px;border-radius:2px;background:{{ d.dot }}"></span>{{ d.v }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:18px;height:54px;border-radius:16px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600">Empezar atención</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px">
+        <sc-for list="{{ sheetActions }}" as="b" hint-placeholder-count="3">
+          <div style="height:48px;border-radius:14px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:600;color:{{ b.fg }}">
+            <span style="width:17px;height:17px;background:currentColor;mask:url({{ b.icon }}) center/contain no-repeat"></span>{{ b.label }}
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;turnos&quot;,&quot;detalle&quot;,&quot;servicios&quot;,&quot;clientes&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const IC = n => `https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/${n}.svg`;
+const ST = {
+  pending: ['Pendiente', '#a8a296'], confirmed: ['Confirmado', '#3b7ddd'], reminded: ['Avisado', '#8b5cf6'],
+  client_confirmed: ['Confirmó', '#0fa3a3'], checked_in: ['Llegó', '#e0a106'], in_progress: ['En curso', '#ea6c1b'],
+  completed: ['Terminado', '#2a9d5c'], cancelled: ['Cancelado', '#dc3d3d'], no_show: ['No vino', '#77776f'],
+};
+const SVC = { 'Corte de cabello': '#6366f1', 'Corte + barba': '#22a35a', 'Coloración': '#e59a0b', 'Perfilado de barba': '#db2778' };
+const ap = (time, dur, name, svc, staff, st) => ({ time, dur, name, svc, staff, svcColor: SVC[svc], label: ST[st][0], c: ST[st][1], op: st === 'completed' ? 0.55 : 1 });
+const MORNING = [
+  ap('09:00', '30 min', 'Martina Gómez', 'Corte de cabello', 'Diego R.', 'completed'),
+  ap('09:45', '45 min', 'Andrés Molina', 'Corte + barba', 'Lucía F.', 'completed'),
+  ap('10:30', '45 min', 'Carlos Pérez', 'Corte + barba', 'Diego R.', 'in_progress'),
+  ap('11:30', '1h 30m', 'Sofía Hernández', 'Coloración', 'Lucía F.', 'checked_in'),
+];
+const AFTERNOON = [
+  ap('15:00', '30 min', 'Julián Ortiz', 'Corte de cabello', 'Diego R.', 'client_confirmed'),
+  ap('16:00', '20 min', 'Valentina Ruiz', 'Perfilado de barba', 'Diego R.', 'reminded'),
+  ap('16:30', '45 min', 'Tomás Acosta', 'Corte + barba', 'Lucía F.', 'confirmed'),
+  ap('18:00', '1h 30m', 'Camila Torres', 'Coloración', 'Lucía F.', 'pending'),
+];
+const TINTS = [['#e4e7fb', '#3f43b8'], ['#dcefe2', '#1d6d3d'], ['#fbe9d3', '#9a5a0f'], ['#f8e1ec', '#a3215c'], ['#dfeefa', '#1f5e95']];
+const cu = (name, meta, i) => ({ name, meta, ini: name.split(' ').map(p => p[0]).join(''), tint: TINTS[i][0], color: TINTS[i][1] });
+
+class Component extends DCLogic {
+  renderVals() {
+    const screen = this.props.screen ?? 'home';
+    const tabDefs = [['home', 'Inicio', 'house'], ['turnos', 'Turnos', 'calendar'], null, ['clientes', 'Clientes', 'users'], ['mas', 'Más', 'layout-grid']];
+    const activeTab = { home: 'home', turnos: 'turnos', detalle: 'turnos', clientes: 'clientes', servicios: 'mas' }[screen];
+    const tabs = tabDefs.map(t => t ? { tab: true, plus: false, label: t[1], icon: IC(t[2]), fg: t[0] === activeTab ? 'var(--ink)' : 'var(--ink-3)', fw: t[0] === activeTab ? 600 : 500 } : { tab: false, plus: true });
+    const days = [['Lun', 8], ['Mar', 9], ['Mié', 10], ['Jue', 11], ['Vie', 12], ['Sáb', 13], ['Dom', 14]].map(([w, n]) => {
+      const sel = n === 12;
+      return { w, n, bg: sel ? 'var(--inv)' : 'transparent', fg: sel ? 'var(--inv-ink)' : 'var(--ink)', dot: n === 14 ? 'transparent' : (sel ? 'var(--inv-ink)' : 'var(--line-2)') };
+    });
+    const filters = [['Todos', 8], ['Por atender', 5], ['En curso', 1], ['Terminados', 2], ['Cancelados', 0]].map(([label, n], i) => ({
+      label, n, bg: i === 0 ? 'var(--inv)' : 'var(--surface)', fg: i === 0 ? 'var(--inv-ink)' : 'var(--ink-2)', bd: i === 0 ? 'var(--inv)' : 'var(--line-2)',
+    }));
+    const views = ['Lista', 'Día', 'Semana'].map((label, i) => ({ label, bg: i === 0 ? 'var(--surface)' : 'transparent', fg: i === 0 ? 'var(--ink)' : 'var(--ink-3)', sh: i === 0 ? 'var(--shadow)' : 'none' }));
+    const services = [
+      ['Corte de cabello', '$ 12', '30 min · Reserva online', true],
+      ['Corte + barba', '$ 18', '45 min · Reserva online', true],
+      ['Coloración', '$ 35', '1h 30m · Requiere aprobación', true],
+      ['Perfilado de barba', '$ 8', '20 min · Pausado', false],
+    ].map(([name, price, meta, on]) => ({ name, price, meta, color: SVC[name], tint: SVC[name] + '22', op: on ? 1 : 0.5, track: on ? 'var(--accent)' : 'var(--line-2)', align: on ? 'flex-end' : 'flex-start' }));
+    return {
+      isHome: screen === 'home',
+      isTurnos: screen === 'turnos' || screen === 'detalle',
+      isDetalle: screen === 'detalle',
+      isServicios: screen === 'servicios',
+      isClientes: screen === 'clientes',
+      tabs, days, filters, views, services,
+      summary: [['Terminados', 2, ST.completed[1]], ['En curso', 1, ST.in_progress[1]], ['Llegaron', 1, ST.checked_in[1]], ['Confirmados', 3, ST.confirmed[1]], ['Pendientes', 1, ST.pending[1]]].map(([label, n, c]) => ({ label, n, c })),
+      upcoming: [MORNING[3], AFTERNOON[0], AFTERNOON[1]],
+      groups: [{ label: 'Mañana', count: 4, items: MORNING }, { label: 'Tarde', count: 4, items: AFTERNOON }],
+      customerGroups: [
+        { letter: 'A', items: [cu('Andrés Molina', 'Última visita hoy · 14 turnos', 1)] },
+        { letter: 'C', items: [cu('Camila Torres', 'Próximo turno hoy 18:00', 3), cu('Carlos Pérez', 'En atención ahora', 0)] },
+        { letter: 'J', items: [cu('Julián Ortiz', 'Próximo turno hoy 15:00', 4)] },
+        { letter: 'M', items: [cu('Martina Gómez', 'Última visita hoy · 6 turnos', 2)] },
+      ],
+      detail: [
+        { k: 'Fecha', v: 'Vie 12 jun', dot: 'transparent' }, { k: 'Hora', v: '11:30 – 13:00', dot: 'transparent' },
+        { k: 'Servicio', v: 'Coloración', dot: SVC['Coloración'] }, { k: 'Profesional', v: 'Lucía F.', dot: '#db2778' },
+        { k: 'Duración', v: '1h 30m', dot: 'transparent' }, { k: 'Precio', v: '$ 35', dot: 'transparent' },
+      ],
+      sheetActions: [
+        { label: 'WhatsApp', icon: IC('message-circle'), fg: 'var(--ink)' },
+        { label: 'Mover', icon: IC('calendar-clock'), fg: 'var(--ink)' },
+        { label: 'Cancelar', icon: IC('x'), fg: 'var(--danger)' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

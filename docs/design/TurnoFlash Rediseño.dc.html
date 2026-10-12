@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#e8e6e0;}a{color:#147a42;}a:hover{color:#0e5e32;}</style>
+</helmet>
+<div style="padding:72px;display:flex;flex-direction:column;gap:72px;font-family:Geist, system-ui, sans-serif;color:#161714;min-width:2200px">
+  <div style="display:flex;gap:64px;align-items:flex-end">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px"><img src="logo/3a-light.svg" alt="" style="width:30px;height:30px"><span style="font-size:15px;font-weight:600">turnoflash · Rediseño v1</span></div>
+      <div style="font-family:'Instrument Serif', serif;font-size:72px;line-height:1">Menos ruido, más agenda.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3, 300px);gap:12px 32px;font-size:14px;line-height:1.45;color:#4b4c47;padding-bottom:8px">
+      <div><b style="color:#161714">Neutros cálidos + un acento.</b> El verde del logo pasa a ser el único color de acción; el fucsia queda para WhatsApp y avisos.</div>
+      <div><b style="color:#161714">Sin gradientes.</b> Los 5 mesh se van; el color de estado vive en un punto, no en bloques saturados.</div>
+      <div><b style="color:#161714">Geist + Instrument Serif.</b> Geist para la UI y Mono para horas y precios; serif sólo en títulos de pantalla.</div>
+      <div><b style="color:#161714">Un solo "crear".</b> El "+" de la barra inferior. Fuera el FAB y el botón duplicado del header.</div>
+      <div><b style="color:#161714">Listas agrupadas.</b> Filas con divisor en vez de una card con borde de color por ítem.</div>
+      <div><b style="color:#161714">Home = el día.</b> Resumen, "ahora" y próximos. La grilla de atajos se va a "Más".</div>
+    </div>
+  </div>
+
+  <section data-screen-label="Pantallas claro" style="display:flex;flex-direction:column;gap:20px">
+    <div style="font-size:15px;font-weight:600">Móvil · claro</div>
+    <div style="display:flex;gap:40px;--bg:#f5f4f0;--surface:#ffffff;--surface-2:#efede8;--line:#e6e3dc;--line-2:#d6d2c8;--ink:#161714;--ink-2:#4b4c47;--ink-3:#85857d;--accent:#147a42;--accent-ink:#ffffff;--accent-soft:#e2f0e6;--accent-text:#0e5e32;--pink:#c4206a;--pink-soft:#fae7ef;--warn:#9a6200;--warn-soft:#fbf0d6;--danger:#c0352b;--danger-soft:#fbe5e2;--overlay:rgba(22,23,20,.38);--shadow:0 1px 2px rgba(22,23,20,.05);--inv:#161714;--inv-ink:#ffffff">
+      <sc-for list="{{ screens }}" as="s" hint-placeholder-count="5">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <dc-import name="TF Screen" screen="{{ s.key }}" hint-size="390px,844px"></dc-import>
+          <div style="font-size:13px;color:#4b4c47;padding-left:8px"><b style="color:#161714">{{ s.label }}</b> · {{ s.note }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section data-screen-label="Pantallas oscuro" style="display:flex;flex-direction:column;gap:20px">
+    <div style="font-size:15px;font-weight:600">Móvil · oscuro</div>
+    <div style="display:flex;gap:40px;--bg:#0f100f;--surface:#181a18;--surface-2:#222422;--line:#2a2d2a;--line-2:#383b38;--ink:#f2f1ec;--ink-2:#b6b5ae;--ink-3:#7c7c75;--accent:#38b86c;--accent-ink:#06210f;--accent-soft:#16301f;--accent-text:#6dd497;--pink:#ee5a9c;--pink-soft:#3a1828;--warn:#f0b54a;--warn-soft:#3a2c0f;--danger:#f0675c;--danger-soft:#3b1a17;--overlay:rgba(0,0,0,.55);--shadow:0 1px 2px rgba(0,0,0,.4);--inv:#f2f1ec;--inv-ink:#0f100f">
+      <sc-for list="{{ screens }}" as="s" hint-placeholder-count="5">
+        <dc-import name="TF Screen" screen="{{ s.key }}" hint-size="390px,844px"></dc-import>
+      </sc-for>
+    </div>
+  </section>
+
+  <sc-if value="{{ showBefore }}" hint-placeholder-val="{{ true }}">
+    <section data-screen-label="Antes" style="display:flex;flex-direction:column;gap:20px">
+      <div style="font-size:15px;font-weight:600">Antes · capturas actuales de la app</div>
+      <div style="display:flex;gap:40px">
+        <sc-for list="{{ before }}" as="b" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <img src="{{ b.src }}" alt="" style="width:390px;height:693px;border-radius:32px;display:block;box-shadow:0 0 0 1px #d6d2c8">
+            <div style="font-size:13px;color:#4b4c47;padding-left:8px;max-width:380px;line-height:1.45"><b style="color:#161714">{{ b.label }}</b> · {{ b.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ showComponents }}" hint-placeholder-val="{{ true }}">
+    <section data-screen-label="Componentes" style="display:flex;gap:40px;align-items:flex-start">
+      <div style="--bg:#f5f4f0;--surface:#ffffff;--surface-2:#efede8;--line:#e6e3dc;--line-2:#d6d2c8;--ink:#161714;--ink-2:#4b4c47;--ink-3:#85857d;--accent:#147a42;--accent-ink:#ffffff;--accent-soft:#e2f0e6;--accent-text:#0e5e32;--pink:#c4206a;--pink-soft:#fae7ef;--warn:#9a6200;--warn-soft:#fbf0d6;--danger:#c0352b;--danger-soft:#fbe5e2;--shadow:0 1px 2px rgba(22,23,20,.05);--inv:#161714;--inv-ink:#ffffff">
+        <dc-import name="TF Componentes" title="Componentes · claro" hint-size="760px,1400px"></dc-import>
+      </div>
+      <div style="--bg:#0f100f;--surface:#181a18;--surface-2:#222422;--line:#2a2d2a;--line-2:#383b38;--ink:#f2f1ec;--ink-2:#b6b5ae;--ink-3:#7c7c75;--accent:#38b86c;--accent-ink:#06210f;--accent-soft:#16301f;--accent-text:#6dd497;--pink:#ee5a9c;--pink-soft:#3a1828;--warn:#f0b54a;--warn-soft:#3a2c0f;--danger:#f0675c;--danger-soft:#3b1a17;--shadow:0 1px 2px rgba(0,0,0,.4);--inv:#f2f1ec;--inv-ink:#0f100f">
+        <dc-import name="TF Componentes" title="Componentes · oscuro" hint-size="760px,1400px"></dc-import>
+      </div>
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showBefore&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showComponents&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showBefore: this.props.showBefore ?? true,
+      showComponents: this.props.showComponents ?? true,
+      screens: [
+        { key: 'home', label: 'Inicio', note: 'el día de un vistazo' },
+        { key: 'turnos', label: 'Turnos', note: 'tira de días + filtros con conteo' },
+        { key: 'detalle', label: 'Detalle de turno', note: 'una acción principal clara' },
+        { key: 'servicios', label: 'Servicios', note: 'fila + switch, sin icono genérico' },
+        { key: 'clientes', label: 'Clientes', note: 'índice alfabético, contexto útil' },
+      ],
+      before: [
+        { src: 'ref/01-dashboard.png', label: 'Inicio', note: 'Arial por un override en globals.css, 3 CTAs de crear, mini-stats saturados con bajo contraste, emoji.' },
+        { src: 'ref/02-turnos.png', label: 'Turnos', note: 'FAB tapa el contenido, card + borde de color por turno, labels en mayúsculas en 3 niveles.' },
+        { src: 'ref/04-servicios.png', label: 'Servicios', note: 'Barra superior + bloque de color + tijera fija en todos; chips con borde.' },
+        { src: 'ref/03-clientes.png', label: 'Clientes', note: 'Card por cliente; avatares de color saturado por id.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

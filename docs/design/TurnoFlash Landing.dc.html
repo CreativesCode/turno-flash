@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#f5f4f0;}a{color:#147a42;text-decoration:none;}a:hover{color:#0e5e32;}</style>
+</helmet>
+<div style="--bg:#f5f4f0;--surface:#ffffff;--surface-2:#efede8;--line:#e6e3dc;--line-2:#d6d2c8;--ink:#161714;--ink-2:#4b4c47;--ink-3:#85857d;--accent:#147a42;--accent-ink:#ffffff;--accent-soft:#e2f0e6;--accent-text:#0e5e32;--pink:#c4206a;--pink-soft:#fae7ef;--warn:#9a6200;--warn-soft:#fbf0d6;--danger:#c0352b;--danger-soft:#fbe5e2;--overlay:rgba(22,23,20,.38);--shadow:0 1px 2px rgba(22,23,20,.05);--inv:#161714;--inv-ink:#ffffff;background:var(--bg);color:var(--ink);font-family:Geist, system-ui, sans-serif;min-height:100vh">
+
+  <nav data-screen-label="Nav" style="position:sticky;top:0;z-index:10;background:rgba(245,244,240,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)">
+    <div style="max-width:1240px;margin:0 auto;padding:0 clamp(20px,4vw,48px);height:68px;display:flex;align-items:center;gap:24px">
+      <a href="#" style="display:flex;align-items:center;gap:10px;color:var(--ink)"><img src="logo/3a-light.svg" alt="" style="width:30px;height:30px"><span style="font-size:21px;font-weight:700;letter-spacing:-0.045em">turno<span style="color:var(--accent)">flash</span></span></a>
+      <div style="flex:1;display:flex;flex-wrap:wrap;justify-content:center;gap:0 28px;height:24px;overflow:hidden;font-size:14px;font-weight:500">
+        <a href="#funciones" style="color:var(--ink-2)">Funciones</a>
+        <a href="#pasajes" style="color:var(--ink-2)">Pasajes</a>
+        <a href="#precios" style="color:var(--ink-2)">Precios</a>
+        <a href="#preguntas" style="color:var(--ink-2)">Preguntas</a>
+        <a href="#" style="color:var(--ink-2)">Ayuda</a>
+      </div>
+      <a href="#" style="font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap">Iniciar sesión</a>
+      <a href="#" style="height:40px;padding:0 16px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;font-size:14px;font-weight:600;white-space:nowrap">Probar gratis</a>
+    </div>
+  </nav>
+
+  <section data-screen-label="Hero" style="max-width:1240px;margin:0 auto;padding:clamp(48px,7vw,96px) clamp(20px,4vw,48px) clamp(48px,6vw,80px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,500px),1fr));gap:56px;align-items:center">
+    <div style="display:flex;flex-direction:column;align-items:flex-start">
+      <span style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:999px;background:var(--pink-soft);color:var(--pink);font-size:13px;font-weight:600">
+        <span style="width:16px;height:16px;background:currentColor;mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/message-circle.svg) center/contain no-repeat"></span>Recordatorios automáticos por WhatsApp
+      </span>
+      <h1 style="margin:24px 0 0;font-family:'Instrument Serif', serif;font-weight:400;font-size:clamp(56px,8vw,108px);line-height:0.94;letter-spacing:-0.02em">Tu agenda,<br>en piloto <em style="color:var(--accent)">automático.</em></h1>
+      <p style="margin:24px 0 0;font-size:clamp(17px,1.6vw,20px);line-height:1.5;color:var(--ink-2);max-width:520px;text-wrap:pretty">Turnos para peluquerías, barberías, consultorios y estéticas, y venta de pasajes para viajes y excursiones. Todo desde el celular.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:32px">
+        <a href="#" style="height:54px;padding:0 22px;border-radius:14px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600">Probar 15 días gratis<span style="width:18px;height:18px;background:currentColor;mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/arrow-right.svg) center/contain no-repeat"></span></a>
+        <a href="#precios" style="height:54px;padding:0 22px;border-radius:14px;background:var(--surface);border:1px solid var(--line-2);color:var(--ink);display:flex;align-items:center;font-size:16px;font-weight:600">Ver precios</a>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:28px;font-size:14px;color:var(--ink-2)">
+        <sc-for list="{{ heroChecks }}" as="c" hint-placeholder-count="3">
+          <span style="display:inline-flex;align-items:center;gap:7px"><span style="width:16px;height:16px;background:var(--accent);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/check.svg) center/contain no-repeat"></span>{{ c }}</span>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="position:relative;display:flex;justify-content:center;min-height:600px">
+      <div style="position:absolute;inset:40px 6% 0 18%;border-radius:40px;background:var(--accent-soft)"></div>
+      <div style="position:relative;width:320px;height:693px;flex:none">
+        <div style="width:390px;height:844px;transform:scale(0.82);transform-origin:top left">
+          <dc-import name="TF Screen" screen="home" hint-size="390px,844px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;bottom:56px;width:min(300px,80%);background:var(--surface);border-radius:22px;padding:16px;box-shadow:0 0 0 1px var(--line), 0 24px 48px -20px rgba(22,23,20,.28);display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink-3)"><span style="width:8px;height:8px;border-radius:50%;background:#25a35a"></span>WhatsApp · Barbería Demo</div>
+        <div style="background:var(--surface-2);border-radius:4px 16px 16px 16px;padding:10px 12px;font-size:14px;line-height:1.45">Hola Sofía, te recordamos tu turno de mañana a las <b>11:30</b> con Lucía. Responde <b>OK</b> para confirmar o <b>CANCELAR</b>.</div>
+        <div style="align-self:flex-end;background:var(--accent-soft);color:var(--accent-text);border-radius:16px 4px 16px 16px;padding:8px 14px;font-size:14px;font-weight:600">OK</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--accent-text)"><span style="width:14px;height:14px;background:currentColor;mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/circle-check.svg) center/contain no-repeat"></span>Turno confirmado · la agenda se actualizó sola</div>
+      </div>
+    </div>
+  </section>
+
+  <div style="border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+    <div style="max-width:1240px;margin:0 auto;padding:24px clamp(20px,4vw,48px);display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:6px 28px;font-family:'Instrument Serif', serif;font-size:clamp(22px,2.4vw,30px);color:var(--ink-3)">
+      <span style="font-family:Geist, sans-serif;font-size:13px;font-weight:600;color:var(--ink-2)">Hecho para</span>
+      <sc-for list="{{ rubros }}" as="r" hint-placeholder-count="6"><span>{{ r }}</span></sc-for>
+    </div>
+  </div>
+
+  <section data-screen-label="Cómo funciona" style="max-width:1240px;margin:0 auto;padding:clamp(64px,9vw,120px) clamp(20px,4vw,48px) 0">
+    <div style="font-size:14px;font-weight:600;color:var(--accent-text)">Cómo funciona</div>
+    <h2 style="margin:10px 0 0;font-family:'Instrument Serif', serif;font-weight:400;font-size:clamp(40px,5.2vw,68px);line-height:1;letter-spacing:-0.01em">En marcha en menos de un día.</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:40px;margin-top:48px">
+      <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+        <div style="border-top:1px solid var(--line-2);padding-top:20px">
+          <div style="font-family:'Instrument Serif', serif;font-size:64px;line-height:1;color:var(--accent)">{{ s.n }}</div>
+          <div style="font-size:20px;font-weight:600;letter-spacing:-0.01em;margin-top:16px">{{ s.title }}</div>
+          <p style="margin:8px 0 0;font-size:15px;line-height:1.55;color:var(--ink-2);text-wrap:pretty">{{ s.desc }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="funciones" data-screen-label="Funciones" style="max-width:1240px;margin:0 auto;padding:clamp(64px,9vw,120px) clamp(20px,4vw,48px) 0">
+    <div style="font-size:14px;font-weight:600;color:var(--accent-text)">Negocios de turnos</div>
+    <h2 style="margin:10px 0 0;font-family:'Instrument Serif', serif;font-weight:400;font-size:clamp(40px,5.2vw,68px);line-height:1;letter-spacing:-0.01em;max-width:760px">Todo lo que necesitas, en un solo lugar.</h2>
+    <div style="margin-top:48px;background:var(--inv);color:#f2f1ec;border-radius:28px;padding:clamp(24px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:40px">
+      <div>
+        <div style="width:48px;height:48px;border-radius:14px;background:rgba(238,90,156,.16);display:flex;align-items:center;justify-content:center"><span style="width:24px;height:24px;background:#ee5a9c;mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/message-circle.svg) center/contain no-repeat"></span></div>
+        <div style="font-family:'Instrument Serif', serif;font-size:clamp(34px,3.6vw,48px);line-height:1.02;margin-top:20px">WhatsApp en piloto automático</div>
+        <p style="margin:14px 0 0;font-size:16px;line-height:1.55;color:#b6b5ae;max-width:440px">Confirmaciones, recordatorios, valoraciones después de la visita y un resumen diario para el dueño. Sin configurar nada.</p>
+      </div>
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ waFlow }}" as="w" hint-placeholder-count="5">
+          <div style="display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-top:1px solid #2a2d2a">
+            <span style="font-family:'Geist Mono', monospace;font-size:13px;color:#7c7c75;width:110px;flex:none;padding-top:2px">{{ w.when }}</span>
+            <div><div style="font-size:16px;font-weight:600">{{ w.what }}</div><div style="font-size:14px;color:#b6b5ae;margin-top:3px;line-height:1.45">{{ w.detail }}</div></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px;margin-top:12px">
+      <sc-for list="{{ features }}" as="f" hint-placeholder-count="7">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:14px">
+          <div style="width:42px;height:42px;border-radius:13px;background:var(--surface-2);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;background:var(--ink);mask:url({{ f.icon }}) center/contain no-repeat"></span></div>
+          <div style="font-size:17px;font-weight:600;letter-spacing:-0.01em">{{ f.title }}</div>
+          <div style="font-size:14px;line-height:1.55;color:var(--ink-2);text-wrap:pretty">{{ f.desc }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="pasajes" data-screen-label="Pasajes" style="margin-top:clamp(64px,9vw,120px);background:var(--inv);color:#f2f1ec">
+    <div style="max-width:1240px;margin:0 auto;padding:clamp(64px,8vw,104px) clamp(20px,4vw,48px)">
+      <div style="font-size:14px;font-weight:600;color:#ee5a9c">Viajes y excursiones</div>
+      <h2 style="margin:10px 0 0;font-family:'Instrument Serif', serif;font-weight:400;font-size:clamp(40px,5.2vw,68px);line-height:1;letter-spacing:-0.01em">¿Vendes pasajes? <em style="color:#6dd497">También es para ti.</em></h2>
+      <p style="margin:18px 0 0;font-size:17px;line-height:1.55;color:#b6b5ae;max-width:620px">Deja de anotar asientos en una libreta: tus pasajeros reservan desde un enlace y tú ves quién viaja, quién pagó y dónde sube.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:48px;margin-top:48px;align-items:start">
+        <div style="background:#181a18;border:1px solid #2a2d2a;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div><div style="font-size:13px;color:#7c7c75">Salida · Sáb 14 jun · 07:00</div><div style="font-size:19px;font-weight:600;margin-top:4px">Excursión a las sierras</div></div>
+            <span style="height:26px;padding:0 10px;border-radius:999px;background:#222422;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#b6b5ae;white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:#38b86c"></span>Abierta</span>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#b6b5ae"><span>Asientos vendidos</span><span style="font-family:'Geist Mono', monospace;color:#f2f1ec">32 / 40</span></div>
+            <div style="height:8px;border-radius:4px;background:#2a2d2a;margin-top:8px;overflow:hidden"><div style="width:80%;height:100%;background:#38b86c;border-radius:4px"></div></div>
+          </div>
+          <div style="border-radius:16px;overflow:hidden;background:#2a2d2a;display:grid;gap:1px">
+            <sc-for list="{{ stops }}" as="s" hint-placeholder-count="3">
+              <div style="background:#181a18;display:flex;align-items:center;gap:12px;padding:12px 14px;font-size:14px">
+                <span style="font-family:'Geist Mono', monospace;color:#b6b5ae;width:44px">{{ s.t }}</span><span style="flex:1">{{ s.name }}</span><span style="font-family:'Geist Mono', monospace;color:#7c7c75">{{ s.pax }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:14px"><span style="color:#b6b5ae">Anticipos cobrados</span><span style="font-family:'Geist Mono', monospace;font-weight:500">26 de 32</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:28px 32px">
+          <sc-for list="{{ tripFeatures }}" as="f" hint-placeholder-count="6">
+            <div>
+              <span style="display:block;width:22px;height:22px;background:#6dd497;mask:url({{ f.icon }}) center/contain no-repeat"></span>
+              <div style="font-size:17px;font-weight:600;margin-top:12px">{{ f.title }}</div>
+              <div style="font-size:14px;line-height:1.55;color:#b6b5ae;margin-top:6px;text-wrap:pretty">{{ f.desc }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Seguridad" style="max-width:1240px;margin:0 auto;padding:clamp(64px,9vw,120px) clamp(20px,4vw,48px) 0">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:40px;align-items:end">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--accent-text)">Seguridad y confianza</div>
+        <h2 style="margin:10px 0 0;font-family:'Instrument Serif', serif;font-weight:400;font-size:clamp(40px,5.2vw,68px);line-height:1;letter-spacing:-0.01em">Los datos de tu negocio, protegidos.</h2>
+      </div>
+      <p style="margin:0;font-size:16px;line-height:1.55;color:var(--ink-2);max-width:520px">Tratamos la información de tu negocio y de tus clientes con el mismo cuidado con el que tú atiendes tu agenda. Consulta nuestra <a href="#" style="text-decoration:underline">Política de Privacidad</a>.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-top:40px">
+      <sc-for list="{{ trust }}" as="t" hint-placeholder-count="4">
+        <div style="background:var(--surface);padding:24px">
+          <span style="display:block;width:22px;height:22px;background:var(--accent);mask:url({{ t.icon }}) center/contain no-repeat"></span>
+          <div style="font-size:16px;font-weight:600;margin-top:14px">{{ t.title }}</div>
+          <div style="font-size:14px;line-height:1.55;color:var(--ink-2);margin-top:6px;text-wrap:pretty">{{ t.desc }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="precios" data-screen-label="Precios" style="max-width:1240px;margin:0 auto;padding:clamp(64px,9vw,120px) clamp(20px,4vw,48px) 0">
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--accent-text)">Precios</div>
+        <h2 style="margin:10px 0 0;font-family:'Instrument Serif', serif;font-weight:400;font-size:clamp(40px,5.2vw,68px);line-height:1;letter-spacing:-0.01em">Pagas según el tamaño de tu negocio.</h2>
+        <p style="margin:14px 0 0;font-size:16px;color:var(--ink-2)">Todo incluido en todos los planes. Empiezas con 15 días gratis.</p>
+      </div>
+      <div role="radiogroup" style="display:flex;flex-wrap:wrap;padding:4px;border-radius:14px;background:var(--surface-2);gap:2px">
+        <sc-for list="{{ periods }}" as="p" hint-placeholder-count="4">
+          <button type="button" onClick="{{ p.onClick }}" style="height:40px;padding:0 14px;border:0;border-radius:10px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;background:{{ p.bg }};color:{{ p.fg }};box-shadow:{{ p.sh }}">{{ p.label }}<sc-if value="{{ p.free }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:6px;background:var(--accent-soft);color:var(--accent-text)">2 meses gratis</span></sc-if></button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px;margin-top:40px">
+      <sc-for list="{{ plans }}" as="p" hint-placeholder-count="4">
+        <div style="border-radius:24px;padding:26px;display:flex;flex-direction:column;background:{{ p.bg }};color:{{ p.fg }};border:1px solid {{ p.bd }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="font-size:18px;font-weight:600">{{ p.label }}</span>
+            <sc-if value="{{ p.featured }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:600;padding:4px 8px;border-radius:7px;background:#38b86c;color:#06210f">El más elegido</span></sc-if>
+          </div>
+          <div style="font-size:14px;line-height:1.45;color:{{ p.sub }};margin-top:4px;min-height:40px">{{ p.audience }}</div>
+          <div style="display:flex;align-items:baseline;gap:6px;margin-top:22px">
+            <span style="font-family:'Instrument Serif', serif;font-size:64px;line-height:0.9">{{ p.amount }}</span>
+            <span style="font-size:14px;color:{{ p.sub }}">USD {{ p.unit }}</span>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:{{ p.save }};margin-top:8px;min-height:18px">{{ p.perMonth }}</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;flex:1">
+            <sc-for list="{{ p.points }}" as="pt" hint-placeholder-count="3">
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:1.4"><span style="width:16px;height:16px;margin-top:1px;flex:none;background:{{ p.check }};mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/check.svg) center/contain no-repeat"></span>{{ pt }}</div>
+            </sc-for>
+          </div>
+          <a href="#" style="margin-top:24px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;background:{{ p.ctaBg }};color:{{ p.ctaFg }};border:1px solid {{ p.ctaBd }}">Probar 15 días gratis</a>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+      <div><div style="font-size:16px;font-weight:600">¿Das turnos y además vendes pasajes?</div><div style="font-size:14px;color:var(--ink-2);margin-top:4px;line-height:1.5">Usa las dos cosas en el mismo negocio: tu plan de turnos más $3 al mes. Por ejemplo, Personal con pasajes son $8 al mes.</div></div>
+      <span style="font-family:'Geist Mono', monospace;font-size:15px;font-weight:600;padding:8px 12px;border-radius:10px;background:var(--accent-soft);color:var(--accent-text)">+$3 / mes</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:24px;margin-top:40px">
+      <sc-for list="{{ conditions }}" as="c" hint-placeholder-count="4">
+        <div style="display:flex;gap:12px">
+          <span style="width:20px;height:20px;flex:none;margin-top:1px;background:var(--accent);mask:url({{ c.icon }}) center/contain no-repeat"></span>
+          <div><div style="font-size:15px;font-weight:600">{{ c.title }}</div><div style="font-size:14px;color:var(--ink-2);margin-top:3px;line-height:1.5">{{ c.detail }}</div></div>
+        </div>
+      </sc-for>
+    </div>
+    <p style="margin:32px 0 0;font-size:13px;color:var(--ink-3)">Precios en dólares estadounidenses. El pago anual cubre 12 meses y cuesta 10. Consulta los <a href="#" style="text-decoration:underline">Términos y Condiciones</a>.</p>
+  </section>
+
+  <section id="preguntas" data-screen-label="Preguntas" style="max-width:1240px;margin:0 auto;padding:clamp(64px,9vw,120px) clamp(20px,4vw,48px) 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:40px;align-items:start">
+    <div>
+      <h2 style="margin:0;font-family:'Instrument Serif', serif;font-weight:400;font-size:clamp(40px,5.2vw,68px);line-height:1;letter-spacing:-0.01em">Preguntas frecuentes</h2>
+      <p style="margin:14px 0 0;font-size:16px;color:var(--ink-2);line-height:1.5">¿No encuentras lo que buscas? Escríbenos a <a href="mailto:robert.cabrer92@gmail.com">robert.cabrer92@gmail.com</a></p>
+    </div>
+    <div style="grid-column:span 1;border-top:1px solid var(--line-2)">
+      <sc-for list="{{ faqs }}" as="q" hint-placeholder-count="6">
+        <div style="border-bottom:1px solid var(--line-2)">
+          <button type="button" onClick="{{ q.toggle }}" style="width:100%;border:0;background:transparent;cursor:pointer;font-family:inherit;color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 0;text-align:left;font-size:17px;font-weight:600">{{ q.q }}<span style="width:20px;height:20px;flex:none;background:var(--ink-3);mask:url({{ q.icon }}) center/contain no-repeat"></span></button>
+          <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;padding:0 40px 22px 0;font-size:15px;line-height:1.6;color:var(--ink-2);text-wrap:pretty">{{ q.a }}</p>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section data-screen-label="CTA" style="max-width:1240px;margin:0 auto;padding:clamp(64px,9vw,120px) clamp(20px,4vw,48px) 0">
+    <div style="background:var(--accent);color:#ffffff;border-radius:32px;padding:clamp(40px,7vw,88px) clamp(24px,5vw,64px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:32px">
+      <div>
+        <div style="font-family:'Instrument Serif', serif;font-size:clamp(56px,8vw,112px);line-height:0.92">¿Empezamos?</div>
+        <p style="margin:16px 0 0;font-size:18px;line-height:1.5;color:#d9efe0;max-width:460px">Crea tu cuenta gratis y simplifica la gestión de tu negocio.</p>
+      </div>
+      <a href="#" style="height:56px;padding:0 24px;border-radius:14px;background:#ffffff;color:#0e5e32;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600">Comenzar gratis<span style="width:18px;height:18px;background:currentColor;mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/arrow-right.svg) center/contain no-repeat"></span></a>
+    </div>
+  </section>
+
+  <footer data-screen-label="Footer" style="max-width:1240px;margin:0 auto;padding:clamp(56px,7vw,88px) clamp(20px,4vw,48px) 32px">
+    <div style="display:flex;flex-wrap:wrap;gap:40px 64px">
+      <div style="flex:1 1 320px;min-width:0">
+        <div style="display:flex;align-items:center;gap:10px"><img src="logo/3a-light.svg" alt="" style="width:28px;height:28px"><span style="font-size:20px;font-weight:700;letter-spacing:-0.045em">turno<span style="color:var(--accent)">flash</span></span></div>
+        <p style="margin:14px 0 0;font-size:14px;line-height:1.55;color:var(--ink-2);max-width:360px">Turnos y venta de pasajes para tu negocio. Reservas online, avisos por WhatsApp y control total de tu agenda y de tus salidas, desde el móvil.</p>
+        <a href="mailto:robert.cabrer92@gmail.com" style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:14px;color:var(--ink-2)"><span style="width:16px;height:16px;background:currentColor;mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/mail.svg) center/contain no-repeat"></span>robert.cabrer92@gmail.com</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+        <div style="font-size:13px;font-weight:600;color:var(--ink-3);margin-bottom:4px">Producto</div>
+        <a href="#funciones" style="color:var(--ink-2)">Funciones</a><a href="#pasajes" style="color:var(--ink-2)">Venta de pasajes</a><a href="#precios" style="color:var(--ink-2)">Precios</a><a href="#" style="color:var(--ink-2)">Ayuda</a><a href="#" style="color:var(--ink-2)">Iniciar sesión</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+        <div style="font-size:13px;font-weight:600;color:var(--ink-3);margin-bottom:4px">Legal</div>
+        <a href="#" style="color:var(--ink-2)">Política de Privacidad</a><a href="#" style="color:var(--ink-2)">Términos y Condiciones</a><a href="#" style="color:var(--ink-2)">Eliminación de cuenta</a>
+      </div>
+    </div>
+    <div style="margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)">© 2026 Turno Flash. Todos los derechos reservados.</div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const IC = n => `https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/${n}.svg`;
+const PLANS = [
+  { key: 'personal', label: 'Personal', audience: 'Trabajas por tu cuenta', price: 5, points: ['1 profesional', 'Agenda, clientes y servicios', 'Tu página para reservar online'] },
+  { key: 'salon', label: 'Salón', audience: 'Un negocio con equipo, hasta 5 profesionales', price: 10, points: ['Hasta 5 profesionales', 'Horario y servicios de cada uno', 'Reportes por profesional'], featured: true },
+  { key: 'salon_large', label: 'Salón grande', audience: 'Más de 5 profesionales', price: 15, points: ['Profesionales sin límite', 'Horario y servicios de cada uno', 'Reportes por profesional'] },
+  { key: 'trips', label: 'Pasajes', audience: 'Gestores y agencias que venden asientos', price: 5, points: ['Salidas y asientos sin límite', 'Anticipos y lista para el chofer', 'Tu página para vender pasajes'] },
+];
+const PERIODS = [
+  { key: 'monthly', label: 'Mensual', covered: 1, charged: 1, unit: 'al mes' },
+  { key: 'quarterly', label: 'Trimestral', covered: 3, charged: 3, unit: 'cada 3 meses' },
+  { key: 'semiannual', label: 'Semestral', covered: 6, charged: 6, unit: 'cada 6 meses' },
+  { key: 'annual', label: 'Anual', covered: 12, charged: 10, unit: 'al año' },
+];
+const money = n => '$' + (Number.isInteger(n) ? n : n.toFixed(2).replace('.', ','));
+const FAQS = [
+  ['¿Qué es Turno Flash?', 'Turno Flash es un sistema de reservas para negocios. Sirve para dos cosas: llevar la agenda de turnos de salones, barberías, clínicas y talleres, y vender pasajes para viajes y excursiones. Está optimizado para funcionar desde tu móvil con bajo consumo de datos.'],
+  ['¿Sirve para vender pasajes de viajes o excursiones?', 'Sí. Cargas cada salida con su fecha, sus asientos, sus puntos de recogida y su precio, y compartes un enlace para que tus pasajeros reserven solos. Puedes pedir un anticipo para guardar el asiento, aprobar las reservas antes de confirmarlas, registrar los cobros y compartir con el chofer la lista de pasajeros.'],
+  ['¿Cuánto cuesta?', 'Depende del tamaño de tu negocio. Personal cuesta $5 al mes; Salón (hasta 5 profesionales), $10; Salón grande, $15; y Pasajes, $5. Si das turnos y además vendes pasajes, sumas $3 al mes. Puedes pagar por mes, por 3 o 6 meses, o por un año, que cuesta 10 meses. Empiezas con 15 días gratis.'],
+  ['¿Cómo se paga?', 'En dólares, por transferencia o en efectivo: nos escribes por WhatsApp desde la app y te decimos cómo. En cuanto registramos tu pago se extiende tu acceso. Desde 2 días antes de que venza te avisamos por WhatsApp, y si te atrasas tienes 5 días de margen en los que la app sigue funcionando.'],
+  ['¿Necesito instalar algo?', 'No. Turno Flash funciona desde tu navegador móvil y también está disponible como aplicación nativa para iOS y Android.'],
+  ['¿Cómo funcionan las automatizaciones por WhatsApp?', 'Envía la confirmación al crear el turno, recordatorios 24 horas y 1 hora antes (el cliente responde OK o CANCELAR y la agenda se actualiza), pide una valoración de 1 a 5 estrellas al completar la visita, avisa a la lista de espera cuando se libera un lugar y puede enviarte cada mañana un resumen de tu día.'],
+  ['¿Qué reportes y estadísticas incluye?', 'Ingresos por día comparados con el período anterior, los servicios que más facturan, el rendimiento de cada profesional, las horas pico, el origen de las reservas y cuántos clientes nuevos ganaste. Puedes exportar turnos y clientes a Excel (CSV).'],
+  ['¿Qué pasa si no tengo internet?', 'En la app del teléfono puedes consultar tu día sin señal: la agenda y la lista de pasajeros quedan guardadas. Para crear o cambiar algo sí hace falta conexión.'],
+  ['¿Puedo personalizar mi página de reservas?', 'Sí, cada negocio tiene su propia página pública con un enlace único, que tú decides cuándo activar. Tus clientes reservan turnos o asientos sin crear una cuenta.'],
+  ['¿Cómo empiezo a usar Turno Flash?', 'Si eres dueño de un negocio, crea tu cuenta gratis: en un minuto tienes tu negocio listo, con 15 días de prueba. Si trabajas en un negocio que ya usa Turno Flash, pídele al dueño que te invite.'],
+];
+
+class Component extends DCLogic {
+  state = { period: 'monthly', openFaq: 0 };
+  renderVals() {
+    const per = PERIODS.find(p => p.key === this.state.period);
+    return {
+      heroChecks: ['Sin dobles reservas', 'Confirmaciones por WhatsApp', 'Página de reservas propia'],
+      rubros: ['Peluquerías', 'Barberías', 'Clínicas', 'Estéticas', 'Talleres', 'Agencias de viaje'],
+      steps: [
+        { n: '01', title: 'Crea tu negocio', desc: 'Regístrate y elige si trabajas con turnos, con pasajes o con ambos. Luego carga tus servicios y tu equipo, o tus salidas.' },
+        { n: '02', title: 'Agenda o publica salidas', desc: 'Carga reservas en segundos desde el móvil o comparte tu página para que reserven solos. Sin solapes ni asientos vendidos de más.' },
+        { n: '03', title: 'WhatsApp hace el resto', desc: 'Confirmaciones y recordatorios automáticos. Tus clientes responden OK o CANCELAR y la agenda se actualiza sola.' },
+      ],
+      waFlow: [
+        { when: 'Al reservar', what: 'Confirmación', detail: 'El cliente recibe fecha, hora y profesional.' },
+        { when: '24 h antes', what: 'Recordatorio', detail: 'Responde OK o CANCELAR y la agenda se actualiza.' },
+        { when: '1 h antes', what: 'Último aviso', detail: 'Menos ausencias, sin escribir un mensaje.' },
+        { when: 'Al terminar', what: 'Valoración', detail: 'Pide una nota de 1 a 5 estrellas.' },
+        { when: 'Cada mañana', what: 'Resumen para el dueño', detail: 'Los turnos del día y los ingresos estimados.' },
+      ],
+      features: [
+        { icon: IC('calendar'), title: 'Calendario intuitivo', desc: 'Vista lista, día y semana, pensada primero para el celular.' },
+        { icon: IC('calendar-check'), title: 'Sin dobles reservas', desc: 'Tu agenda siempre al día, en tiempo real y sin solapes.' },
+        { icon: IC('users'), title: 'Clientes', desc: 'Historial, notas y datos. Búsqueda instantánea por nombre o teléfono.' },
+        { icon: IC('chart-column'), title: 'Reportes', desc: 'Ingresos, servicios top, horas pico y rendimiento de tu equipo.' },
+        { icon: IC('heart-handshake'), title: 'Recupera clientes', desc: 'Detecta a quienes dejaron de venir e invítalos por WhatsApp con un clic.' },
+        { icon: IC('list-ordered'), title: 'Lista de espera', desc: 'Si se cancela un turno, avisamos al primero en espera.' },
+        { icon: IC('smartphone'), title: 'App nativa', desc: 'iOS y Android, con bajo consumo de datos para conexiones lentas.' },
+      ],
+      stops: [{ t: '06:30', name: 'Terminal centro', pax: '18' }, { t: '06:50', name: 'Plaza norte', pax: '9' }, { t: '07:10', name: 'Rotonda ruta 2', pax: '5' }],
+      tripFeatures: [
+        { icon: IC('bus'), title: 'Salidas y asientos', desc: 'Cada salida con sus asientos, su precio y la foto del vehículo. Nunca se vende de más.' },
+        { icon: IC('globe'), title: 'Tu página de pasajes', desc: 'Reservan solos desde un enlace: eligen salida, cuántos viajan y dónde suben.' },
+        { icon: IC('map-pin'), title: 'Puntos de recogida', desc: 'Cada parada con su hora y su precio. Solo ida o ida y vuelta.' },
+        { icon: IC('banknote'), title: 'Anticipos bajo control', desc: 'Pide un anticipo para guardar el asiento y registra cada cobro.' },
+        { icon: IC('clipboard-list'), title: 'La lista del chofer', desc: 'Pasajeros, paradas, teléfonos y lo que falta cobrar, lista para compartir.' },
+        { icon: IC('message-circle'), title: 'Avisos por WhatsApp', desc: 'Confirmación de la reserva y cómo pagar el anticipo, sin escribir nada.' },
+      ],
+      trust: [
+        { icon: IC('lock'), title: 'Datos aislados por negocio', desc: 'Cada organización solo accede a su propia información, aislada en la base de datos.' },
+        { icon: IC('key-round'), title: 'Roles y permisos', desc: 'Dueño y empleados: cada uno ve exactamente lo que necesita.' },
+        { icon: IC('server-cog'), title: 'Infraestructura confiable', desc: 'Cifrado en tránsito, respaldos automáticos y sincronización en tiempo real.' },
+        { icon: IC('building-2'), title: 'Hecho para el día a día', desc: 'Flujos pensados para salones, clínicas, talleres y agencias de viaje.' },
+      ],
+      periods: PERIODS.map(p => {
+        const sel = p.key === this.state.period;
+        return { label: p.label, free: p.covered > p.charged, bg: sel ? 'var(--surface)' : 'transparent', fg: sel ? 'var(--ink)' : 'var(--ink-2)', sh: sel ? '0 1px 2px rgba(22,23,20,.08)' : 'none', onClick: () => this.setState({ period: p.key }) };
+      }),
+      plans: PLANS.map(p => {
+        const amount = p.price * per.charged, f = !!p.featured;
+        return {
+          label: p.label, audience: p.audience, points: p.points, featured: f,
+          amount: money(amount), unit: per.unit,
+          perMonth: per.covered > 1 && per.covered > per.charged ? `Te sale a ${money(amount / per.covered)} al mes` : '',
+          bg: f ? 'var(--inv)' : 'var(--surface)', fg: f ? '#f2f1ec' : 'var(--ink)', bd: f ? 'var(--inv)' : 'var(--line)',
+          sub: f ? '#b6b5ae' : 'var(--ink-2)', save: f ? '#6dd497' : 'var(--accent-text)', check: f ? '#6dd497' : 'var(--accent)',
+          ctaBg: f ? '#38b86c' : 'var(--surface)', ctaFg: f ? '#06210f' : 'var(--ink)', ctaBd: f ? '#38b86c' : 'var(--line-2)',
+        };
+      }),
+      conditions: [
+        { icon: IC('sparkles'), title: '15 días gratis', detail: 'Pruebas todo sin pagar y sin dar una tarjeta.' },
+        { icon: IC('banknote'), title: 'Pagas en USD', detail: 'Por transferencia o en efectivo. Nos escribes por WhatsApp y listo.' },
+        { icon: IC('calendar-clock'), title: '5 días de margen', detail: 'Si te atrasas con el pago, la app sigue funcionando esos días.' },
+        { icon: IC('gift'), title: 'Recomienda y gana 10 días', detail: 'Por cada negocio que traigas y pague su primer periodo.' },
+      ],
+      faqs: FAQS.map(([q, a], i) => {
+        const open = this.state.openFaq === i;
+        return { q, a, open, icon: IC(open ? 'minus' : 'plus'), toggle: () => this.setState({ openFaq: open ? -1 : i }) };
+      }),
+    };
+  }
+}
+</script>
+</body>
+</html>

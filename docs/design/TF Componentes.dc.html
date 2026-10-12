@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+</helmet>
+<div style="width:760px;background:var(--bg);color:var(--ink);font-family:Geist, system-ui, sans-serif;border-radius:28px;padding:36px;box-shadow:0 0 0 1px var(--line-2);display:flex;flex-direction:column;gap:32px">
+  <div>
+    <div style="font-family:'Instrument Serif', serif;font-size:40px;line-height:1">{{ title }}</div>
+    <div style="font-size:13px;color:var(--ink-3);margin-top:6px">Tokens y primitivas — reemplazan a components/ui/*</div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="font-size:13px;font-weight:600;color:var(--ink-2)">Color</div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+      <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="12">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="height:52px;border-radius:12px;background:{{ s.css }};box-shadow:inset 0 0 0 1px var(--line)"></div>
+          <div style="font-family:'Geist Mono', monospace;font-size:11px;color:var(--ink-2)">{{ s.name }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="font-size:13px;font-weight:600;color:var(--ink-2)">Tipografía</div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:18px;display:grid;gap:1px;background:var(--line);overflow:hidden">
+      <sc-for list="{{ type }}" as="t" hint-placeholder-count="6">
+        <div style="background:var(--surface);display:flex;align-items:baseline;gap:16px;padding:12px 16px">
+          <span style="font-family:'Geist Mono', monospace;font-size:11px;color:var(--ink-3);width:150px;flex:none">{{ t.spec }}</span>
+          <span style="font-family:{{ t.ff }};font-size:{{ t.fs }};font-weight:{{ t.fw }};color:{{ t.c }};line-height:1.15">{{ t.sample }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--ink-2)">Button</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <span style="height:44px;padding:0 18px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;font-size:15px;font-weight:600">Primario</span>
+        <span style="height:44px;padding:0 18px;border-radius:12px;background:var(--surface);border:1px solid var(--line-2);display:flex;align-items:center;font-size:15px;font-weight:600">Secundario</span>
+        <span style="height:44px;padding:0 14px;border-radius:12px;display:flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink-2)">Ghost</span>
+        <span style="height:44px;padding:0 18px;border-radius:12px;background:var(--surface);border:1px solid var(--line-2);color:var(--danger);display:flex;align-items:center;font-size:15px;font-weight:600">Cancelar turno</span>
+        <span style="height:36px;padding:0 12px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;font-size:13px;font-weight:600">Pequeño</span>
+        <span style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;background:var(--ink-2);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/ellipsis-vertical.svg) center/contain no-repeat"></span></span>
+      </div>
+      <div style="font-size:12px;color:var(--ink-3);line-height:1.45">Alturas 36 / 44 / 54. Sin gradientes ni sombras de color. Un solo primario por pantalla.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--ink-2)">Tag</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ tags }}" as="t" hint-placeholder-count="5">
+          <span style="height:24px;padding:0 9px;border-radius:7px;background:{{ t.bg }};color:{{ t.fg }};display:flex;align-items:center;font-size:12px;font-weight:600">{{ t.label }}</span>
+        </sc-for>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:var(--ink-2);margin-top:6px">StatusTag</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ statuses }}" as="s" hint-placeholder-count="9">
+          <span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:var(--surface-2);font-size:12px;font-weight:500;color:var(--ink-2)"><span style="width:7px;height:7px;border-radius:50%;background:{{ s.c }}"></span>{{ s.label }}</span>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--ink-2)">Field · SearchInput</div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:6px">Teléfono</div>
+        <div style="height:48px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);display:flex;align-items:center;padding:0 14px;font-size:15px">+54 9 11 4823-1190</div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:6px">Email</div>
+        <div style="height:48px;border-radius:12px;border:1.5px solid var(--accent);box-shadow:0 0 0 4px var(--accent-soft);background:var(--surface);display:flex;align-items:center;padding:0 14px;font-size:15px">sofia@|</div>
+      </div>
+      <div style="height:48px;border-radius:14px;background:var(--surface-2);display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--ink-3);font-size:15px">
+        <span style="width:18px;height:18px;background:var(--ink-3);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/search.svg) center/contain no-repeat"></span>Buscar
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--ink-2)">SegmentedControl · FilterChips · Switch</div>
+      <div style="display:flex;padding:3px;border-radius:12px;background:var(--surface-2);align-self:flex-start">
+        <span style="height:34px;padding:0 14px;border-radius:9px;display:flex;align-items:center;font-size:13px;font-weight:600;background:var(--surface);box-shadow:var(--shadow)">Lista</span>
+        <span style="height:34px;padding:0 14px;border-radius:9px;display:flex;align-items:center;font-size:13px;font-weight:600;color:var(--ink-3)">Día</span>
+        <span style="height:34px;padding:0 14px;border-radius:9px;display:flex;align-items:center;font-size:13px;font-weight:600;color:var(--ink-3)">Semana</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span style="height:36px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;background:var(--inv);color:var(--inv-ink)">Todos<span style="font-family:'Geist Mono', monospace;opacity:.6">8</span></span>
+        <span style="height:36px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2)">En curso<span style="font-family:'Geist Mono', monospace;opacity:.6">1</span></span>
+      </div>
+      <div style="display:flex;gap:16px;align-items:center">
+        <span style="width:44px;height:26px;border-radius:13px;background:var(--accent);padding:2px;display:flex;justify-content:flex-end"><span style="width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)"></span></span>
+        <span style="width:44px;height:26px;border-radius:13px;background:var(--line-2);padding:2px;display:flex"><span style="width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)"></span></span>
+        <span style="display:flex;gap:6px;align-items:center">
+          <span style="width:34px;height:34px;border-radius:50%;background:#e4e7fb;color:#3f43b8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">MG</span>
+          <span style="width:34px;height:34px;border-radius:50%;background:#dcefe2;color:#1d6d3d;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">AM</span>
+          <span style="width:34px;height:34px;border-radius:50%;background:#fbe9d3;color:#9a5a0f;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">SH</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--ink-2)">ListGroup + ListRow</div>
+      <div style="border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--line);display:grid;gap:1px">
+        <div style="background:var(--surface);display:flex;align-items:center;gap:14px;padding:14px 16px">
+          <div style="display:flex;flex-direction:column;gap:2px;min-width:48px"><span style="font-family:'Geist Mono', monospace;font-size:15px;font-weight:500">11:30</span><span style="font-size:12px;color:var(--ink-3)">1h 30m</span></div>
+          <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">Sofía Hernández</div><div style="font-size:13px;color:var(--ink-2);margin-top:3px">Coloración · Lucía F.</div></div>
+          <span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:var(--surface-2);font-size:12px;font-weight:500;color:var(--ink-2)"><span style="width:7px;height:7px;border-radius:50%;background:#e0a106"></span>Llegó</span>
+        </div>
+        <div style="background:var(--surface);display:flex;align-items:center;gap:12px;padding:12px 14px 12px 16px">
+          <div style="width:40px;height:40px;border-radius:50%;background:#dfeefa;color:#1f5e95;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">JO</div>
+          <div style="flex:1"><div style="font-size:15px;font-weight:600">Julián Ortiz</div><div style="font-size:13px;color:var(--ink-2);margin-top:2px">Próximo turno hoy 15:00</div></div>
+          <span style="width:18px;height:18px;background:var(--ink-3);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/chevron-right.svg) center/contain no-repeat"></span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--ink-3);line-height:1.45">Una sola fila base para turnos, clientes, servicios, staff, usuarios y organizaciones. Divisores de 1px, sin una card por ítem.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--ink-2)">EmptyState</div>
+      <div style="border:1px dashed var(--line-2);border-radius:20px;padding:28px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px">
+        <div style="width:44px;height:44px;border-radius:14px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;margin-bottom:6px"><span style="width:20px;height:20px;background:var(--ink-3);mask:url(https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/calendar.svg) center/contain no-repeat"></span></div>
+        <div style="font-size:15px;font-weight:600">Sin turnos este día</div>
+        <div style="font-size:13px;color:var(--ink-2)">Tu página de reservas sigue abierta.</div>
+        <span style="margin-top:10px;height:36px;padding:0 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line-2);display:flex;align-items:center;font-size:13px;font-weight:600">Crear turno</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:1400},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Componentes&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const sw = n => ({ name: n, css: `var(--${n})` });
+    return {
+      title: this.props.title ?? 'Componentes',
+      swatches: ['bg', 'surface', 'surface-2', 'line', 'line-2', 'ink', 'ink-2', 'ink-3', 'accent', 'accent-soft', 'pink', 'pink-soft'].map(sw),
+      type: [
+        { spec: 'Display · Serif 40', ff: "'Instrument Serif', serif", fs: '40px', fw: 400, c: 'var(--ink)', sample: 'Turnos' },
+        { spec: 'Title · 20 / 600', ff: 'Geist', fs: '20px', fw: 600, c: 'var(--ink)', sample: 'Sofía Hernández' },
+        { spec: 'Body · 15 / 500', ff: 'Geist', fs: '15px', fw: 500, c: 'var(--ink)', sample: 'Corte + barba con Diego' },
+        { spec: 'Secondary · 13', ff: 'Geist', fs: '13px', fw: 400, c: 'var(--ink-2)', sample: '45 min · Reserva online' },
+        { spec: 'Label · 13 / 600', ff: 'Geist', fs: '13px', fw: 600, c: 'var(--ink-2)', sample: 'Próximos' },
+        { spec: 'Data · Mono 15', ff: "'Geist Mono', monospace", fs: '15px', fw: 500, c: 'var(--ink)', sample: '10:30  $ 18  N° 0147' },
+      ],
+      tags: [
+        { label: 'Reserva online', bg: 'var(--surface-2)', fg: 'var(--ink-2)' },
+        { label: 'Activo', bg: 'var(--accent-soft)', fg: 'var(--accent-text)' },
+        { label: 'WhatsApp', bg: 'var(--pink-soft)', fg: 'var(--pink)' },
+        { label: 'Vence en 5 días', bg: 'var(--warn-soft)', fg: 'var(--warn)' },
+        { label: 'Inactivo', bg: 'var(--danger-soft)', fg: 'var(--danger)' },
+      ],
+      statuses: [['Pendiente', '#a8a296'], ['Confirmado', '#3b7ddd'], ['Avisado', '#8b5cf6'], ['Confirmó', '#0fa3a3'], ['Llegó', '#e0a106'], ['En curso', '#ea6c1b'], ['Terminado', '#2a9d5c'], ['Cancelado', '#dc3d3d'], ['No vino', '#77776f']].map(([label, c]) => ({ label, c })),
+    };
+  }
+}
+</script>
+</body>
+</html>

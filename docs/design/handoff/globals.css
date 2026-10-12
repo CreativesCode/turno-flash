@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * TurnoFlash · Rediseño v2 — reemplazo completo de app/globals.css
+ *
+ * Estrategia: se CONSERVAN los nombres de token que ya usa el código
+ * (bg-surface, text-foreground, border-border, primary-*, secondary-*, st-*…)
+ * y se cambian sus VALORES. Así toda la app adopta la paleta nueva sin tocar
+ * vistas. Lo nuevo (fuentes, tamaños, radios) se agrega como tokens extra.
+ * ────────────────────────────────────────────────────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+
+  /* Neutros cálidos — claro */
+  --background: #f5f4f0;        /* fondo de página (antes #ffffff) */
+  --surface: #ffffff;           /* cards, sheets, barras */
+  --surface-2: #efede8;         /* inputs de búsqueda, pills neutras, segmented */
+  --muted-background: #f5f4f0;  /* hover sobre surface */
+  --subtle-background: #efede8;
+  --border: #e6e3dc;            /* divisores y bordes de card */
+  --border-2: #d6d2c8;          /* bordes de inputs y botones secundarios */
+  --foreground: #161714;        /* texto principal (ink) */
+  --foreground-muted: #4b4c47;  /* texto secundario (ink-2) */
+  --foreground-subtle: #85857d; /* metadatos, placeholders (ink-3) */
+  --primary-foreground: #ffffff;
+  --secondary-foreground: #ffffff;
+  --inverse: #161714;           /* chip de filtro activo, día seleccionado */
+  --inverse-foreground: #ffffff;
+  --overlay: rgba(22, 23, 20, 0.38);
+
+  /* Sin glow: se mantienen los nombres para no romper clases existentes */
+  --shadow-glow-primary: none;
+  --shadow-glow-secondary: none;
+  --shadow-card: 0 1px 2px rgba(22, 23, 20, 0.05);
+  --accent: #147a42; /* color de acción según tema */
+  --pink: #c4206a;
+}
+
+.dark {
+  --accent: #38b86c;
+  --pink: #ee5a9c;
+  --background: #0f100f;
+  --surface: #181a18;
+  --surface-2: #222422;
+  --muted-background: #1d1f1d;
+  --subtle-background: #222422;
+  --border: #2a2d2a;
+  --border-2: #383b38;
+  --foreground: #f2f1ec;
+  --foreground-muted: #b6b5ae;
+  --foreground-subtle: #7c7c75;
+  --primary-foreground: #06210f;  /* en oscuro el botón primario es verde claro con texto oscuro */
+  --secondary-foreground: #ffffff;
+  --inverse: #f2f1ec;
+  --inverse-foreground: #0f100f;
+  --overlay: rgba(0, 0, 0, 0.55);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+@theme inline {
+  /* Primary — verde profundo del logo. 600 es el color de acción. */
+  --color-primary-50: #eef7f1;
+  --color-primary-100: #e2f0e6;
+  --color-primary-200: #c3e2cd;
+  --color-primary-300: #94cba8;
+  --color-primary-400: #6dd497;
+  --color-primary-500: #38b86c;
+  --color-primary-600: #147a42;
+  --color-primary-700: #0e5e32;
+  --color-primary-800: #0b4a28;
+  --color-primary-900: #16301f;
+  --color-primary-950: #06210f;
+  --color-primary: var(--accent);
+
+  /* Secondary — fucsia. Sólo WhatsApp / avisos / "ahora". */
+  --color-secondary-50: #fdf2f7;
+  --color-secondary-100: #fae7ef;
+  --color-secondary-200: #f5c8db;
+  --color-secondary-300: #ee9dbf;
+  --color-secondary-400: #ee5a9c;
+  --color-secondary-500: #d42f7a;
+  --color-secondary-600: #c4206a;
+  --color-secondary-700: #9c1854;
+  --color-secondary-800: #741240;
+  --color-secondary-900: #3a1828;
+  --color-secondary-950: #2e0619;
+  --color-secondary: var(--pink);
+
+  /* Success = primary */
+  --color-success-50: #eef7f1;
+  --color-success-100: #e2f0e6;
+  --color-success-200: #c3e2cd;
+  --color-success-300: #94cba8;
+  --color-success-400: #6dd497;
+  --color-success-500: #38b86c;
+  --color-success-600: #147a42;
+  --color-success-700: #0e5e32;
+  --color-success-800: #0b4a28;
+  --color-success-900: #16301f;
+  --color-success-950: #06210f;
+  --color-success: var(--accent);
+  --color-success-foreground: var(--primary-foreground);
+
+  /* Danger */
+  --color-danger-50: #fdf1ef;
+  --color-danger-100: #fbe5e2;
+  --color-danger-200: #f6c9c3;
+  --color-danger-300: #ee9f95;
+  --color-danger-400: #f0675c;
+  --color-danger-500: #dc3d3d;
+  --color-danger-600: #c0352b;
+  --color-danger-700: #9c2a22;
+  --color-danger-800: #7a211b;
+  --color-danger-900: #3b1a17;
+  --color-danger-950: #2a0f0c;
+  --color-danger: #c0352b;
+  --color-danger-foreground: #ffffff;
+
+  /* Warning */
+  --color-warning-50: #fdf7e8;
+  --color-warning-100: #fbf0d6;
+  --color-warning-200: #f6dfa6;
+  --color-warning-300: #f0c96c;
+  --color-warning-400: #f0b54a;
+  --color-warning-500: #e0a106;
+  --color-warning-600: #b47d00;
+  --color-warning-700: #9a6200;
+  --color-warning-800: #7a4c00;
+  --color-warning-900: #3a2c0f;
+  --color-warning-950: #251a05;
+  --color-warning: #e0a106;
+  --color-warning-foreground: #161714;
+
+  /* Info */
+  --color-info-50: #eff5fd;
+  --color-info-100: #e1ecfb;
+  --color-info-200: #c2d7f5;
+  --color-info-300: #93b7ec;
+  --color-info-400: #6b9be6;
+  --color-info-500: #3b7ddd;
+  --color-info-600: #2a64be;
+  --color-info-700: #214e95;
+  --color-info-800: #1b3e75;
+  --color-info-900: #142a4d;
+  --color-info-950: #0c1a31;
+  --color-info: #3b7ddd;
+  --color-info-foreground: #ffffff;
+
+  /* Semánticos */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-muted: var(--muted-background);
+  --color-subtle: var(--subtle-background);
+  --color-border: var(--border);
+  --color-border-2: var(--border-2);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-inverse: var(--inverse);
+  --color-inverse-foreground: var(--inverse-foreground);
+  --color-overlay: var(--overlay);
+
+  --shadow-glow-primary: var(--shadow-glow-primary);
+  --shadow-glow-secondary: var(--shadow-glow-secondary);
+  --shadow-card: var(--shadow-card);
+
+  /* Tipografía — las variables las crea next/font en app/layout.tsx */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
+
+  /* Escala tipográfica — reemplaza los text-[9px]/[10px]/[11px]/[13px] */
+  --text-caption: 12px;    /* duración, metadatos mínimos, labels de tab (11px solo en tab bar) */
+  --text-meta: 13px;       /* texto secundario, labels de sección */
+  --text-body: 15px;       /* texto de filas y formularios */
+  --text-lead: 17px;       /* títulos de card, preguntas FAQ */
+  --text-title: 20px;      /* título de sheet, nombre en detalle */
+  --text-display: 40px;    /* título de pantalla (font-display) */
+  --text-display--line-height: 1.05;
+
+  /* Radios */
+  --radius-control: 12px;  /* botones, inputs, segmented */
+  --radius-chip: 999px;
+  --radius-tag: 7px;
+  --radius-card: 20px;     /* cards y ListGroup */
+  --radius-sheet: 28px;    /* esquinas superiores del bottom sheet */
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  /* IMPORTANTE: antes había "Arial, Helvetica" aquí y anulaba la fuente de la app */
+  font-family: var(--font-sans);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pl-safe { padding-left: env(safe-area-inset-left); }
+.pr-safe { padding-right: env(safe-area-inset-right); }
+
+@supports (padding: max(0px)) {
+  body {
+    padding-top: var(--safe-area-inset-top, 0px);
+    padding-left: var(--safe-area-inset-left, 0px);
+    padding-right: var(--safe-area-inset-right, 0px);
+    padding-bottom: var(--safe-area-inset-bottom, 0px);
+  }
+  body:has([data-mobile-topbar]) { padding-top: 0; }
+  body:has([data-mobile-tabbar]) { padding-bottom: 0; }
+}
+
+.scrollbar-discreet { scrollbar-width: thin; scrollbar-color: rgba(133, 133, 125, 0.12) transparent; }
+.scrollbar-discreet::-webkit-scrollbar { width: 4px; height: 4px; }
+.scrollbar-discreet::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-discreet::-webkit-scrollbar-thumb { background-color: rgba(133, 133, 125, 0.12); border-radius: 2px; }
+.scrollbar-discreet:hover::-webkit-scrollbar-thumb { background-color: rgba(133, 133, 125, 0.25); }
+
+/* ──────────────────────────────────────────────────────────
+ * Mesh gradients — RETIRADOS. Se dejan como colores planos para que
+ * nada se rompa mientras se migran los usos (fase 3 los elimina).
+ * ────────────────────────────────────────────────────────── */
+.mesh-primary   { background: var(--accent); color: var(--primary-foreground); }
+.mesh-secondary { background: var(--pink); color: #ffffff; }
+.mesh-info,
+.mesh-warn,
+.mesh-violet    { background: var(--inverse); color: var(--inverse-foreground); }
+
+/* ──────────────────────────────────────────────────────────
+ * Estados de turno. --st-c es el color del PUNTO (no cambia por tema).
+ * --st-bg queda neutro: el estado ya no tiñe bloques, sólo el punto.
+ * Calendario Día/Semana sí usa --st-tint para el bloque.
+ * ────────────────────────────────────────────────────────── */
+.st-pending          { --st-c: #a8a296; --st-tint: #f1efea; }
+.st-confirmed        { --st-c: #3b7ddd; --st-tint: #e7effb; }
+.st-reminded         { --st-c: #8b5cf6; --st-tint: #efeafd; }
+.st-client_confirmed { --st-c: #0fa3a3; --st-tint: #e0f3f2; }
+.st-checked_in       { --st-c: #e0a106; --st-tint: #fbf0d6; }
+.st-in_progress      { --st-c: #ea6c1b; --st-tint: #fcebdf; }
+.st-completed        { --st-c: #2a9d5c; --st-tint: #e2f0e6; }
+.st-cancelled        { --st-c: #dc3d3d; --st-tint: #fbe5e2; }
+.st-no_show          { --st-c: #77776f; --st-tint: #efede8; }
+.st-rescheduled      { --st-c: #0e8ec9; --st-tint: #e1f1f9; }
+.st-pending, .st-confirmed, .st-reminded, .st-client_confirmed, .st-checked_in,
+.st-in_progress, .st-completed, .st-cancelled, .st-no_show, .st-rescheduled {
+  --st-bg: var(--surface-2);
+  --st-cb: var(--foreground-muted);
+}
+
+.dark .st-pending          { --st-tint: #262622; }
+.dark .st-confirmed        { --st-tint: #17233a; }
+.dark .st-reminded         { --st-tint: #241c3a; }
+.dark .st-client_confirmed { --st-tint: #0f2a2a; }
+.dark .st-checked_in       { --st-tint: #2e2610; }
+.dark .st-in_progress      { --st-tint: #33200f; }
+.dark .st-completed        { --st-tint: #16301f; }
+.dark .st-cancelled        { --st-tint: #3b1a17; }
+.dark .st-no_show          { --st-tint: #222422; }
+.dark .st-rescheduled      { --st-tint: #0f2633; }
+
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select { font-size: 16px; }
+}
