@@ -2,7 +2,7 @@
 
 > Archivos organizados por carpeta (tipo). Max 200 lineas.
 > Gestionado por skill memory-manager. Auto-memory de Claude Code DESACTIVADO.
-> Ultima revision: 2026-10-11.
+> Ultima revision: 2026-10-12.
 
 ## user/ — Sobre el usuario/equipo
 - [Roberto](user/roberto.md) — operador y dueno del producto; Windows + VS Code, usar Bash para escribir archivos; prioriza coste $0 sobre infra ya pagada
@@ -10,8 +10,8 @@
 ## project/ — Proyectos y decisiones activas
 - [Producto y dominio](project/producto-y-dominio.md) — que es Turno Flash, multi-org, roles admin/owner/staff, maquina de 9 estados de turno; **todos los negocios están en Cuba**; borrar es solo de dueño/admin y el empleado se vincula a su ficha («Mis turnos»)
 - [Estado actual](project/estado-actual-2026-09.md) — foto de sep 2026 + actualizaciones hasta 2026-10-08: plan QA cerrado en código, migraciones hasta la 072, funciones desplegadas, **todo subido a GitHub el 2026-10-08** y APK vieja en Play; agujeros (cero tests, cero CI, sin Sentry, SMTP por defecto); por qué los docs mienten
-- [Rediseno de UI](project/rediseno-ui-migracion.md) — completo (9/9) desde 2026-09-10, incluidos details e invite; decisiones cerradas
-- [Rediseno v2](project/rediseno-v2.md) — paquete nuevo en `docs/design/handoff` (sustituye al anterior); en la rama `redesign-v2` con commits por fase (sin subir): hechas fases 1-3, Inicio, Turnos, Servicios, Clientes e íconos web; falta el detalle de turno, calendarios, resto de listas, login, landing, íconos nativos y **rehacer guía y manual**; decisiones de Roberto y trampas (fuente, variantes de `Button`, menú «Más», «Llegó» ya no termina el turno)
+- [Rediseno de UI](project/rediseno-ui-migracion.md) — el rediseño anterior (sep 2026), **sustituido por el v2**; queda como historia
+- [Rediseno v2](project/rediseno-v2.md) — paquete de `docs/design/handoff` **aplicado entero el 2026-10-12** en la rama `redesign-v2`, con commits por fase y **sin subir ni fusionar**: tokens, primitivas, navegación con «Más», todas las pantallas, landing, íconos y la guía y el manual; falta la revisión de Roberto, `cap sync` y la APK; qué quedó distinto del diseño, nombres de estado nuevos («Llegó» ya no termina el turno) y trampas
 - [Reserva online](project/reserva-online.md) — implementada 2026-09-10 (migraciones 029-031 + edge `public-booking`); horario y servicios por profesional (estricto), aprobacion por servicio, opt-in, vacaciones; `/book?b=<slug>`; desde 2026-10-08 apellido opcional, cliente recordado, salto de «¿Con quién?» y contacto del negocio
 - [QA piloto Cuba](project/qa-piloto-cuba.md) — plan P0-P3 en `.claude/PRPs/qa-piloto-cuba.md`; **todo cerrado** salvo P1-26 (Mac) y `special`; migraciones 067-072 y funciones desplegadas el 2026-10-08; ya subido a GitHub; falta APK nueva + pruebas en teléfono real, SMTP propio y el WhatsApp de cada dueño; RLS rechaza en silencio; roles decididos; cómo probar con un negocio desechable
 - [Modulo reserva de asientos](project/modulo-reserva-asientos.md) — 9/10 fases (migraciones 033-047, edges public-trips y wa-trip-send, dashboard, pagina publica /trips, WhatsApp incl. cancelaciones); solo falta el cron de vencimiento (frenado otra vez 2026-09-12); anticipo y confirmacion son ejes independientes; cambios de P3 del 2026-10-08 al final

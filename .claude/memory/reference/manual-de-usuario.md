@@ -43,3 +43,5 @@ de voz, avisos de licencia, y CSV que no aparece en el teléfono.
 **Fotos de la guía:** `passenger.webp` rehecha el 2026-10-08 (receta en [[turno-flash-tooling]]). Las otras siete
 muestran la cabecera sin el botón «Actualizar», y `booking-page.webp` / `trips-page.webp` muestran Copiar y
 Compartir en la tarjeta apagada de abajo, que ya no aparecen. Diferencias menores, sin rehacer.
+
+- **2026-10-12:** textos al día con el rediseño v2 (estados Avisado / Confirmó / Llegó / Terminado / No vino, acciones «Marcar llegada», «Empezar atención», «Terminar», barra inferior con «Más», filas en vez de tarjetas) y las 8 fotos de la guía de primeros pasos rehechas. La hoja de estilos propia del manual sigue con los colores de antes. Ver [[rediseno-v2]].
