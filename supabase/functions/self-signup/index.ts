@@ -1,7 +1,7 @@
 // Supabase Edge Function: self-signup
 //
 // Registro self-service de un negocio nuevo. Crea el usuario (email
-// auto-confirmado), su organización con un trial de 7 días, lo deja como owner,
+// auto-confirmado), su organización con una prueba de 15 días, lo deja como owner,
 // y notifica por WhatsApp al número del admin de la plataforma.
 //
 // Endpoint público: se invoca con la anon key (Authorization: Bearer <anon> +
@@ -10,7 +10,9 @@
 // por usar el service_role.
 //
 // Body: { email, password, full_name, org_name, org_timezone?, org_whatsapp_phone?,
-//         modules? }  // 'appointments' (default) | 'trips' | 'both'
+//         modules?,       // 'appointments' (default) | 'trips' | 'both'
+//         plan?,          // 'personal' (default) | 'salon' | 'salon_large'; trips-only is always 'trips'
+//         owner_phone? }  // the owner's WhatsApp, where license notices go
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { phoneToChatId, sendText } from "../_shared/openwa.ts";
@@ -21,7 +23,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const TRIAL_DAYS = 7;
+const TRIAL_DAYS = 15;
+const APPOINTMENT_PLANS = ["personal", "salon", "salon_large"];
 // Anti-abuse (P1-29): businesses created in the last hour, across the
 // platform. Far above real pilot traffic; also caps the admin's WhatsApp.
 const MAX_SIGNUPS_PER_HOUR = 10;
@@ -81,6 +84,15 @@ Deno.serve(async (req) => {
     const orgTimezone = String(body.org_timezone ?? "America/Havana").trim();
     const orgWhatsappPhone = String(body.org_whatsapp_phone ?? "").trim();
     const modules = String(body.modules ?? "appointments").trim();
+    const requestedPlan = String(body.plan ?? "").trim();
+    // Older app versions do not send it: fall back to the business number
+    const ownerPhone = String(body.owner_phone ?? "").trim() || orgWhatsappPhone;
+    const plan =
+      modules === "trips"
+        ? "trips"
+        : APPOINTMENT_PLANS.includes(requestedPlan)
+          ? requestedPlan
+          : "personal";
 
     // 1. Validaciones
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -154,10 +166,16 @@ Deno.serve(async (req) => {
 
     createdUserId = created.user.id;
 
-    // 4 + 5. Crear la organización con trial de 7 días y asignar al owner
+    // 4 + 5. Crear la organización con la prueba y asignar al owner. La base
+    // decide cuándo termina la prueba (último segundo del día 15 en Cuba); que
+    // nazca con fechas es lo que la deja en fase "trial" (migración 073).
     const now = new Date();
-    const end = new Date(now);
-    end.setDate(end.getDate() + TRIAL_DAYS);
+    const { data: trialEnd } = await admin.rpc("license_trial_end", {
+      p_days: TRIAL_DAYS,
+    });
+    const end = trialEnd
+      ? new Date(trialEnd as string)
+      : new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
 
     const { data: rpcData, error: rpcError } = await admin.rpc(
       "create_organization_with_owner",
@@ -193,17 +211,20 @@ Deno.serve(async (req) => {
     // no se toca a propósito: sumarle un parámetro dejaría ambiguas las
     // llamadas viejas. El trigger de la 033 deja pasar este UPDATE porque
     // service_role no tiene auth.uid().
-    if (result.organization_id && modules !== "appointments") {
+    // El plan y el WhatsApp del dueño viajan en el mismo UPDATE.
+    if (result.organization_id) {
       const { error: modulesError } = await admin
         .from("organizations")
         .update({
           appointments_module_enabled: modules !== "trips",
           trips_module_enabled: modules === "trips" || modules === "both",
+          license_plan: plan,
+          owner_phone: ownerPhone || null,
         })
         .eq("id", result.organization_id);
       if (modulesError) {
-        // La cuenta ya existe y sirve: un admin puede corregir los módulos.
-        console.error("[self-signup] módulos no aplicados:", modulesError.message);
+        // La cuenta ya existe y sirve: un admin puede corregir módulos y plan.
+        console.error("[self-signup] módulos o plan no aplicados:", modulesError.message);
       }
     }
 
@@ -216,13 +237,16 @@ Deno.serve(async (req) => {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
+          timeZone: "America/Havana",
         });
         const text =
           `🎉 Nuevo registro en TurnoFlash\n` +
           `Nombre: ${fullName}\n` +
           `Email: ${email}\n` +
           `Negocio: ${orgName}\n` +
-          `Trial hasta: ${trialHasta}`;
+          `Plan: ${plan}\n` +
+          (ownerPhone ? `WhatsApp: ${ownerPhone}\n` : "") +
+          `Prueba hasta: ${trialHasta}`;
         const waResult = await sendText({
           sessionId: notifySession,
           chatId: phoneToChatId(notifyPhone),

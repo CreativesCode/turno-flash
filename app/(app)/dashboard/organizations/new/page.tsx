@@ -15,7 +15,13 @@ import {
   CreateOrganizationResult,
 } from "@/types/organization";
 import { ORGANIZATION_TIMEZONES as TIMEZONES } from "@/config/constants";
-import { getGracePeriodDays } from "@/utils/license";
+import {
+  LICENSE_GRACE_DAYS,
+  LICENSE_PLAN_INFO,
+  LICENSE_PLANS,
+  type LicensePlan,
+  formatUsd,
+} from "@/config/license-pricing";
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
 import { Check, ChevronLeft } from "lucide-react";
@@ -38,9 +44,23 @@ interface NewOrganizationForm {
   org_timezone: string;
   org_whatsapp_phone: string;
   selected_user_id: string;
-  license_start_date: string;
-  license_end_date: string;
+  start_mode: StartMode;
+  license_plan: LicensePlan;
+  owner_phone: string;
 }
+
+/** How the business starts: with a free trial, or blocked until it pays. */
+type StartMode = "trial_15" | "trial_30" | "pending";
+
+const START_MODES: { key: StartMode; label: string; trialDays: number | null }[] = [
+  { key: "trial_15", label: "Prueba gratis de 15 días", trialDays: 15 },
+  { key: "trial_30", label: "Prueba gratis de 30 días", trialDays: 30 },
+  { key: "pending", label: "En preparación (sin prueba)", trialDays: null },
+];
+
+const APPOINTMENT_PLANS = LICENSE_PLANS.filter(
+  (plan) => LICENSE_PLAN_INFO[plan].appointments
+);
 
 const EMPTY_FORM: NewOrganizationForm = {
   org_name: "",
@@ -48,8 +68,9 @@ const EMPTY_FORM: NewOrganizationForm = {
   org_timezone: "America/Havana",
   org_whatsapp_phone: "",
   selected_user_id: "",
-  license_start_date: "",
-  license_end_date: "",
+  start_mode: "trial_15",
+  license_plan: "personal",
+  owner_phone: "",
 };
 
 /** Lowercase, accent-free, hyphen-separated slug derived from a name. */
@@ -192,18 +213,23 @@ export default function NewOrganizationPage() {
         return;
       }
 
-      // Validar fechas de licencia si se proporcionan
-      if (formData.license_start_date && formData.license_end_date) {
-        const startDate = new Date(formData.license_start_date);
-        const endDate = new Date(formData.license_end_date);
-
-        if (endDate <= startDate) {
-          setError(
-            "La fecha de fin de licencia debe ser posterior a la fecha de inicio"
-          );
+      // A trial ends when the database says (last second of its last day in
+      // Cuba). Without dates the business is created "pending".
+      const trialDays = START_MODES.find(
+        (mode) => mode.key === formData.start_mode
+      )?.trialDays;
+      let trialEnd: string | null = null;
+      if (trialDays) {
+        const { data: endData, error: endError } = await supabase.rpc(
+          "license_trial_end",
+          { p_days: trialDays }
+        );
+        if (endError || !endData) {
+          setError("No se pudo calcular el fin de la prueba. Intenta nuevamente.");
           setLoading(false);
           return;
         }
+        trialEnd = endData;
       }
 
       // Preparar parámetros para la función
@@ -213,8 +239,8 @@ export default function NewOrganizationPage() {
         org_timezone: formData.org_timezone || "UTC",
         org_whatsapp_phone: formData.org_whatsapp_phone.trim() || undefined,
         owner_user_id: formData.selected_user_id,
-        license_start_date: formData.license_start_date || undefined,
-        license_end_date: formData.license_end_date || undefined,
+        license_start_date: trialEnd ? new Date().toISOString() : undefined,
+        license_end_date: trialEnd ?? undefined,
       };
 
       // Llamar a la función RPC
@@ -240,7 +266,26 @@ export default function NewOrganizationPage() {
         return;
       }
 
+      // create_organization_with_owner has no plan or owner phone parameters
+      const { data: planData, error: planError } = await supabase
+        .from("organizations")
+        .update({
+          license_plan: formData.license_plan,
+          owner_phone: formData.owner_phone.trim() || null,
+        })
+        .eq("id", result.organization_id)
+        .select("id");
+
       const selectedUser = users.find((u) => u.user_id === result.user_id);
+
+      if (planError || !planData?.length) {
+        void Logger.error("Error setting plan on new organization:", planError);
+        setError(
+          `La organización "${formData.org_name}" se creó, pero no se guardó el plan ni el WhatsApp del dueño. Corrígelos en su ficha.`
+        );
+        setLoading(false);
+        return;
+      }
 
       setSuccess(
         `Organización "${formData.org_name}" creada exitosamente. El usuario ${selectedUser?.email} ha sido asignado como dueño.`
@@ -404,34 +449,56 @@ export default function NewOrganizationPage() {
             )}
           </Field>
 
-          <div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Inicio licencia">
-                <input
-                  type="datetime-local"
-                  value={formData.license_start_date}
-                  onChange={(e) =>
-                    patchForm({ license_start_date: e.target.value })
-                  }
-                  className={inputClasses}
-                />
-              </Field>
-              <Field label="Fin licencia">
-                <input
-                  type="datetime-local"
-                  value={formData.license_end_date}
-                  onChange={(e) =>
-                    patchForm({ license_end_date: e.target.value })
-                  }
-                  className={inputClasses}
-                />
-              </Field>
-            </div>
+          <Field label="Plan">
+            <Select
+              value={formData.license_plan}
+              onChange={(e) =>
+                patchForm({ license_plan: e.target.value as LicensePlan })
+              }
+            >
+              {APPOINTMENT_PLANS.map((plan) => (
+                <option key={plan} value={plan}>
+                  {LICENSE_PLAN_INFO[plan].label} ·{" "}
+                  {formatUsd(LICENSE_PLAN_INFO[plan].price)} al mes
+                </option>
+              ))}
+            </Select>
             <p className="mt-1 text-[11px] text-foreground-subtle">
-              Opcional. Sin fechas, la organización no vence. Al vencer tiene{" "}
-              {getGracePeriodDays()} días de gracia con avisos de renovación.
+              Un negocio que solo vende pasajes pasa al plan Pasajes cuando le
+              cambias los módulos en su ficha.
             </p>
-          </div>
+          </Field>
+
+          <Field label="Cómo empieza">
+            <Select
+              value={formData.start_mode}
+              onChange={(e) =>
+                patchForm({ start_mode: e.target.value as StartMode })
+              }
+            >
+              {START_MODES.map((mode) => (
+                <option key={mode.key} value={mode.key}>
+                  {mode.label}
+                </option>
+              ))}
+            </Select>
+            <p className="mt-1 text-[11px] text-foreground-subtle">
+              {formData.start_mode === "pending"
+                ? "No podrá trabajar hasta que registres su primer pago, y ese pago empieza a contar ese día. Después no se le puede dar una prueba."
+                : `Al vencer la prueba tiene ${LICENSE_GRACE_DAYS} días de margen con avisos diarios. La prueba solo se da ahora, al crear el negocio.`}
+            </p>
+          </Field>
+
+          <Field label="WhatsApp del dueño" hint="Ahí le llegan los avisos de cobro.">
+            <input
+              type="tel"
+              required
+              value={formData.owner_phone}
+              onChange={(e) => patchForm({ owner_phone: e.target.value })}
+              className={inputClasses}
+              placeholder="+5351234567"
+            />
+          </Field>
 
           <Field label="Zona horaria">
             <Select
@@ -454,7 +521,7 @@ export default function NewOrganizationPage() {
                 patchForm({ org_whatsapp_phone: e.target.value })
               }
               className={inputClasses}
-              placeholder="+5491123456789"
+              placeholder="+5351234567"
             />
           </Field>
 

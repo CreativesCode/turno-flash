@@ -2,8 +2,17 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { Button, Card, Logo } from "@/components/ui";
+import {
+  LICENSE_PLAN_INFO,
+  LICENSE_PLANS,
+  type LicensePlan,
+  TRIAL_DAYS,
+  formatUsd,
+  licenseMonthlyPrice,
+} from "@/config/license-pricing";
 import { createClient } from "@/utils/supabase/client";
 import { Logger } from "@/utils/logger";
+import { toInternationalPhone } from "@/utils/phone";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -40,6 +49,18 @@ const BUSINESS_KINDS = [
 
 type BusinessKind = (typeof BUSINESS_KINDS)[number]["key"];
 
+/** Plans a business that takes appointments picks from, by team size. */
+const APPOINTMENT_PLANS = LICENSE_PLANS.filter(
+  (plan) => LICENSE_PLAN_INFO[plan].appointments
+);
+
+const TEAM_SIZE_LABEL: Record<LicensePlan, string> = {
+  personal: "Trabajo por mi cuenta",
+  salon: "Somos un equipo, hasta 5 profesionales",
+  salon_large: "Somos más de 5 profesionales",
+  trips: "",
+};
+
 const inputClass =
   "mt-1.5 block w-full rounded-lg border border-border-2 bg-surface px-3 py-2.5 text-sm text-foreground placeholder-foreground-subtle transition-shadow focus:border-primary-500 focus:outline-none focus:ring-3 focus:ring-primary-500/15";
 const labelClass =
@@ -56,16 +77,30 @@ export default function RegisterPage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [timezone, setTimezone] = useState<string>("America/Havana");
   const [kind, setKind] = useState<BusinessKind>("appointments");
+  const [teamPlan, setTeamPlan] = useState<LicensePlan>("personal");
+  const [ownerPhone, setOwnerPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   // Honeypot (P1-29): invisible for people, bots fill it
   const [website, setWebsite] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const plan: LicensePlan = kind === "trips" ? "trips" : teamPlan;
+  const monthlyPrice = formatUsd(
+    licenseMonthlyPrice(plan, { secondModule: kind === "both" })
+  );
+
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    // Cuban mobiles have 8 digits; anything shorter cannot receive WhatsApp
+    if (ownerPhone.replace(/\D/g, "").length < 8) {
+      setError("Escribe tu número de WhatsApp completo.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -92,6 +127,8 @@ export default function RegisterPage() {
           org_timezone: timezone,
           org_whatsapp_phone: whatsapp || undefined,
           modules: kind,
+          plan,
+          owner_phone: toInternationalPhone(ownerPhone),
           website,
         }),
       });
@@ -150,7 +187,7 @@ export default function RegisterPage() {
               Registra tu negocio
             </h1>
             <p className="mt-1 text-sm text-foreground-muted">
-              Crea tu cuenta y empieza tu prueba gratis de 7 días.
+              Crea tu cuenta y empieza tu prueba gratis de {TRIAL_DAYS} días.
             </p>
 
             <form onSubmit={handleRegister} className="mt-6 space-y-4">
@@ -225,6 +262,49 @@ export default function RegisterPage() {
                 </p>
               </div>
 
+              {kind !== "trips" && (
+                <div>
+                  <span className={labelClass}>¿Cuántos atienden?</span>
+                  <div className="mt-1.5 flex flex-col gap-2">
+                    {APPOINTMENT_PLANS.map((option) => (
+                      <label
+                        key={option}
+                        className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                          teamPlan === option
+                            ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                            : "border-border-2 bg-surface hover:bg-muted"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="team-plan"
+                          value={option}
+                          checked={teamPlan === option}
+                          onChange={() => setTeamPlan(option)}
+                          className="h-4 w-4 shrink-0 accent-primary-500"
+                        />
+                        <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
+                          {TEAM_SIZE_LABEL[option]}
+                        </span>
+                        <span className="shrink-0 text-xs font-semibold text-foreground-muted">
+                          Plan {LICENSE_PLAN_INFO[option].label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <p className="rounded-lg bg-surface-2 px-3 py-2.5 text-xs text-foreground-muted">
+                Tu plan:{" "}
+                <span className="font-semibold text-foreground">
+                  {LICENSE_PLAN_INFO[plan].label}
+                  {kind === "both" ? " + Pasajes" : ""}, {monthlyPrice} al mes
+                </span>
+                . Hoy no pagas nada: tienes {TRIAL_DAYS} días gratis para
+                probarlo.
+              </p>
+
               <div>
                 <label htmlFor="email" className={labelClass}>
                   Email
@@ -274,6 +354,27 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="ownerPhone" className={labelClass}>
+                  Tu WhatsApp
+                </label>
+                <input
+                  id="ownerPhone"
+                  name="ownerPhone"
+                  type="tel"
+                  autoComplete="tel"
+                  required
+                  value={ownerPhone}
+                  onChange={(e) => setOwnerPhone(e.target.value)}
+                  placeholder="5 123 4567"
+                  className={inputClass}
+                />
+                <p className="mt-1.5 text-xs text-foreground-subtle">
+                  Ahí te avisamos antes de que venza tu acceso. No lo ven tus
+                  clientes.
+                </p>
               </div>
 
               <div>

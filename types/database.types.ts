@@ -2281,6 +2281,7 @@ export type Database = {
         Returns: number
       }
       license_today: { Args: never; Returns: string }
+      license_trial_end: { Args: { p_days?: number }; Returns: string }
       my_access_revoked: { Args: never; Returns: boolean }
       org_license_usable: { Args: { p_org_id: string }; Returns: boolean }
       ping: { Args: never; Returns: string }
