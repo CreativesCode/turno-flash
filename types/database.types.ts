@@ -659,6 +659,8 @@ export type Database = {
           note: string | null
           organization_id: string
           recorded_by: string | null
+          referral_days_granted: number | null
+          referral_granted_to: string | null
           second_module: boolean
         }
         Insert: {
@@ -673,6 +675,8 @@ export type Database = {
           note?: string | null
           organization_id: string
           recorded_by?: string | null
+          referral_days_granted?: number | null
+          referral_granted_to?: string | null
           second_module?: boolean
         }
         Update: {
@@ -687,6 +691,8 @@ export type Database = {
           note?: string | null
           organization_id?: string
           recorded_by?: string | null
+          referral_days_granted?: number | null
+          referral_granted_to?: string | null
           second_module?: boolean
         }
         Relationships: [
@@ -700,6 +706,20 @@ export type Database = {
           {
             foreignKeyName: "license_payments_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "license_payments_referral_granted_to_fkey"
+            columns: ["referral_granted_to"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "license_payments_referral_granted_to_fkey"
+            columns: ["referral_granted_to"]
             isOneToOne: false
             referencedRelation: "organizations_with_license_status"
             referencedColumns: ["id"]
@@ -2241,6 +2261,26 @@ export type Database = {
         Returns: boolean
       }
       license_grace_days: { Args: never; Returns: number }
+      license_payment_quote: {
+        Args: { p_billing_period: string; p_organization_id: string }
+        Returns: Json
+      }
+      license_payment_quote_internal: {
+        Args: { p_billing_period: string; p_organization_id: string }
+        Returns: Json
+      }
+      license_period_months: {
+        Args: { p_period: string }
+        Returns: {
+          charged: number
+          covered: number
+        }[]
+      }
+      license_plan_monthly_price: {
+        Args: { p_founder: boolean; p_plan: string; p_second_module: boolean }
+        Returns: number
+      }
+      license_today: { Args: never; Returns: string }
       my_access_revoked: { Args: never; Returns: boolean }
       org_license_usable: { Args: { p_org_id: string }; Returns: boolean }
       ping: { Args: never; Returns: string }
@@ -2270,6 +2310,14 @@ export type Database = {
       queue_wa_trip: {
         Args: { p_booking_id: string; p_intent: string; p_org_id: string }
         Returns: undefined
+      }
+      record_license_payment: {
+        Args: {
+          p_billing_period: string
+          p_note?: string
+          p_organization_id: string
+        }
+        Returns: Json
       }
       release_expired_trip_holds: { Args: never; Returns: number }
       save_staff_schedule: {
