@@ -40,6 +40,10 @@ mañana/tarde», filtro No vino y búsqueda completa, apellido opcional, Cuenta 
 reserva pública (salto de «¿Con quién?», cliente recordado, Escribir al negocio, Copiar instrucciones), 👍 y nota
 de voz, avisos de licencia, y CSV que no aparece en el teléfono.
 
+**Actualizado el 2026-10-12:** rediseño v2 (nombres de estado, navegación, Turnos por día) y «Mi cuenta» editable
+(nombre, contraseña pidiendo la actual, WhatsApp del dueño). «Lo que todavía no se puede hacer» ya solo manda a
+soporte para cambiar el nombre del negocio; el WhatsApp del negocio se cambia en Ajustes.
+
 **Fotos de la guía:** `passenger.webp` rehecha el 2026-10-08 (receta en [[turno-flash-tooling]]). Las otras siete
 muestran la cabecera sin el botón «Actualizar», y `booking-page.webp` / `trips-page.webp` muestran Copiar y
 Compartir en la tarjeta apagada de abajo, que ya no aparecen. Diferencias menores, sin rehacer.

@@ -15,7 +15,10 @@ listas agrupadas, logo «3a».
 
 Roberto lo dio por bueno y pidió pasarlo a `main` y desplegar: `redesign-v2` se fusionó en `main` (fast-forward) y
 se subió a GitHub hasta `e005e8a` (ese push lo pidió él; la regla de no subir sin que lo pida sigue en pie). Con
-el push salieron también los commits de planes y precios que estaban sin subir.
+el push salieron también los commits de planes y precios que estaban sin subir. **En producción desde las 14:34**:
+`https://turno-flash.vercel.app` tardó unos 20 minutos en cambiar de versión (no asumir que el deploy falló antes
+de eso; se comprueba buscando `theme-color` en el HTML de la portada). No se recorrió la app publicada.
+**Sigue pendiente la APK nueva** (`cap sync`, íconos y splash nuevos): Android sigue con la versión vieja.
 Compila, `tsc` y `eslint` limpios, y se revisó con capturas en claro y oscuro.
 
 - **Tokens y fuentes:** `app/globals.css` (mismos nombres de token, valores nuevos), tres fuentes en `app/layout.tsx`.
@@ -81,6 +84,9 @@ Todo pasa por `services/account.service.ts` y `schemas/account.schema.ts`; no hi
 048 ya lo permite). El correo no se cambia desde la app (decisión de Roberto).
 
 ## Trampas
+
+- **El MCP de Vercel de claude.ai es de otra cuenta** (no la de Turno Flash) y no hay `gh`: el estado del deploy
+  solo se ve consultando el sitio público.
 
 - **La fuente no se aplicaba con el `globals.css` del paquete:** `font-family: var(--font-sans)` en `body` se
   resuelve en `:root`, por encima del `<body>` donde next/font define `--font-geist`. El `body` usa

@@ -6,7 +6,7 @@ metadata:
 ---
 
 Decidido por Roberto el **2026-10-11** e **implementado ese mismo día** (PRP-003,
-`.claude/PRPs/prp-license-plans-billing.md`; commits `7f9649f` a `236b03d`, sin pushear).
+`.claude/PRPs/prp-license-plans-billing.md`; commits `7f9649f` a `236b03d`, subidos el 2026-10-12 con el rediseño v2).
 
 **Funciones desplegadas el 2026-10-11** con el permiso de Roberto («sí, publica las dos funciones»):
 `self-signup` v9 y `license-notices` v1. Probadas con un registro desechable (plan Salón + pasajes,

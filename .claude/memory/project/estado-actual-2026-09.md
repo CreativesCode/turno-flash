@@ -128,7 +128,9 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   de arriba.
 - **Agujeros que siguen:** cero tests automatizados, sin CI de build/lint, sin Sentry, `npm run lint` roto,
   SMTP por defecto de Supabase (los dueños no reciben «¿Olvidaste tu contraseña?»).
-- **Pendiente fuera del código:** comprobar que el deploy de Vercel salió bien, regenerar la APK y probar en teléfono real,
+- **2026-10-12:** rediseño v2, planes y precios y «Mi cuenta» editable subidos y publicados en Vercel
+  (ver [[rediseno-v2]]); `main` y `origin/main` iguales.
+- **Pendiente fuera del código:** regenerar la APK y probar en teléfono real,
   SMTP propio, pedir a cada dueño su WhatsApp de contacto, y decidir qué hacer con los 6 negocios reales con la
   licencia vencida hace más de 100 días (AgroRed, DveloxSoft SC, LeoDev, Negocio, Negocio test registro, Notengo).
 
