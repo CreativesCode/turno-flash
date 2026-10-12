@@ -286,6 +286,9 @@ function OrganizationDetailsContent() {
         // The view exposes these as nullable; the table defaults are on/off.
         appointments_module_enabled: orgData.appointments_module_enabled ?? true,
         trips_module_enabled: orgData.trips_module_enabled ?? false,
+        license_plan: orgData.license_plan ?? "personal",
+        license_phase: orgData.license_phase ?? "pending",
+        license_founder: orgData.license_founder ?? false,
         owner: members.find((m) => m.role === "owner") ?? null,
         members,
       };

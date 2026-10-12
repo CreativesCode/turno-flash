@@ -646,6 +646,66 @@ export type Database = {
           },
         ]
       }
+      license_payments: {
+        Row: {
+          amount_usd: number
+          billing_period: string
+          covered_from: string
+          covered_until: string
+          created_at: string
+          founder_price: boolean
+          id: string
+          license_plan: string
+          note: string | null
+          organization_id: string
+          recorded_by: string | null
+          second_module: boolean
+        }
+        Insert: {
+          amount_usd: number
+          billing_period: string
+          covered_from: string
+          covered_until: string
+          created_at?: string
+          founder_price?: boolean
+          id?: string
+          license_plan: string
+          note?: string | null
+          organization_id: string
+          recorded_by?: string | null
+          second_module?: boolean
+        }
+        Update: {
+          amount_usd?: number
+          billing_period?: string
+          covered_from?: string
+          covered_until?: string
+          created_at?: string
+          founder_price?: boolean
+          id?: string
+          license_plan?: string
+          note?: string | null
+          organization_id?: string
+          recorded_by?: string | null
+          second_module?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "license_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "license_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -730,14 +790,22 @@ export type Database = {
       organizations: {
         Row: {
           appointments_module_enabled: boolean
+          billing_period: string | null
           contact_name: string | null
           created_at: string
           currency: string
+          founder_price_until: string | null
           id: string
           is_active: boolean
           license_end_date: string | null
+          license_founder: boolean
+          license_phase: string
+          license_plan: string
           license_start_date: string | null
           name: string
+          owner_phone: string | null
+          referral_credit_applied_at: string | null
+          referred_by_organization_id: string | null
           slug: string
           subscription_platform: string | null
           subscription_product_id: string | null
@@ -749,14 +817,22 @@ export type Database = {
         }
         Insert: {
           appointments_module_enabled?: boolean
+          billing_period?: string | null
           contact_name?: string | null
           created_at?: string
           currency?: string
+          founder_price_until?: string | null
           id?: string
           is_active?: boolean
           license_end_date?: string | null
+          license_founder?: boolean
+          license_phase?: string
+          license_plan?: string
           license_start_date?: string | null
           name: string
+          owner_phone?: string | null
+          referral_credit_applied_at?: string | null
+          referred_by_organization_id?: string | null
           slug: string
           subscription_platform?: string | null
           subscription_product_id?: string | null
@@ -768,14 +844,22 @@ export type Database = {
         }
         Update: {
           appointments_module_enabled?: boolean
+          billing_period?: string | null
           contact_name?: string | null
           created_at?: string
           currency?: string
+          founder_price_until?: string | null
           id?: string
           is_active?: boolean
           license_end_date?: string | null
+          license_founder?: boolean
+          license_phase?: string
+          license_plan?: string
           license_start_date?: string | null
           name?: string
+          owner_phone?: string | null
+          referral_credit_applied_at?: string | null
+          referred_by_organization_id?: string | null
           slug?: string
           subscription_platform?: string | null
           subscription_product_id?: string | null
@@ -785,7 +869,22 @@ export type Database = {
           trips_module_enabled?: boolean
           whatsapp_phone?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organizations_referred_by_organization_id_fkey"
+            columns: ["referred_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizations_referred_by_organization_id_fkey"
+            columns: ["referred_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reminder_logs: {
         Row: {
@@ -1934,18 +2033,26 @@ export type Database = {
       organizations_with_license_status: {
         Row: {
           appointments_module_enabled: boolean | null
+          billing_period: string | null
           contact_name: string | null
           created_at: string | null
           currency: string | null
           days_remaining: number | null
+          founder_price_until: string | null
           id: string | null
           is_active: boolean | null
           is_usable: boolean | null
           license_end_date: string | null
+          license_founder: boolean | null
           license_message: string | null
+          license_phase: string | null
+          license_plan: string | null
           license_start_date: string | null
           license_status: Database["public"]["Enums"]["license_status"] | null
           name: string | null
+          owner_phone: string | null
+          referral_credit_applied_at: string | null
+          referred_by_organization_id: string | null
           slug: string | null
           subscription_platform: string | null
           subscription_product_id: string | null
@@ -1955,7 +2062,22 @@ export type Database = {
           trips_module_enabled: boolean | null
           whatsapp_phone: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organizations_referred_by_organization_id_fkey"
+            columns: ["referred_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizations_referred_by_organization_id_fkey"
+            columns: ["referred_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -2118,6 +2240,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      license_grace_days: { Args: never; Returns: number }
       my_access_revoked: { Args: never; Returns: boolean }
       org_license_usable: { Args: { p_org_id: string }; Returns: boolean }
       ping: { Args: never; Returns: string }
