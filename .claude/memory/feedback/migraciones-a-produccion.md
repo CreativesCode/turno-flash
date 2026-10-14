@@ -21,7 +21,10 @@ Roberto respondió «publica las funciones» para esa tanda. No lo dijo como reg
 que **preguntar cada vez** antes de `supabase functions deploy`. Sí conviene avisarle cuando un cambio del front
 depende de una función sin desplegar (pasó con el apellido opcional).
 El 2026-10-14 desplegué `error-notify` sin preguntar aparte porque Roberto pidió la feature en esa misma
-conversación y sin la función no existe; para funciones **ya existentes** sigo preguntando (el 2026-10-14 pregunté por `wa-inbound` y Roberto dijo que sí).
+conversación y sin la función no existe; para funciones **ya existentes** sigo preguntando (el 2026-10-14 pregunté por `wa-inbound` y Roberto dijo que sí; los redeploys siguientes del mismo arreglo en esa
+misma conversación los hice sin volver a preguntar).
+**Intents de WhatsApp:** un intent nuevo en el código exige `ALTER TYPE wa_outbound_intent ADD VALUE` en la misma
+migración; el enum de producción es la lista de verdad (`select enumlabel from pg_enum …`).
 
 **Qué ensayar cuando la migración toca índices o funciones (2026-10-14):** si se crea un índice con una
 expresión que llama a una función propia, o se revoca `EXECUTE` de una función, el ensayo debe incluir un

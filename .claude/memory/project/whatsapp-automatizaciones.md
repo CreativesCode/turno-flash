@@ -146,3 +146,28 @@ sin código de país, así que un número guardado como `63792397` manda el avis
 mensajes al cliente lo muestra sin prefijo. El registro lo mandaba crudo (arreglado en `register/page.tsx` el
 2026-10-14, pendiente de push). `notify_business_new` **no es idempotente** en `wa-send`: se puede reenviar a mano
 con la clave de servicio (`{appointmentId, intent}`), como se hizo con el T-0002 de Espiral.
+
+**Las respuestas de clientes estuvieron rotas para TODOS del 2026-10-06 al 2026-10-14 (enum):** la función de mover
+turnos (commit `27be2ce`) añadió el intent `rescheduled` en `wa-send`/`wa-inbound` sin `ALTER TYPE wa_outbound_intent
+ADD VALUE`. El filtro `.in("intent", [... "rescheduled"])` fallaba con 22P02, PostgREST devolvía error, `wa-inbound`
+ignoraba el `error` y lo leía como «no open appointment». Arreglado con la **081**. **Regla:** cada intent nuevo lleva su
+`ADD VALUE` en la misma migración, y al ensayar hay que probar una respuesta real (el OK de Roberto al T-0003 lo confirmó:
+`client_confirmed`, `confirm_ack` y `notify_business_confirm` enviados, 2026-10-14 14:16 UTC).
+
+**Remitentes `@lid` (identificador de privacidad de WhatsApp):** los teléfonos de Roberto y de muchos clientes llegan
+como `211909458550818@lid`, sin número en el payload (`keys`: from, to, chatId, body, type, timestamp, fromMe,
+isGroup). El alias se aprendía de `message_id` (`true_<lid>@lid_<id>`), pero OpenWA no devuelve ids desde el
+2026-06-14 (solo 6 teléfonos tienen alias). Desde `wa-inbound` v42: el alias se busca en **todos** los negocios;
+si no hay, usa `data.senderPhone` (lo manda el servidor con `RESOLVE_LID_TO_PHONE=true`, apagado por defecto) o
+pregunta a `GET /sessions/:id/contacts/:lid/phone` (`resolveContactPhone` en `_shared/openwa.ts`). **Pendiente de
+verificar** con un `@lid` desconocido (p. ej. Aicenis respondiendo al T-0001). La línea de la plataforma es un
+número de EE. UU. (`15753180319@c.us`).
+
+**Diagnóstico sin logs:** `wa_processed_events.payload` (copia compacta del webhook) y `.result` (qué decidió) desde la
+080 / v40. Primera consulta ante «respondí y no pasó nada»:
+`select processed_at, result, payload from wa_processed_events order by processed_at desc limit 5`.
+
+**Carga de una sesión más en OpenWA (FAQ 12, 2026-10-14):** motor whatsapp-web.js = un Chromium por sesión, 300-500 MB
+RAM (2 GB → 3-5 sesiones; 4 GB → 8-10); motor Baileys, mucho menos. Roberto **no tiene SSH al servidor** por ahora:
+seguir con una sola línea compartida hasta recuperarlo; entonces activar `RESOLVE_LID_TO_PHONE=true` y reaplicar el
+parche de whatsapp-web.js que devuelve los message ids (quita los HTTP 500).

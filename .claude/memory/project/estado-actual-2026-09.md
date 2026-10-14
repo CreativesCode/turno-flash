@@ -163,7 +163,7 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   `authenticated`; los índices se crearon como `postgres` sin error. Regla nueva en [[migraciones-a-produccion]].
 - **Mismo día:** aviso inmediato por WhatsApp al admin de cada error nuevo (migración **079** + edge `error-notify`
   desplegada; ver [[whatsapp-automatizaciones]]). Roberto lo pidió tras este incidente.
-- Migraciones locales y remotas alineadas hasta la **079**. **Roberto hizo el push el 2026-10-14** (078, 079,
+- Migraciones locales y remotas alineadas hasta la **081**. **Roberto hizo el push el 2026-10-14** (078, 079,
   `error-notify` y memoria): `main` y `origin/main` iguales; Vercel no cambia (solo BD y funciones).
 - **Espiral Studio (Aicenis Castro Oves-Garcia, dueña; acovesgarcia@yahoo.com; +5354469246; negocio +5363792397),**
   primera usuaria real activa: plan Salón en prueba hasta el 2026-11-15, 2 servicios (fotos/álbumes), 2 profesionales
@@ -173,7 +173,11 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   formulario de registro arreglado, pendiente de push). Respuestas dadas: solapes se impiden **por profesional**
   (constraint 049), la reserva online muestra **30 días** (`MAX_VISIBLE_DAYS` en `BookingSteps.tsx`, aunque el
   ajuste permita 60) y el bot desde el número del negocio queda para después (Roberto: no sobrecargar OpenWA).
-- **Pendiente de verificar:** una respuesta real (OK/CANCELAR) de un cliente de Espiral tras la v39 →
-  `client_confirmed_at` o estado del turno. BD al 2026-10-14: 26 tablas (todas con RLS),
+- **Verificado 2026-10-14 14:16 UTC:** el OK de Roberto al T-0003 (Espiral) aplicó `client_confirmed` y salieron el
+  acuse y el aviso al negocio. Hicieron falta 4 arreglos (línea compartida, alias `@lid` global, consulta a OpenWA
+  para `@lid` desconocidos y el enum `rescheduled`, migraciones 080-081, `wa-inbound` v39-v42). Detalle y reglas en
+  [[whatsapp-automatizaciones]]. **Las respuestas de clientes no funcionaban para nadie desde el 2026-10-06.**
+- **Pendiente:** probar un `@lid` desconocido (Aicenis → T-0001); push de los commits del día; memoria de la carga
+  de OpenWA en [[whatsapp-automatizaciones]]. BD al 2026-10-14: 26 tablas (todas con RLS),
   13 organizaciones, 21 usuarios, 71 turnos, 24 clientes, 32 servicios, 13 salidas, 21 pasajes; aún **0 pagos
   registrados** y 0 avisos de licencia enviados. Dos negocios nuevos desde el 8 de octubre (uno es Espiral Studio).
