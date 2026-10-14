@@ -165,7 +165,15 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   desplegada; ver [[whatsapp-automatizaciones]]). Roberto lo pidió tras este incidente.
 - Migraciones locales y remotas alineadas hasta la **079**. **Roberto hizo el push el 2026-10-14** (078, 079,
   `error-notify` y memoria): `main` y `origin/main` iguales; Vercel no cambia (solo BD y funciones).
-- **En curso:** revisión de dudas que plantea Aicenis (Espiral Studio, dueña, registrada el 2026-10-14), la
-  primera usuaria real que reportó un fallo. BD al 2026-10-14: 26 tablas (todas con RLS),
+- **Espiral Studio (Aicenis Castro Oves-Garcia, dueña; acovesgarcia@yahoo.com; +5354469246; negocio +5363792397),**
+  primera usuaria real activa: plan Salón en prueba hasta el 2026-11-15, 2 servicios (fotos/álbumes), 2 profesionales
+  (Emilio Salado y ella) L-S 9-18, T-0001 desde el panel y T-0002 por el enlace `/book?b=espiral-studio-9c7a97`.
+  Revisión del 2026-10-14: todo funcionó salvo (1) respuestas de clientes perdidas por la línea compartida
+  (arreglado, `wa-inbound` v39) y (2) su número de negocio sin +53 (corregido en BD; aviso del T-0002 reenviado;
+  formulario de registro arreglado, pendiente de push). Respuestas dadas: solapes se impiden **por profesional**
+  (constraint 049), la reserva online muestra **30 días** (`MAX_VISIBLE_DAYS` en `BookingSteps.tsx`, aunque el
+  ajuste permita 60) y el bot desde el número del negocio queda para después (Roberto: no sobrecargar OpenWA).
+- **Pendiente de verificar:** una respuesta real (OK/CANCELAR) de un cliente de Espiral tras la v39 →
+  `client_confirmed_at` o estado del turno. BD al 2026-10-14: 26 tablas (todas con RLS),
   13 organizaciones, 21 usuarios, 71 turnos, 24 clientes, 32 servicios, 13 salidas, 21 pasajes; aún **0 pagos
   registrados** y 0 avisos de licencia enviados. Dos negocios nuevos desde el 8 de octubre (uno es Espiral Studio).

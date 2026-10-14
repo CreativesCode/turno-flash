@@ -129,3 +129,20 @@ desde la sesión de plataforma `ADMIN_NOTIFY_SESSION_ID`. Solo acepta service ro
 error en 24 h no avisan**: `increment_error_count` (065) las suma a la fila existente y el AFTER INSERT no se
 dispara; vuelve a avisar si pasan 24 h o si el error se marcó resuelto. Probado en real el 2026-10-14: `sent: 2`.
 Para cambiar los números: `supabase secrets set ERROR_NOTIFY_PHONES=...` (sin redeploy).
+
+**Una sola línea para todo el piloto (decisión de Roberto, 2026-10-14):** todos los negocios del piloto se conectan a
+la **misma sesión OpenWA** (`ef7074ea-…`, la de «Organización test»); el `openwa_session_id` se copia en
+`business_settings` desde el panel de plataforma (`WhatsAppOrgSection`). Consecuencia que ya mordió: `wa-inbound`
+buscaba el negocio por sesión con `.single()` y con dos negocios fallaba (PGRST116, «2 rows») y **descartaba todas las
+respuestas** (pasó con Espiral Studio de 13:08 a 13:36 UTC; se perdieron 2 respuestas). Desde `wa-inbound` v39
+(2026-10-14): lista los negocios de la sesión y, si hay varios, `resolveOrgBySender` elige el que **escribió por
+última vez a ese remitente** (reutiliza `resolveChatIds` por negocio); si ninguno le escribió, se ignora. La caída de
+sesión avisa a los dueños de todos los negocios de la línea. **Toda función nueva que resuelva negocio por sesión debe
+asumir N negocios.** Límite: un cliente al que dos negocios de la línea le escribieron recibe la respuesta en el que
+le escribió más recientemente.
+
+**El número de WhatsApp del negocio debe ir con +53:** `notify_business_*` hace `phoneToChatId(org.whatsapp_phone)`
+sin código de país, así que un número guardado como `63792397` manda el aviso a un chat inválido y el pie de los
+mensajes al cliente lo muestra sin prefijo. El registro lo mandaba crudo (arreglado en `register/page.tsx` el
+2026-10-14, pendiente de push). `notify_business_new` **no es idempotente** en `wa-send`: se puede reenviar a mano
+con la clave de servicio (`{appointmentId, intent}`), como se hizo con el T-0002 de Espiral.

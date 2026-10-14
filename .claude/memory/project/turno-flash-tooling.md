@@ -61,6 +61,11 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
   Ojo: `pg_class.reltuples` da -1 en tablas nunca analizadas (contar con `count(*)`); la tabla de errores se llama
   `error_logs` con columnas `error_message`, `error_stack`, `timestamp`, `last_occurrence`, `error_count`, `resolved`;
   `customers.last_name` es NOT NULL (el panel manda `''` cuando no hay apellido).
+- **Logs de edge functions sin MCP:** el token del CLI está en el Administrador de credenciales de Windows
+  (`Supabase CLI:supabase`, blob UTF-8 `sbp_…`, se lee con `CredReadW` por P/Invoke desde PowerShell). El endpoint
+  `analytics/endpoints/logs.all` ya no existe; `analytics/endpoints/logs?sql=…&iso_timestamp_start=…` responde pero el
+  2026-10-14 devolvió 0 filas para `function_logs`/`function_edge_logs` (sin resolver). Alternativa que sí sirvió:
+  reproducir la consulta PostgREST con la clave de servicio (`Accept: application/vnd.pgrst.object+json` → 406 PGRST116).
 - **Verificar un trigger → pg_net → edge function:** la respuesta queda en `net._http_response` (`status_code`,
   `content`, `error_msg`, `created`); consultar unos segundos después del insert que dispara.
 - **Definición viva de una función:** `select pg_get_functiondef(oid) …` por `db query`, guardar a un archivo y
