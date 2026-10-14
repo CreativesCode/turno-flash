@@ -1,4 +1,5 @@
 // Types for the TurnoFlash Appointment System
+import type { ServiceBadgeKey } from "@/config/service-badges";
 import { Database } from "./database.types";
 
 // Tipos generados desde Supabase - Enums
@@ -46,6 +47,7 @@ export interface ServiceFormData {
   available_for_online_booking?: boolean;
   image_url?: string;
   sort_order?: number;
+  badge?: ServiceBadgeKey | null;
 }
 
 export interface ServiceWithCategory extends Service {

@@ -1,4 +1,8 @@
+import { SERVICE_BADGE_KEYS, type ServiceBadgeKey } from "@/config/service-badges";
 import { z } from "zod";
+
+/** Long enough for a full package or price list, one item per line. */
+export const SERVICE_DESCRIPTION_MAX = 1000;
 
 /**
  * Service Form Data Schema
@@ -22,8 +26,8 @@ export const serviceFormSchema = z.object({
     .trim(),
   description: z
     .string()
-    .max(500, {
-      message: "La descripción no puede superar los 500 caracteres",
+    .max(SERVICE_DESCRIPTION_MAX, {
+      message: `La descripción no puede superar los ${SERVICE_DESCRIPTION_MAX} caracteres`,
     })
     .optional()
     .or(z.literal("")),
@@ -108,7 +112,13 @@ export const serviceFormSchema = z.object({
     .max(500)
     .optional()
     .or(z.literal("")),
-  sort_order: z.number().int().min(0).optional().default(0),
+  sort_order: z.number().int().min(0).optional(),
+  badge: z
+    .enum(SERVICE_BADGE_KEYS as [ServiceBadgeKey, ...ServiceBadgeKey[]], {
+      message: "Marca inválida",
+    })
+    .nullable()
+    .optional(),
 });
 
 /**

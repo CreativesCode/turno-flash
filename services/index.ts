@@ -7,6 +7,7 @@ export { AnalyticsService } from "./analytics.service";
 export { AppointmentService } from "./appointments.service";
 export { CustomerService } from "./customers.service";
 export { InvitationService } from "./invitations.service";
+export { ServiceCategoryService } from "./service-categories.service";
 export { ServiceService } from "./services.service";
 export { StaffService } from "./staff.service";
 export { TeamService } from "./team.service";

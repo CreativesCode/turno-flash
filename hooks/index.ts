@@ -48,6 +48,7 @@ export {
   useCreateService,
   useDeactivateService,
   useReactivateService,
+  useDuplicateService,
   useReorderServices,
   useServiceById,
   useServices as useServicesQuery,
@@ -103,6 +104,16 @@ export {
   type UseNormalizedDataReturn,
 } from "./useNormalizedData";
 
+// Service category hooks (PRP-004)
+export {
+  serviceCategoryKeys,
+  useCreateServiceCategory,
+  useDeleteServiceCategory,
+  useReorderServiceCategories,
+  useServiceCategories,
+  useUpdateServiceCategory,
+} from "./useServiceCategories.query";
+
 // Realtime hooks (Supabase Realtime + React Query)
 export {
   useRealtimeTable,
@@ -113,6 +124,7 @@ export {
   useRealtimeAll,
   useRealtimeAppointments,
   useRealtimeCustomers,
+  useRealtimeServiceCategories,
   useRealtimeServices,
   useRealtimeStaff,
   useRealtimeWAOutbound,

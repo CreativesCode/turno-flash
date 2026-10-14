@@ -3,6 +3,7 @@
 import { useAuth } from "@/contexts/auth-context";
 import { appointmentKeys } from "./useAppointments.query";
 import { customerKeys } from "./useCustomers.query";
+import { serviceCategoryKeys } from "./useServiceCategories.query";
 import { serviceKeys } from "./useServices.query";
 import { staffKeys } from "./useStaff.query";
 import { tripBookingKeys } from "./useTripBookings.query";
@@ -52,6 +53,17 @@ export function useRealtimeServices(enabled = true) {
     table: "services",
     organizationId: profile?.organization_id ?? null,
     invalidateKeys: [serviceKeys.all],
+    enabled,
+  });
+}
+
+export function useRealtimeServiceCategories(enabled = true) {
+  const { profile } = useAuth();
+  useRealtimeTable({
+    table: "service_categories",
+    organizationId: profile?.organization_id ?? null,
+    // Deleting a category also leaves its services without one
+    invalidateKeys: [serviceCategoryKeys.all, serviceKeys.all],
     enabled,
   });
 }
@@ -116,6 +128,7 @@ export function useRealtimeAll(enabled = true) {
   useRealtimeAppointments(enabled);
   useRealtimeCustomers(enabled);
   useRealtimeServices(enabled);
+  useRealtimeServiceCategories(enabled);
   useRealtimeStaff(enabled);
   useRealtimeTrips(enabled);
   // No wa_outbound_messages here: no query reads it, every message sent

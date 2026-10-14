@@ -8,9 +8,20 @@ export interface PublicService {
   price: number | null;
   currency: string | null;
   color: string | null;
+  /** null = no category (or its category is inactive) */
+  category_id: string | null;
+  /** One of SERVICE_BADGES keys; anything else is ignored */
+  badge: string | null;
   requires_approval: boolean;
   max_advance_booking_days: number;
   staff_ids: string[];
+}
+
+/** Active category with at least one listed service (migration 085). */
+export interface PublicCategory {
+  id: string;
+  name: string;
+  description: string | null;
 }
 
 export interface PublicStaff {
@@ -38,6 +49,8 @@ export type PublicBookingInfo =
       today: string;
       allow_same_day: boolean;
       services: PublicService[];
+      /** Empty when the business does not use categories */
+      categories: PublicCategory[];
       staff: PublicStaff[];
     };
 

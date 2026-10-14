@@ -186,10 +186,20 @@ export class ServiceService {
         }
       }
 
+      // Moving to another category: append at the end of the new group
+      const changes = { ...data };
+      if (
+        data.category_id !== undefined &&
+        (data.category_id ?? null) !== existingService.category_id &&
+        data.sort_order === undefined
+      ) {
+        changes.sort_order = await this.nextSortOrder(organizationId);
+      }
+
       // Update service
       const { data: service, error: updateError } = await supabase
         .from("services")
-        .update(data)
+        .update(changes)
         .eq("id", serviceId)
         .select()
         .single();
@@ -237,7 +247,8 @@ export class ServiceService {
         .from("services")
         .select("*")
         .eq("organization_id", organizationId)
-        .order("sort_order");
+        .order("sort_order")
+        .order("name");
 
       // Apply filters
       if (filters?.isActive !== undefined) {
@@ -299,6 +310,7 @@ export class ServiceService {
         .select("*")
         .eq("organization_id", organizationId)
         .order("sort_order")
+        .order("name")
         .range(offset, offset + limit - 1);
 
       // Apply filters
@@ -452,15 +464,30 @@ export class ServiceService {
       const supabase = createClient();
 
       // Update sort_order for each service
-      const updates = serviceIds.map((id, index) =>
-        supabase
-          .from("services")
-          .update({ sort_order: index })
-          .eq("id", id)
-          .eq("organization_id", organizationId)
+      const results = await Promise.all(
+        serviceIds.map((id, index) =>
+          supabase
+            .from("services")
+            .update({ sort_order: index })
+            .eq("id", id)
+            .eq("organization_id", organizationId)
+            .select("id")
+        )
       );
 
-      await Promise.all(updates);
+      // RLS rejects silently: no rows back means no permission
+      const failed = results.find((r) => r.error || !r.data?.length);
+      if (failed) {
+        if (failed.error) {
+          void Logger.error("Error reordering services:", failed.error);
+        }
+        return {
+          success: false,
+          error: failed.error
+            ? "Error al reordenar los servicios"
+            : "No tienes permiso para ordenar los servicios",
+        };
+      }
 
       return { success: true };
     } catch (error) {
@@ -469,6 +496,94 @@ export class ServiceService {
         success: false,
         error: "Error inesperado al reordenar los servicios",
       };
+    }
+  }
+
+  /** Next sort_order: services are appended at the end. */
+  private static async nextSortOrder(organizationId: string): Promise<number> {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("services")
+      .select("sort_order")
+      .eq("organization_id", organizationId)
+      .order("sort_order", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return (data?.sort_order ?? -1) + 1;
+  }
+
+  /**
+   * Copy of a service, appended at the end of its category, with the same
+   * staff assigned so it can be booked right away. Name: "X (copia)",
+   * "X (copia 2)"... (service names are unique per business).
+   */
+  static async duplicate(
+    serviceId: string,
+    organizationId: string
+  ): Promise<{ success: boolean; error?: string; service?: Service }> {
+    try {
+      const supabase = createClient();
+      const [{ data: original }, { data: names }, { data: staffRows }] =
+        await Promise.all([
+          supabase
+            .from("services")
+            .select("*")
+            .eq("id", serviceId)
+            .eq("organization_id", organizationId)
+            .single(),
+          supabase
+            .from("services")
+            .select("name")
+            .eq("organization_id", organizationId),
+          supabase
+            .from("staff_services")
+            .select("staff_id, proficiency_level")
+            .eq("service_id", serviceId),
+        ]);
+
+      if (!original) return { success: false, error: "El servicio no existe" };
+
+      const taken = new Set((names ?? []).map((n) => n.name));
+      const base = `${original.name} (copia`;
+      let name = `${base})`;
+      for (let i = 2; taken.has(name); i++) name = `${base} ${i})`;
+
+      // id and timestamps are new for the copy
+      const fields: Partial<Service> = { ...original };
+      delete fields.id;
+      delete fields.created_at;
+      delete fields.updated_at;
+      const { data: service, error } = await supabase
+        .from("services")
+        .insert({
+          ...fields,
+          organization_id: organizationId,
+          duration_minutes: original.duration_minutes,
+          name,
+          sort_order: await this.nextSortOrder(organizationId),
+        })
+        .select()
+        .single();
+
+      if (error || !service) {
+        void Logger.error("Error duplicating service:", error);
+        return { success: false, error: "Error al duplicar el servicio" };
+      }
+
+      if (staffRows?.length) {
+        const { error: staffError } = await supabase
+          .from("staff_services")
+          .insert(staffRows.map((r) => ({ ...r, service_id: service.id })));
+        if (staffError) {
+          // The copy exists; staff can still be assigned by hand
+          void Logger.error("Error copying staff of duplicated service:", staffError);
+        }
+      }
+
+      return { success: true, service: service as Service };
+    } catch (error) {
+      void Logger.error("Unexpected error duplicating service:", error);
+      return { success: false, error: "Error inesperado al duplicar el servicio" };
     }
   }
 }

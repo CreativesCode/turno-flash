@@ -9,6 +9,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { ZodError } from "zod";
+import { staffKeys } from "./useStaff.query";
 
 /**
  * Filters for services query
@@ -351,9 +352,70 @@ export function useReorderServices() {
 
       return result;
     },
-    onSuccess: () => {
+    // OPTIMISTIC: the list moves at once (buttons up/down)
+    onMutate: async (serviceIds) => {
+      await queryClient.cancelQueries({ queryKey: serviceKeys.lists() });
+      const previous = queryClient.getQueriesData({
+        queryKey: serviceKeys.lists(),
+      });
+      const position = new Map(serviceIds.map((id, i) => [id, i]));
+      queryClient.setQueriesData(
+        { queryKey: serviceKeys.lists() },
+        (old: Service[] | undefined) =>
+          old
+            ?.map((s) =>
+              position.has(s.id)
+                ? { ...s, sort_order: position.get(s.id) ?? 0 }
+                : s
+            )
+            .sort(
+              (a, b) =>
+                (a.sort_order ?? 0) - (b.sort_order ?? 0) ||
+                a.name.localeCompare(b.name)
+            )
+      );
+      return { previous };
+    },
+    onError: (_error, _ids, context) => {
+      context?.previous.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+    },
+    onSettled: () => {
       // Invalidate services queries to update order
       queryClient.invalidateQueries({ queryKey: serviceKeys.all });
+    },
+  });
+}
+
+/**
+ * Hook for duplicating a service (copy at the end of its category, same staff)
+ */
+export function useDuplicateService() {
+  const queryClient = useQueryClient();
+  const { profile } = useAuth();
+
+  return useMutation({
+    mutationFn: async (serviceId: string) => {
+      if (!profile?.organization_id) {
+        throw new Error("No se encontró la información de la organización");
+      }
+
+      const result = await ServiceService.duplicate(
+        serviceId,
+        profile.organization_id
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || "Error al duplicar el servicio");
+      }
+
+      return result.service;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: serviceKeys.all });
+      // The copy carries the staff assignments of the original
+      queryClient.invalidateQueries({ queryKey: staffKeys.all });
     },
   });
 }
