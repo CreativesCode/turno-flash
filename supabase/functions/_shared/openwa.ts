@@ -169,23 +169,19 @@ export function checkNumber(
 export async function resolveContactPhone(
   sessionId: string,
   contactId: string
-): Promise<string | null> {
+): Promise<{ phone: string | null; error?: string }> {
   const res = await call<{ contactId: string; phone: string | null }>(
     `/sessions/${sessionId}/contacts/${encodeURIComponent(contactId)}/phone`,
     { method: "GET" }
   );
   if (!res.success) {
-    console.warn(
-      `[openwa] resolveContactPhone(${contactId}) failed:`,
-      res.error?.code,
-      res.error?.message
-    );
-    return null;
+    const error = `${res.error?.code ?? "?"}: ${(res.error?.message ?? "").slice(0, 120)}`;
+    console.warn(`[openwa] resolveContactPhone(${contactId}) failed:`, error);
+    return { phone: null, error };
   }
   const phone = res.data?.phone;
-  return typeof phone === "string" && phone.replace(/\D/g, "")
-    ? phone.replace(/\D/g, "")
-    : null;
+  const digits = typeof phone === "string" ? phone.replace(/\D/g, "") : "";
+  return { phone: digits || null };
 }
 
 /** Verifica firma HMAC SHA-256 de un webhook de OpenWA.

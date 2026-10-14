@@ -545,7 +545,7 @@ function buildMessage(
           `🎫 N° ${numero}`,
           ``,
           `El negocio revisará tu solicitud y te avisaremos por aquí cuando la confirme.`,
-          `❌ Si ya no puedes ir, responde *CANCELAR*.`,
+          `❌ Si ya no puedes ir, responde *CANCELAR ${numero}*.`,
         ].join("\n");
       }
       return [
@@ -559,8 +559,8 @@ function buildMessage(
         `🎫 N° ${numero}`,
         ``,
         `Por favor confirma:`,
-        `✅ *OK* — confirmo que asisto`,
-        `❌ *CANCELAR* — no podré ir`,
+        `✅ *OK ${numero}* — confirmo que asisto`,
+        `❌ *CANCELAR ${numero}* — no podré ir`,
       ].join("\n");
 
     case "approved":
@@ -573,7 +573,7 @@ function buildMessage(
         `🎫 N° ${numero}`,
         ``,
         `Te esperamos 🙌`,
-        `❌ Si ya no puedes ir, responde *CANCELAR*.`,
+        `❌ Si ya no puedes ir, responde *CANCELAR ${numero}*.`,
       ].join("\n");
 
     case "rescheduled":
@@ -587,7 +587,7 @@ function buildMessage(
           `🎫 N° ${numero}`,
           ``,
           `El negocio revisará tu solicitud y te avisaremos por aquí cuando la confirme.`,
-          `❌ Si este horario no te sirve, responde *CANCELAR*.`,
+          `❌ Si este horario no te sirve, responde *CANCELAR ${numero}*.`,
         ].join("\n");
       }
       return [
@@ -599,8 +599,8 @@ function buildMessage(
         `🎫 N° ${numero}`,
         ``,
         `Por favor confirma de nuevo:`,
-        `✅ *OK* — confirmo que asisto`,
-        `❌ *CANCELAR* — no podré ir`,
+        `✅ *OK ${numero}* — confirmo que asisto`,
+        `❌ *CANCELAR ${numero}* — no podré ir`,
       ].join("\n");
 
     case "reminder_24h":
@@ -611,7 +611,7 @@ function buildMessage(
         ``,
         `💇 ${servicio}${staff}`,
         ``,
-        `Escribe *OK* para confirmar o *CANCELAR* si no puedes.`,
+        `Escribe *OK ${numero}* para confirmar o *CANCELAR ${numero}* si no puedes.`,
       ].join("\n");
 
     case "reminder_1h":
@@ -646,7 +646,7 @@ function buildMessage(
         `💇 ${servicio}${staff}`,
         `🎫 N° ${numero}`,
         ``,
-        `Escribe *OK* para confirmar o *CANCELAR* si no puedes.`,
+        `Escribe *OK ${numero}* para confirmar o *CANCELAR ${numero}* si no puedes.`,
       ].join("\n");
     }
 
@@ -656,8 +656,8 @@ function buildMessage(
         ``,
         `Para tu turno del *${fechaLarga}* a las *${hora}* (N° ${numero}):`,
         ``,
-        `✅ Escribe *OK* si vas a asistir`,
-        `❌ Escribe *CANCELAR* si no puedes ir`,
+        `✅ Escribe *OK ${numero}* si vas a asistir`,
+        `❌ Escribe *CANCELAR ${numero}* si no puedes ir`,
       ].join("\n");
 
     case "clarify_which":
@@ -665,7 +665,7 @@ function buildMessage(
         `Tienes varios turnos con nosotros:`,
         openList,
         ``,
-        `Para cancelar uno, escribe *CANCELAR* y su número, por ejemplo: *CANCELAR ${numero}*`,
+        `Para cancelar uno, escribe *CANCELAR ${numero}* y su número, por ejemplo: *CANCELAR ${numero}*`,
       ].join("\n");
 
     case "cancel_ack":

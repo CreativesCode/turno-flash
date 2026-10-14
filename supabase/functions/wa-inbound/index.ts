@@ -282,19 +282,55 @@ async function handleMessageReceived(
   const from = data.from ?? "";
   let organizationId = candidates[0];
   const chatIds = await resolveChatIds(supabase, from);
+  const isPrivacyId = from.endsWith("@lid");
+  let aliasSource: string | null = null;
   // A privacy-id sender (@lid) whose alias was never learned: OpenWA can map
   // it to the phone, either inline (senderPhone, RESOLVE_LID_TO_PHONE=true on
   // the server) or on demand.
+  let lidLookup = "";
   if (from.endsWith("@lid")) {
     const inline =
       typeof data.senderPhone === "string" ? data.senderPhone.replace(/\D/g, "") : "";
-    const phone =
-      inline || (chatIds.length ? null : await resolveContactPhone(env.sessionId, from));
+    let phone: string | null = inline || null;
+    if (!phone && !chatIds.length) {
+      const lookup = await resolveContactPhone(env.sessionId, from);
+      phone = lookup.phone;
+      lidLookup = lookup.error ? `lookup failed ${lookup.error}` : `lookup phone=${lookup.phone}`;
+    }
     if (phone) {
       const chatId = `${phone}@c.us`;
       if (!chatIds.includes(chatId)) chatIds.push(chatId);
+      aliasSource = "openwa_lookup";
       console.log(`[wa-inbound] ${from} resolved to ${chatId}`);
     }
+  }
+  // Still unknown: the reply itself can name the appointment ("OK T-0003"),
+  // which identifies the chat we wrote to. Otherwise ask for the code.
+  if (!chatIds.length) {
+    const code = appointmentNumberIn(data.body);
+    const byCode = code ? await chatByAppointmentCode(supabase, candidates, code) : null;
+    if (byCode) {
+      chatIds.push(byCode.chatId);
+      organizationId = byCode.organizationId;
+      aliasSource = "reply_code";
+      console.log(`[wa-inbound] ${from} identified by code ${code} → ${byCode.chatId}`);
+    } else {
+      const asked = await askForCode(supabase, env.sessionId, from, code);
+      return {
+        result: `unknown sender ${from} (${lidLookup || "no lookup"}; code=${code ?? "none"}; ${asked})`,
+      };
+    }
+  }
+  if (isPrivacyId && aliasSource && chatIds.length) {
+    await supabase.from("wa_sender_aliases").upsert(
+      {
+        sender_id: from,
+        chat_id: chatIds[0],
+        source: aliasSource,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "sender_id" }
+    );
   }
   if (candidates.length > 1) {
     const match = await resolveOrgBySender(supabase, candidates, chatIds);
@@ -303,7 +339,7 @@ async function handleMessageReceived(
         `[wa-inbound] ${candidates.length} orgs on session ${env.sessionId}, none wrote to "${from}"`
       );
       return {
-        result: `skip: ${candidates.length} businesses on the line, none wrote to ${from} (chatIds=${chatIds.join(",") || "none"})`,
+        result: `skip: ${candidates.length} businesses on the line, none wrote to ${from} (chatIds=${chatIds.join(",") || "none"}; ${lidLookup || "no lookup"})`,
       };
     }
     organizationId = match;
@@ -401,7 +437,7 @@ async function handleMessageReceived(
     );
     return {
       organizationId,
-      result: `no open appointment for ${from} (chatIds=${chatIds.join(",") || "none"})`,
+      result: `no open appointment for ${from} (chatIds=${chatIds.join(",") || "none"}; ${lidLookup || "no lookup"})`,
     };
   }
 
@@ -603,6 +639,14 @@ async function resolveChatIds(
   if (!from) return [];
   const chatIds = new Set<string>();
 
+  // Aliases learned earlier (082): the fast, deterministic path
+  const { data: known } = await supabase
+    .from("wa_sender_aliases")
+    .select("chat_id")
+    .eq("sender_id", from)
+    .maybeSingle<{ chat_id: string }>();
+  if (known?.chat_id) chatIds.add(known.chat_id);
+
   const digits = from.replace(/[^0-9]/g, "");
   if (from.endsWith("@c.us") && digits.length >= 8) {
     const suffix = digits.slice(-Math.min(10, digits.length));
@@ -623,6 +667,62 @@ async function resolveChatIds(
   for (const row of aliased ?? []) chatIds.add(row.chat_id);
 
   return [...chatIds];
+}
+
+/** The chat we wrote to about appointment `code` (e.g. "T-0003"), when exactly
+ *  one open appointment with that number got a customer message from one of
+ *  the businesses on the line. */
+async function chatByAppointmentCode(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  organizationIds: string[],
+  code: string
+): Promise<{ chatId: string; organizationId: string } | null> {
+  const minDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const { data } = await supabase
+    .from("wa_outbound_messages")
+    .select("chat_id, organization_id, appointment_id, appointments!inner(appointment_number, status, appointment_date)")
+    .in("organization_id", organizationIds)
+    .eq("appointments.appointment_number", code)
+    .in("appointments.status", ["pending", "confirmed", "reminded", "client_confirmed"])
+    .gte("appointments.appointment_date", minDate)
+    .like("chat_id", "%@c.us")
+    .order("sent_at", { ascending: false })
+    .limit(10);
+  const rows = (data ?? []) as { chat_id: string; organization_id: string; appointment_id: string }[];
+  const appointments = new Set(rows.map((r) => r.appointment_id));
+  if (appointments.size !== 1) return null;
+  return { chatId: rows[0].chat_id, organizationId: rows[0].organization_id };
+}
+
+const ASK_CODE_THROTTLE_MS = 12 * 60 * 60 * 1000;
+
+/** Best effort: tell an unidentified sender to include the appointment code.
+ *  At most once per sender every 12 h (looked up in wa_processed_events). */
+async function askForCode(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  sessionId: string,
+  from: string,
+  code: string | null
+): Promise<string> {
+  const since = new Date(Date.now() - ASK_CODE_THROTTLE_MS).toISOString();
+  const { data: recent } = await supabase
+    .from("wa_processed_events")
+    .select("idempotency_key")
+    .eq("payload->>from", from)
+    .gte("processed_at", since)
+    .ilike("result", "%asked for code%")
+    .limit(1);
+  if (recent?.length) return "asked recently";
+
+  const text = code
+    ? `No encontramos un turno abierto con el código ${code}. Revisa el código que aparece en tu mensaje (N° T-0000) y responde, por ejemplo, *OK T-0000*.`
+    : `No pudimos identificar tu turno. Responde con la palabra y el código que aparecen en tu mensaje, por ejemplo *OK T-0000* o *CANCELAR T-0000*.`;
+  const sent = await sendText({ sessionId, chatId: from, text });
+  const statusCode = (sent.error?.details as { statusCode?: number } | undefined)?.statusCode;
+  const ok = sent.success || sent.error?.code === "HTTP_500" || statusCode === 500;
+  return ok ? "asked for code" : `asked for code failed ${sent.error?.code ?? "?"}`;
 }
 
 /** Among the businesses that share a WhatsApp line, the one that last wrote
