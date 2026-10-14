@@ -25,6 +25,35 @@ interface WebhookEnvelope {
 
 const WEBHOOK_SECRET = Deno.env.get("OPENWA_WEBHOOK_SECRET") ?? "";
 
+// What the handler did with an event; stored on wa_processed_events (080)
+// because the function logs are not reachable from our tools.
+interface Outcome {
+  organizationId?: string;
+  result: string;
+}
+
+function compactPayload(env: WebhookEnvelope): Record<string, unknown> {
+  const d = (env.data ?? {}) as Record<string, unknown>;
+  const str = (v: unknown) => (typeof v === "string" ? v.slice(0, 80) : v);
+  const obj = (v: unknown) =>
+    v && typeof v === "object" ? JSON.stringify(v).slice(0, 200) : undefined;
+  return {
+    sessionId: env.sessionId,
+    keys: Object.keys(d).slice(0, 40),
+    id: str(d.id),
+    from: str(d.from),
+    to: str(d.to),
+    author: str(d.author),
+    chatId: str(d.chatId),
+    type: d.type,
+    fromMe: d.fromMe,
+    isGroup: d.isGroup,
+    body: str(d.body),
+    sender: obj(d.sender),
+    chat: obj(d.chat),
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -108,6 +137,7 @@ Deno.serve(async (req) => {
     .insert({
       idempotency_key: idemKey,
       event_type: envelope.event,
+      payload: compactPayload(envelope),
     });
 
   if (dupErr && dupErr.code === "23505") {
@@ -124,9 +154,10 @@ Deno.serve(async (req) => {
   // 3. Routing por tipo de evento
   console.log(`[wa-inbound] routing event="${envelope.event}"`);
   try {
+    let outcome: Outcome | null = null;
     switch (envelope.event) {
       case "message.received":
-        await handleMessageReceived(supabase, envelope);
+        outcome = await handleMessageReceived(supabase, envelope);
         break;
       case "message.sent":
         console.log("[wa-inbound] message.sent (echo) — skip");
@@ -142,6 +173,16 @@ Deno.serve(async (req) => {
         break;
       default:
         console.log("[wa-inbound] ignored event", envelope.event);
+    }
+
+    if (outcome) {
+      await supabase
+        .from("wa_processed_events")
+        .update({
+          organization_id: outcome.organizationId ?? null,
+          result: outcome.result.slice(0, 300),
+        })
+        .eq("idempotency_key", idemKey);
     }
 
     console.log("[wa-inbound] processed OK");
@@ -167,7 +208,7 @@ async function handleMessageReceived(
   // deno-lint-ignore no-explicit-any
   supabase: any,
   env: WebhookEnvelope
-) {
+): Promise<Outcome> {
   const data = env.data as {
     from: string;
     body?: string;
@@ -182,7 +223,7 @@ async function handleMessageReceived(
 
   if (data.fromMe || data.isGroup) {
     console.log("[wa-inbound] skip: fromMe or isGroup");
-    return;
+    return { result: "skip: fromMe or group" };
   }
 
   // Ignorar notificaciones internas de WhatsApp (e2e_notification,
@@ -194,13 +235,13 @@ async function handleMessageReceived(
     data.body = "[nota de voz]";
   } else if (data.type && data.type !== "chat") {
     console.log(`[wa-inbound] skip: type=${data.type} (no es chat)`);
-    return;
+    return { result: `skip: type=${data.type}` };
   }
 
   // Mensajes sin cuerpo (stickers vacíos, media sin caption, etc.) — ignorar.
   if (!data.body || !data.body.trim()) {
     console.log("[wa-inbound] skip: empty body");
-    return;
+    return { result: "skip: empty body" };
   }
 
   const intent = classifyReply(data.body);
@@ -228,7 +269,7 @@ async function handleMessageReceived(
     console.warn(
       `[wa-inbound] session not mapped to org: ${env.sessionId}`
     );
-    return;
+    return { result: "skip: session not mapped to any business" };
   }
 
   // Resolve the appointment of this chat: first the chat ids we write to for
@@ -244,7 +285,9 @@ async function handleMessageReceived(
       console.log(
         `[wa-inbound] ${candidates.length} orgs on session ${env.sessionId}, none wrote to "${from}"`
       );
-      return;
+      return {
+        result: `skip: ${candidates.length} businesses on the line, none wrote to ${from}`,
+      };
     }
     organizationId = match.organizationId;
     chatIds = match.chatIds;
@@ -268,7 +311,7 @@ async function handleMessageReceived(
       ratingValue,
       data.body
     );
-    if (ratingApplied) return;
+    if (ratingApplied) return { organizationId, result: "rating applied" };
     // Sin rating_request pendiente: cae al flujo normal (confirm/cancel/clarify)
   }
 
@@ -287,7 +330,7 @@ async function handleMessageReceived(
     console.log(
       `[wa-inbound] latest message to "${from}" was about a trip booking: appointments untouched`
     );
-    return;
+    return { organizationId, result: "skip: latest message to sender was a trip booking" };
   }
 
   const OPEN_INTENTS = [
@@ -340,7 +383,10 @@ async function handleMessageReceived(
     console.log(
       `[wa-inbound] no open appointment for from="${from}" in org ${organizationId}`
     );
-    return;
+    return {
+      organizationId,
+      result: `no open appointment for ${from} (chatIds=${chatIds.join(",") || "none"})`,
+    };
   }
 
   console.log(
@@ -356,7 +402,7 @@ async function handleMessageReceived(
       `[wa-inbound] ambiguous CANCEL: ${openIds.length} open appointments for "${from}"`
     );
     await invokeWaSend(appointmentId, "clarify_which");
-    return;
+    return { organizationId, result: `ambiguous cancel for ${appointmentId}: asked which` };
   }
 
   // Si no se entendió → mandar mensaje de clarificación (con throttle)
@@ -368,7 +414,10 @@ async function handleMessageReceived(
       )}"`
     );
     await maybeSendClarify(supabase, appointmentId);
-    return;
+    return {
+      organizationId,
+      result: `unclassified reply for ${appointmentId}: "${(data.body ?? "").slice(0, 40)}"`,
+    };
   }
 
   if (intent === "confirm") {
@@ -411,6 +460,10 @@ async function handleMessageReceived(
       invokeWaSend(appointmentId, "confirm_ack"),
       invokeWaSend(appointmentId, "notify_business_confirm"),
     ]);
+    return {
+      organizationId,
+      result: `confirm applied to ${appointmentId}: ${updErr ? "UPDATE failed " + updErr.message : "rows=" + (count ?? "?")}`,
+    };
   } else if (intent === "cancel") {
     console.log(
       `[wa-inbound] applying CANCEL to appointment ${appointmentId}`
@@ -442,7 +495,12 @@ async function handleMessageReceived(
     // `trg_wa_on_appointment_cancel` automáticamente cuando el UPDATE de
     // status='cancelled' se commitea. Aquí solo notificamos al negocio.
     await invokeWaSend(appointmentId, "notify_business_cancel");
+    return {
+      organizationId,
+      result: `cancel applied to ${appointmentId}: ${updErr ? "UPDATE failed " + updErr.message : "rows=" + (count ?? "?")}`,
+    };
   }
+  return { organizationId, result: `intent ${intent} not handled for ${appointmentId}` };
 }
 
 // deno-lint-ignore no-explicit-any
