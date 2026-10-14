@@ -494,7 +494,7 @@
   <ol class="steps">
     <li><strong>Crea tu cuenta.</strong> En la pantalla de registro completa tu nombre, el nombre del negocio, tu email y una contraseña de al menos 6 caracteres. En <em>¿Qué hace tu negocio?</em> elige <span class="ui">Doy turnos o citas</span> (o <span class="ui">Las dos cosas</span> si también vendes asientos de viajes). En <em>¿Cuántos atienden?</em> elige si trabajas por tu cuenta o con equipo: eso define tu plan. Escribe <strong>tu WhatsApp</strong> (ahí te avisamos antes de que venza tu acceso), el WhatsApp del negocio y tu zona horaria. Empiezas con <strong>15 días de prueba gratis</strong> y ese día no pagas nada.</li>
     <li><strong>Elige la moneda.</strong> En <span class="path">Ajustes <i>›</i> Moneda</span> selecciona la moneda en la que cobras y pulsa <span class="ui">Guardar</span>.</li>
-    <li><strong>Pon a quién te escriben tus clientes.</strong> En <span class="path">Ajustes <i>›</i> Contacto para tus clientes</span> escribe quién atiende y el WhatsApp del negocio. Los avisos salen de un número automático que solo entiende <em>OK</em> y <em>CANCELAR</em>; cuando el cliente pueda necesitar hablar con alguien, el mensaje le dice que escriba a esta persona y número.</li>
+    <li><strong>Pon a quién te escriben tus clientes.</strong> En <span class="path">Ajustes <i>›</i> Contacto para tus clientes</span> escribe quién atiende y el WhatsApp del negocio. Los avisos salen de un número automático que solo entiende <em>OK</em> y <em>CANCELAR</em> con el código del turno (por ejemplo <em>OK EN-0042</em>); cuando el cliente pueda necesitar hablar con alguien, el mensaje le dice que escriba a esta persona y número.</li>
     <li><strong>Carga tus servicios</strong> en <span class="path">Servicios</span>: nombre, duración y precio de cada uno.</li>
     <li><strong>Carga a tu equipo</strong> en <span class="path">Profesionales</span> y, para cada persona, abre el menú <span class="ui">⋮</span> › <span class="ui">Horario y servicios</span>.</li>
     <li><strong>Invita a tu personal</strong> desde <span class="path">Invitar</span> para que cada uno entre con su propio usuario.</li>
@@ -684,7 +684,7 @@
     <table>
       <thead><tr><th>Cuándo</th><th>Quién lo recibe</th><th>Qué dice</th></tr></thead>
       <tbody>
-        <tr><td>Al crear un turno</td><td class="wrap">Cliente y negocio</td><td class="wrap">Al cliente, los datos del turno con opción de responder OK o CANCELAR. Si está pendiente de aprobación, le dice que su solicitud se recibió. Al negocio, un aviso de <em>Nuevo turno</em>.</td></tr>
+        <tr><td>Al crear un turno</td><td class="wrap">Cliente y negocio</td><td class="wrap">Al cliente, los datos del turno con opción de responder OK o CANCELAR seguido del código del turno. Si está pendiente de aprobación, le dice que su solicitud se recibió. Al negocio, un aviso de <em>Nuevo turno</em>.</td></tr>
         <tr><td>Al aprobar un pendiente</td><td class="wrap">Cliente</td><td class="wrap">Que el negocio aprobó su solicitud y el turno está confirmado.</td></tr>
         <tr><td>24 horas antes</td><td class="wrap">Cliente</td><td class="wrap">Recordatorio para confirmar con OK o cancelar.</td></tr>
         <tr><td>1 hora antes</td><td class="wrap">Cliente</td><td class="wrap">Aviso de que el turno es en una hora.</td></tr>
@@ -705,11 +705,11 @@ Tu turno en <b>Estudio Nova</b> está reservado:
 ⏰ 10:30
 💇 Corte y peinado
 👤 <b>Con:</b> Carla
-🎫 N° T-0042
+🎫 N° EN-0042
 
 Por favor confirma:
-✅ <b>OK</b> — confirmo que asisto
-❌ <b>CANCELAR</b> — no podré ir</div>
+✅ <b>OK EN-0042</b> — confirmo que asisto
+❌ <b>CANCELAR EN-0042</b> — no podré ir</div>
     </div>
     <div class="wa">
       <div class="wa-when">Ejemplo · 24 horas antes</div>
@@ -719,12 +719,13 @@ Mañana jueves 24 de septiembre a las 10:30 te esperamos en <b>Estudio Nova</b>.
 
 💇 Corte y peinado
 
-Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
+Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.</div>
     </div>
   </div>
 
   <h3>Cuando el cliente responde</h3>
   <ul>
+    <li><strong>El código del turno (EN-0042):</strong> lleva las letras de tu negocio y es el mismo que ves en el panel. La primera vez que un cliente te responde debe incluirlo, escrito como le salga (en-42, EN 0042); a partir de ahí le basta con OK o CANCELAR. Si responde sin código y aún no lo conocemos, recibe un mensaje pidiéndoselo.</li>
     <li><strong>OK, SI, CONFIRMO o un 👍:</strong> el turno pasa a <span class="chip st-client_confirmed">Confirmó</span> y el negocio recibe <em>Cliente confirmó asistencia</em>. En un turno pendiente solo queda anotado que vendrá: aprobarlo sigue siendo decisión tuya.</li>
     <li><strong>CANCELAR o NO:</strong> el turno se cancela solo, el cliente recibe la confirmación y el negocio, un aviso de <em>Turno cancelado por el cliente</em>.</li>
     <li><strong>Un número del 1 al 5</strong> después de un pedido de valoración: se guarda como rating y alimenta tus reportes.</li>
@@ -916,9 +917,9 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
 Te recordamos tu turno en <b>Estudio Nova</b> mañana a las 10:30.
 
 💇 Corte y peinado
-🎫 N° T-0042
+🎫 N° EN-0042
 
-Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
+Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.</div>
   </div>
   <p>Si responde <strong>OK</strong>, el turno pasa solo a <span class="chip st-client_confirmed">Confirmó</span>. Si responde <strong>CANCELAR</strong>, se cancela solo y el hueco queda libre. El número <strong>Respondieron</strong> te dice qué parte de los avisados ya confirmó.</p>
 
@@ -955,7 +956,7 @@ Escribe <b>OK</b> para confirmar o <b>CANCELAR</b> si no puedes.</div>
   <ol class="steps">
     <li><strong>Crea tu cuenta.</strong> En <em>¿Qué hace tu negocio?</em> elige <span class="ui">Vendo asientos de viajes</span> (o <span class="ui">Las dos cosas</span>). Escribe tu WhatsApp (ahí te avisamos antes de que venza tu acceso) y el WhatsApp del negocio, que es donde te llegarán los avisos de reservas nuevas. Empiezas con 15 días de prueba gratis en el plan Pasajes.</li>
     <li><strong>Elige la moneda</strong> en <span class="path">Ajustes <i>›</i> Moneda</span>: CUP, USD, EUR y otras monedas de la región.</li>
-    <li><strong>Pon a quién te escriben tus clientes.</strong> En <span class="path">Ajustes <i>›</i> Contacto para tus clientes</span> escribe quién atiende y el WhatsApp del negocio. Los avisos salen de un número automático que solo entiende <em>OK</em> y <em>CANCELAR</em>; cuando el cliente pueda necesitar hablar con alguien, el mensaje le dice que escriba a esta persona y número.</li>
+    <li><strong>Pon a quién te escriben tus clientes.</strong> En <span class="path">Ajustes <i>›</i> Contacto para tus clientes</span> escribe quién atiende y el WhatsApp del negocio. Los avisos salen de un número automático que solo entiende <em>OK</em> y <em>CANCELAR</em> con el código del turno (por ejemplo <em>OK EN-0042</em>); cuando el cliente pueda necesitar hablar con alguien, el mensaje le dice que escriba a esta persona y número.</li>
     <li><strong>Configura el cobro del anticipo</strong> en <span class="path">Ajustes <i>›</i> Página de reservas de viajes</span>: escribe cómo se paga y cuántas horas hay para pagarlo.</li>
     <li><strong>Crea tu primera salida</strong> en <span class="path">Viajes</span> y déjala publicada.</li>
     <li><strong>Enciende la página de reservas</strong>, pulsa <span class="ui">Guardar cambios</span> y comparte el link.</li>
