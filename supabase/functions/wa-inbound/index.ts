@@ -281,6 +281,16 @@ async function handleMessageReceived(
   // required: OpenWA can answer with an error after delivering, leaving it null.
   const from = data.from ?? "";
   let organizationId = candidates[0];
+  const { data: orgRows } = await supabase
+    .from("organizations")
+    .select("id, reply_prefix")
+    .in("id", candidates);
+  const prefixByOrg = new Map<string, string>(
+    ((orgRows ?? []) as { id: string; reply_prefix: string | null }[])
+      .filter((o) => o.reply_prefix)
+      .map((o) => [o.id, o.reply_prefix as string])
+  );
+  const knownPrefixes = [...prefixByOrg.values()];
   const chatIds = await resolveChatIds(supabase, from);
   const isPrivacyId = from.endsWith("@lid");
   let aliasSource: string | null = null;
@@ -307,17 +317,24 @@ async function handleMessageReceived(
   // Still unknown: the reply itself can name the appointment ("OK T-0003"),
   // which identifies the chat we wrote to. Otherwise ask for the code.
   if (!chatIds.length) {
-    const code = appointmentNumberIn(data.body);
-    const byCode = code ? await chatByAppointmentCode(supabase, candidates, code) : null;
+    const code = parseReplyCode(data.body ?? "", knownPrefixes);
+    const orgsForCode = code?.prefix
+      ? candidates.filter((id) => prefixByOrg.get(id) === code.prefix)
+      : candidates;
+    const byCode = code
+      ? await chatByAppointmentCode(supabase, orgsForCode, code.number)
+      : null;
     if (byCode) {
       chatIds.push(byCode.chatId);
       organizationId = byCode.organizationId;
       aliasSource = "reply_code";
-      console.log(`[wa-inbound] ${from} identified by code ${code} → ${byCode.chatId}`);
+      console.log(`[wa-inbound] ${from} identified by code ${code?.prefix ?? "T"}-${code?.number} → ${byCode.chatId}`);
     } else {
-      const asked = await askForCode(supabase, env.sessionId, from, code);
+      const example = knownPrefixes.length === 1 ? `${knownPrefixes[0]}-0001` : "T-0001";
+      const codeText = code ? `${code.prefix ?? "T"}-${code.number.slice(2)}` : null;
+      const asked = await askForCode(supabase, env.sessionId, from, codeText, example);
       return {
-        result: `unknown sender ${from} (${lidLookup || "no lookup"}; code=${code ?? "none"}; ${asked})`,
+        result: `unknown sender ${from} (${lidLookup || "no lookup"}; code=${codeText ?? "none"}; ${asked})`,
       };
     }
   }
@@ -425,7 +442,7 @@ async function handleMessageReceived(
 
   // The customer can name the appointment ("CANCELAR T-0045"); otherwise the
   // one that got the latest message.
-  const named = appointmentNumberIn(data.body);
+  const named = appointmentNumberIn(data.body, knownPrefixes);
   const lastOutbound =
     (named &&
       openRows.find((row) => row.appointments?.appointment_number === named)) ||
@@ -704,7 +721,8 @@ async function askForCode(
   supabase: any,
   sessionId: string,
   from: string,
-  code: string | null
+  code: string | null,
+  example: string
 ): Promise<string> {
   const since = new Date(Date.now() - ASK_CODE_THROTTLE_MS).toISOString();
   const { data: recent } = await supabase
@@ -717,8 +735,8 @@ async function askForCode(
   if (recent?.length) return "asked recently";
 
   const text = code
-    ? `No encontramos un turno abierto con el código ${code}. Revisa el código que aparece en tu mensaje (N° T-0000) y responde, por ejemplo, *OK T-0000*.`
-    : `No pudimos identificar tu turno. Responde con la palabra y el código que aparecen en tu mensaje, por ejemplo *OK T-0000* o *CANCELAR T-0000*.`;
+    ? `No encontramos un turno abierto con el código ${code}. Revisa el código que aparece en tu mensaje y responde, por ejemplo, *OK ${example}*.`
+    : `No pudimos identificar tu turno. Responde con la palabra y el código que aparecen en tu mensaje, por ejemplo *OK ${example}* o *CANCELAR ${example}*.`;
   const sent = await sendText({ sessionId, chatId: from, text });
   const statusCode = (sent.error?.details as { statusCode?: number } | undefined)?.statusCode;
   const ok = sent.success || sent.error?.code === "HTTP_500" || statusCode === 500;
@@ -907,9 +925,28 @@ function classifyReply(body: string): "confirm" | "cancel" | null {
 }
 
 /** "T-0045", "t45" or "T 0045" in the reply → "T-0045", else null. */
-function appointmentNumberIn(body: string): string | null {
-  const match = body.toUpperCase().match(/\bT[-\s]?(\d{1,6})\b/);
-  return match ? `T-${match[1].padStart(4, "0")}` : null;
+interface ReplyCode {
+  prefix: string | null; // business prefix (083), null for the plain T-0001 form
+  number: string; // "T-0001"
+}
+
+/** The appointment code in a reply, typed loosely: "T-0045", "ES-0001",
+ *  "es-001", "es001", "es 1". Letters other than T must be a known business
+ *  prefix, so "dale 5" or "voy 2" are not read as codes. */
+function parseReplyCode(body: string, knownPrefixes: string[]): ReplyCode | null {
+  const known = new Set(knownPrefixes.map((p) => p.toUpperCase()));
+  const re = /\b([A-Z]{1,4})[-\s]?0*(\d{1,6})\b/gi;
+  for (const match of body.matchAll(re)) {
+    const letters = match[1].toUpperCase();
+    const number = `T-${match[2].padStart(4, "0")}`;
+    if (letters === "T") return { prefix: null, number };
+    if (known.has(letters)) return { prefix: letters, number };
+  }
+  return null;
+}
+
+function appointmentNumberIn(body: string, knownPrefixes: string[] = []): string | null {
+  return parseReplyCode(body, knownPrefixes)?.number ?? null;
 }
 
 async function invokeWaSend(appointmentId: string, intent: string) {
