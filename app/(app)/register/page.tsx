@@ -128,7 +128,7 @@ export default function RegisterPage() {
           full_name: fullName,
           org_name: orgName,
           org_timezone: timezone,
-          org_whatsapp_phone: whatsapp || undefined,
+          org_whatsapp_phone: whatsapp ? toInternationalPhone(whatsapp) : undefined,
           modules: kind,
           plan,
           owner_phone: toInternationalPhone(ownerPhone),
