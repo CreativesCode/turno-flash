@@ -532,7 +532,7 @@
     <li>Pulsa <span class="ui">Nuevo turno</span> (en el teléfono, el botón redondo <span class="ui">+</span>).</li>
     <li>Elige el <strong>cliente</strong> de la lista. Si es nuevo, pulsa <span class="ui">Nuevo</span>, completa nombre, apellido, teléfono y (si quieres) email, y pulsa <span class="ui">Crear y seleccionar</span>.</li>
     <li>Elige <strong>fecha</strong> y <strong>hora</strong> de inicio.</li>
-    <li>Toca el <strong>servicio</strong>. Cada opción muestra la duración y el precio; la hora de fin se calcula sola.</li>
+    <li>Toca el <strong>servicio</strong>. Cada opción muestra la duración y el precio; la hora de fin se calcula sola. Si usas categorías, los servicios aparecen agrupados bajo el nombre de cada una.</li>
     <li>Opcional: elige el <strong>profesional</strong> o deja <span class="ui">Cualquiera</span>, y agrega una nota.</li>
     <li>Pulsa <span class="ui">Crear turno</span>.</li>
   </ol>
@@ -611,7 +611,10 @@
     <table>
       <thead><tr><th>Campo</th><th>Para qué sirve</th></tr></thead>
       <tbody>
-        <tr><td>Nombre y descripción</td><td class="wrap">Lo que ven tú y tus clientes en la reserva online.</td></tr>
+        <tr><td>Nombre</td><td class="wrap">Lo que ven tú y tus clientes. Si tienes varios parecidos, pon la diferencia en el nombre: <em>Álbum personalizado 6x8</em>, <em>Álbum personalizado 8x10</em>.</td></tr>
+        <tr><td>Categoría</td><td class="wrap">Solo aparece si creaste categorías (ver más abajo). El servicio se muestra dentro de esa categoría.</td></tr>
+        <tr><td>Descripción</td><td class="wrap">Lo que incluye, <strong>una cosa por línea</strong> (hasta 1000 letras). Tu cliente la ve tal cual la escribiste; si es larga, ve las primeras líneas y el botón <span class="ui">Ver detalle</span>.</td></tr>
+        <tr><td>Marca</td><td class="wrap">Una etiqueta opcional junto al nombre: <span class="ui">Recomendado</span>, <span class="ui">Más popular</span>, <span class="ui">Nuevo</span> u <span class="ui">Oferta</span>. No cambia el orden.</td></tr>
         <tr><td>Duración (min)</td><td class="wrap">Cuánto dura el servicio. Define la hora de fin del turno.</td></tr>
         <tr><td>Buffer (min)</td><td class="wrap">Tiempo extra que se reserva después del servicio para limpiar o prepararse. Ocupa agenda aunque no se cobre.</td></tr>
         <tr><td>Precio</td><td class="wrap">En la moneda de tu negocio.</td></tr>
@@ -622,6 +625,21 @@
     </table>
   </div>
   <p>El interruptor a la derecha de cada servicio lo pausa: deja de ofrecerse sin borrarlo, y queda marcado como <span class="ui">Pausado</span>. Puedes volver a activarlo cuando quieras.</p>
+
+  <h3>Categorías (opcional)</h3>
+  <p>Si ofreces muchos servicios, agrúpalos: por ejemplo <em>Bodas</em>, <em>Quinceañeras</em> y <em>Familiares</em>, o <em>Cortes</em>, <em>Color</em> y <em>Uñas</em>. Así tu cliente elige primero qué le interesa y solo ve esos servicios. Si no creas ninguna, todo sigue como siempre.</p>
+  <ol class="steps">
+    <li>En <span class="path">Servicios</span> pulsa <span class="ui">Categorías</span> (en el teléfono, el botón con la etiqueta, junto a <span class="ui">Nuevo</span>).</li>
+    <li>Escribe el nombre y, si quieres, una descripción corta (por ejemplo, <em>Incluye estilismo y vestuario</em>). Pulsa <span class="ui">Agregar categoría</span>.</li>
+    <li>Abre cada servicio y elige su <strong>Categoría</strong>. Pulsa <span class="ui">Guardar cambios</span>.</li>
+  </ol>
+  <p>En la lista de categorías, las flechas cambian el orden, el lápiz la edita y la papelera la borra. Borrar una categoría <strong>no borra sus servicios</strong>: quedan en <em>Sin categoría</em>. El botón del enlace copia un link que abre tu página de reservas <strong>directo en esa categoría</strong>, ideal para compartir solo las bodas en Instagram o por WhatsApp.</p>
+
+  <h3>Ordenar los servicios</h3>
+  <p>Pulsa <span class="ui">Ordenar</span>, arriba de la lista, y usa las flechas de cada servicio para subirlo o bajarlo dentro de su categoría. Pulsa <span class="ui">Listo</span> al terminar. Ese orden es el que ven tus clientes y tu equipo.</p>
+
+  <h3>Duplicar un servicio</h3>
+  <p>Para cargar varios paquetes parecidos, abre uno y toca <span class="ui">Duplicar este servicio</span>. Se crea una copia llamada <em>… (copia)</em>, con los mismos profesionales asignados, y se abre para que cambies el nombre, lo que incluye y el precio.</p>
 
   <h2 id="td-profesionales">Profesionales</h2>
   <p>En <span class="path">Profesionales</span> cargas a las personas que atienden. Pulsa <span class="ui">Nuevo</span> y completa nombre y apellido; el resto es opcional: apodo (es el nombre que se muestra), teléfono, email, especialidades separadas por coma, una bio y un color para la agenda. Si esa persona entra a la app con su propia cuenta, elígela en <strong>Cuenta de la app</strong>: así verá la pastilla <span class="ui">Mis turnos</span> en su agenda. Además hay tres casillas:</p>
@@ -634,7 +652,7 @@
   <h3>Horario y servicios de cada profesional</h3>
   <p>Desde el menú <span class="ui">⋮</span> › <span class="ui">Horario y servicios</span> de cada profesional configuras tres cosas:</p>
   <ul>
-    <li><strong>Servicios que realiza:</strong> toca los que hace esa persona. Solo esos se le ofrecen online.</li>
+    <li><strong>Servicios que realiza:</strong> toca los que hace esa persona. Solo esos se le ofrecen online. Si usas categorías, <span class="ui">Marcar todos</span> junto a cada una marca todos sus servicios de un toque (y <span class="ui">Quitar todos</span> los desmarca). Un servicio que crees después en esa categoría hay que marcarlo aparte, salvo que lo hayas duplicado de uno que esa persona ya hacía.</li>
     <li><strong>Horario semanal:</strong> para cada día marca <em>Trabaja</em> y define desde y hasta. Si corta al mediodía, usa <span class="ui">Agregar tramo</span> para cargar un segundo horario el mismo día.</li>
     <li><strong>Días libres y vacaciones:</strong> elige desde, hasta y un motivo, y pulsa <span class="ui">Agregar</span>. Se guardan en el momento. Si ya hay turnos esos días, la app te avisa antes: el cierre no los cancela, tienes que moverlos o cancelarlos tú. Desde el panel tampoco se pueden crear turnos con ese profesional en un día cerrado.</li>
   </ul>
@@ -652,6 +670,7 @@
 
   <h3>Qué hace tu cliente en la página</h3>
   <div class="flow" aria-label="Pasos de la reserva online">
+    <span class="chip plain">¿Qué te interesa?</span><span class="arrow">→</span>
     <span class="chip plain">Elige un servicio</span><span class="arrow">→</span>
     <span class="chip plain">¿Con quién?</span><span class="arrow">→</span>
     <span class="chip plain">Elige día y horario</span><span class="arrow">→</span>
@@ -659,6 +678,7 @@
     <span class="chip plain">Listo</span>
   </div>
   <ul>
+    <li><em>¿Qué te interesa?</em> solo aparece si usas <strong>dos o más categorías</strong>: muestra cada una con su descripción, cuántas opciones tiene y desde qué precio. Después ve solo los servicios de la que eligió, en tu orden y con sus marcas. Los servicios sin categoría salen juntos como <em>Otros</em>. Si alguien entra con el link de una categoría, va directo a ella.</li>
     <li>En <em>¿Con quién?</em> puede elegir a un profesional o <strong>Sin preferencia</strong>, y la app asigna al primero que esté libre. Si el servicio lo hace una sola persona, ese paso se salta.</li>
     <li>Solo ve horarios realmente libres, calculados con el horario de cada profesional, sus turnos, sus días libres y los cierres del negocio.</li>
     <li>En <em>Tus datos</em> deja nombre, teléfono de WhatsApp (con selector de país) y, si quiere, apellido, email y una nota para el negocio. Su teléfono recuerda el nombre y el número para la próxima reserva.</li>

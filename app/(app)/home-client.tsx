@@ -34,6 +34,7 @@ import {
   Plus,
   ServerCog,
   Smartphone,
+  Tags,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -79,6 +80,12 @@ const FEATURES: readonly Feature[] = [
     title: "Sin dobles reservas",
     description:
       "Tu calendario siempre actualizado en tiempo real, sin solapes.",
+  },
+  {
+    Icon: Tags,
+    title: "Servicios por categorías",
+    description:
+      "Agrupa tu catálogo (bodas, cortes, consultas…) y destaca lo más pedido. Tus clientes encuentran rápido lo que buscan.",
   },
   {
     Icon: ChartColumn,
