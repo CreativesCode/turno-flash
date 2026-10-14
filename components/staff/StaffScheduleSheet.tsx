@@ -2,7 +2,7 @@
 
 import { Button, Field, Sheet, sheetInputClasses } from "@/components/ui";
 import { ExceptionsEditor } from "@/components/staff/ExceptionsEditor";
-import { useServicesQuery, useToast } from "@/hooks";
+import { useServiceCategories, useServicesQuery, useToast } from "@/hooks";
 import {
   useSaveStaffSchedule,
   useStaffSchedule,
@@ -13,8 +13,9 @@ import {
   type StaffScheduleInput,
 } from "@/schemas/staff-schedule.schema";
 import type { StaffMember } from "@/types/appointments";
+import { groupServices, hasCategoryGroups } from "@/utils/group-services";
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 /** Monday first for display; values are Postgres DOW (0 = Sunday). */
 const DAYS: { dow: number; label: string }[] = [
@@ -81,6 +82,16 @@ function ScheduleEditor({
   const { services, loading: loadingServices } = useServicesQuery({
     isActive: true,
   });
+  const { categories } = useServiceCategories();
+  const groups = useMemo(
+    () =>
+      groupServices(
+        services,
+        categories.filter((c) => c.is_active ?? true)
+      ),
+    [services, categories]
+  );
+  const showHeadings = hasCategoryGroups(groups);
   const saveMutation = useSaveStaffSchedule();
   const toast = useToast();
 
@@ -95,6 +106,15 @@ function ScheduleEditor({
       service_ids: prev.service_ids.includes(serviceId)
         ? prev.service_ids.filter((id) => id !== serviceId)
         : [...prev.service_ids, serviceId],
+    }));
+
+  // A shortcut: later services of the category are not added on their own
+  const toggleGroup = (ids: string[], select: boolean) =>
+    setDraft((prev) => ({
+      ...prev,
+      service_ids: select
+        ? [...new Set([...prev.service_ids, ...ids])]
+        : prev.service_ids.filter((id) => !ids.includes(id)),
     }));
 
   const setDayRanges = (dow: number, ranges: DayRange[]) =>
@@ -135,28 +155,54 @@ function ScheduleEditor({
             Todavía no hay servicios activos.
           </p>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            {services.map((service) => {
-              const selected = draft.service_ids.includes(service.id);
+          <div className="flex flex-col gap-3">
+            {groups.map((group) => {
+              const ids = group.services.map((s) => s.id);
+              const allSelected = ids.every((id) => draft.service_ids.includes(id));
+              const label = group.category?.name ?? "Sin categoría";
               return (
-                <button
-                  key={service.id}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => toggleService(service.id)}
-                  className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    selected
-                      ? "border-primary bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-400"
-                      : "border-border bg-surface-2 text-foreground-muted hover:border-border-2"
-                  }`}
-                >
-                  <span
-                    aria-hidden
-                    className="h-2 w-2 rounded-full"
-                    style={{ background: service.color ?? "#3b82f6" }}
-                  />
-                  {service.name}
-                </button>
+                <div key={group.category?.id ?? "none"} className="flex flex-col gap-2">
+                  {showHeadings && (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-meta font-semibold text-foreground">
+                        {label}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(ids, !allSelected)}
+                        aria-label={`${allSelected ? "Quitar" : "Marcar"} todos los servicios de ${label}`}
+                        className="cursor-pointer text-xs font-semibold text-primary-700 hover:underline dark:text-primary-400"
+                      >
+                        {allSelected ? "Quitar todos" : "Marcar todos"}
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {group.services.map((service) => {
+                      const selected = draft.service_ids.includes(service.id);
+                      return (
+                        <button
+                          key={service.id}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => toggleService(service.id)}
+                          className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                            selected
+                              ? "border-primary bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-400"
+                              : "border-border bg-surface-2 text-foreground-muted hover:border-border-2"
+                          }`}
+                        >
+                          <span
+                            aria-hidden
+                            className="h-2 w-2 rounded-full"
+                            style={{ background: service.color ?? "#3b82f6" }}
+                          />
+                          {service.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>
