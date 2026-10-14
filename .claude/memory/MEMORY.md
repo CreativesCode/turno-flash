@@ -2,14 +2,14 @@
 
 > Archivos organizados por carpeta (tipo). Max 200 lineas.
 > Gestionado por skill memory-manager. Auto-memory de Claude Code DESACTIVADO.
-> Ultima revision: 2026-10-12.
+> Ultima revision: 2026-10-14.
 
 ## user/ — Sobre el usuario/equipo
 - [Roberto](user/roberto.md) — operador y dueno del producto; Windows + VS Code, usar Bash para escribir archivos; prioriza coste $0 sobre infra ya pagada
 
 ## project/ — Proyectos y decisiones activas
 - [Producto y dominio](project/producto-y-dominio.md) — que es Turno Flash, multi-org, roles admin/owner/staff, maquina de 9 estados de turno; **todos los negocios están en Cuba**; borrar es solo de dueño/admin y el empleado se vincula a su ficha («Mis turnos»)
-- [Estado actual](project/estado-actual-2026-09.md) — foto de sep 2026 + actualizaciones hasta 2026-10-12: plan QA cerrado en código, funciones desplegadas, **todo subido y publicado en Vercel el 2026-10-12** y APK vieja en Play; agujeros (cero tests, cero CI, sin Sentry, SMTP por defecto); por qué los docs mienten
+- [Estado actual](project/estado-actual-2026-09.md) — foto de sep 2026 + actualizaciones hasta 2026-10-14 (incidente: alta de clientes rota del 8 al 14 oct por la 071, arreglado con la 078): plan QA cerrado en código, funciones desplegadas, **todo subido y publicado en Vercel el 2026-10-12** y APK vieja en Play; agujeros (cero tests, cero CI, sin Sentry, SMTP por defecto); por qué los docs mienten
 - [Rediseno de UI](project/rediseno-ui-migracion.md) — el rediseño anterior (sep 2026), **sustituido por el v2**; queda como historia
 - [Rediseno v2](project/rediseno-v2.md) — paquete de `docs/design/handoff` **aplicado entero, fusionado en `main` y subido el 2026-10-12** (lo pidió Roberto): tokens, primitivas, navegación con «Más», todas las pantallas, landing, íconos, la guía y el manual, y «Mi cuenta» editable; **en producción**; falta `cap sync` y la APK; qué quedó distinto del diseño, nombres de estado nuevos («Llegó» ya no termina el turno) y trampas
 - [Reserva online](project/reserva-online.md) — implementada 2026-09-10 (migraciones 029-031 + edge `public-booking`); horario y servicios por profesional (estricto), aprobacion por servicio, opt-in, vacaciones; `/book?b=<slug>`; desde 2026-10-08 apellido opcional, cliente recordado, salto de «¿Con quién?» y contacto del negocio
@@ -22,7 +22,7 @@
 
 ## feedback/ — Correcciones y preferencias
 - [Preferencias de Roberto](feedback/preferencias-roberto.md) — espanol para hablar, ingles para el codigo; landing solo al cerrar un plan completo; nada de refactors ni dependencias sorpresa; guías para gente poco ducha en tecnología y con fotos reales; **commits en trozos por área; el push lo hace él salvo que lo pida**
-- [Migraciones a produccion](feedback/migraciones-a-produccion.md) — autorizado aplicar migraciones sin pedir permiso; siempre ensayar en BEGIN/ROLLBACK por rol antes; **desplegar edge functions sí se pregunta**
+- [Migraciones a produccion](feedback/migraciones-a-produccion.md) — autorizado aplicar migraciones sin pedir permiso; siempre ensayar en BEGIN/ROLLBACK por rol antes, **con INSERT/UPDATE reales si hay índices con funciones o revokes**; **desplegar edge functions sí se pregunta**
 - [Copy en espanol internacional](feedback/copy-espanol-internacional.md) — tuteo, nunca voseo; "anticipo" y no "sena"; locale `es` y la moneda siempre explicita (`useMoney`)
 
 ## reference/ — Donde encontrar cosas

@@ -146,3 +146,19 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
 - **Sin tocar:** la imagen `public/opengraph-image.jpg` y las tres capturas de la galería (`tf-1..3.webp`) siguen
   siendo de turnos.
 - Un `next build` puede fallar una vez con «next/font/google queries have exactly one entry»: es pasajero, repetir.
+
+## Incidente 2026-10-14: nadie podía crear clientes desde el panel (desde la 071)
+
+- **Síntoma:** «Error al crear el cliente: permission denied for function booking_phone_key» al dar de alta un
+  cliente (alta rápida dentro de «Nuevo turno» o ficha de cliente). Lo reportó Espiral Studio (negocio nuevo,
+  registrado ese mismo día a las 12:42 UTC; dos intentos a las 12:48 y 12:51), recogido en `/dashboard/errors`.
+- **Causa:** la 071 (2026-10-08) creó el índice `idx_customers_phone_key` sobre `booking_phone_key(phone,
+  phone_country_code)`, y la 029 había revocado `EXECUTE` de esa función a `authenticated`. Postgres evalúa las
+  expresiones de un índice con los permisos de quien escribe la fila, así que **todo INSERT en `customers` desde el
+  panel falló entre el 8 y el 14 de octubre** (0 clientes creados en ese tramo; las reservas públicas no se vieron
+  afectadas porque van por `service_role`). Los UPDATE que no cambian el teléfono pasaban (HOT).
+- **Fix:** migración **078** (`GRANT EXECUTE ... TO authenticated`), ensayada por rol en BEGIN/ROLLBACK y aplicada
+  en producción el 2026-10-14. `anon` sigue sin acceso. El error quedó marcado como resuelto en `error_logs`.
+- **Por qué no se vio en el QA de P3:** el ensayo por rol de la 071 no incluyó un INSERT en `customers` como
+  `authenticated`; los índices se crearon como `postgres` sin error. Regla nueva en [[migraciones-a-produccion]].
+- Migraciones locales y remotas alineadas hasta la **078**.

@@ -20,3 +20,9 @@ organizaciones de clientes: eso sigue requiriendo confirmación.
 Roberto respondió «publica las funciones» para esa tanda. No lo dijo como regla permanente: es mi lectura que hay
 que **preguntar cada vez** antes de `supabase functions deploy`. Sí conviene avisarle cuando un cambio del front
 depende de una función sin desplegar (pasó con el apellido opcional).
+
+**Qué ensayar cuando la migración toca índices o funciones (2026-10-14):** si se crea un índice con una
+expresión que llama a una función propia, o se revoca `EXECUTE` de una función, el ensayo debe incluir un
+**INSERT y un UPDATE reales como `authenticated`** en esa tabla. Postgres evalúa las expresiones de los índices
+con los permisos de quien escribe (los triggers no comprueban `EXECUTE` al dispararse, por eso los triggers
+revocados sí funcionan). La 071 pasó por alto esto y rompió el alta de clientes seis días (ver [[estado-actual-2026-09]]).
