@@ -163,6 +163,31 @@ export function checkNumber(
   });
 }
 
+/** Teléfono (solo dígitos) de un contacto identificado por su id de privacidad
+ *  (`…@lid`). Mejor esfuerzo: null si OpenWA no lo puede mapear o el endpoint
+ *  no existe en la versión desplegada. */
+export async function resolveContactPhone(
+  sessionId: string,
+  contactId: string
+): Promise<string | null> {
+  const res = await call<{ contactId: string; phone: string | null }>(
+    `/sessions/${sessionId}/contacts/${encodeURIComponent(contactId)}/phone`,
+    { method: "GET" }
+  );
+  if (!res.success) {
+    console.warn(
+      `[openwa] resolveContactPhone(${contactId}) failed:`,
+      res.error?.code,
+      res.error?.message
+    );
+    return null;
+  }
+  const phone = res.data?.phone;
+  return typeof phone === "string" && phone.replace(/\D/g, "")
+    ? phone.replace(/\D/g, "")
+    : null;
+}
+
 /** Verifica firma HMAC SHA-256 de un webhook de OpenWA.
  *
  *  La doc de OpenWA es inconsistente respecto a QUÉ firma exactamente

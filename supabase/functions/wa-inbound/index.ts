@@ -10,6 +10,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   chatIdToPhone,
+  resolveContactPhone,
   sendText,
   verifyWebhookSignature,
 } from "../_shared/openwa.ts";
@@ -49,6 +50,7 @@ function compactPayload(env: WebhookEnvelope): Record<string, unknown> {
     fromMe: d.fromMe,
     isGroup: d.isGroup,
     body: str(d.body),
+    senderPhone: str(d.senderPhone),
     sender: obj(d.sender),
     chat: obj(d.chat),
   };
@@ -215,6 +217,7 @@ async function handleMessageReceived(
     type?: string;
     isGroup?: boolean;
     fromMe?: boolean;
+    senderPhone?: string | null;
   };
 
   console.log(
@@ -279,6 +282,20 @@ async function handleMessageReceived(
   const from = data.from ?? "";
   let organizationId = candidates[0];
   const chatIds = await resolveChatIds(supabase, from);
+  // A privacy-id sender (@lid) whose alias was never learned: OpenWA can map
+  // it to the phone, either inline (senderPhone, RESOLVE_LID_TO_PHONE=true on
+  // the server) or on demand.
+  if (from.endsWith("@lid")) {
+    const inline =
+      typeof data.senderPhone === "string" ? data.senderPhone.replace(/\D/g, "") : "";
+    const phone =
+      inline || (chatIds.length ? null : await resolveContactPhone(env.sessionId, from));
+    if (phone) {
+      const chatId = `${phone}@c.us`;
+      if (!chatIds.includes(chatId)) chatIds.push(chatId);
+      console.log(`[wa-inbound] ${from} resolved to ${chatId}`);
+    }
+  }
   if (candidates.length > 1) {
     const match = await resolveOrgBySender(supabase, candidates, chatIds);
     if (!match) {
