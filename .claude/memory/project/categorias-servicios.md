@@ -22,11 +22,11 @@ metadata:
 - 5 categorías (Familiares 12, Embarazo 4, Boda 7, Quince 6, Fotos sueltas 1) = 30 servicios transcritos de sus 11
   fotos: nombre «<paquete> (<sesión>)» (los nombres son únicos por negocio), 1 h cada uno (Aicenis debe ajustar),
   descripción por líneas + «Total: N fotos» + «Máximo N cambios de vestuario», marcas como en sus folletos, color por
-  categoría, solo **Emilio** asignado (decisión de Roberto). Embarazo solo trae Básico y Revista: preguntarle si hay más.
-- Los 2 servicios de prueba quedaron **pausados**, no borrados: la FK de turnos es RESTRICT y ES-0002 (Derwil Medina,
-  reserva web, +5359467140) podría ser un cliente real. Borrarlos cuando Roberto lo confirme.
-- **Emilio estaba desactivado** (lo hizo alguien desde el panel) y la página quedó sin servicios; Roberto pidió
-  reactivarlo. Verificado en producción: categorías, paquetes, marcas, «Más fechas» y horarios de Emilio.
+  categoría, primero asignados a Emilio, luego a Aicenis (ver abajo). Embarazo solo trae Básico y Revista: preguntarle si hay más.
+- Después Roberto pidió (habló con Aicenis): **un solo profesional, Aicenis**. Los 30 paquetes están asignados a ella
+  y **Emilio fue eliminado** de verdad (DELETE; horarios y asignaciones en cascada).
+- Turnos de prueba ES-0001 y ES-0002 y los 2 servicios viejos **borrados** (Roberto confirmó que eran pruebas). Espiral
+  queda con 30 servicios, 0 turnos. Verificado en producción con Aicenis ofreciendo horarios.
 
 ## Dónde vive
 
