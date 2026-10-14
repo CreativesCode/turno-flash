@@ -41,13 +41,19 @@ function prettyPhone(phone: string): string {
 export function frameCustomerMessage(
   business: BusinessContact,
   body: string,
-  options: FrameOptions
+  options: FrameOptions,
+  /** Appointment code ("ES-0004"): named in the note so the reply matches it. */
+  code: string | null = null
 ): string {
   const lines = [`*${business.name}*`, "", body];
   if (options.contact && business.phone) {
     const who = business.contactName?.trim() || business.name;
     lines.push("", `💬 ¿Dudas? Escribe a *${who}* al ${prettyPhone(business.phone)}`);
   }
-  lines.push("", `_${REPLY_NOTE[options.reply]}_`);
+  const note =
+    options.reply === "keywords" && code
+      ? `Mensaje automático de Turno Flash. Por aquí solo entendemos *OK ${code}* y *CANCELAR ${code}*.`
+      : REPLY_NOTE[options.reply];
+  lines.push("", `_${note}_`);
   return lines.join("\n");
 }

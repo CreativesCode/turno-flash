@@ -318,23 +318,17 @@ async function handleMessageReceived(
   // which identifies the chat we wrote to. Otherwise ask for the code.
   if (!chatIds.length) {
     const code = parseReplyCode(data.body ?? "", knownPrefixes);
-    const orgsForCode = code?.prefix
-      ? candidates.filter((id) => prefixByOrg.get(id) === code.prefix)
-      : candidates;
-    const byCode = code
-      ? await chatByAppointmentCode(supabase, orgsForCode, code.number)
-      : null;
+    const byCode = code ? await chatByAppointmentCode(supabase, candidates, code) : null;
     if (byCode) {
       chatIds.push(byCode.chatId);
       organizationId = byCode.organizationId;
       aliasSource = "reply_code";
-      console.log(`[wa-inbound] ${from} identified by code ${code?.prefix ?? "T"}-${code?.number} → ${byCode.chatId}`);
+      console.log(`[wa-inbound] ${from} identified by code ${code} → ${byCode.chatId}`);
     } else {
-      const example = knownPrefixes.length === 1 ? `${knownPrefixes[0]}-0001` : "T-0001";
-      const codeText = code ? `${code.prefix ?? "T"}-${code.number.slice(2)}` : null;
-      const asked = await askForCode(supabase, env.sessionId, from, codeText, example);
+      const example = await exampleCodeFor(supabase, candidates, prefixByOrg);
+      const asked = await askForCode(supabase, env.sessionId, from, code, example);
       return {
-        result: `unknown sender ${from} (${lidLookup || "no lookup"}; code=${codeText ?? "none"}; ${asked})`,
+        result: `unknown sender ${from} (${lidLookup || "no lookup"}; code=${code ?? "none"}; ${asked})`,
       };
     }
   }
@@ -712,6 +706,29 @@ async function chatByAppointmentCode(
   return { chatId: rows[0].chat_id, organizationId: rows[0].organization_id };
 }
 
+/** Example code for the "include the code" note: the prefix of the business
+ *  that last wrote to a customer on this line (most likely the one being
+ *  answered), else any prefix on the line, else T-0001. */
+async function exampleCodeFor(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  organizationIds: string[],
+  prefixByOrg: Map<string, string>
+): Promise<string> {
+  const { data: last } = await supabase
+    .from("wa_outbound_messages")
+    .select("organization_id")
+    .in("organization_id", organizationIds)
+    .in("intent", ["confirm", "reminder_24h", "reminder_1h", "reminder_manual", "approved", "rescheduled"])
+    .order("sent_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ organization_id: string }>();
+  const prefix =
+    (last?.organization_id && prefixByOrg.get(last.organization_id)) ||
+    prefixByOrg.values().next().value;
+  return `${prefix ?? "T"}-0001`;
+}
+
 const ASK_CODE_THROTTLE_MS = 12 * 60 * 60 * 1000;
 
 /** Best effort: tell an unidentified sender to include the appointment code.
@@ -925,28 +942,24 @@ function classifyReply(body: string): "confirm" | "cancel" | null {
 }
 
 /** "T-0045", "t45" or "T 0045" in the reply → "T-0045", else null. */
-interface ReplyCode {
-  prefix: string | null; // business prefix (083), null for the plain T-0001 form
-  number: string; // "T-0001"
-}
-
 /** The appointment code in a reply, typed loosely: "T-0045", "ES-0001",
- *  "es-001", "es001", "es 1". Letters other than T must be a known business
- *  prefix, so "dale 5" or "voy 2" are not read as codes. */
-function parseReplyCode(body: string, knownPrefixes: string[]): ReplyCode | null {
+ *  "es-001", "es001", "es 1" → "ES-0001", the appointment_number itself (084).
+ *  Letters other than T must be a known business prefix, so "dale 5" or
+ *  "voy 2" are not read as codes. */
+function parseReplyCode(body: string, knownPrefixes: string[]): string | null {
   const known = new Set(knownPrefixes.map((p) => p.toUpperCase()));
   const re = /\b([A-Z]{1,4})[-\s]?0*(\d{1,6})\b/gi;
   for (const match of body.matchAll(re)) {
     const letters = match[1].toUpperCase();
-    const number = `T-${match[2].padStart(4, "0")}`;
-    if (letters === "T") return { prefix: null, number };
-    if (known.has(letters)) return { prefix: letters, number };
+    if (letters === "T" || known.has(letters)) {
+      return `${letters}-${match[2].padStart(4, "0")}`;
+    }
   }
   return null;
 }
 
 function appointmentNumberIn(body: string, knownPrefixes: string[] = []): string | null {
-  return parseReplyCode(body, knownPrefixes)?.number ?? null;
+  return parseReplyCode(body, knownPrefixes);
 }
 
 async function invokeWaSend(appointmentId: string, intent: string) {

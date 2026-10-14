@@ -269,19 +269,7 @@ Deno.serve(async (req) => {
       intent === "clarify_which"
         ? await openAppointmentsList(supabase, appt.customer_id, appt.organization_id)
         : "";
-    // Short code the customer types back ("OK ES-0001"); T-0001 without one
-    const { data: orgCode } = await supabase
-      .from("organizations")
-      .select("reply_prefix")
-      .eq("id", appt.organization_id)
-      .maybeSingle<{ reply_prefix: string | null }>();
-    const body = buildMessage(
-      appt,
-      intent,
-      waitlistCustomerName,
-      openList,
-      orgCode?.reply_prefix ?? null
-    );
+    const body = buildMessage(appt, intent, waitlistCustomerName, openList);
     const frame = CUSTOMER_FRAME[intent];
     let text = body;
     if (frame) {
@@ -297,7 +285,8 @@ Deno.serve(async (req) => {
           phone: org?.whatsapp_phone ?? null,
         },
         body,
-        frame
+        frame,
+        appt.appointment_number ?? null
       );
     }
 
@@ -525,8 +514,7 @@ function buildMessage(
   appt: AppointmentRow,
   intent: Intent,
   waitlistCustomerName = "",
-  openList = "",
-  replyPrefix: string | null = null
+  openList = ""
 ): string {
   const date = new Date(`${appt.appointment_date}T${appt.start_time}`);
   const fechaLarga = date.toLocaleDateString("es-CU", {
@@ -535,10 +523,8 @@ function buildMessage(
     month: "long",
   });
   const hora = appt.start_time.slice(0, 5);
+  // "ES-0004": the same code the panel shows and the customer types back (084)
   const numero = appt.appointment_number ?? appt.id.slice(0, 8);
-  // What the customer sees and types back: "ES-0001" when the business has a
-  // prefix (083), otherwise the appointment number itself.
-  const codigo = replyPrefix ? `${replyPrefix}-${numero.replace(/^T-/, "")}` : numero;
   const cliente = appt.customer_first_name;
   const servicio = appt.service_name;
   const staff = appt.staff_first_name
@@ -558,10 +544,10 @@ function buildMessage(
           `📅 ${fechaLarga}`,
           `⏰ ${hora}`,
           `💇 ${servicio}${staff}`,
-          `🎫 N° ${codigo}`,
+          `🎫 N° ${numero}`,
           ``,
           `El negocio revisará tu solicitud y te avisaremos por aquí cuando la confirme.`,
-          `❌ Si ya no puedes ir, responde *CANCELAR ${codigo}*.`,
+          `❌ Si ya no puedes ir, responde *CANCELAR ${numero}*.`,
         ].join("\n");
       }
       return [
@@ -572,11 +558,11 @@ function buildMessage(
         `📅 ${fechaLarga}`,
         `⏰ ${hora}`,
         `💇 ${servicio}${staff}`,
-        `🎫 N° ${codigo}`,
+        `🎫 N° ${numero}`,
         ``,
         `Por favor confirma:`,
-        `✅ *OK ${codigo}* — confirmo que asisto`,
-        `❌ *CANCELAR ${codigo}* — no podré ir`,
+        `✅ *OK ${numero}* — confirmo que asisto`,
+        `❌ *CANCELAR ${numero}* — no podré ir`,
       ].join("\n");
 
     case "approved":
@@ -586,10 +572,10 @@ function buildMessage(
         `📅 ${fechaLarga}`,
         `⏰ ${hora}`,
         `💇 ${servicio}${staff}`,
-        `🎫 N° ${codigo}`,
+        `🎫 N° ${numero}`,
         ``,
         `Te esperamos 🙌`,
-        `❌ Si ya no puedes ir, responde *CANCELAR ${codigo}*.`,
+        `❌ Si ya no puedes ir, responde *CANCELAR ${numero}*.`,
       ].join("\n");
 
     case "rescheduled":
@@ -600,10 +586,10 @@ function buildMessage(
           `📅 ${fechaLarga}`,
           `⏰ ${hora}`,
           `💇 ${servicio}${staff}`,
-          `🎫 N° ${codigo}`,
+          `🎫 N° ${numero}`,
           ``,
           `El negocio revisará tu solicitud y te avisaremos por aquí cuando la confirme.`,
-          `❌ Si este horario no te sirve, responde *CANCELAR ${codigo}*.`,
+          `❌ Si este horario no te sirve, responde *CANCELAR ${numero}*.`,
         ].join("\n");
       }
       return [
@@ -612,11 +598,11 @@ function buildMessage(
         `📅 ${fechaLarga}`,
         `⏰ ${hora}`,
         `💇 ${servicio}${staff}`,
-        `🎫 N° ${codigo}`,
+        `🎫 N° ${numero}`,
         ``,
         `Por favor confirma de nuevo:`,
-        `✅ *OK ${codigo}* — confirmo que asisto`,
-        `❌ *CANCELAR ${codigo}* — no podré ir`,
+        `✅ *OK ${numero}* — confirmo que asisto`,
+        `❌ *CANCELAR ${numero}* — no podré ir`,
       ].join("\n");
 
     case "reminder_24h":
@@ -627,7 +613,7 @@ function buildMessage(
         ``,
         `💇 ${servicio}${staff}`,
         ``,
-        `Escribe *OK ${codigo}* para confirmar o *CANCELAR ${codigo}* si no puedes.`,
+        `Escribe *OK ${numero}* para confirmar o *CANCELAR ${numero}* si no puedes.`,
       ].join("\n");
 
     case "reminder_1h":
@@ -660,9 +646,9 @@ function buildMessage(
         `Te recordamos tu turno ${whenLabel}.`,
         ``,
         `💇 ${servicio}${staff}`,
-        `🎫 N° ${codigo}`,
+        `🎫 N° ${numero}`,
         ``,
-        `Escribe *OK ${codigo}* para confirmar o *CANCELAR ${codigo}* si no puedes.`,
+        `Escribe *OK ${numero}* para confirmar o *CANCELAR ${numero}* si no puedes.`,
       ].join("\n");
     }
 
@@ -670,10 +656,10 @@ function buildMessage(
       return [
         `🤔 No entendí tu respuesta.`,
         ``,
-        `Para tu turno del *${fechaLarga}* a las *${hora}* (N° ${codigo}):`,
+        `Para tu turno del *${fechaLarga}* a las *${hora}* (N° ${numero}):`,
         ``,
-        `✅ Escribe *OK ${codigo}* si vas a asistir`,
-        `❌ Escribe *CANCELAR ${codigo}* si no puedes ir`,
+        `✅ Escribe *OK ${numero}* si vas a asistir`,
+        `❌ Escribe *CANCELAR ${numero}* si no puedes ir`,
       ].join("\n");
 
     case "clarify_which":
@@ -681,11 +667,11 @@ function buildMessage(
         `Tienes varios turnos con nosotros:`,
         openList,
         ``,
-        `Para cancelar uno, escribe *CANCELAR ${codigo}* y su número, por ejemplo: *CANCELAR ${codigo}*`,
+        `Para cancelar uno, escribe *CANCELAR ${numero}* y su número, por ejemplo: *CANCELAR ${numero}*`,
       ].join("\n");
 
     case "cancel_ack":
-      return `Tu turno N° ${codigo} fue cancelado. Si quieres otro día u hora, avísale al negocio 🙌`;
+      return `Tu turno N° ${numero} fue cancelado. Si quieres otro día u hora, avísale al negocio 🙌`;
 
     case "confirm_ack":
       if (appt.status === "pending") {
