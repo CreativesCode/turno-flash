@@ -6,7 +6,9 @@ import { Database } from "./database.types";
 export type LicenseStatus = Database["public"]["Enums"]["license_status"];
 export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 
-export interface OrganizationWithLicenseStatus extends Organization {
+// The organizations_with_license_status view does not expose reply_prefix (083).
+export interface OrganizationWithLicenseStatus
+  extends Omit<Organization, "reply_prefix"> {
   license_status: LicenseStatus;
   days_remaining: number | null;
   is_usable: boolean;

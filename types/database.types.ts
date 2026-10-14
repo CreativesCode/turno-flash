@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.1"
   }
   graphql_public: {
     Tables: {
@@ -880,6 +880,7 @@ export type Database = {
           owner_phone: string | null
           referral_credit_applied_at: string | null
           referred_by_organization_id: string | null
+          reply_prefix: string | null
           slug: string
           subscription_platform: string | null
           subscription_product_id: string | null
@@ -907,6 +908,7 @@ export type Database = {
           owner_phone?: string | null
           referral_credit_applied_at?: string | null
           referred_by_organization_id?: string | null
+          reply_prefix?: string | null
           slug: string
           subscription_platform?: string | null
           subscription_product_id?: string | null
@@ -934,6 +936,7 @@ export type Database = {
           owner_phone?: string | null
           referral_credit_applied_at?: string | null
           referred_by_organization_id?: string | null
+          reply_prefix?: string | null
           slug?: string
           subscription_platform?: string | null
           subscription_product_id?: string | null
@@ -1071,6 +1074,7 @@ export type Database = {
       services: {
         Row: {
           available_for_online_booking: boolean | null
+          badge: string | null
           buffer_time_minutes: number | null
           category_id: string | null
           color: string | null
@@ -1092,6 +1096,7 @@ export type Database = {
         }
         Insert: {
           available_for_online_booking?: boolean | null
+          badge?: string | null
           buffer_time_minutes?: number | null
           category_id?: string | null
           color?: string | null
@@ -1113,6 +1118,7 @@ export type Database = {
         }
         Update: {
           available_for_online_booking?: boolean | null
+          badge?: string | null
           buffer_time_minutes?: number | null
           category_id?: string | null
           color?: string | null
@@ -1134,11 +1140,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "services_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "services_category_org_fkey"
+            columns: ["category_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "service_categories"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "services_organization_id_fkey"
@@ -1897,19 +1903,25 @@ export type Database = {
           event_type: string | null
           idempotency_key: string
           organization_id: string | null
+          payload: Json | null
           processed_at: string | null
+          result: string | null
         }
         Insert: {
           event_type?: string | null
           idempotency_key: string
           organization_id?: string | null
+          payload?: Json | null
           processed_at?: string | null
+          result?: string | null
         }
         Update: {
           event_type?: string | null
           idempotency_key?: string
           organization_id?: string | null
+          payload?: Json | null
           processed_at?: string | null
+          result?: string | null
         }
         Relationships: [
           {
@@ -1927,6 +1939,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      wa_sender_aliases: {
+        Row: {
+          chat_id: string
+          created_at: string
+          sender_id: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string
+          sender_id: string
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string
+          sender_id?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       waitlist: {
         Row: {
@@ -2385,6 +2421,10 @@ export type Database = {
         Returns: Json
       }
       release_expired_trip_holds: { Args: never; Returns: number }
+      renumber_appointments_for_prefix: {
+        Args: { org_id: string }
+        Returns: number
+      }
       run_license_notices: { Args: never; Returns: number }
       save_staff_schedule: {
         Args: { p_ranges: Json; p_service_ids: string[]; p_staff_id: string }
@@ -2517,6 +2557,7 @@ export type Database = {
         | "trip_booking_cancelled"
         | "trip_departure_cancelled"
         | "clarify_which"
+        | "rescheduled"
       wa_outbound_status: "pending" | "sent" | "delivered" | "read" | "failed"
       waitlist_status:
         | "active"
@@ -2717,6 +2758,7 @@ export const Constants = {
         "trip_booking_cancelled",
         "trip_departure_cancelled",
         "clarify_which",
+        "rescheduled",
       ],
       wa_outbound_status: ["pending", "sent", "delivered", "read", "failed"],
       waitlist_status: ["active", "notified", "booked", "expired", "cancelled"],
