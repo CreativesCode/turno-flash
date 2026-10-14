@@ -23,10 +23,13 @@ import { CustomerPicker } from "@/components/appointments/CustomerPicker";
 import { NEXT_ACTIONS } from "@/utils/appointment-status";
 import { formatDateForDisplay, parseLocalDate } from "@/utils/date";
 import { toInternationalPhone } from "@/utils/phone";
+import { ServiceBadge } from "@/components/services/ServiceBadge";
+import { useServiceCategories } from "@/hooks";
 import { useMoney } from "@/hooks/useMoney";
 import { fmtDuration } from "@/utils/format";
+import { groupServices, hasCategoryGroups } from "@/utils/group-services";
 import { CalendarClock, MessageCircle, Plus, X } from "lucide-react";
-import { FormEvent, ReactNode } from "react";
+import { FormEvent, ReactNode, useMemo } from "react";
 
 /* ────────────────────────────────────────────────────────────
  * Create modal
@@ -77,6 +80,21 @@ export function AppointmentCreateModal({
   isCreatingCustomer,
 }: AppointmentCreateModalProps) {
   const { format: money } = useMoney();
+  const { categories } = useServiceCategories();
+  // The normalized store keeps insertion order, not the owner's order
+  const serviceGroups = useMemo(
+    () =>
+      groupServices(
+        [...services].sort(
+          (a, b) =>
+            (a.sort_order ?? 0) - (b.sort_order ?? 0) ||
+            a.name.localeCompare(b.name)
+        ),
+        categories.filter((c) => c.is_active ?? true)
+      ),
+    [services, categories]
+  );
+  const showServiceHeadings = hasCategoryGroups(serviceGroups);
 
   return (
     <Sheet open={open} onClose={onClose} title="Nuevo turno">
@@ -213,39 +231,53 @@ export function AppointmentCreateModal({
 
         {/* Service */}
         <Field label="Servicio">
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {services.map((s) => {
-              const selected = formData.service_id === s.id;
-              const dot = s.color ?? "#94a3b8";
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => onServiceChange(s.id)}
-                  aria-pressed={selected}
-                  className={`cursor-pointer rounded-control border px-3.5 py-2.5 text-left transition-colors ${
-                    selected
-                      ? "border-primary bg-primary-100 dark:bg-primary-900"
-                      : "border-border-2 bg-surface hover:bg-muted"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      aria-hidden
-                      className="size-1.5 shrink-0 rounded-[2px]"
-                      style={{ background: dot }}
-                    />
-                    <span className="truncate text-body font-semibold text-foreground">
-                      {s.name}
-                    </span>
-                  </div>
-                  <div className="mt-0.5 text-caption text-foreground-muted">
-                    {fmtDuration(s.duration_minutes)} ·{" "}
-                    {s.price != null ? money(s.price) : "Sin precio"}
-                  </div>
-                </button>
-              );
-            })}
+          <div className="flex flex-col gap-3">
+            {serviceGroups.map((group) => (
+              <div key={group.category?.id ?? "none"}>
+                {showServiceHeadings && (
+                  <p className="mb-1.5 text-caption font-semibold uppercase tracking-wide text-foreground-muted">
+                    {group.category?.name ?? "Sin categoría"}
+                  </p>
+                )}
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {group.services.map((s) => {
+                    const selected = formData.service_id === s.id;
+                    const dot = s.color ?? "#94a3b8";
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => onServiceChange(s.id)}
+                        aria-pressed={selected}
+                        className={`cursor-pointer rounded-control border px-3.5 py-2.5 text-left transition-colors ${
+                          selected
+                            ? "border-primary bg-primary-100 dark:bg-primary-900"
+                            : "border-border-2 bg-surface hover:bg-muted"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            aria-hidden
+                            className="size-1.5 shrink-0 rounded-[2px]"
+                            style={{ background: dot }}
+                          />
+                          <span className="truncate text-body font-semibold text-foreground">
+                            {s.name}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-caption text-foreground-muted">
+                          <span>
+                            {fmtDuration(s.duration_minutes)} ·{" "}
+                            {s.price != null ? money(s.price) : "Sin precio"}
+                          </span>
+                          <ServiceBadge badge={s.badge} />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
           {services.length === 0 && (
             <p className="mt-1.5 text-caption text-warning-700 dark:text-warning-400">
