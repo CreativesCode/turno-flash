@@ -106,7 +106,8 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
   (los textos «Te quedan N días de acceso» salen de `check_license_status`; `getGracePeriodDays()` devuelve 7 fijo).
   068 `contact_phone` en los payloads públicos y sin `driver_phone`. 069 apellido opcional en las RPC de reserva.
   070 borrar clientes/turnos solo owner/admin (RESTRICTIVE). 071 `notify_business_new` solo con `source = web`,
-  numeración con lock por organización + índices únicos, índice por `booking_phone_key`. 072 RevenueCat: los eventos
+  numeración con lock por organización + índices únicos, índice por `booking_phone_key` (**rompió el alta de
+  clientes del panel hasta la 078 del 2026-10-14**, ver [[estado-actual-2026-09]]). 072 RevenueCat: los eventos
   **SANDBOX solo se auditan** y una compra nunca acorta la licencia (GREATEST).
 - **Edge functions desplegadas el 2026-10-08** (Roberto lo pidió esa vez; no es permiso permanente, preguntar la
   próxima): `public-booking`, `public-trips`, `wa-trip-send`, `daily-summary`, `wa-campaign`, `wa-inbound`.

@@ -55,6 +55,12 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
 - **Ensayar migraciones:** `supabase db query --linked -f` con `BEGIN … ROLLBACK`, juntando los resultados en una
   tabla temporal y un único `SELECT` final (solo vuelve el último resultado). Para simular un rol dentro de un `DO`:
   `set_config('request.jwt.claims', …, true)` + `SET LOCAL ROLE authenticated` + `RESET ROLE`.
+  **Atajo (2026-10-14):** un solo `DO $$ … $$` sin BEGIN/ROLLBACK: cada paso en su `BEGIN … EXCEPTION WHEN OTHERS`
+  (subtransacción) acumulando `SQLERRM` en una variable, y al final `RAISE EXCEPTION 'RESULTS >> %', r`: deshace
+  todo (incluido un GRANT de prueba) y los resultados vuelven en el mensaje de error del CLI. `grep -o 'RESULTS >>.*'`.
+  Ojo: `pg_class.reltuples` da -1 en tablas nunca analizadas (contar con `count(*)`); la tabla de errores se llama
+  `error_logs` con columnas `error_message`, `error_stack`, `timestamp`, `last_occurrence`, `error_count`, `resolved`;
+  `customers.last_name` es NOT NULL (el panel manda `''` cuando no hay apellido).
 - **Definición viva de una función:** `select pg_get_functiondef(oid) …` por `db query`, guardar a un archivo y
   generar la migración reemplazando solo lo necesario. La consola de Windows muestra mal los acentos; el archivo
   queda bien en UTF-8.

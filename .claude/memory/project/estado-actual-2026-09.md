@@ -161,4 +161,6 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   en producción el 2026-10-14. `anon` sigue sin acceso. El error quedó marcado como resuelto en `error_logs`.
 - **Por qué no se vio en el QA de P3:** el ensayo por rol de la 071 no incluyó un INSERT en `customers` como
   `authenticated`; los índices se crearon como `postgres` sin error. Regla nueva en [[migraciones-a-produccion]].
-- Migraciones locales y remotas alineadas hasta la **078**.
+- Migraciones locales y remotas alineadas hasta la **078**. BD al 2026-10-14: 26 tablas (todas con RLS),
+  13 organizaciones, 21 usuarios, 71 turnos, 24 clientes, 32 servicios, 13 salidas, 21 pasajes; aún **0 pagos
+  registrados** y 0 avisos de licencia enviados. Dos negocios nuevos desde el 8 de octubre (uno es Espiral Studio).
