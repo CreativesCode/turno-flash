@@ -206,12 +206,13 @@ async function handleMessageReceived(
   const intent = classifyReply(data.body);
   console.log(`[wa-inbound] classifyReply → ${intent ?? "null"}`);
 
-  // Resolver organización por session_id
-  const { data: settings, error: settingsErr } = await supabase
+  // Resolve the business by session_id. Several businesses share one line
+  // during the pilot, so the reply belongs to the one that last wrote to this
+  // sender (see resolveOrgBySender).
+  const { data: sessionOrgs, error: settingsErr } = await supabase
     .from("business_settings")
     .select("organization_id")
-    .eq("openwa_session_id", env.sessionId)
-    .single<{ organization_id: string }>();
+    .eq("openwa_session_id", env.sessionId);
 
   if (settingsErr) {
     console.error(
@@ -220,23 +221,38 @@ async function handleMessageReceived(
     );
   }
 
-  if (!settings) {
+  const candidates = ((sessionOrgs ?? []) as { organization_id: string }[]).map(
+    (row) => row.organization_id
+  );
+  if (!candidates.length) {
     console.warn(
       `[wa-inbound] session not mapped to org: ${env.sessionId}`
     );
     return;
   }
 
-  console.log(
-    `[wa-inbound] resolved org=${settings.organization_id} for session=${env.sessionId}`
-  );
-
   // Resolve the appointment of this chat: first the chat ids we write to for
   // this sender (see resolveChatIds), then the latest open message of an
   // appointment that is still ahead. The message_id of that message is not
   // required: OpenWA can answer with an error after delivering, leaving it null.
   const from = data.from ?? "";
-  const chatIds = await resolveChatIds(supabase, settings.organization_id, from);
+  let organizationId = candidates[0];
+  let chatIds = await resolveChatIds(supabase, organizationId, from);
+  if (candidates.length > 1) {
+    const match = await resolveOrgBySender(supabase, candidates, from);
+    if (!match) {
+      console.log(
+        `[wa-inbound] ${candidates.length} orgs on session ${env.sessionId}, none wrote to "${from}"`
+      );
+      return;
+    }
+    organizationId = match.organizationId;
+    chatIds = match.chatIds;
+  }
+
+  console.log(
+    `[wa-inbound] resolved org=${organizationId} for session=${env.sessionId}`
+  );
 
   console.log(
     `[wa-inbound] resolving outbound for from="${from}" (chatIds=${chatIds.join(",") || "none"})`
@@ -247,7 +263,7 @@ async function handleMessageReceived(
   if (ratingValue !== null) {
     const ratingApplied = await tryApplyRating(
       supabase,
-      settings.organization_id,
+      organizationId,
       chatIds,
       ratingValue,
       data.body
@@ -261,7 +277,7 @@ async function handleMessageReceived(
     ? await supabase
         .from("wa_outbound_messages")
         .select("trip_booking_id")
-        .eq("organization_id", settings.organization_id)
+        .eq("organization_id", organizationId)
         .in("chat_id", chatIds)
         .order("sent_at", { ascending: false })
         .limit(1)
@@ -295,7 +311,7 @@ async function handleMessageReceived(
         .select(
           "appointment_id, sent_at, chat_id, appointments!inner(status, appointment_date, appointment_number)"
         )
-        .eq("organization_id", settings.organization_id)
+        .eq("organization_id", organizationId)
         .in("chat_id", chatIds)
         .in("intent", OPEN_INTENTS)
         .in("appointments.status", OPEN_STATUSES)
@@ -322,7 +338,7 @@ async function handleMessageReceived(
 
   if (!lastOutbound?.appointment_id) {
     console.log(
-      `[wa-inbound] no open appointment for from="${from}" in org ${settings.organization_id}`
+      `[wa-inbound] no open appointment for from="${from}" in org ${organizationId}`
     );
     return;
   }
@@ -469,26 +485,28 @@ async function handleSessionStatus(supabase: any, env: WebhookEnvelope) {
 
   if (derived !== "DISCONNECTED" && derived !== "FAILED") return;
 
-  const { data: settings } = await supabase
+  // Every business on this line loses WhatsApp at once
+  const { data: sessionOrgs } = await supabase
     .from("business_settings")
     .select("organization_id")
-    .eq("openwa_session_id", env.sessionId)
-    .single<{ organization_id: string }>();
+    .eq("openwa_session_id", env.sessionId);
+  const organizationIds = ((sessionOrgs ?? []) as { organization_id: string }[]).map(
+    (row) => row.organization_id
+  );
+  if (!organizationIds.length) return;
 
-  if (!settings) return;
-
-  // notifications.user_id is NOT NULL: one row per owner of the business
+  // notifications.user_id is NOT NULL: one row per owner of each business
   const { data: owners } = await supabase
     .from("user_profiles")
-    .select("user_id")
-    .eq("organization_id", settings.organization_id)
+    .select("user_id, organization_id")
+    .in("organization_id", organizationIds)
     .eq("role", "owner");
 
   if (!owners?.length) return;
 
   await supabase.from("notifications").insert(
-    owners.map((owner: { user_id: string }) => ({
-      organization_id: settings.organization_id,
+    owners.map((owner: { user_id: string; organization_id: string }) => ({
+      organization_id: owner.organization_id,
       user_id: owner.user_id,
       type: "wa_session_down",
       title: "WhatsApp desconectado",
@@ -533,6 +551,35 @@ async function resolveChatIds(
   for (const row of aliased ?? []) chatIds.add(row.chat_id);
 
   return [...chatIds];
+}
+
+/** Among the businesses that share a WhatsApp line, the one that last wrote
+ *  to this sender, with the chat ids it used. Null when none of them did.
+ */
+async function resolveOrgBySender(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  organizationIds: string[],
+  from: string
+): Promise<{ organizationId: string; chatIds: string[] } | null> {
+  let best: { organizationId: string; chatIds: string[]; sentAt: string } | null =
+    null;
+  for (const organizationId of organizationIds) {
+    const chatIds = await resolveChatIds(supabase, organizationId, from);
+    if (!chatIds.length) continue;
+    const { data: latest } = await supabase
+      .from("wa_outbound_messages")
+      .select("sent_at")
+      .eq("organization_id", organizationId)
+      .in("chat_id", chatIds)
+      .order("sent_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<{ sent_at: string }>();
+    if (latest?.sent_at && (!best || latest.sent_at > best.sentAt)) {
+      best = { organizationId, chatIds, sentAt: latest.sent_at };
+    }
+  }
+  return best && { organizationId: best.organizationId, chatIds: best.chatIds };
 }
 
 /** Extrae una valoración 1-5 si el mensaje empieza con ese número.
