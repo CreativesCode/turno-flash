@@ -163,7 +163,10 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   `authenticated`; los índices se crearon como `postgres` sin error. Regla nueva en [[migraciones-a-produccion]].
 - **Mismo día:** aviso inmediato por WhatsApp al admin de cada error nuevo (migración **079** + edge `error-notify`
   desplegada; ver [[whatsapp-automatizaciones]]). Roberto lo pidió tras este incidente.
-- Migraciones locales y remotas alineadas hasta la **081**. **Roberto hizo el push el 2026-10-14** (078, 079,
+- **Tarde del 2026-10-14:** clientes nuevos identificados por código de turno con prefijo del negocio (082-084;
+  ver [[whatsapp-automatizaciones]]); turnos de prueba en Espiral ES-0004/0005/0006 (clientes Juan, Roberto Prueba,
+  Prueba Desconocido) para mañana 15/10, los tres confirmados por WhatsApp.
+- Migraciones locales y remotas alineadas hasta la **084**. **Roberto hizo el push el 2026-10-14** (078, 079,
   `error-notify` y memoria): `main` y `origin/main` iguales; Vercel no cambia (solo BD y funciones).
 - **Espiral Studio (Aicenis Castro Oves-Garcia, dueña; acovesgarcia@yahoo.com; +5354469246; negocio +5363792397),**
   primera usuaria real activa: plan Salón en prueba hasta el 2026-11-15, 2 servicios (fotos/álbumes), 2 profesionales

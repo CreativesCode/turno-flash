@@ -171,3 +171,21 @@ número de EE. UU. (`15753180319@c.us`).
 RAM (2 GB → 3-5 sesiones; 4 GB → 8-10); motor Baileys, mucho menos. Roberto **no tiene SSH al servidor** por ahora:
 seguir con una sola línea compartida hasta recuperarlo; entonces activar `RESOLVE_LID_TO_PHONE=true` y reaplicar el
 parche de whatsapp-web.js que devuelve los message ids (quita los HTTP 500).
+
+**Identificación de clientes nuevos por código (2026-10-14, migraciones 082-084, `wa-inbound` v43+, `wa-send`):**
+el servidor OpenWA instalado **no tiene** `GET /contacts/:lid/phone` («Cannot GET», confirmado) ni devuelve message
+ids, así que un `@lid` nuevo no se puede traducir. Solución propia que funciona para todos:
+- **El número de turno lleva el prefijo del negocio** (`organizations.reply_prefix`, 2-4 letras únicas; sin prefijo
+  sigue `T-`): `ES-0004` en el panel, en el WhatsApp y en lo que escribe el cliente. Al poner o cambiar el prefijo,
+  un trigger renumera los turnos de ese negocio (mismos dígitos). Prefijos hoy: ES Espiral, OT Organización test,
+  BD Barbería Demo, DU Dulceria, QAV/QAN/QAB los QA. Se asignan por SQL (no hay UI).
+- Los mensajes al cliente muestran «✅ *OK ES-0004*» / «❌ *CANCELAR ES-0004*» y el pie dice «solo entendemos *OK
+  ES-0004* y *CANCELAR ES-0004*». `parseReplyCode` acepta `es-4`, `es004`, `ES 0004`, mayúsculas o no; letras
+  distintas de T deben ser un prefijo conocido («dale 5» no es código).
+- **Remitente desconocido:** si trae código → `chatByAppointmentCode` (turno abierto único con ese número entre los
+  negocios de la línea) → actúa y guarda el alias en **`wa_sender_aliases`** (`sender_id` lid → `chat_id`); después
+  le basta «OK». Si no trae código → `askForCode` le pide el código (ejemplo con el prefijo del negocio que escribió
+  último en la línea; **responder a un `@lid` sí funciona** en este servidor), máx. 1 vez por 12 h.
+- Verificado en real: Aicenis («OK» a secas tras aprender el alias), Roberto (alias de junio) y +5350625804 hecho
+  desconocido a propósito (alias borrado + message_ids a NULL): «Ok» → aviso; «Ok es-6» → confirmado + alias.
+- Manual (`docs/user-manual/turno-flash-user-manual.html`) actualizado con el ejemplo `EN-0042`.
