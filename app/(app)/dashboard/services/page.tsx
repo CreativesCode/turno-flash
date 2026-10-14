@@ -2,6 +2,7 @@
 
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
+import { CategoriesSheet } from "@/components/services/CategoriesSheet";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { ServiceFormModal } from "@/components/services/ServiceFormModal";
 import {
@@ -18,14 +19,21 @@ import {
   useCreateService,
   useDeactivateService,
   useDebounce,
+  useDuplicateService,
   useReactivateService,
+  useReorderServices,
+  useServiceCategories,
   useServicesQuery,
   useToast,
   useUpdateService,
 } from "@/hooks";
+import { isServiceBadge } from "@/config/service-badges";
+import { useOrganizationBasics } from "@/hooks/useBookingSetup.query";
 import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import { Service, ServiceFormData } from "@/types/appointments";
-import { AlertCircle, Package, Plus } from "lucide-react";
+import { groupServices, hasCategoryGroups } from "@/utils/group-services";
+import { getSiteUrl } from "@/utils/metadata";
+import { AlertCircle, Package, Plus, Tags } from "lucide-react";
 import { FormEvent, Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 const EMPTY_FORM: ServiceFormData = {
@@ -41,7 +49,8 @@ const EMPTY_FORM: ServiceFormData = {
   max_advance_booking_days: 60,
   min_advance_booking_hours: 2,
   available_for_online_booking: true,
-  sort_order: 0,
+  category_id: null,
+  badge: null,
 };
 
 function ServicesContent() {
@@ -58,6 +67,27 @@ function ServicesContent() {
   );
 
   const { services, loading, error } = useServicesQuery({});
+  const { categories: allCategories } = useServiceCategories();
+  // An inactive category behaves as "no category", like on /book
+  const categories = useMemo(
+    () => allCategories.filter((c) => c.is_active ?? true),
+    [allCategories]
+  );
+  const [showCategories, setShowCategories] = useState(false);
+  const [ordering, setOrdering] = useState(false);
+  const { data: basics } = useOrganizationBasics(profile?.organization_id ?? "");
+  // Always the public web domain: inside the native app window.location is localhost
+  const bookingLink = basics ? `${getSiteUrl()}/book?b=${basics.slug}` : null;
+
+  const serviceCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of services) {
+      if (s.category_id) {
+        counts.set(s.category_id, (counts.get(s.category_id) ?? 0) + 1);
+      }
+    }
+    return counts;
+  }, [services]);
 
   const filteredServices = useMemo(() => {
     if (!debouncedSearch) return services;
@@ -73,6 +103,17 @@ function ServicesContent() {
   const updateServiceMutation = useUpdateService();
   const deactivateServiceMutation = useDeactivateService();
   const reactivateServiceMutation = useReactivateService();
+  const duplicateServiceMutation = useDuplicateService();
+  const reorderServicesMutation = useReorderServices();
+
+  const groups = useMemo(
+    () => groupServices(filteredServices, categories),
+    [filteredServices, categories]
+  );
+  const showHeadings = hasCategoryGroups(groups);
+  // Ordering works on the whole list, not on search results
+  const canOrder = canManageServices && !debouncedSearch && services.length > 1;
+  const isOrdering = ordering && canOrder;
 
   const { modules } = useOrganizationModules();
   const [formData, setFormData] = useState<ServiceFormData>(EMPTY_FORM);
@@ -109,7 +150,8 @@ function ServicesContent() {
       max_advance_booking_days: service.max_advance_booking_days ?? 60,
       min_advance_booking_hours: service.min_advance_booking_hours ?? 2,
       available_for_online_booking: service.available_for_online_booking ?? true,
-      sort_order: service.sort_order ?? 0,
+      category_id: service.category_id ?? null,
+      badge: isServiceBadge(service.badge) ? service.badge : null,
     });
     setEditingService(service);
     setShowModal(true);
@@ -204,6 +246,37 @@ function ServicesContent() {
     [deactivateServiceMutation, reactivateServiceMutation, toast]
   );
 
+  const handleDuplicate = useCallback(
+    async (service: Service) => {
+      const loadingToast = toast.loading("Duplicando...");
+      try {
+        const copy = await duplicateServiceMutation.mutateAsync(service.id);
+        toast.dismiss(loadingToast);
+        toast.success("Servicio duplicado", "Cambia lo que haga falta y guarda");
+        // Straight into the copy: the usual next step is editing it
+        if (copy) handleEdit(copy);
+      } catch (err) {
+        toast.dismiss(loadingToast);
+        toast.error(
+          "No se pudo duplicar",
+          err instanceof Error ? err.message : undefined
+        );
+      }
+    },
+    [duplicateServiceMutation, handleEdit, toast]
+  );
+
+  const handleMove = useCallback(
+    (group: Service[], index: number, delta: -1 | 1) => {
+      const ids = group.map((s) => s.id);
+      [ids[index], ids[index + delta]] = [ids[index + delta], ids[index]];
+      reorderServicesMutation.mutate(ids, {
+        onError: (err) => toast.error("No se pudo ordenar", err.message),
+      });
+    },
+    [reorderServicesMutation, toast]
+  );
+
   if (loading) {
     return (
       <ProtectedRoute>
@@ -238,10 +311,21 @@ function ServicesContent() {
           subtitle={subtitle}
           actions={
             canManageServices && (
-              <Button variant="secondary" onClick={handleCreate}>
-                <Plus className="size-[18px]" />
-                Nuevo
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowCategories(true)}
+                  aria-label="Categorías"
+                >
+                  <Tags className="size-[18px]" />
+                  {/* Icon only on phones: the subtitle needs the room */}
+                  <span className="hidden sm:inline">Categorías</span>
+                </Button>
+                <Button variant="secondary" onClick={handleCreate}>
+                  <Plus className="size-[18px]" />
+                  Nuevo
+                </Button>
+              </div>
             )
           }
         >
@@ -280,17 +364,62 @@ function ServicesContent() {
             </EmptyState>
           ) : (
             <>
-              <ListGroup>
-                {filteredServices.map((service) => (
-                  <ServiceCard
-                    key={service.id}
-                    service={service}
-                    canManage={canManageServices}
-                    onEdit={handleEdit}
-                    onToggleActive={handleToggleActive}
-                  />
+              {canOrder && (
+                <div className="mb-2 flex items-center justify-end gap-3 px-1">
+                  {isOrdering && (
+                    <span className="mr-auto text-meta text-foreground-muted">
+                      Usa las flechas para cambiar el orden
+                    </span>
+                  )}
+                  <Button
+                    size="sm"
+                    variant={isOrdering ? "primary" : "ghost"}
+                    onClick={() => setOrdering((v) => !v)}
+                  >
+                    {isOrdering ? "Listo" : "Ordenar"}
+                  </Button>
+                </div>
+              )}
+              <div className="flex flex-col gap-5">
+                {groups.map((group) => (
+                  <section key={group.category?.id ?? "none"}>
+                    {showHeadings && (
+                      <div className="mb-2 px-1">
+                        <h2 className="text-meta font-semibold uppercase tracking-wide text-foreground-muted">
+                          {group.category?.name ?? "Sin categoría"}
+                        </h2>
+                        {group.category?.description && (
+                          <p className="text-meta text-foreground-subtle">
+                            {group.category.description}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <ListGroup>
+                      {group.services.map((service, index) => (
+                        <ServiceCard
+                          key={service.id}
+                          service={service}
+                          canManage={canManageServices}
+                          onEdit={handleEdit}
+                          onToggleActive={handleToggleActive}
+                          ordering={isOrdering}
+                          onMoveUp={
+                            index > 0
+                              ? () => handleMove(group.services, index, -1)
+                              : undefined
+                          }
+                          onMoveDown={
+                            index < group.services.length - 1
+                              ? () => handleMove(group.services, index, 1)
+                              : undefined
+                          }
+                        />
+                      ))}
+                    </ListGroup>
+                  </section>
                 ))}
-              </ListGroup>
+              </div>
               <p className="mt-3.5 px-1 text-meta text-foreground-subtle">
                 Los servicios pausados no aparecen en tu página de reservas.
               </p>
@@ -309,7 +438,19 @@ function ServicesContent() {
         isSubmitting={
           createServiceMutation.isPending || updateServiceMutation.isPending
         }
+        categories={categories}
+        onDuplicate={handleDuplicate}
       />
+
+      {canManageServices && (
+        <CategoriesSheet
+          open={showCategories}
+          onClose={() => setShowCategories(false)}
+          categories={categories}
+          serviceCounts={serviceCounts}
+          bookingLink={bookingLink}
+        />
+      )}
     </ProtectedRoute>
   );
 }

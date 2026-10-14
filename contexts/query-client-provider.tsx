@@ -22,6 +22,8 @@ const PERSISTED_ROOTS = new Set<unknown>([
   "trips",
   "trip-bookings",
   "services",
+  // Without them the offline lists lose their grouping (PRP-004)
+  "service_categories",
   "staff",
   "organization-modules",
   "license",

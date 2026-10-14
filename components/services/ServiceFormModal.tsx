@@ -3,10 +3,22 @@
 import {
   Button,
   Field,
+  Select,
   Sheet,
   sheetInputClasses as inputClasses,
 } from "@/components/ui";
-import type { Service, ServiceFormData } from "@/types/appointments";
+import {
+  SERVICE_BADGE_KEYS,
+  SERVICE_BADGES,
+  isServiceBadge,
+} from "@/config/service-badges";
+import { SERVICE_DESCRIPTION_MAX } from "@/schemas/service.schema";
+import type {
+  Service,
+  ServiceCategory,
+  ServiceFormData,
+} from "@/types/appointments";
+import { Copy } from "lucide-react";
 import { FormEvent } from "react";
 
 export interface ServiceFormModalProps {
@@ -17,6 +29,10 @@ export interface ServiceFormModalProps {
   onChange: (patch: Partial<ServiceFormData>) => void;
   onSubmit: (e: FormEvent) => void | Promise<void>;
   isSubmitting: boolean;
+  /** The field only shows when the business has categories */
+  categories: ServiceCategory[];
+  /** Copies the saved service (only while editing) */
+  onDuplicate: (service: Service) => void;
 }
 
 export function ServiceFormModal({
@@ -27,7 +43,10 @@ export function ServiceFormModal({
   onChange,
   onSubmit,
   isSubmitting,
+  categories,
+  onDuplicate,
 }: ServiceFormModalProps) {
+  const description = formData.description ?? "";
   const isEdit = !!editing;
   return (
     <Sheet
@@ -47,14 +66,52 @@ export function ServiceFormModal({
           />
         </Field>
 
-        <Field label="Descripción (opcional)">
+        {categories.length > 0 && (
+          <Field label="Categoría">
+            <Select
+              value={formData.category_id ?? ""}
+              onChange={(e) => onChange({ category_id: e.target.value || null })}
+            >
+              <option value="">Sin categoría</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        )}
+
+        <Field
+          label="Descripción (opcional)"
+          hint={`Lo que incluye, una cosa por línea. Se ve igual en tu página de reservas. ${description.length}/${SERVICE_DESCRIPTION_MAX}`}
+        >
           <textarea
-            rows={2}
-            value={formData.description ?? ""}
+            rows={4}
+            maxLength={SERVICE_DESCRIPTION_MAX}
+            value={description}
             onChange={(e) => onChange({ description: e.target.value })}
             className={inputClasses}
-            placeholder="Detalle visible para el cliente…"
+            placeholder={"Ej:\n10 fotos 8x10\n4 postales\nAmpliación 12x18"}
           />
+        </Field>
+
+        <Field label="Marca (opcional)" hint="Una etiqueta junto al nombre; no cambia el orden">
+          <Select
+            value={formData.badge ?? ""}
+            onChange={(e) =>
+              onChange({
+                badge: isServiceBadge(e.target.value) ? e.target.value : null,
+              })
+            }
+          >
+            <option value="">Sin marca</option>
+            {SERVICE_BADGE_KEYS.map((key) => (
+              <option key={key} value={key}>
+                {SERVICE_BADGES[key].label}
+              </option>
+            ))}
+          </Select>
         </Field>
 
         <div className="grid grid-cols-3 gap-3">
@@ -153,6 +210,18 @@ export function ServiceFormModal({
             </span>
           </label>
         </div>
+
+        {editing && (
+          <button
+            type="button"
+            onClick={() => onDuplicate(editing)}
+            disabled={isSubmitting}
+            className="flex cursor-pointer items-center gap-2 self-start text-meta font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline disabled:opacity-50"
+          >
+            <Copy className="size-4" />
+            Duplicar este servicio (copia lo guardado y quién lo hace)
+          </button>
+        )}
 
         <div className="flex gap-2 pt-1">
           <Button
