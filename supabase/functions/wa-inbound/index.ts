@@ -278,19 +278,18 @@ async function handleMessageReceived(
   // required: OpenWA can answer with an error after delivering, leaving it null.
   const from = data.from ?? "";
   let organizationId = candidates[0];
-  let chatIds = await resolveChatIds(supabase, organizationId, from);
+  const chatIds = await resolveChatIds(supabase, from);
   if (candidates.length > 1) {
-    const match = await resolveOrgBySender(supabase, candidates, from);
+    const match = await resolveOrgBySender(supabase, candidates, chatIds);
     if (!match) {
       console.log(
         `[wa-inbound] ${candidates.length} orgs on session ${env.sessionId}, none wrote to "${from}"`
       );
       return {
-        result: `skip: ${candidates.length} businesses on the line, none wrote to ${from}`,
+        result: `skip: ${candidates.length} businesses on the line, none wrote to ${from} (chatIds=${chatIds.join(",") || "none"})`,
       };
     }
-    organizationId = match.organizationId;
-    chatIds = match.chatIds;
+    organizationId = match;
   }
 
   console.log(
@@ -576,12 +575,12 @@ async function handleSessionStatus(supabase: any, env: WebhookEnvelope) {
 /** Chat ids ("<digits>@c.us", as wa-send writes them) that belong to the
  *  sender. WhatsApp can deliver replies from an @lid alias instead of the
  *  phone number; the alias is learned from earlier message_ids, which OpenWA
- *  builds from the delivered chat ("true_<lid>@lid_<id>").
+ *  builds from the delivered chat ("true_<lid>@lid_<id>"). The lookup spans
+ *  every business: the alias identifies the person, not the business.
  */
 async function resolveChatIds(
   // deno-lint-ignore no-explicit-any
   supabase: any,
-  organizationId: string,
   from: string
 ): Promise<string[]> {
   if (!from) return [];
@@ -593,7 +592,6 @@ async function resolveChatIds(
     const { data } = await supabase
       .from("wa_outbound_messages")
       .select("chat_id")
-      .eq("organization_id", organizationId)
       .ilike("chat_id", `%${suffix}@c.us`)
       .limit(20);
     for (const row of data ?? []) chatIds.add(row.chat_id);
@@ -602,7 +600,6 @@ async function resolveChatIds(
   const { data: aliased } = await supabase
     .from("wa_outbound_messages")
     .select("chat_id")
-    .eq("organization_id", organizationId)
     .ilike("message_id", `%_${from}_%`)
     .order("sent_at", { ascending: false })
     .limit(20);
@@ -612,32 +609,24 @@ async function resolveChatIds(
 }
 
 /** Among the businesses that share a WhatsApp line, the one that last wrote
- *  to this sender, with the chat ids it used. Null when none of them did.
+ *  to the sender (any of its chat ids). Null when none of them did.
  */
 async function resolveOrgBySender(
   // deno-lint-ignore no-explicit-any
   supabase: any,
   organizationIds: string[],
-  from: string
-): Promise<{ organizationId: string; chatIds: string[] } | null> {
-  let best: { organizationId: string; chatIds: string[]; sentAt: string } | null =
-    null;
-  for (const organizationId of organizationIds) {
-    const chatIds = await resolveChatIds(supabase, organizationId, from);
-    if (!chatIds.length) continue;
-    const { data: latest } = await supabase
-      .from("wa_outbound_messages")
-      .select("sent_at")
-      .eq("organization_id", organizationId)
-      .in("chat_id", chatIds)
-      .order("sent_at", { ascending: false })
-      .limit(1)
-      .maybeSingle<{ sent_at: string }>();
-    if (latest?.sent_at && (!best || latest.sent_at > best.sentAt)) {
-      best = { organizationId, chatIds, sentAt: latest.sent_at };
-    }
-  }
-  return best && { organizationId: best.organizationId, chatIds: best.chatIds };
+  chatIds: string[]
+): Promise<string | null> {
+  if (!chatIds.length) return null;
+  const { data: latest } = await supabase
+    .from("wa_outbound_messages")
+    .select("organization_id")
+    .in("organization_id", organizationIds)
+    .in("chat_id", chatIds)
+    .order("sent_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ organization_id: string }>();
+  return latest?.organization_id ?? null;
 }
 
 /** Extrae una valoración 1-5 si el mensaje empieza con ese número.
