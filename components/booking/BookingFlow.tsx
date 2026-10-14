@@ -1,12 +1,15 @@
 "use client";
 
 import {
+  type CategoryOption,
+  CategoryStep,
   type CustomerSubmit,
   DateTimeStep,
   type DetailsDraft,
   DetailsStep,
   ServiceStep,
   StaffStep,
+  UNCATEGORIZED_ID,
 } from "@/components/booking/BookingSteps";
 import {
   BusinessContactLink,
@@ -32,6 +35,7 @@ import type {
   PublicSlot,
 } from "@/types/public-booking";
 import { fmtDuration } from "@/utils/format";
+import { UNCATEGORIZED_LABEL, groupServices } from "@/utils/group-services";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -43,9 +47,11 @@ import {
 } from "lucide-react";
 import { ReactNode, useState } from "react";
 
-type Step = "service" | "staff" | "time" | "details" | "done";
+/** "category" is the first entry; it shows the services when there is nothing to choose. */
+type Step = "category" | "service" | "staff" | "time" | "details" | "done";
 
 const STEP_TITLES: Record<Step, string> = {
+  category: "¿Qué te interesa?",
   service: "Elige un servicio",
   staff: "¿Con quién?",
   time: "Elige día y horario",
@@ -54,6 +60,7 @@ const STEP_TITLES: Record<Step, string> = {
 };
 
 const PREVIOUS_STEP: Partial<Record<Step, Step>> = {
+  service: "category",
   staff: "service",
   time: "staff",
   details: "time",
@@ -63,19 +70,34 @@ function longDate(date: string): string {
   return format(parseISO(date), "EEEE d 'de' MMMM", { locale: es });
 }
 
-export function BookingFlow({ slug }: { slug: string }) {
+export function BookingFlow({
+  slug,
+  linkedCategoryId = null,
+}: {
+  slug: string;
+  linkedCategoryId?: string | null;
+}) {
   const { data: info, isLoading, error, refetch } = usePublicBookingInfo(slug);
   const bookMutation = useCreatePublicBooking();
   const queryClient = useQueryClient();
   const requestKey = useRequestKey();
   const toast = useToast();
 
-  const { step, go, replace, back } = useStepHistory<Step>("service");
+  const { step, go, replace, back } = useStepHistory<Step>("category");
   // Kept in the tab's storage: Android may reload the page after WhatsApp
   const storageKey = `booking:${slug}`;
   const [service, setService] = useSessionState<PublicService | null>(
     `${storageKey}:service`,
     null
+  );
+  const [categoryId, setCategoryId] = useSessionState<string | null>(
+    `${storageKey}:category`,
+    null
+  );
+  /** Set once they leave the linked category for the full list */
+  const [linkDismissed, setLinkDismissed] = useSessionState<boolean>(
+    `${storageKey}:link-dismissed`,
+    false
   );
   /** null = "no preference" */
   const [staffId, setStaffId] = useSessionState<string | null>(`${storageKey}:staff`, null);
@@ -144,7 +166,8 @@ export function BookingFlow({ slug }: { slug: string }) {
     info.staff.find((s) => s.id === id)?.name ?? null;
 
   const reset = () => {
-    replace("service");
+    replace("category");
+    setCategoryId(null);
     setService(null);
     setStaffId(null);
     setDate(null);
@@ -205,16 +228,51 @@ export function BookingFlow({ slug }: { slug: string }) {
     }
   };
 
+  // Categories: a step of its own only with two or more groups to pick from
+  const categoryOptions: CategoryOption[] = groupServices(
+    info.services,
+    info.categories ?? []
+  ).map((group) => ({
+    id: group.category?.id ?? UNCATEGORIZED_ID,
+    name: group.category?.name ?? UNCATEGORIZED_LABEL,
+    description: group.category?.description ?? null,
+    services: group.services,
+  }));
+  const pickCategory = categoryOptions.length > 1;
+  const findOption = (id: string | null) =>
+    pickCategory ? (categoryOptions.find((o) => o.id === id) ?? null) : null;
+  // An unknown or stale "c" in the link just falls back to the full list
+  const linkedOption = linkDismissed ? null : findOption(linkedCategoryId);
+  const chosenOption = findOption(categoryId);
+
   // History entries can outlive the choices they need (after "Hacer otra
   // reserva"): fall back to the first step instead of rendering nothing.
-  const view: Step = step !== "service" && step !== "done" && !service ? "service" : step;
-  const previous = PREVIOUS_STEP[view];
+  let view: Step = step;
+  if (step !== "category" && step !== "service" && step !== "done" && !service) {
+    view = "category";
+  }
+  // The first entry shows the services straight away when there is no
+  // category to pick, or when they came through a category link
+  const openedByLink = view === "category" && !!linkedOption;
+  if (view === "category" && (!pickCategory || openedByLink)) view = "service";
+  if (view === "service" && pickCategory && !chosenOption && !openedByLink) {
+    view = "category";
+  }
+  const listedOption = openedByLink ? linkedOption : chosenOption;
+  // Without categories the services are the first screen: nothing to go back to
+  const previous =
+    view === "service" && !pickCategory ? undefined : PREVIOUS_STEP[view];
+  const handleBack = () => {
+    // A category link opens on the first entry: back shows the full list
+    if (openedByLink) setLinkDismissed(true);
+    else back();
+  };
 
   return (
     <Shell
       businessName={info.organization.name}
       subtitle={STEP_TITLES[view]}
-      onBack={previous ? () => back() : undefined}
+      onBack={previous ? handleBack : undefined}
     >
       {offline && (
         <p className="mb-3 flex items-center gap-1.5 rounded-lg bg-warning-50 px-3 py-2 text-xs font-semibold text-warning-800 dark:bg-warning-900 dark:text-warning-400">
@@ -222,7 +280,17 @@ export function BookingFlow({ slug }: { slug: string }) {
           Sin conexión, reintentando… Lo que escribiste se mantiene.
         </p>
       )}
-      {service && view !== "service" && view !== "done" && (
+      {view === "category" && (
+        <CategoryStep
+          options={categoryOptions}
+          onSelect={(id) => {
+            setCategoryId(id);
+            go("service");
+          }}
+        />
+      )}
+
+      {service && view !== "category" && view !== "service" && view !== "done" && (
         <div className="mb-4 flex flex-wrap gap-1.5 text-xs">
           <Chip>
             {service.name} · {fmtDuration(service.duration_minutes)}
@@ -238,7 +306,8 @@ export function BookingFlow({ slug }: { slug: string }) {
 
       {view === "service" && (
         <ServiceStep
-          services={info.services}
+          services={listedOption ? listedOption.services : info.services}
+          heading={listedOption}
           onSelect={(s) => {
             // Nothing to choose with a single professional: skip "¿Con quién?"
             const candidates = info.staff.filter((member) =>

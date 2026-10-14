@@ -1,5 +1,6 @@
 "use client";
 
+import { ServiceBadge } from "@/components/services/ServiceBadge";
 import { Avatar, Button, Field, sheetInputClasses } from "@/components/ui";
 import { PHONE_COUNTRIES, dialCodeOf } from "@/config/phone-countries";
 import { usePublicSlots } from "@/hooks/usePublicBooking.query";
@@ -24,15 +25,83 @@ const MAX_VISIBLE_DAYS = 30;
 /** Empty days skipped on their own before the customer picks one (each costs a request). */
 const MAX_AUTO_SKIPPED_DAYS = 3;
 
+// ─── Category ─────────────────────────────────────────────
+
+/** One option of "¿Qué te interesa?": a category or the uncategorized rest. */
+export interface CategoryOption {
+  /** Category id, or UNCATEGORIZED_ID for services without one */
+  id: string;
+  name: string;
+  description: string | null;
+  services: PublicService[];
+}
+
+export const UNCATEGORIZED_ID = "none";
+
+export function CategoryStep({
+  options,
+  onSelect,
+}: {
+  options: CategoryOption[];
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <ul className="flex flex-col gap-2">
+      {options.map((option) => {
+        const prices = option.services
+          .map((s) => s.price)
+          .filter((p): p is number => p != null);
+        const currency = option.services.find((s) => s.currency)?.currency ?? undefined;
+        const count = option.services.length;
+        return (
+          <li key={option.id}>
+            <button
+              type="button"
+              onClick={() => onSelect(option.id)}
+              className="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-border bg-surface p-4 text-left shadow-sm transition-shadow hover:shadow-md"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-base font-semibold text-foreground">
+                  {option.name}
+                </span>
+                {option.description && (
+                  <span className="mt-0.5 block text-xs text-foreground-muted">
+                    {option.description}
+                  </span>
+                )}
+                <span className="mt-1 block text-xs text-foreground-muted">
+                  {count === 1 ? "1 opción" : `${count} opciones`}
+                  {prices.length > 0 &&
+                    ` · desde ${fmtMoney(Math.min(...prices), undefined, currency)}`}
+                </span>
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-foreground-subtle" />
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 // ─── Service ──────────────────────────────────────────────
+
+/** Longer than this shows "Ver detalle" instead of the whole text. */
+const DESCRIPTION_PREVIEW_LINES = 3;
+const DESCRIPTION_PREVIEW_CHARS = 140;
 
 export function ServiceStep({
   services,
+  heading,
   onSelect,
 }: {
   services: PublicService[];
+  /** The chosen category, shown above its services */
+  heading?: { name: string; description: string | null } | null;
   onSelect: (service: PublicService) => void;
 }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+
   if (services.length === 0) {
     return (
       <p className="rounded-xl border border-border bg-surface p-6 text-center text-sm text-foreground-muted">
@@ -42,47 +111,91 @@ export function ServiceStep({
   }
 
   return (
-    <ul className="flex flex-col gap-2">
-      {services.map((service) => (
-        <li key={service.id}>
-          <button
-            type="button"
-            onClick={() => onSelect(service)}
-            className="flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-xl border border-border bg-surface p-3.5 text-left shadow-sm transition-shadow hover:shadow-md"
-          >
-            <span
-              aria-hidden
-              className="h-10 w-1.5 shrink-0 rounded-full"
-              style={{ background: service.color ?? "#3b82f6" }}
-            />
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-foreground">
-                {service.name}
-              </span>
-              {service.description && (
-                <span className="mt-0.5 line-clamp-2 block text-xs text-foreground-muted">
-                  {service.description}
+    <>
+      {heading && (
+        <div className="mb-3">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            {heading.name}
+          </h2>
+          {heading.description && (
+            <p className="text-xs text-foreground-muted">{heading.description}</p>
+          )}
+        </div>
+      )}
+      <ul className="flex flex-col gap-2">
+        {services.map((service) => {
+          const description = service.description?.trim() ?? "";
+          const isLong =
+            description.split("\n").length > DESCRIPTION_PREVIEW_LINES ||
+            description.length > DESCRIPTION_PREVIEW_CHARS;
+          const isOpen = expanded === service.id;
+          return (
+            <li
+              key={service.id}
+              className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition-shadow hover:shadow-md"
+            >
+              <button
+                type="button"
+                onClick={() => onSelect(service)}
+                className="flex w-full cursor-pointer items-center gap-3 p-3.5 text-left"
+              >
+                <span
+                  aria-hidden
+                  className="h-10 w-1.5 shrink-0 self-start rounded-full"
+                  style={{ background: service.color ?? "#3b82f6" }}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-sm font-semibold text-foreground">
+                      {service.name}
+                    </span>
+                    <ServiceBadge badge={service.badge} />
+                  </span>
+                  {description && (
+                    // Plain text, one item per line as the owner typed it
+                    <span
+                      // line-clamp needs its own display: never together with "block"
+                      className={`mt-1 whitespace-pre-line text-xs text-foreground-muted ${
+                        isLong && !isOpen ? "line-clamp-3" : "block"
+                      }`}
+                    >
+                      {description}
+                    </span>
+                  )}
+                  <span className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-foreground-muted">
+                    <span>{fmtDuration(service.duration_minutes)}</span>
+                    {service.price != null && (
+                      <span className="font-semibold text-foreground">
+                        {fmtMoney(service.price, undefined, service.currency ?? undefined)}
+                      </span>
+                    )}
+                    {service.requires_approval && (
+                      <span className="rounded-full bg-warning-100 px-1.5 py-px text-caption font-semibold text-warning-700 dark:bg-warning-900 dark:text-warning-400">
+                        Sujeto a aprobación
+                      </span>
+                    )}
+                  </span>
                 </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-foreground-subtle" />
+              </button>
+              {isLong && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded(isOpen ? null : service.id)}
+                  aria-expanded={isOpen}
+                  className="flex w-full cursor-pointer items-center gap-1 border-t border-border px-3.5 py-2 text-xs font-semibold text-primary-700 hover:bg-muted dark:text-primary-400"
+                >
+                  {isOpen ? "Ver menos" : "Ver detalle"}
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
               )}
-              <span className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-foreground-muted">
-                <span>{fmtDuration(service.duration_minutes)}</span>
-                {service.price != null && (
-                  <span className="font-semibold text-foreground">
-                    {fmtMoney(service.price, undefined, service.currency ?? undefined)}
-                  </span>
-                )}
-                {service.requires_approval && (
-                  <span className="rounded-full bg-warning-100 px-1.5 py-px text-caption font-semibold text-warning-700 dark:bg-warning-900 dark:text-warning-400">
-                    Sujeto a aprobación
-                  </span>
-                )}
-              </span>
-            </span>
-            <ChevronRight className="h-4 w-4 shrink-0 text-foreground-subtle" />
-          </button>
-        </li>
-      ))}
-    </ul>
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 }
 

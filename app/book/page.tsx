@@ -12,7 +12,9 @@ import { Suspense } from "react";
 function BookContent() {
   const searchParams = useSearchParams();
   const slug = (searchParams.get("b") ?? "").trim().toLowerCase();
-  return <BookingFlow slug={slug} />;
+  // Link of one category ("solo bodas"): opens straight on its services
+  const categoryId = searchParams.get("c")?.trim() || null;
+  return <BookingFlow slug={slug} linkedCategoryId={categoryId} />;
 }
 
 export default function BookPage() {
