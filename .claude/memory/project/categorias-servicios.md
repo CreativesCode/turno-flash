@@ -17,6 +17,17 @@ metadata:
   descripción hasta 1000; asignar por categoría = atajo «Marcar todos» (no asignación viva); «Duplicar»; enlace
   por categoría; tarjeta en la landing. **Fuera:** pedidos de fotos sueltas por tamaño y reportes por categoría.
 
+## Espiral Studio cargado (2026-10-14, noche, después del push)
+
+- 5 categorías (Familiares 12, Embarazo 4, Boda 7, Quince 6, Fotos sueltas 1) = 30 servicios transcritos de sus 11
+  fotos: nombre «<paquete> (<sesión>)» (los nombres son únicos por negocio), 1 h cada uno (Aicenis debe ajustar),
+  descripción por líneas + «Total: N fotos» + «Máximo N cambios de vestuario», marcas como en sus folletos, color por
+  categoría, solo **Emilio** asignado (decisión de Roberto). Embarazo solo trae Básico y Revista: preguntarle si hay más.
+- Los 2 servicios de prueba quedaron **pausados**, no borrados: la FK de turnos es RESTRICT y ES-0002 (Derwil Medina,
+  reserva web, +5359467140) podría ser un cliente real. Borrarlos cuando Roberto lo confirme.
+- **Emilio estaba desactivado** (lo hizo alguien desde el panel) y la página quedó sin servicios; Roberto pidió
+  reactivarlo. Verificado en producción: categorías, paquetes, marcas, «Más fechas» y horarios de Emilio.
+
 ## Dónde vive
 
 - **BD (085):** `services.badge` (CHECK con las 4 claves), nombre de categoría único por negocio
