@@ -9,7 +9,8 @@ import type { PublicService, PublicSlot, PublicStaff } from "@/types/public-book
 import { fmtDuration, fmtMoney } from "@/utils/format";
 import { addDays, format, getDay, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { ChevronDown, ChevronRight, Shuffle } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronRight, Shuffle } from "lucide-react";
+import { MonthPicker } from "./MonthPicker";
 import { FormEvent, KeyboardEvent, useEffect, useState } from "react";
 
 /**
@@ -20,8 +21,8 @@ import { FormEvent, KeyboardEvent, useEffect, useState } from "react";
 const loadCustomerSchema = () =>
   import("@/schemas/public-booking.schema").then((m) => m.publicCustomerSchema);
 
-/** Max day chips shown, even if the service allows booking further ahead. */
-const MAX_VISIBLE_DAYS = 30;
+/** Day chips in the strip; later days are in "Más fechas" (month calendar). */
+const STRIP_DAYS = 12;
 /** Empty days skipped on their own before the customer picks one (each costs a request). */
 const MAX_AUTO_SKIPPED_DAYS = 3;
 
@@ -269,7 +270,8 @@ export function DateTimeStep({
   const candidates = staffId ? staff.filter((s) => s.id === staffId) : staff;
   const workDays = new Set(candidates.flatMap((s) => s.work_days ?? []));
 
-  const lastOffset = Math.min(service.max_advance_booking_days, MAX_VISIBLE_DAYS);
+  // Every day the service allows; the server enforces the same limit
+  const lastOffset = service.max_advance_booking_days;
   const days: { value: string; weekday: string; day: string }[] = [];
   for (let offset = allowSameDay ? 0 : 1; offset <= lastOffset; offset++) {
     const d = addDays(parseISO(today), offset);
@@ -291,6 +293,14 @@ export function DateTimeStep({
     date: activeDate,
   });
 
+  const [showMonth, setShowMonth] = useState(false);
+  // The strip shows the next days; a later date picked in the calendar joins it
+  const stripDays = days.slice(0, STRIP_DAYS);
+  const pickedLater = days.find(
+    (d) => d.value === activeDate && !stripDays.includes(d)
+  );
+  if (pickedLater) stripDays.push(pickedLater);
+
   const autoDayIsEmpty = date === null && !isLoading && !error && slots.length === 0;
   if (autoDayIsEmpty && autoIndex < MAX_AUTO_SKIPPED_DAYS && autoIndex < days.length - 1) {
     setAutoIndex(autoIndex + 1);
@@ -307,7 +317,7 @@ export function DateTimeStep({
   return (
     <div className="flex flex-col gap-4">
       <div className="scrollbar-discreet -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-        {days.map((d) => {
+        {stripDays.map((d) => {
           const selected = d.value === activeDate;
           return (
             <button
@@ -328,7 +338,31 @@ export function DateTimeStep({
             </button>
           );
         })}
+        {days.length > STRIP_DAYS && (
+          <button
+            type="button"
+            onClick={() => setShowMonth((v) => !v)}
+            aria-expanded={showMonth}
+            className={`flex min-w-16 shrink-0 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-3 py-2 text-primary-700 transition-colors dark:text-primary-400 ${
+              showMonth ? "border-primary bg-primary-50 dark:bg-primary-900" : "border-border-2 bg-surface hover:border-primary"
+            }`}
+          >
+            <CalendarDays className="h-4 w-4" />
+            <span className="text-caption font-semibold">Más fechas</span>
+          </button>
+        )}
       </div>
+
+      {showMonth && (
+        <MonthPicker
+          available={days.map((d) => d.value)}
+          value={activeDate}
+          onSelect={(picked) => {
+            onDateChange(picked);
+            setShowMonth(false);
+          }}
+        />
+      )}
 
       {isLoading ? (
         <div className="grid grid-cols-4 gap-2">

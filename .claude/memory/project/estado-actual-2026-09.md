@@ -174,8 +174,8 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   Revisión del 2026-10-14: todo funcionó salvo (1) respuestas de clientes perdidas por la línea compartida
   (arreglado, `wa-inbound` v39) y (2) su número de negocio sin +53 (corregido en BD; aviso del T-0002 reenviado;
   formulario de registro arreglado, pendiente de push). Respuestas dadas: solapes se impiden **por profesional**
-  (constraint 049), la reserva online muestra **30 días** (`MAX_VISIBLE_DAYS` en `BookingSteps.tsx`, aunque el
-  ajuste permita 60) y el bot desde el número del negocio queda para después (Roberto: no sobrecargar OpenWA).
+  (constraint 049), la reserva online mostraba **30 días** (desde la noche del 14 oct muestra todos los que
+  permite el servicio, 60 por defecto: tira de 12 días + «Más fechas» con calendario, `MonthPicker.tsx`) y el bot desde el número del negocio queda para después (Roberto: no sobrecargar OpenWA).
 - **Verificado 2026-10-14 14:16 UTC:** el OK de Roberto al T-0003 (Espiral) aplicó `client_confirmed` y salieron el
   acuse y el aviso al negocio. Hicieron falta 4 arreglos (línea compartida, alias `@lid` global, consulta a OpenWA
   para `@lid` desconocidos y el enum `rescheduled`, migraciones 080-081, `wa-inbound` v39-v42). Detalle y reglas en
