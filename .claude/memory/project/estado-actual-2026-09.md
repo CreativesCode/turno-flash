@@ -184,3 +184,6 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   de OpenWA en [[whatsapp-automatizaciones]]. BD al 2026-10-14: 26 tablas (todas con RLS),
   13 organizaciones, 21 usuarios, 71 turnos, 24 clientes, 32 servicios, 13 salidas, 21 pasajes; aún **0 pagos
   registrados** y 0 avisos de licencia enviados. Dos negocios nuevos desde el 8 de octubre (uno es Espiral Studio).
+- **Noche del 2026-10-14:** categorías de servicios, marcas, orden y duplicar (PRP-004, pedido de Aicenis; ver
+  [[categorias-servicios]]). Migración **085** aplicada; migraciones alineadas hasta la 085. 7 commits **sin push**.
+  Tipos regenerados (recogían también 080-084).

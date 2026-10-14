@@ -87,6 +87,8 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
 - **Con `npm run dev` corriendo**, `tsc` puede mostrar errores de `.next/dev/types/validator.ts` al agregar un
   layout nuevo: son tipos generados viejos; se van con `npm run build:next`.
 - `.playwright-mcp/` está en `.gitignore` desde el 2026-10-08.
+- **Playwright sin el MCP (2026-10-14):** el de la caché de npx (`npm-cache/_npx/*/node_modules/playwright`, la 1.63.0) se carga con `createRequire` desde un script del scratchpad; esperar `networkidle` antes de llenar el login (si no, el clic no hace nada). `npm run dev` toma el primer puerto libre (ese día el 3002). Los avisos de sonner que lee un guion pueden ser del paso anterior: no usarlos como prueba.
+- **Comparar el peso de una build vieja:** un worktree con `node_modules` enlazado (junction) no compila: Turbopack lo rechaza por estar fuera de la raíz. Hace falta un `npm ci` propio.
 
 ## Android build: Ionic Appflow, not local (2026-10-12)
 

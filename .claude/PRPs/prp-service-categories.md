@@ -1,6 +1,6 @@
 # PRP-004: Categorías de servicios, marcas, orden y descripciones multilínea
 
-> **Estado**: PENDIENTE DE APROBACIÓN (decisiones cerradas el 2026-10-14)
+> **Estado**: COMPLETADO 2026-10-14 (aprobado por Roberto; 8 fases, migración 085 en producción; falta push)
 > **Fecha**: 2026-10-14
 > **Proyecto**: Turno Flash
 > **Origen**: Espiral Studio (Aicenis) — ~29 paquetes de fotos repartidos en Familiares / Embarazo / Boda / Quince
@@ -218,7 +218,47 @@ categoría; línea en la landing; memoria del proyecto actualizada.
 
 ## Aprendizajes (Self-Annealing)
 
-_(vacío — se completa durante la implementación)_
+### 2026-10-14: el formulario pisaba el orden de alta
+- **Error**: `serviceFormSchema.sort_order` tenía `.default(0)` y la página mandaba `sort_order: 0`, así que
+  `create` nunca usaba «al final»: todos los servicios del sistema estaban en 0 y salían por orden alfabético.
+- **Fix**: sin default en Zod, la página ya no manda `sort_order`; alta y cambio de categoría van al final.
+- **Aplicar en**: cualquier campo de orden con valor por defecto en un schema compartido.
+
+### 2026-10-14: `line-clamp-*` junto a `block` no recorta
+- **Error**: «Ver detalle» aparecía pero se veía toda la descripción: `block` pisa el `display: -webkit-box` del clamp.
+- **Fix**: alternar `line-clamp-3` o `block`, nunca ambos.
+- **Aplicar en**: cualquier texto recortable con Tailwind.
+
+### 2026-10-14: el almacén normalizado no respeta el orden
+- **Error**: `useNormalizedData` guarda servicios en un objeto por id (`{...viejo, ...nuevo}`): tras reordenar,
+  «Nuevo turno» conservaba el orden de inserción.
+- **Fix**: ordenar por `sort_order, name` en el componente antes de agrupar.
+- **Aplicar en**: cualquier lista ordenada que salga de `useNormalizedData`.
+
+### 2026-10-14: nombres largos ilegibles en la fila de servicio
+- **Error**: con el precio a la derecha del título (y un menú ⋮ al lado del interruptor), en 390px «Álbum
+  personalizado 6x8» quedaba «Álbum pe…».
+- **Fix**: «Duplicar» dentro del formulario (sin menú en la fila), título a 2 líneas y precio al inicio de la
+  línea de detalles.
+- **Aplicar en**: filas de `ListRow` con nombres que se distinguen por el final.
+
+### 2026-10-14: comparar el peso de una build vieja
+- **Error**: Turbopack rechaza un `node_modules` enlazado (junction) desde otra carpeta: «Symlink node_modules is
+  invalid, it points out of the filesystem root».
+- **Fix**: no se midió el antes; se comprobó que `/book` no carga código del panel (GoTrue, persist, editor).
+- **Aplicar en**: comparativas de peso; para medir el antes hace falta un `npm ci` propio en el worktree.
+
+## Resultado (2026-10-14)
+
+- 7 commits por área (085, capa de datos, Servicios, profesionales, nuevo turno, `/book`, docs). Sin push.
+- Verificado con Playwright sobre `qa-fixture-categorias` (borrado al final): permisos por rol (dueño, empleada,
+  anónimo, licencia vencida en el ensayo SQL), crear/renombrar/ordenar/borrar categorías, nombre repetido
+  rechazado, orden persistido, duplicar (con «(copia 2)»), «Marcar todos» por categoría persistido, «Nuevo
+  turno» agrupado, `/book` con categorías, enlace `&c=`, enlace inválido, Atrás de la página y del navegador,
+  reserva de punta a punta (T-0001), «Hacer otra reserva», descripción de 21 líneas recortada a 3, y el mismo
+  negocio sin categorías sin paso nuevo. Móvil 390px y escritorio oscuro.
+- «Editar turno» no existe como tal (Reprogramar no cambia el servicio): nada que agrupar ahí.
+- `tsc` y `build:next` pasan; `eslint` sin errores en los 25 archivos tocados (los 79 errores del repo son previos).
 
 ---
 
