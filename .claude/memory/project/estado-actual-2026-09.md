@@ -163,6 +163,9 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   `authenticated`; los índices se crearon como `postgres` sin error. Regla nueva en [[migraciones-a-produccion]].
 - **Mismo día:** aviso inmediato por WhatsApp al admin de cada error nuevo (migración **079** + edge `error-notify`
   desplegada; ver [[whatsapp-automatizaciones]]). Roberto lo pidió tras este incidente.
-- Migraciones locales y remotas alineadas hasta la **079**. BD al 2026-10-14: 26 tablas (todas con RLS),
+- Migraciones locales y remotas alineadas hasta la **079**. **Roberto hizo el push el 2026-10-14** (078, 079,
+  `error-notify` y memoria): `main` y `origin/main` iguales; Vercel no cambia (solo BD y funciones).
+- **En curso:** revisión de dudas que plantea Aicenis (Espiral Studio, dueña, registrada el 2026-10-14), la
+  primera usuaria real que reportó un fallo. BD al 2026-10-14: 26 tablas (todas con RLS),
   13 organizaciones, 21 usuarios, 71 turnos, 24 clientes, 32 servicios, 13 salidas, 21 pasajes; aún **0 pagos
   registrados** y 0 avisos de licencia enviados. Dos negocios nuevos desde el 8 de octubre (uno es Espiral Studio).
