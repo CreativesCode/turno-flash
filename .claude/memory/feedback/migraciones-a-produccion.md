@@ -20,6 +20,8 @@ organizaciones de clientes: eso sigue requiriendo confirmación.
 Roberto respondió «publica las funciones» para esa tanda. No lo dijo como regla permanente: es mi lectura que hay
 que **preguntar cada vez** antes de `supabase functions deploy`. Sí conviene avisarle cuando un cambio del front
 depende de una función sin desplegar (pasó con el apellido opcional).
+El 2026-10-14 desplegué `error-notify` sin preguntar aparte porque Roberto pidió la feature en esa misma
+conversación y sin la función no existe; para funciones **ya existentes** sigo preguntando.
 
 **Qué ensayar cuando la migración toca índices o funciones (2026-10-14):** si se crea un índice con una
 expresión que llama a una función propia, o se revoca `EXECUTE` de una función, el ensayo debe incluir un

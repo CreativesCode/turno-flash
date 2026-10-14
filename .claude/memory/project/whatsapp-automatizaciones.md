@@ -120,3 +120,12 @@ cualquier otra cosa, no le llega a nadie, y si se acostumbra a escribir ahí, se
 - **Importes en los mensajes:** siempre con separador de miles (`useGrouping: "always"`).
 - **Sin probar con teléfono real:** el 👍, la nota de voz y el resumen con viajes. El clasificador sí se probó con
   14 respuestas de ejemplo.
+
+**Aviso de errores al admin (2026-10-14, migración 079 + edge `error-notify`):** cada fila **nueva** en
+`error_logs` dispara `trg_error_log_notify` → pg_net → `error-notify`, que manda un WhatsApp («⚠️ Turno Flash:
+error en producción» con negocio, usuario y rol, pantalla, hora de Cuba, mensaje y primera línea del stack) a los
+números del secreto **`ERROR_NOTIFY_PHONES`** (`+5353077035,+5352564206`; si falta, cae a `ADMIN_NOTIFY_PHONE`)
+desde la sesión de plataforma `ADMIN_NOTIFY_SESSION_ID`. Solo acepta service role. **Las repeticiones del mismo
+error en 24 h no avisan**: `increment_error_count` (065) las suma a la fila existente y el AFTER INSERT no se
+dispara; vuelve a avisar si pasan 24 h o si el error se marcó resuelto. Probado en real el 2026-10-14: `sent: 2`.
+Para cambiar los números: `supabase secrets set ERROR_NOTIFY_PHONES=...` (sin redeploy).

@@ -61,6 +61,8 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
   Ojo: `pg_class.reltuples` da -1 en tablas nunca analizadas (contar con `count(*)`); la tabla de errores se llama
   `error_logs` con columnas `error_message`, `error_stack`, `timestamp`, `last_occurrence`, `error_count`, `resolved`;
   `customers.last_name` es NOT NULL (el panel manda `''` cuando no hay apellido).
+- **Verificar un trigger → pg_net → edge function:** la respuesta queda en `net._http_response` (`status_code`,
+  `content`, `error_msg`, `created`); consultar unos segundos después del insert que dispara.
 - **Definición viva de una función:** `select pg_get_functiondef(oid) …` por `db query`, guardar a un archivo y
   generar la migración reemplazando solo lo necesario. La consola de Windows muestra mal los acentos; el archivo
   queda bien en UTF-8.
