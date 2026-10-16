@@ -2,7 +2,7 @@
 
 > Archivos organizados por carpeta (tipo). Max 200 lineas.
 > Gestionado por skill memory-manager. Auto-memory de Claude Code DESACTIVADO.
-> Ultima revision: 2026-10-14.
+> Ultima revision: 2026-10-16.
 
 ## user/ — Sobre el usuario/equipo
 - [Roberto](user/roberto.md) — operador y dueno del producto; Windows + VS Code, usar Bash para escribir archivos; prioriza coste $0 sobre infra ya pagada
@@ -33,4 +33,5 @@
 - [Mapa de docs](reference/mapa-docs.md) — que doc sirve y cuales son de enero y estan obsoletos
 - [Manual de usuario](reference/manual-de-usuario.md) — fuente única en `docs/user-manual/`, servida en `/help` (se lee en build); actualizarla cuando cambie algo visible (al día al 2026-10-14, incluye categorías); **18 fotos reales en `public/images/help/` desde el 2026-10-15** y cómo rehacerlas; el Artifact publicado ya no existe; guía de primeros pasos en Inicio y estado de sus fotos
  - [Tasknic](reference/tasknic.md) — enlazado 2026-10-15 (skill `tasknic`, key en `.env.local`); proyecto «Turno Flash», tareas `TURxxxx`; `requested_by` = Roberto cuando él lo pide
+- [Google Play](reference/google-play.md) — cuenta «Ismel»; en Play solo hay 1.0.0 interna y 1.0.1 alpha de junio 2026, **nada en producción**; clasificación IARC para todos los públicos (cuestionario 12 jun 2026, ID guardado); el «Live Rating Notice» del 14 oct fue automático, sin acción; dónde verlo en la consola
 - [Secretos en assets del template](reference/secretos-en-assets-del-template.md) — el PNG de video-visuals traia una API key de OpenRouter en su XMP; como detectarla y como reescribir commits sin pushear
