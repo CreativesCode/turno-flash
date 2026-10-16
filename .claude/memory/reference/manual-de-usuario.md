@@ -49,3 +49,13 @@ muestran la cabecera sin el botón «Actualizar», y `booking-page.webp` / `trip
 Compartir en la tarjeta apagada de abajo, que ya no aparecen. Diferencias menores, sin rehacer.
 
 - **2026-10-12:** textos al día con el rediseño v2 (estados Avisado / Confirmó / Llegó / Terminado / No vino, acciones «Marcar llegada», «Empezar atención», «Terminar», barra inferior con «Más», filas en vez de tarjetas) y las 8 fotos de la guía de primeros pasos rehechas. La hoja de estilos propia del manual sigue con los colores de antes. Ver [[rediseno-v2]].
+
+**Fotos en el manual (2026-10-15, TUR0004):** 18 capturas reales de teléfono en `public/images/help/<nombre>.webp`
+(520 px de ancho, ~25 KB cada una), insertadas como `<figure class="shot">` en 19 secciones (una por pantalla
+clave; las de texto puro, sin foto). Van después del primer párrafo, o después de su lista si ese párrafo termina
+en «:». Rutas absolutas `/images/help/…`: en el HTML suelto de `docs/` no cargan, en `/help` sí.
+Se sacaron sobre dos negocios desechables («Barbería La Esquina» y «Rutas del Caribe», slugs `qa-fixture-ayuda-*`,
+WhatsApp apagado y sin sesión para que ningún trigger mande mensajes; borrados al terminar), con el reloj del
+navegador fijado a las 10:40 para que la agenda parezca de media mañana (`context.clock.install`).
+Ojo al sembrar pasajes: los puntos de recogida tienen su propio precio (por defecto 0 → la página pública dice
+«Desde 0 US$»). La pantalla de equipo del dueño es `/dashboard/invite` (`/dashboard/users` es solo de admin).
