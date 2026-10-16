@@ -20,6 +20,16 @@ admin; `service_role` (webhook de RevenueCat, self-signup) sigue pasando.
 no en solo lectura. Hoy las lecturas siguen abiertas: hay que cerrarlas (punto pendiente del plan
 `qa-piloto-cuba`). El cobro en Cuba será por transferencia más WhatsApp a soporte, y el admin extiende la
 licencia a mano. No hay licencias largas para los negocios piloto.
+**D-10 hecho el 2026-10-16** (PRP-005, `.claude/PRPs/prp-license-full-block.md`): migración **087** con una
+política RESTRICTIVE «License must be usable» por tabla operativa (usa `auth_org_usable()`, una vez por consulta;
+admins nunca bloqueados). Un negocio bloqueado lee **0 filas** y no escribe nada, incluidos `business_settings`,
+`customer_history` y las fotos de `trip-photos`, que antes no tenían guard. Siguen abiertas `organizations`,
+`user_profiles`, `notifications`, `license_*` (la compuerta, Suscripción y Mi cuenta las usan) y el INSERT de
+`error_logs`. Decidido: se corta **todo** el WhatsApp del negocio bloqueado (`wa-send` v35, `wa-trip-send` v11,
+`wa-inbound` v48 → `license_blocked`; los avisos de licencia siguen) y **no** hay descarga de datos (soporte).
+`LicenseGate` invalida todas las consultas al desbloquearse. **Si una tabla nueva guarda datos de un negocio,
+añadirle la misma política RESTRICTIVE.** Verificado con un negocio `qa-fixture-*` en pantalla y por API.
+Nota: un negocio **sin fechas de licencia** (`no_license`) es usable para siempre (p. ej. «Organización test»).
 
 **Migración 067 (2026-10-08):** la gracia ya no se configura en el cliente: son 7 días fijos en SQL y en `getGracePeriodDays()`. El acoplamiento con `NEXT_PUBLIC_LICENSE_GRACE_PERIOD_DAYS` de arriba ya no aplica (la variable sigue en `.env.local` y en el README, sin efecto). Los días se redondean hacia arriba.
 

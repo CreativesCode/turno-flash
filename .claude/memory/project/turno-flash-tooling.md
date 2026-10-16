@@ -33,6 +33,15 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
 - El usuario (Roberto) prefiere actualizar el landing solo cuando un plan
   completo está terminado, no por fases ([[preferencias-roberto]]).
 
+## En el equipo de Claudia/Klaudia (2026-10-16)
+
+- El CLI de scoop (v2.121) está, pero el proyecto **no estaba enlazado**: `supabase link --project-ref
+  gotetvnmnlrsfhsnounn` (sin contraseña de BD basta para `db query`, `db push`, `migration list` y `functions`).
+- Suele haber ya un `npm run dev` en el puerto 3000 con este mismo árbol: un segundo falla por el lock de
+  `.next/dev`; usar el que está.
+- No hay navegadores de `ms-playwright`: usar el MCP de Playwright (deja `.playwright-mcp/`, ya ignorado por git).
+- `supabase functions deploy` respeta `verify_jwt` de `config.toml` (`wa-inbound` y `revenuecat-webhook` en false).
+
 ## Probar en navegador y medir (2026-10-06)
 
 - **El MCP de Playwright suele estar ocupado** por otra sesión ("Browser is already in use") y el **MCP de
