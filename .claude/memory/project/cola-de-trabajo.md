@@ -7,12 +7,15 @@ metadata:
 
 Acordado con el equipo el 2026-10-15, al repasar los pendientes.
 
+**Cola terminada el 2026-10-16.** Tres de las cinco ya estaban hechas y las notas no lo decían: **antes de
+empezar una tarea de la memoria, comprobar en el código y en producción que sigue pendiente.**
+
 **Cola, en este orden:**
 1. ~~**Licencia vencida = bloqueo total** (D-10)~~ — **hecho el 2026-10-16** ([[license-enforcement]]).
 2. ~~Botón «Compartir» de una salida~~ — ya existía; el 2026-10-16 se pasó al menú de compartir del teléfono y se añadió en el detalle. Era: botón «Compartir» de una salida que arme el mensaje del viaje para WhatsApp ([[modulo-reserva-asientos]]).
 3. ~~Precio ida / ida y vuelta~~ — ya existía (042); el 2026-10-16 se marcó también en la lista del chofer. Era: precio distinto para solo ida y para ida y vuelta (hoy se simula con dos paradas).
 4. ~~Reportes con la zona horaria del negocio~~ — **hecho el 2026-10-16** (088; también cierra los reportes a un negocio bloqueado). Era: reportes con la zona horaria del negocio (P0-13, punto 7 de [[qa-piloto-cuba]]).
-5. **Siguiente:** fecha del detalle de una salida que se ve como `2026-10-09`.
+5. ~~Fecha del detalle de una salida~~ — ya arreglada el 2026-10-08 (`9e1955d`). Era: fecha del detalle de una salida que se ve como `2026-10-09`.
 
 **Ya cerrado:** categorías de servicios en la web, probado en producción.
 
