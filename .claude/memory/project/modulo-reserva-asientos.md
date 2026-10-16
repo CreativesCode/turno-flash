@@ -99,7 +99,10 @@ Organizaciones, roles, licencia/trial, clientes por telefono (`booking_phone_key
     cursiva, tachado, mono) + vista previa.
   **Why:** lo que el dueno escribe se guarda tal cual y se puede **pegar en WhatsApp viendose igual**.
   **How to apply:** `<RichTextEditor>` en textos largos nuevos, `<RichText>` para mostrarlos.
-  *Pendiente pedido:* boton "Compartir" que arme el mensaje del viaje para WhatsApp.
+  *Compartir la salida:* existe desde el 2026-09-12 (`utils/trip-share.ts`, «Compartir» en el menú de
+  `TripCard`); esta nota lo daba por pendiente y no lo estaba. Desde el 2026-10-16 `shareTrip()` usa el menú de
+  compartir del teléfono (`shareText` de `utils/driver-list.ts`, como «Compartir lista») y también está como
+  «Compartir salida» en el detalle. **Antes de dar algo por pendiente, buscarlo en el código.**
 - **Exportacion e impresion por pasajero, no por reserva.** Una reserva de 4 asientos de 2000 debe
   mostrar **500 por pasajero**, no 2000 repetido en cada fila. La impresion
   (`components/trips/PassengerPrintSheet.tsx`) es la misma tabla del CSV con el nombre de la
