@@ -24,6 +24,7 @@
 ## feedback/ — Correcciones y preferencias
 - [Preferencias de Roberto](feedback/preferencias-roberto.md) — espanol para hablar, ingles para el codigo; landing solo al cerrar un plan completo; nada de refactors ni dependencias sorpresa; guías para gente poco ducha en tecnología y con fotos reales; **commits en trozos por área; el push lo hace él salvo que lo pida**
 - [Migraciones a produccion](feedback/migraciones-a-produccion.md) — autorizado aplicar migraciones sin pedir permiso; siempre ensayar en BEGIN/ROLLBACK por rol antes, **con INSERT/UPDATE reales si hay índices con funciones o revokes**; **desplegar edge functions sí se pregunta**
+- [Manual siempre al día](feedback/manual-siempre-al-dia.md) — **todo cambio que afecte a lo que explica `/help` se ajusta en el mismo trabajo, fotos incluidas** (pedido 2026-10-16)
 - [Copy en espanol internacional](feedback/copy-espanol-internacional.md) — tuteo, nunca voseo; "anticipo" y no "sena"; locale `es` y la moneda siempre explicita (`useMoney`)
 
 ## reference/ — Donde encontrar cosas
