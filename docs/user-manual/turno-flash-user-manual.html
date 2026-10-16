@@ -537,12 +537,16 @@
       <thead><tr><th>Vista</th><th>Qué muestra</th></tr></thead>
       <tbody>
         <tr><td><span class="ui">Lista</span></td><td class="wrap">Los turnos desde 7 días atrás hasta 60 días adelante, agrupados por día (<em>Hoy</em> y <em>Mañana</em> llevan también la fecha) y dentro de cada día en <em>Por la mañana</em> y <em>Por la tarde</em>. Es la única vista con buscador y filtros por estado.</td></tr>
-        <tr><td><span class="ui">Día</span></td><td class="wrap">Una grilla de 8:00 a 20:00 con cada turno dibujado en su horario. Usa las flechas para cambiar de día y <span class="ui">Hoy</span> para volver. Tocar un hueco libre abre el formulario con esa hora ya puesta.</td></tr>
+        <tr><td><span class="ui">Día</span></td><td class="wrap">Una grilla por horas (de 8:00 a 20:00, salvo que la acortes en <span class="path">Ajustes</span>) con cada turno dibujado en su horario. Usa las flechas para cambiar de día y <span class="ui">Hoy</span> para volver. Tocar un hueco libre abre el formulario con esa hora ya puesta.</td></tr>
         <tr><td><span class="ui">Semana</span></td><td class="wrap">Los siete días de la semana, de lunes a domingo, en la misma grilla horaria. También puedes tocar un hueco para crear un turno ahí.</td></tr>
       </tbody>
     </table>
   <figure class="shot"><img src="/images/help/agenda.webp" alt="La agenda en modo Lista, con los turnos de la mañana y de la tarde y su estado." width="520" height="933" loading="lazy"><figcaption>La agenda en modo Lista, con los turnos de la mañana y de la tarde y su estado.</figcaption></figure>
   </div>
+
+  <h3>Acortar las horas del calendario</h3>
+  <p>Si tu negocio no abre de 8:00 a 20:00, en <span class="path">Ajustes</span>, en <strong>Horario del calendario</strong>, elige <span class="ui">Desde</span> y <span class="ui">Hasta</span> (por ejemplo, de 8:00 a 14:00) y toca <span class="ui">Guardar cambios</span>. Las vistas Día y Semana de todo tu equipo mostrarán solo esas horas. Si algún turno queda fuera, la grilla se estira sola ese día para que no se pierda.</p>
+  <figure class="shot"><img src="/images/help/calendar-hours.webp" alt="Ajustes: Horario del calendario, de 08:00 a 14:00." width="520" height="933" loading="lazy"><figcaption>En Ajustes, «Horario del calendario» con las horas de 08:00 a 14:00.</figcaption></figure>
 
   <h3>Buscar y filtrar</h3>
   <p>La vista Lista muestra <strong>un día</strong>. Arriba está la semana: toca un día para ver sus turnos (un puntito marca los días que tienen alguno) y usa las flechas para cambiar de semana; <span class=\"ui\">Hoy</span> te devuelve al día actual. Debajo, las pastillas filtran por estado y dicen cuántos turnos hay en cada una: Todos, Por atender (los que aún no empezaron), En curso, Terminados y Cancelados (incluye los que no vinieron). La lupa abre el buscador, que encuentra turnos por nombre o teléfono del cliente, por servicio o por profesional, desde la semana pasada hasta dos meses adelante; <span class=\"ui\">Cancelar</span> vuelve a la vista por día. Si hay muchos turnos, al final aparece <span class="ui">Cargar más</span>.</p>
@@ -917,7 +921,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
   <p>En <span class="path">Turnos</span> elige la vista:</p>
   <ul>
     <li><span class="ui">Lista</span>: turnos por día, con buscador (cliente, teléfono, servicio o profesional) y filtros por estado. Si el dueño vinculó tu cuenta con tu ficha de profesional, verás también la pastilla <span class="ui">Mis turnos</span>, que deja solo los tuyos.</li>
-    <li><span class="ui">Día</span>: grilla de 8:00 a 20:00. Toca un hueco libre para crear un turno a esa hora.</li>
+    <li><span class="ui">Día</span>: grilla por horas (de 8:00 a 20:00, o el horario que haya fijado el dueño). Toca un hueco libre para crear un turno a esa hora.</li>
     <li><span class="ui">Semana</span>: los siete días en la misma grilla.</li>
   </ul>
   <figure class="shot"><img src="/images/help/agenda-staff.webp" alt="La agenda: «Mis turnos» muestra solo los tuyos." width="520" height="933" loading="lazy"><figcaption>La agenda: «Mis turnos» muestra solo los tuyos.</figcaption></figure>
