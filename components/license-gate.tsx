@@ -9,8 +9,9 @@ import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useIsStoreApp } from "@/hooks/useIsStoreApp";
 import { useLicense, useOrganizationLicense } from "@/hooks/useLicense";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 
 // Rutas que siguen accesibles aun con la licencia vencida, para que el usuario
 // pueda renovar o cerrar su cuenta sin quedar encerrado.
@@ -30,6 +31,17 @@ export function LicenseGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { profile, signOut } = useAuth();
   const { licenseStatus, isBlocked, loading } = useLicense();
+  const queryClient = useQueryClient();
+  // While blocked the database returns empty lists (087): once the license is
+  // usable again, refetch everything instead of showing those empty copies
+  const wasBlocked = useRef(false);
+  useEffect(() => {
+    if (isBlocked) wasBlocked.current = true;
+    else if (wasBlocked.current) {
+      wasBlocked.current = false;
+      void queryClient.invalidateQueries();
+    }
+  }, [isBlocked, queryClient]);
   const { data: organizationLicense } = useOrganizationLicense();
   // A business created without a trial waits for its first payment
   const isPending = organizationLicense?.phase === "pending";
