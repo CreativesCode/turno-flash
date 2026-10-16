@@ -323,6 +323,7 @@ function TripDetailsContent() {
       bookingNumber: string;
       status: string;
       tripType: string;
+      roundTrip: boolean;
       deposit: string;
       depositEach: number;
       priceEach: number;
@@ -354,6 +355,7 @@ function TripDetailsContent() {
           status: STATUS_TEXT[booking.status] ?? booking.status,
           tripType:
             booking.trip_type === "round_trip" ? "Ida y vuelta" : "Solo ida",
+          roundTrip: booking.trip_type === "round_trip",
           deposit: DEPOSIT_TEXT[booking.deposit_status] ?? booking.deposit_status,
           depositEach,
           priceEach,

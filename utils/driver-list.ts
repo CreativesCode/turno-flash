@@ -27,7 +27,14 @@ export function driverListText(input: {
   date: string;
   time: string;
   driver?: string | null;
-  rows: { passenger: string; pickup: string; phone: string; pendingEach: number }[];
+  rows: {
+    passenger: string;
+    pickup: string;
+    phone: string;
+    pendingEach: number;
+    /** Comes back too: the driver needs to know who to wait for on the return. */
+    roundTrip: boolean;
+  }[];
   money: (amount: number) => string;
 }): string {
   const total = input.rows.reduce((sum, row) => sum + row.pendingEach, 0);
@@ -40,6 +47,7 @@ export function driverListText(input: {
       [
         `${index + 1}. ${row.passenger}`,
         row.pickup,
+        row.roundTrip ? "ida y vuelta" : "",
         row.phone,
         row.pendingEach > 0 ? `cobrar ${input.money(row.pendingEach)}` : "pagado",
       ]
