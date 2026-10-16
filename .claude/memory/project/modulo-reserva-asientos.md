@@ -158,8 +158,8 @@ Sagua - La Habana) que el usuario pego en el chat:
 
 - ~~**Ida y retorno a precio distinto**~~ — **hecho con la 042** (ver más abajo); esta nota quedó vieja.
   Verificado el 2026-10-16: formulario, paradas, página pública, reserva a mano, tarjeta del pasajero, CSV,
-  impresión y WhatsApp lo manejan, y en producción hay 3 salidas y 4 reservas de ida y vuelta. Solo la lista
-  de «Compartir lista» (`driverListText`) no marca quién vuelve.
+  impresión y WhatsApp lo manejan, y en producción hay 3 salidas y 4 reservas de ida y vuelta. Desde el mismo
+  día «Compartir lista» (`driverListText`) también marca «ida y vuelta» en quien vuelve.
 - **Foto del bus** (el nombre y telefono del chofer ya estan; la foto necesita Storage).
 
 ## Lo construido en la Fase 1 (2026-09-11)
