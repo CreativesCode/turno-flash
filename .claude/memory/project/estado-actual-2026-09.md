@@ -187,3 +187,11 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
 - **Noche del 2026-10-14:** categorías de servicios, marcas, orden y duplicar (PRP-004, pedido de Aicenis; ver
   [[categorias-servicios]]). Migración **085** aplicada; migraciones alineadas hasta la 085. 7 commits **sin push**.
   Tipos regenerados (recogían también 080-084).
+- **2026-10-15/16 (sesión de Claudia, TUR0001):** repaso de pendientes y cola acordada ([[cola-de-trabajo]],
+  terminada). Hecho y en producción: **bloqueo total por licencia vencida** (087 + `wa-send` v35, `wa-trip-send`
+  v11, `wa-inbound` v48; [[license-enforcement]]), «Compartir salida» por el menú del teléfono, «ida y vuelta» en
+  la lista del chofer y **reportes con la zona del negocio** (088, que también cierra los reportes a un negocio
+  bloqueado). Migraciones alineadas hasta la **088**. Todo subido a `main` (último `8a99af2`).
+  Ya no existen los 6 negocios con la licencia vencida hace >100 días: en producción quedan 7 organizaciones
+  (Organización test, Barbería Demo, Espiral Studio, Dulceria y 3 `QA *`), todas usables.
+  Lo de arriba que seguía como «falta push» ya está subido.

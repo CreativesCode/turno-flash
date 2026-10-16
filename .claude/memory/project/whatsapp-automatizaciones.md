@@ -189,3 +189,8 @@ ids, así que un `@lid` nuevo no se puede traducir. Solución propia que funcion
 - Verificado en real: Aicenis («OK» a secas tras aprender el alias), Roberto (alias de junio) y +5350625804 hecho
   desconocido a propósito (alias borrado + message_ids a NULL): «Ok» → aviso; «Ok es-6» → confirmado + alias.
 - Manual (`docs/user-manual/turno-flash-user-manual.html`) actualizado con el ejemplo `EN-0042`.
+
+**Negocio bloqueado = sin WhatsApp (2026-10-16, D-10):** `wa-send` (v35), `wa-trip-send` (v11) y `wa-inbound` (v48)
+consultan `org_license_usable` y salen con `license_blocked` (en `wa-inbound` queda en `wa_processed_events.result`
+como `skip: license_blocked`), igual que `daily-summary` y `wa-campaign`. `license-notices` **no** se corta: es
+el aviso al dueño de cómo pagar. Ver [[license-enforcement]].

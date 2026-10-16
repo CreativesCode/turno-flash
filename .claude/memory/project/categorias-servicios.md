@@ -11,7 +11,7 @@ metadata:
   Fotos sueltas; el mismo paquete cambia de precio según la sesión. Plan y aprendizajes en
   `.claude/PRPs/prp-service-categories.md`.
 - **Estado:** hecho y verificado con Playwright; migración **085** aplicada en producción; 7 commits en `main`
-  **sin push** (lo hace Roberto). La web cambia al publicar en Vercel; no requiere APK nueva.
+  subidos a GitHub (Roberto, 2026-10-15). La web cambia al publicar en Vercel; no requiere APK nueva.
 - **Decisiones de Roberto:** un solo nivel (el tipo Álbum/Photobook va en el nombre); categorías opcionales (sin
   categorías todo igual que antes); marcas fijas Recomendado / Más popular / Nuevo / Oferta que **no reordenan**;
   descripción hasta 1000; asignar por categoría = atajo «Marcar todos» (no asignación viva); «Duplicar»; enlace
