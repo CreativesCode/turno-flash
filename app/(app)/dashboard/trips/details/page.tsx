@@ -42,6 +42,7 @@ import {
   pickupLabel,
   shareText,
 } from "@/utils/driver-list";
+import { shareTrip } from "@/utils/trip-share";
 import { Capacitor } from "@capacitor/core";
 import {
   ArrowLeft,
@@ -422,6 +423,14 @@ function TripDetailsContent() {
     }
   }, [modules.name, money, passengerRows, toast, trip]);
 
+  // The departure itself, the same message as "Compartir" on its card
+  const handleShareTrip = useCallback(() => {
+    if (!trip) return;
+    shareTrip(trip, { currency: modules.currency, slug: modules.slug }).catch(
+      () => toast.error("No se pudo compartir", "Inténtalo de nuevo")
+    );
+  }, [modules.currency, modules.slug, toast, trip]);
+
   if (tripsLoading || loading) {
     return (
       <ProtectedRoute>
@@ -528,6 +537,12 @@ function TripDetailsContent() {
             </div>
 
             <div className="flex flex-wrap gap-2">
+              {!trip.cancelled_at && (
+                <Button variant="secondary" onClick={handleShareTrip}>
+                  <Share2 className="h-4 w-4" />
+                  Compartir salida
+                </Button>
+              )}
               <Button variant="secondary" onClick={() => void handleShare()}>
                 <Share2 className="h-4 w-4" />
                 Compartir lista

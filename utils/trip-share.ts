@@ -1,5 +1,7 @@
 import type { TripWithOccupancy } from "@/types/trips";
+import { shareText } from "@/utils/driver-list";
 import { fmtMoney } from "@/utils/format";
+import { getSiteUrl } from "@/utils/metadata";
 
 const MONTHS = [
   "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -82,7 +84,19 @@ export function tripShareText(
   return lines.join("\n");
 }
 
-/** wa.me link that opens WhatsApp with the message already written. */
-export function tripShareUrl(text: string): string {
-  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+/**
+ * Shares the departure through the phone's share sheet (WhatsApp from the
+ * web), with the link to book when the trip is on the public page.
+ */
+export function shareTrip(
+  trip: TripWithOccupancy,
+  options: { currency: string; slug?: string | null }
+): Promise<void> {
+  const bookingUrl =
+    trip.is_published && options.slug
+      ? `${getSiteUrl()}/trips?b=${options.slug}`
+      : null;
+  return shareText(
+    tripShareText(trip, { currency: options.currency, bookingUrl })
+  );
 }

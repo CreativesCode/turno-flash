@@ -23,8 +23,7 @@ import type {
   TripFormState,
   TripWithOccupancy,
 } from "@/types/trips";
-import { getSiteUrl } from "@/utils/metadata";
-import { tripShareText, tripShareUrl } from "@/utils/trip-share";
+import { shareTrip } from "@/utils/trip-share";
 import { Bus, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, Suspense, useCallback, useMemo, useState } from "react";
@@ -144,16 +143,11 @@ function TripsContent() {
    */
   const handleShare = useCallback(
     (trip: TripWithOccupancy) => {
-      const text = tripShareText(trip, {
-        currency: modules.currency,
-        bookingUrl:
-          trip.is_published && modules.slug
-            ? `${getSiteUrl()}/trips?b=${modules.slug}`
-            : null,
-      });
-      window.open(tripShareUrl(text), "_blank", "noopener,noreferrer");
+      shareTrip(trip, { currency: modules.currency, slug: modules.slug }).catch(
+        () => toast.error("No se pudo compartir", "Inténtalo de nuevo")
+      );
     },
-    [modules.currency, modules.slug]
+    [modules.currency, modules.slug, toast]
   );
 
   const handleCreate = useCallback(() => {
