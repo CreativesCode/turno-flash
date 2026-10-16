@@ -174,6 +174,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    // A blocked business (expired license or deactivated) sends nothing
+    const { data: usable } = await supabase.rpc("org_license_usable", {
+      p_org_id: booking.organization_id,
+    });
+    if (usable !== true) {
+      return json(200, {
+        success: false,
+        skipped: true,
+        reason: "license_blocked",
+      });
+    }
+
     const { data: settings } = await supabase
       .from("business_settings")
       .select(

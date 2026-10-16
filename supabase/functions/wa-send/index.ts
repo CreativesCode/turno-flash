@@ -151,6 +151,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    // A blocked business (expired license or deactivated) sends nothing
+    const { data: usable } = await supabase.rpc("org_license_usable", {
+      p_org_id: appt.organization_id,
+    });
+    if (usable !== true) {
+      return json(200, {
+        success: false,
+        skipped: true,
+        reason: "license_blocked",
+      });
+    }
+
     // 2. Cargar configuración WA del negocio
     const { data: settings, error: settingsErr } = await supabase
       .from("business_settings")

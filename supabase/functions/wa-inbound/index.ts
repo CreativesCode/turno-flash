@@ -360,6 +360,14 @@ async function handleMessageReceived(
     `[wa-inbound] resolved org=${organizationId} for session=${env.sessionId}`
   );
 
+  // A blocked business (expired license or deactivated) gets no replies processed
+  const { data: usable } = await supabase.rpc("org_license_usable", {
+    p_org_id: organizationId,
+  });
+  if (usable !== true) {
+    return { organizationId, result: "skip: license_blocked" };
+  }
+
   console.log(
     `[wa-inbound] resolving outbound for from="${from}" (chatIds=${chatIds.join(",") || "none"})`
   );
