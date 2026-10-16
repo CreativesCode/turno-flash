@@ -324,6 +324,8 @@ export type Database = {
           booking_page_enabled: boolean | null
           booking_page_url: string | null
           business_hours_config: Json | null
+          calendar_end_hour: number
+          calendar_start_hour: number
           cancellation_policy_hours: number | null
           created_at: string | null
           daily_summary_time: string | null
@@ -353,6 +355,8 @@ export type Database = {
           booking_page_enabled?: boolean | null
           booking_page_url?: string | null
           business_hours_config?: Json | null
+          calendar_end_hour?: number
+          calendar_start_hour?: number
           cancellation_policy_hours?: number | null
           created_at?: string | null
           daily_summary_time?: string | null
@@ -382,6 +386,8 @@ export type Database = {
           booking_page_enabled?: boolean | null
           booking_page_url?: string | null
           business_hours_config?: Json | null
+          calendar_end_hour?: number
+          calendar_start_hour?: number
           cancellation_policy_hours?: number | null
           created_at?: string | null
           daily_summary_time?: string | null
