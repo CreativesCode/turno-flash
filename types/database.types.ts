@@ -2210,6 +2210,7 @@ export type Database = {
         }
         Returns: Json
       }
+      auth_org_usable: { Args: never; Returns: boolean }
       auth_user_org_id: { Args: never; Returns: string }
       auth_user_role: { Args: never; Returns: string }
       booking_min_to_time: { Args: { p_min: number }; Returns: string }
