@@ -32,3 +32,5 @@ dice. Si algún día se quiere un rango por día de la semana, la columna `busin
 sin uso) ya existe, pero hoy nada la lee.
 
 Relacionado: [[categorias-servicios]] (otro pedido de Aicenis), [[manual-de-usuario]], [[estado-actual-2026-09]].
+
+**Cierre 2026-10-16:** Roberto lo comprobó («lo damos por bueno»), hizo el push de los 4 commits (Vercel publica) y TUR0002 pasó a Hecho.
