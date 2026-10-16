@@ -7,7 +7,7 @@ import { TripBookingDetails } from "@/components/settings/TripBookingDetails";
 import { ExceptionsEditor } from "@/components/staff/ExceptionsEditor";
 import { CurrencyCard } from "@/components/organizations/CurrencyCard";
 import { ContactCard } from "@/components/organizations/ContactCard";
-import { Button, Card, PageHeader } from "@/components/ui";
+import { Button, Card, PageHeader, Select } from "@/components/ui";
 import { useSupportWhatsAppUrl } from "@/hooks/useSupportWhatsAppUrl";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
@@ -21,11 +21,13 @@ import {
   Bus,
   CalendarCheck,
   CalendarOff,
+  Clock,
   Loader2,
   MessageSquare,
   Star,
   Sunrise,
 } from "lucide-react";
+import { DEFAULT_HOUR_RANGE } from "@/utils/calendar-hours";
 import { useState } from "react";
 
 /**
@@ -69,6 +71,12 @@ export default function SettingsPage() {
     draft.deposit_instructions ?? settings?.deposit_instructions ?? "";
   const holdHours =
     draft.seat_booking_hold_hours ?? settings?.seat_booking_hold_hours ?? 24;
+  const calendarStart =
+    draft.calendar_start_hour ??
+    settings?.calendar_start_hour ??
+    DEFAULT_HOUR_RANGE[0];
+  const calendarEnd =
+    draft.calendar_end_hour ?? settings?.calendar_end_hour ?? DEFAULT_HOUR_RANGE[1];
 
   const patchDraft = (patch: BusinessAutomationSettingsPatch) =>
     setDraft((prev) => ({ ...prev, ...patch }));
@@ -82,6 +90,8 @@ export default function SettingsPage() {
         enable_rating_request: ratingEnabled,
         enable_daily_summary: summaryEnabled,
         daily_summary_time: summaryTime,
+        calendar_start_hour: calendarStart,
+        calendar_end_hour: calendarEnd,
         // Only sent by a business that runs the seat booking module: for the
         // rest these columns stay untouched at their defaults.
         ...(modules.trips
@@ -280,6 +290,70 @@ export default function SettingsPage() {
                       )
                     }
                   />
+                  <div className="p-4 sm:p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-foreground-muted">
+                        <Clock className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-foreground">
+                          Horario del calendario
+                        </div>
+                        <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">
+                          Las vistas Día y Semana muestran solo estas horas (la
+                          de «Hasta» incluida). Si un turno cae fuera, la grilla
+                          se estira sola ese día para mostrarlo.
+                        </p>
+                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-foreground-muted">
+                          <label className="flex items-center gap-2">
+                            Desde
+                            <Select
+                              value={calendarStart}
+                              disabled={isLoading}
+                              onChange={(e) => {
+                                const start = Number(e.target.value);
+                                patchDraft({
+                                  calendar_start_hour: start,
+                                  // Keep "Hasta" after "Desde"
+                                  ...(start >= calendarEnd
+                                    ? { calendar_end_hour: start + 1 }
+                                    : {}),
+                                });
+                              }}
+                              wrapperClassName="w-28"
+                            >
+                              {CALENDAR_HOURS.slice(0, -1).map((h) => (
+                                <option key={h} value={h}>
+                                  {formatHour(h)}
+                                </option>
+                              ))}
+                            </Select>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            Hasta
+                            <Select
+                              value={calendarEnd}
+                              disabled={isLoading}
+                              onChange={(e) =>
+                                patchDraft({
+                                  calendar_end_hour: Number(e.target.value),
+                                })
+                              }
+                              wrapperClassName="w-28"
+                            >
+                              {CALENDAR_HOURS.filter((h) => h > calendarStart).map(
+                                (h) => (
+                                  <option key={h} value={h}>
+                                    {formatHour(h)}
+                                  </option>
+                                )
+                              )}
+                            </Select>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </Card>
               )}
 
@@ -304,6 +378,11 @@ export default function SettingsPage() {
 }
 
 // ───────────────────────────────────────────────────────────
+
+/** Hour rows the calendar can start or end at: 00:00 … 23:00. */
+const CALENDAR_HOURS = Array.from({ length: 24 }, (_, h) => h);
+
+const formatHour = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
 function SettingRow({
   icon: Icon,

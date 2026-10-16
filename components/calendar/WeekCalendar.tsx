@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui";
-import { BUSINESS_HOURS } from "@/config/constants";
+import { DEFAULT_HOUR_RANGE, fitHourRange } from "@/utils/calendar-hours";
 import { AppointmentWithDetails } from "@/types/appointments";
 import { getLocalDateString, getStartOfWeek, getWeekDays } from "@/utils/date";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
@@ -27,20 +27,14 @@ export const WeekCalendar = React.memo(
     onDateChange,
     onAppointmentClick,
     onTimeSlotClick,
-    startHour = BUSINESS_HOURS.START_HOUR,
-    endHour = BUSINESS_HOURS.END_HOUR,
+    startHour = DEFAULT_HOUR_RANGE[0],
+    endHour = DEFAULT_HOUR_RANGE[1],
   }: WeekCalendarProps) {
     const { startOfWeek, weekDays } = useMemo(() => {
       const start = getStartOfWeek(date);
       const days = getWeekDays(date);
       return { startOfWeek: start, weekDays: days };
     }, [date]);
-
-    const hours = useMemo(() => {
-      const arr: number[] = [];
-      for (let h = startHour; h <= endHour; h++) arr.push(h);
-      return arr;
-    }, [startHour, endHour]);
 
     const appointmentsByDate = useMemo(() => {
       const map = new Map<string, AppointmentWithDetails[]>();
@@ -51,6 +45,24 @@ export const WeekCalendar = React.memo(
       });
       return map;
     }, [appointments]);
+
+    // Widened when a turno of this week falls outside the hours the business chose
+    const [firstHour, lastHour] = useMemo(
+      () =>
+        fitHourRange(
+          [startHour, endHour],
+          weekDays.flatMap(
+            (d) => appointmentsByDate.get(getLocalDateString(d)) ?? []
+          )
+        ),
+      [startHour, endHour, weekDays, appointmentsByDate]
+    );
+
+    const hours = useMemo(() => {
+      const arr: number[] = [];
+      for (let h = firstHour; h <= lastHour; h++) arr.push(h);
+      return arr;
+    }, [firstHour, lastHour]);
 
     const goToPrevWeek = useCallback(() => {
       const newDate = new Date(date);
@@ -216,7 +228,7 @@ export const WeekCalendar = React.memo(
                       <ApptBlock
                         key={appt.id}
                         appt={appt}
-                        startHour={startHour}
+                        startHour={firstHour}
                         onClick={onAppointmentClick}
                       />
                     ))}

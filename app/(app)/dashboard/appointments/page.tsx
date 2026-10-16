@@ -38,6 +38,7 @@ import {
   useRescheduleAppointment,
   useToast,
   useUpdateAppointmentStatus,
+  useBusinessSettings,
 } from "@/hooks";
 import { AppointmentService } from "@/services";
 import {
@@ -47,6 +48,7 @@ import {
   CustomerFormData,
 } from "@/types/appointments";
 import { downloadCsv } from "@/utils/csv";
+import { DEFAULT_HOUR_RANGE } from "@/utils/calendar-hours";
 import { getLocalDateString } from "@/utils/date";
 import {
   AlertCircle,
@@ -156,6 +158,12 @@ function AppointmentsContent() {
   const [onlyMineStaffId, setOnlyMineStaffId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [view, setView] = useState<AppointmentView>("list");
+  // Hours the business chose for the Day/Week grid (Ajustes); 8-20 until loaded
+  const { data: businessSettings } = useBusinessSettings();
+  const calendarStartHour =
+    businessSettings?.calendar_start_hour ?? DEFAULT_HOUR_RANGE[0];
+  const calendarEndHour =
+    businessSettings?.calendar_end_hour ?? DEFAULT_HOUR_RANGE[1];
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -1001,6 +1009,8 @@ function AppointmentsContent() {
               onTimeSlotClick={
                 canManageAppointments ? handleDayTimeSlotClick : undefined
               }
+              startHour={calendarStartHour}
+              endHour={calendarEndHour}
             />
           )}
 
@@ -1013,6 +1023,8 @@ function AppointmentsContent() {
               onTimeSlotClick={
                 canManageAppointments ? handleWeekTimeSlotClick : undefined
               }
+              startHour={calendarStartHour}
+              endHour={calendarEndHour}
             />
           )}
         </LoadingRegion>

@@ -22,6 +22,9 @@ export interface BusinessAutomationSettings {
   deposit_instructions: string | null;
   /** Hours a seat is held before an unpaid booking expires. */
   seat_booking_hold_hours: number;
+  /** First and last hour row (0-23) drawn by the Day/Week calendar (086). */
+  calendar_start_hour: number;
+  calendar_end_hour: number;
 }
 
 export type BusinessAutomationSettingsPatch = Partial<
@@ -44,7 +47,7 @@ export function useBusinessSettings() {
       const { data, error } = await supabase
         .from("business_settings")
         .select(
-          "organization_id, whatsapp_integration_enabled, enable_rating_request, enable_daily_summary, daily_summary_time, booking_page_enabled, seat_booking_enabled, deposit_instructions, seat_booking_hold_hours"
+          "organization_id, whatsapp_integration_enabled, enable_rating_request, enable_daily_summary, daily_summary_time, booking_page_enabled, seat_booking_enabled, deposit_instructions, seat_booking_hold_hours, calendar_start_hour, calendar_end_hour"
         )
         .eq("organization_id", orgId)
         .maybeSingle();

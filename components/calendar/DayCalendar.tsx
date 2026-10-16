@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui";
-import { BUSINESS_HOURS } from "@/config/constants";
+import { DEFAULT_HOUR_RANGE, fitHourRange } from "@/utils/calendar-hours";
 import { AppointmentWithDetails } from "@/types/appointments";
 import { getLocalDateString, isToday } from "@/utils/date";
 import { fmtDuration } from "@/utils/format";
@@ -30,19 +30,25 @@ export const DayCalendar = React.memo(
     onDateChange,
     onAppointmentClick,
     onTimeSlotClick,
-    startHour = BUSINESS_HOURS.START_HOUR,
-    endHour = BUSINESS_HOURS.END_HOUR,
+    startHour = DEFAULT_HOUR_RANGE[0],
+    endHour = DEFAULT_HOUR_RANGE[1],
   }: DayCalendarProps) {
-    const hours = useMemo(() => {
-      const arr: number[] = [];
-      for (let h = startHour; h <= endHour; h++) arr.push(h);
-      return arr;
-    }, [startHour, endHour]);
-
     const dayAppointments = useMemo(() => {
       const dateStr = getLocalDateString(date);
       return appointments.filter((apt) => apt.appointment_date === dateStr);
     }, [appointments, date]);
+
+    // Widened when a turno falls outside the hours the business chose
+    const [firstHour, lastHour] = useMemo(
+      () => fitHourRange([startHour, endHour], dayAppointments),
+      [startHour, endHour, dayAppointments]
+    );
+
+    const hours = useMemo(() => {
+      const arr: number[] = [];
+      for (let h = firstHour; h <= lastHour; h++) arr.push(h);
+      return arr;
+    }, [firstHour, lastHour]);
 
     const goToPrevDay = useCallback(() => {
       const newDate = new Date(date);
@@ -170,14 +176,14 @@ export const DayCalendar = React.memo(
               })}
 
               {/* Now indicator */}
-              {today && <NowIndicator startHour={startHour} endHour={endHour} />}
+              {today && <NowIndicator startHour={firstHour} endHour={lastHour} />}
 
               {/* Appointment blocks */}
               {dayAppointments.map((appt) => (
                 <ApptBlock
                   key={appt.id}
                   appt={appt}
-                  startHour={startHour}
+                  startHour={firstHour}
                   onClick={onAppointmentClick}
                 />
               ))}
