@@ -156,8 +156,10 @@ Sagua - La Habana) que el usuario pego en el chat:
 
 ### Lo que los ejemplos piden y TODAVIA NO esta
 
-- **Ida y retorno a precio distinto** (8500 solo ida / 17000 ida y vuelta). Hoy se puede simular
-  con dos paradas, pero es un parche: falta modelar el tipo de billete.
+- ~~**Ida y retorno a precio distinto**~~ — **hecho con la 042** (ver más abajo); esta nota quedó vieja.
+  Verificado el 2026-10-16: formulario, paradas, página pública, reserva a mano, tarjeta del pasajero, CSV,
+  impresión y WhatsApp lo manejan, y en producción hay 3 salidas y 4 reservas de ida y vuelta. Solo la lista
+  de «Compartir lista» (`driverListText`) no marca quién vuelve.
 - **Foto del bus** (el nombre y telefono del chofer ya estan; la foto necesita Storage).
 
 ## Lo construido en la Fase 1 (2026-09-11)
