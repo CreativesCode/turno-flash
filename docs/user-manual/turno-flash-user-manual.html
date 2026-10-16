@@ -327,6 +327,24 @@
     color: var(--hm-brand-ink);
   }
 
+  .shot {
+    margin: 18px 0 22px;
+    max-width: 260px;
+  }
+  .shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 18px;
+    border: 1px solid var(--hm-line);
+    box-shadow: var(--hm-shadow);
+  }
+  .shot figcaption {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--hm-muted);
+  }
+
   .callout {
     border-radius: 12px;
     padding: 13px 16px;
@@ -509,6 +527,7 @@
     <li><strong>Ahora:</strong> el turno que se está atendiendo o el cliente que ya llegó, con el botón del siguiente paso (<span class="ui">Empezar</span> o <span class="ui">Terminar</span>).</li>
     <li><strong>Próximos:</strong> los siguientes tres turnos del día que todavía no empezaron. <span class="ui">Ver agenda</span> te lleva a la agenda completa.</li>
   </ul>
+  <figure class="shot"><img src="/images/help/home-owner.webp" alt="La pantalla de inicio: los turnos de hoy, el que se está atendiendo y los próximos." width="520" height="933" loading="lazy"><figcaption>La pantalla de inicio: los turnos de hoy, el que se está atendiendo y los próximos.</figcaption></figure>
   <p>En la computadora el menú está siempre a la izquierda; ahí también encuentras <span class="ui">Ayuda</span>, que abre esta guía. Abajo, junto a tu nombre, el menú <span class="ui">⋮</span> cambia a <span class="ui">Tema oscuro</span> y tiene <span class="ui">Cerrar sesión</span>. En el teléfono tienes una barra inferior con Inicio, Turnos, Clientes y <span class="ui">Más</span>, y un botón <span class="ui">+</span> en el centro que abre la agenda para crear un turno. <span class="ui">Más</span> abre el resto de las secciones (Servicios, Profesionales, Recordatorios, Reportes, Ajustes, Suscripción…), el tema claro u oscuro, <span class="ui">Actualizar datos</span>, que vuelve a traer la información sin salir de la pantalla, y <span class="ui">Cerrar sesión</span>. Arriba, la campana te lleva a Recordatorios y el círculo con tus iniciales, a tu cuenta.</p>
 
   <h2 id="td-turnos">La agenda de turnos</h2>
@@ -522,6 +541,7 @@
         <tr><td><span class="ui">Semana</span></td><td class="wrap">Los siete días de la semana, de lunes a domingo, en la misma grilla horaria. También puedes tocar un hueco para crear un turno ahí.</td></tr>
       </tbody>
     </table>
+  <figure class="shot"><img src="/images/help/agenda.webp" alt="La agenda en modo Lista, con los turnos de la mañana y de la tarde y su estado." width="520" height="933" loading="lazy"><figcaption>La agenda en modo Lista, con los turnos de la mañana y de la tarde y su estado.</figcaption></figure>
   </div>
 
   <h3>Buscar y filtrar</h3>
@@ -585,6 +605,7 @@
 
   <h2 id="td-clientes">Clientes</h2>
   <p>En <span class="path">Clientes</span> tienes la base de clientes activos, con buscador por nombre, teléfono o email. Cada fila muestra el nombre y el teléfono; al tocarla se abre la ficha para ver o corregir el resto.</p>
+  <figure class="shot"><img src="/images/help/customers.webp" alt="La lista de clientes, con el buscador y el botón «Nuevo»." width="520" height="933" loading="lazy"><figcaption>La lista de clientes, con el buscador y el botón «Nuevo».</figcaption></figure>
   <ul>
     <li><span class="ui">Nuevo</span>: nombre y teléfono son obligatorios; apellido, WhatsApp, email y notas (preferencias, alergias…) son opcionales.</li>
     <li>Toca la fila, o su menú <span class="ui">⋮</span> › <span class="ui">Editar</span>, para corregir datos.</li>
@@ -607,6 +628,7 @@
 
   <h2 id="td-servicios">Servicios</h2>
   <p>En <span class="path">Servicios</span> armas el catálogo de lo que ofreces. Pulsa <span class="ui">Nuevo</span>, o toca un servicio de la lista para editarlo.</p>
+  <figure class="shot"><img src="/images/help/services.webp" alt="Servicios: cada uno con su precio, su duración y si se puede reservar online." width="520" height="933" loading="lazy"><figcaption>Servicios: cada uno con su precio, su duración y si se puede reservar online.</figcaption></figure>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Campo</th><th>Para qué sirve</th></tr></thead>
@@ -648,6 +670,7 @@
     <li><strong>Se pueden reservar turnos con esta persona:</strong> desmárcala para quien no atiende clientes (por ejemplo, recepción).</li>
     <li><strong>Acepta reservas online:</strong> desmárcala si esa persona solo toma turnos que agenda el negocio.</li>
   </ul>
+  <figure class="shot"><img src="/images/help/staff.webp" alt="Profesionales: quién atiende y qué servicios hace." width="520" height="933" loading="lazy"><figcaption>Profesionales: quién atiende y qué servicios hace.</figcaption></figure>
 
   <h3>Horario y servicios de cada profesional</h3>
   <p>Desde el menú <span class="ui">⋮</span> › <span class="ui">Horario y servicios</span> de cada profesional configuras tres cosas:</p>
@@ -666,6 +689,7 @@
     <li>Pulsa <span class="ui">Guardar cambios</span>. Hasta que guardes, el link no funciona.</li>
     <li>Con la página ya activa aparecen <span class="ui">Copiar link</span>, <span class="ui">Compartir</span> (abre WhatsApp con el mensaje <em>Reserva tu turno online</em> y el link) y <span class="ui">Ver página</span> para probarla.</li>
   </ol>
+  <figure class="shot"><img src="/images/help/book.webp" alt="Lo que ve tu cliente al abrir tu enlace de reservas." width="520" height="933" loading="lazy"><figcaption>Lo que ve tu cliente al abrir tu enlace de reservas.</figcaption></figure>
   <p>Debajo del link, la app te avisa cuántos profesionales aparecerán y, para los que no, qué les falta (horario o servicios), con un acceso directo a <span class="path">Profesionales</span>.</p>
 
   <h3>Qué hace tu cliente en la página</h3>
@@ -699,6 +723,7 @@
 
   <h2 id="td-whatsapp">WhatsApp y recordatorios</h2>
   <p>En <span class="path">Ajustes</span> ves si tu negocio tiene <strong>WhatsApp conectado</strong>. Si dice <em>no conectado</em>, pídele al equipo de Turno Flash que lo conecte: sin eso no sale ningún mensaje.</p>
+  <figure class="shot"><img src="/images/help/reminders.webp" alt="Recordatorios: los clientes de mañana a los que falta avisar." width="520" height="933" loading="lazy"><figcaption>Recordatorios: los clientes de mañana a los que falta avisar.</figcaption></figure>
 
   <h3>Lo que se envía solo</h3>
   <div class="table-wrap">
@@ -765,6 +790,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
 
   <h2 id="td-reportes">Reportes</h2>
   <p><span class="path">Reportes</span> resume cómo va el negocio en el período que elijas: <span class="ui">7 días</span>, <span class="ui">30 días</span>, <span class="ui">90 días</span> o <span class="ui">Este mes</span>.</p>
+  <figure class="shot"><img src="/images/help/reports.webp" alt="Reportes: ingresos, turnos y cancelaciones del período." width="520" height="933" loading="lazy"><figcaption>Reportes: ingresos, turnos y cancelaciones del período.</figcaption></figure>
   <ul>
     <li><strong>Indicadores:</strong> Ingresos (comparados con el período anterior), Turnos, Terminados, Cancelados + No-show, Clientes nuevos y Rating promedio.</li>
     <li><strong>Gráficos y tablas:</strong> Ingresos por día, Turnos por estado, Top servicios por ingresos, Rendimiento del equipo (turnos, ingresos y rating por profesional), Horas pico y Origen de las reservas.</li>
@@ -776,6 +802,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
 
   <h2 id="td-equipo">Tu equipo</h2>
   <p>En <span class="path">Invitar</span> escribe el correo de la persona y pulsa <span class="ui">Enviar invitación</span>. Recibe un correo con un enlace para crear su contraseña y queda en tu negocio como <strong>personal</strong>.</p>
+  <figure class="shot"><img src="/images/help/team.webp" alt="Invitar a alguien por correo y ver quién tiene acceso." width="520" height="933" loading="lazy"><figcaption>Invitar a alguien por correo y ver quién tiene acceso.</figcaption></figure>
   <div class="split">
     <div class="yes">
       <h4>Tu personal puede</h4>
@@ -801,6 +828,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
   <p>Invitar a alguien no lo agrega a la agenda: si esa persona atiende clientes, cárgala también en <span class="path">Profesionales</span>.</p>
 
   <h2 id="td-licencia">Suscripción y licencia</h2>
+  <figure class="shot"><img src="/images/help/subscription.webp" alt="Suscripción: tu plan, hasta cuándo está pagado y los precios." width="520" height="933" loading="lazy"><figcaption>Suscripción: tu plan, hasta cuándo está pagado y los precios.</figcaption></figure>
   <ul>
     <li>Empiezas con <strong>15 días de prueba gratis</strong>. La prueba se da una sola vez, al crear el negocio.</li>
     <li class="web-only"><strong>Tu plan</strong> depende de cuántos atienden. Lo ves en <span class="path">Suscripción</span>, con lo que cuesta al mes y por cada forma de pago.</li>
@@ -831,6 +859,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
 
   <h2 id="td-cuenta">Mi cuenta</h2>
   <p>Muestra tu correo y tu rol, y te deja <strong>cambiar tu nombre</strong> (escríbelo y pulsa <span class="ui">Guardar</span>) y <strong>tu contraseña</strong> (escribe la actual, luego la nueva dos veces, y pulsa <span class="ui">Cambiar contraseña</span>). Si eres el dueño, también cambias <strong>tu WhatsApp</strong>, que es donde te llegan los avisos de tu suscripción. El correo no se puede cambiar desde la app. Desde aquí también puedes eliminar tu cuenta escribiendo <span class="ui">ELIMINAR</span> para confirmar. Si eres el único miembro del negocio, el negocio se desactiva; si hay más personas con acceso, primero quítales el acceso en <span class="path">Invitar usuario › Tu equipo</span>. Si pagas una suscripción en Google Play, cancélala allí.</p>
+  <figure class="shot"><img src="/images/help/account.webp" alt="Mi cuenta: tu nombre, tu WhatsApp y tu contraseña." width="520" height="933" loading="lazy"><figcaption>Mi cuenta: tu nombre, tu WhatsApp y tu contraseña.</figcaption></figure>
   <p>Si la red falla al abrir la app, verás <strong>Sin conexión</strong>: no hace falta volver a escribir la contraseña. La app entra sola en cuanto vuelve la conexión, o puedes pulsar <span class="ui">Reintentar</span>.</p>
 
   <h2 id="td-limites">Lo que todavía no se puede hacer</h2>
@@ -882,6 +911,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
 
   <h2 id="tp-inicio">La pantalla de inicio</h2>
   <p>Arriba ves cuántos turnos hay <strong>hoy</strong> y cuántos van Terminados, En curso, Llegaron, Confirmados y Pendientes. Más abajo está <strong>Ahora</strong> (el turno que se está atendiendo) y los <strong>próximos</strong> tres turnos del día. En el teléfono, la barra inferior te lleva a Inicio, Turnos, Clientes y <span class="ui">Más</span>, donde está el resto; el botón <span class="ui">+</span> del centro abre la agenda.</p>
+  <figure class="shot"><img src="/images/help/home-staff.webp" alt="La pantalla de inicio del personal." width="520" height="933" loading="lazy"><figcaption>La pantalla de inicio del personal.</figcaption></figure>
 
   <h2 id="tp-agenda">La agenda</h2>
   <p>En <span class="path">Turnos</span> elige la vista:</p>
@@ -890,6 +920,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
     <li><span class="ui">Día</span>: grilla de 8:00 a 20:00. Toca un hueco libre para crear un turno a esa hora.</li>
     <li><span class="ui">Semana</span>: los siete días en la misma grilla.</li>
   </ul>
+  <figure class="shot"><img src="/images/help/agenda-staff.webp" alt="La agenda: «Mis turnos» muestra solo los tuyos." width="520" height="933" loading="lazy"><figcaption>La agenda: «Mis turnos» muestra solo los tuyos.</figcaption></figure>
 
   <h3>Crear un turno</h3>
   <ol class="steps">
@@ -922,6 +953,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
     <li>Cuando llega el cliente, pulsa <span class="ui">Marcar llegada</span>. Cuando lo pasan a atender, <span class="ui">Empezar atención</span>.</li>
     <li>Al terminar, <span class="ui">Terminar</span>. Esto es importante: <strong>solo los turnos terminados cuentan como ingreso</strong> en los reportes del negocio, y es el momento en que al cliente se le pide una valoración.</li>
   </ol>
+  <figure class="shot"><img src="/images/help/appointment-detail.webp" alt="Al tocar un turno se abre su ficha. El botón grande es el siguiente paso: aquí, «Marcar llegada»." width="520" height="933" loading="lazy"><figcaption>Al tocar un turno se abre su ficha. El botón grande es el siguiente paso: aquí, «Marcar llegada».</figcaption></figure>
   <p>Tocando el turno abres su detalle, con los botones <span class="ui">WhatsApp</span> (abre un chat con el cliente), <span class="ui">Mover</span> y <span class="ui">Cancelar</span>; <span class="ui">No vino</span> está en el menú <span class="ui">⋮</span> de arriba. Un turno ya <span class="chip st-in_progress">En curso</span> no se puede marcar como No vino, y los turnos terminados, cancelados o marcados como No vino ya no cambian.</p>
 
   <h2 id="tp-recordatorios">Recordatorios</h2>
@@ -1064,6 +1096,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
         <tr><td><span class="ui">Cancelar salida</span></td><td class="wrap">Deja de publicarla y no acepta más reservas. Con WhatsApp conectado, cada pasajero con reserva recibe un aviso.</td></tr>
       </tbody>
     </table>
+  <figure class="shot"><img src="/images/help/trips-list.webp" alt="Tus salidas, con los asientos ocupados y lo que falta aprobar." width="520" height="933" loading="lazy"><figcaption>Tus salidas, con los asientos ocupados y lo que falta aprobar.</figcaption></figure>
   </div>
   <div class="callout tip">
     <span class="tag">Consejo</span>
@@ -1072,6 +1105,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
 
   <h2 id="vd-pasajeros">Pasajeros y cobros</h2>
   <p>Al abrir <span class="ui">Ver pasajeros</span> ves arriba el título, la fecha y la ocupación; los datos del chofer y la foto del vehículo; y un resumen con lo que requiere atención: <em>3 por aprobar</em>, <em>2 con anticipo pendiente</em>, <em>Falta cobrar …</em>.</p>
+  <figure class="shot"><img src="/images/help/trip-details.webp" alt="Una salida por dentro: cada reserva con sus asientos, su anticipo y lo que falta cobrar." width="520" height="933" loading="lazy"><figcaption>Una salida por dentro: cada reserva con sus asientos, su anticipo y lo que falta cobrar.</figcaption></figure>
   <p>Cada reserva muestra quién reservó, su número, cantidad de asientos, teléfono (tócalo para llamar), parada, si es ida y vuelta, las dos marcas de estado, el monto que falta (<em>Falta …</em> o <em>Pagó completo</em>), los nombres de los pasajeros y la nota del cliente. Si faltan nombres, lo avisa: <em>Faltan 2 nombres para la lista del chofer</em>.</p>
 
   <h3>Aprobar una reserva</h3>
@@ -1120,6 +1154,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
     <li><strong>Cómo se paga el anticipo:</strong> las instrucciones que el cliente ve apenas reserva y en el WhatsApp de confirmación, con formato de WhatsApp. Por ejemplo: <em>*Transfiere el anticipo* a la tarjeta 9200 XXXX XXXX XXXX (tu nombre) y envíanos el comprobante por WhatsApp.</em> Si la página está activa y este texto está vacío, la app te lo avisa.</li>
     <li><strong>Horas para pagar el anticipo:</strong> de 1 a 168 (una semana). Viene en 24.</li>
   </ul>
+  <figure class="shot"><img src="/images/help/trips-public.webp" alt="Lo que ve tu cliente al abrir tu enlace de pasajes." width="520" height="933" loading="lazy"><figcaption>Lo que ve tu cliente al abrir tu enlace de pasajes.</figcaption></figure>
 
   <h3>Qué hace tu cliente en la página</h3>
   <div class="flow" aria-label="Pasos de la reserva de viaje">
@@ -1272,6 +1307,7 @@ Viajes Ruta Central</div>
     <li>Cuántos asientos están ocupados y cuántos quedan, con una barra de ocupación.</li>
     <li>Marcas como <span class="chip st-checked_in">Requiere aprobación</span>, <span class="chip st-pending">Sin publicar</span>, <span class="chip st-checked_in">Completo</span> o <span class="chip st-cancelled">Cancelada</span>.</li>
   </ul>
+  <figure class="shot"><img src="/images/help/trips-staff.webp" alt="Las salidas tal como las ve el personal." width="520" height="933" loading="lazy"><figcaption>Las salidas tal como las ve el personal.</figcaption></figure>
   <p>Toca el contador de asientos (<em>12 de 20 asientos</em>) para abrir la lista de pasajeros.</p>
 
   <h2 id="vp-pasajeros">Leer la lista de pasajeros</h2>
@@ -1288,6 +1324,7 @@ Viajes Ruta Central</div>
         <tr><td>Pasajeros</td><td class="wrap">Los nombres, numerados. Si falta alguno verás <em>Faltan N nombres para la lista del chofer</em>.</td></tr>
       </tbody>
     </table>
+  <figure class="shot"><img src="/images/help/trip-details.webp" alt="La lista de pasajeros de una salida." width="520" height="933" loading="lazy"><figcaption>La lista de pasajeros de una salida.</figcaption></figure>
   </div>
   <p>Las reservas <span class="chip st-cancelled">Cancelada</span> aparecen atenuadas: esos pasajeros ya no viajan.</p>
 
