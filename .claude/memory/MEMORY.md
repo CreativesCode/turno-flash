@@ -31,4 +31,5 @@
 - [Convenciones de codigo](reference/convenciones-de-codigo.md) — services estaticos, hooks `.query`, schemas Zod, tokens `st-*`/`mesh-*`, primitivas en `components/ui/`, `datetime-local` en hora local, sin N+1; helpers del QA, del cierre de P2 y del cierre de P3 (Field con etiqueta enlazada, `useMoney` en reportes, `ROLE_META`, filtros de la Lista en el servidor, `MODULE_ROUTES`)
 - [Mapa de docs](reference/mapa-docs.md) — que doc sirve y cuales son de enero y estan obsoletos
 - [Manual de usuario](reference/manual-de-usuario.md) — fuente única en `docs/user-manual/`, servida en `/help` (se lee en build); actualizarla cuando cambie algo visible (al día al 2026-10-14, incluye categorías); el Artifact publicado ya no existe; guía de primeros pasos en Inicio y estado de sus fotos
+- [Tasknic](reference/tasknic.md) — enlazado 2026-10-15 (skill `tasknic`, key en `.env.local`); proyecto «Turno Flash», tareas `TURxxxx`; `requested_by` = Roberto cuando él lo pide
 - [Secretos en assets del template](reference/secretos-en-assets-del-template.md) — el PNG de video-visuals traia una API key de OpenRouter en su XMP; como detectarla y como reescribir commits sin pushear
