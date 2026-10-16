@@ -59,3 +59,8 @@ WhatsApp apagado y sin sesión para que ningún trigger mande mensajes; borrados
 navegador fijado a las 10:40 para que la agenda parezca de media mañana (`context.clock.install`).
 Ojo al sembrar pasajes: los puntos de recogida tienen su propio precio (por defecto 0 → la página pública dice
 «Desde 0 US$»). La pantalla de equipo del dueño es `/dashboard/invite` (`/dashboard/users` es solo de admin).
+
+- **2026-10-16 (TUR0002):** h3 «Acortar las horas del calendario» en la agenda del dueño y fila «Día» de ambas guías; 19.ª foto
+  `calendar-hours.webp`, sacada con **puppeteer-core + Chrome local** (390x700 @2x, `prefers-color-scheme: light` emulado,
+  `nextjs-portal` oculto por CSS) y reducida a 520 px con sharp; el MCP de Playwright va a DPR 1 y en oscuro, no sirve
+  para fotos. Ver [[horario-calendario]].
