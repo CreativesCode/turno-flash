@@ -30,6 +30,9 @@ admins nunca bloqueados). Un negocio bloqueado lee **0 filas** y no escribe nada
 `LicenseGate` invalida todas las consultas al desbloquearse. **Si una tabla nueva guarda datos de un negocio,
 añadirle la misma política RESTRICTIVE.** Verificado con un negocio `qa-fixture-*` en pantalla y por API.
 Nota: un negocio **sin fechas de licencia** (`no_license`) es usable para siempre (p. ej. «Organización test»).
+**Ojo — las funciones SECURITY DEFINER saltan la RLS de 087:** cada una que devuelva datos de un negocio debe
+comprobar `org_license_usable` ella misma. `get_organization_analytics` no lo hacía; lo cerró la **088**
+(2026-10-16). Las demás DEFINER que leen `auth.uid()` son de licencia, perfil o admin y no exponen datos.
 
 **Migración 067 (2026-10-08):** la gracia ya no se configura en el cliente: son 7 días fijos en SQL y en `getGracePeriodDays()`. El acoplamiento con `NEXT_PUBLIC_LICENSE_GRACE_PERIOD_DAYS` de arriba ya no aplica (la variable sigue en `.env.local` y en el README, sin efecto). Los días se redondean hacia arriba.
 

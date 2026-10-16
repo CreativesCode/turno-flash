@@ -92,7 +92,7 @@ Relacionado: [[whatsapp-automatizaciones]], [[modulo-reserva-asientos]], [[reser
 - **SMTP propio** para que llegue "¿Olvidaste tu contraseña?" a los dueños (configurarlo en Supabase Auth).
 - **Pedir a cada dueño su WhatsApp de contacto** (`organizations.whatsapp_phone`); la guía de primeros pasos ya
   se lo pide al dueño nuevo.
-- **Pendientes menores:** reportes con la zona del negocio (P0-13, punto 7); el detalle de una salida muestra la
+- **Pendientes menores:** ~~reportes con la zona del negocio (P0-13, punto 7)~~ hecho el 2026-10-16 (088: solo «clientes nuevos» cortaba el día en UTC); el detalle de una salida muestra la
   fecha como `2026-10-09` (se ve en una foto de la guía); la web en navegador no abre sin señal (haría falta el
   service worker descartado en D-02).
 - Los turnos de prueba T-0062 y T-0063 (7 y 8 oct) ya pasaron. En producción quedan los negocios `qa-*` y
