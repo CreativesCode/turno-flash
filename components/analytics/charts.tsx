@@ -73,8 +73,15 @@ function shortMonth(month: string): string {
 }
 
 /** Ingresos + turnos por día (dashboard de reportes). */
-export function RevenueAreaChart({ data }: { data: RevenueByDay[] }) {
-  const { format: formatMoney } = useMoney();
+export function RevenueAreaChart({
+  data,
+  organizationId,
+}: {
+  data: RevenueByDay[];
+  /** Set when a platform admin views another business, for its currency. */
+  organizationId?: string;
+}) {
+  const { format: formatMoney } = useMoney(organizationId);
   return (
     <ResponsiveContainer width="100%" height={260}>
       <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -161,8 +168,15 @@ export function StatusDonut({
 }
 
 /** Top servicios por ingresos (barras horizontales). */
-export function TopServicesBars({ data }: { data: TopService[] }) {
-  const { format: formatMoney } = useMoney();
+export function TopServicesBars({
+  data,
+  organizationId,
+}: {
+  data: TopService[];
+  /** Set when a platform admin views another business, for its currency. */
+  organizationId?: string;
+}) {
+  const { format: formatMoney } = useMoney(organizationId);
   const height = Math.max(160, data.length * 38 + 24);
   return (
     <ResponsiveContainer width="100%" height={height}>

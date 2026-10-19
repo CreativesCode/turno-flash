@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge, IconTile, KebabMenu, ListRow } from "@/components/ui";
+import type { OrganizationActivityRow } from "@/types/analytics";
 import type {
   LicenseStatus,
   OrganizationWithOwner,
@@ -60,14 +61,38 @@ function formatDate(iso: string): string {
   });
 }
 
+/** "63 turnos · 20 pasajes · último 6 oct 2026", by the modules the business uses. */
+function activityLine(
+  org: OrganizationWithOwner,
+  activity: OrganizationActivityRow
+): string {
+  if (!activity.last_activity_at) return "Sin actividad";
+  const parts: string[] = [];
+  if (org.appointments_module_enabled !== false) {
+    parts.push(
+      `${activity.appointments} ${activity.appointments === 1 ? "turno" : "turnos"}`
+    );
+  }
+  if (org.trips_module_enabled) {
+    parts.push(
+      `${activity.trip_bookings} ${activity.trip_bookings === 1 ? "pasaje" : "pasajes"}`
+    );
+  }
+  parts.push(`último ${formatDate(activity.last_activity_at)}`);
+  return parts.join(" · ");
+}
+
 export interface OrganizationCardProps {
   org: OrganizationWithOwner;
+  /** Admin-only activity summary (migration 089); absent while it loads. */
+  activity?: OrganizationActivityRow;
   onViewDetails: (org: OrganizationWithOwner) => void;
   onDelete: (org: OrganizationWithOwner) => void;
 }
 
 export function OrganizationCard({
   org,
+  activity,
   onViewDetails,
   onDelete,
 }: OrganizationCardProps) {
@@ -120,6 +145,11 @@ export function OrganizationCard({
             : "Sin vencimiento"}
         </span>
       </div>
+      {activity && (
+        <div className="mt-1 text-caption text-foreground-muted">
+          {activityLine(org, activity)}
+        </div>
+      )}
     </ListRow>
   );
 }

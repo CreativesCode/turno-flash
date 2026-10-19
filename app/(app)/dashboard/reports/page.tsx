@@ -20,8 +20,11 @@ import {
   UserPlus,
   XCircle,
 } from "lucide-react";
+import { useOrganizationModules } from "@/hooks/useOrganizationModules.query";
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo, useState } from "react";
 
 // recharts solo en cliente y fuera del bundle inicial
 const chartLoading = () => (
@@ -95,16 +98,33 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 
 export default function ReportsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ReportsContent />
+    </Suspense>
+  );
+}
+
+function ReportsContent() {
   const { profile } = useAuth();
-  const { format: formatMoney } = useMoney();
+  const isAdmin = profile?.role === "admin";
+  // A platform admin opens any business's report from its details page (TUR0006)
+  const searchParams = useSearchParams();
+  const adminOrgId = (isAdmin && searchParams.get("org")) || undefined;
+  const { format: formatMoney } = useMoney(adminOrgId);
+  const { modules } = useOrganizationModules(adminOrgId);
   const [period, setPeriod] = useState<PeriodKey>("30d");
 
   const { start, end } = useMemo(() => getPeriodRange(period), [period]);
-  const { data, isLoading, error } = useOrganizationAnalytics(start, end);
+  const { data, isLoading, error } = useOrganizationAnalytics(
+    start,
+    end,
+    adminOrgId
+  );
 
   const canView =
-    (profile?.role === "owner" || profile?.role === "admin") &&
-    !!profile?.organization_id;
+    (profile?.role === "owner" || isAdmin) &&
+    !!(adminOrgId || profile?.organization_id);
 
   const summary = data?.summary;
   const previous = data?.previous;
@@ -128,9 +148,21 @@ export default function ReportsPage() {
               <h1 className="font-display text-display text-foreground">
                 Reportes
               </h1>
-              <p className="mt-0.5 text-sm text-foreground-muted">
-                Cómo va tu negocio, en números.
-              </p>
+              {adminOrgId ? (
+                <p className="mt-0.5 text-sm text-foreground-muted">
+                  {modules.name || "Negocio"} ·{" "}
+                  <Link
+                    href={`/dashboard/organizations/details?id=${adminOrgId}`}
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    Volver a la organización
+                  </Link>
+                </p>
+              ) : (
+                <p className="mt-0.5 text-sm text-foreground-muted">
+                  Cómo va tu negocio, en números.
+                </p>
+              )}
             </div>
             <div className="flex rounded-xl border border-border bg-surface p-1">
               {PERIODS.map((p) => (
@@ -253,7 +285,10 @@ export default function ReportsPage() {
                   {isLoading || !data ? (
                     chartLoading()
                   ) : (
-                    <RevenueAreaChart data={data.revenue_by_day} />
+                    <RevenueAreaChart
+                      data={data.revenue_by_day}
+                      organizationId={adminOrgId}
+                    />
                   )}
                 </Card>
               </section>
@@ -295,7 +330,10 @@ export default function ReportsPage() {
                     ) : data.top_services.length === 0 ? (
                       <EmptyState />
                     ) : (
-                      <TopServicesBars data={data.top_services} />
+                      <TopServicesBars
+                        data={data.top_services}
+                        organizationId={adminOrgId}
+                      />
                     )}
                   </Card>
                 </section>

@@ -8,8 +8,8 @@ import { useOrganizationModules } from "./useOrganizationModules.query";
  * calling fmtMoney directly, so a business that charges in CUP never sees its
  * prices rendered as another currency.
  */
-export function useMoney() {
-  const { modules } = useOrganizationModules();
+export function useMoney(organizationId?: string) {
+  const { modules } = useOrganizationModules(organizationId);
   const currency = modules.currency || "USD";
 
   const format = useCallback(

@@ -40,9 +40,10 @@ const FALLBACK: OrganizationModules = {
   plan: "personal",
 };
 
-export function useOrganizationModules() {
+/** `organizationId` lets a platform admin read another business; defaults to the user's own. */
+export function useOrganizationModules(organizationId?: string) {
   const { profile } = useAuth();
-  const orgId = profile?.organization_id ?? "";
+  const orgId = organizationId || profile?.organization_id || "";
 
   const query = useQuery({
     queryKey: organizationModuleKeys.org(orgId),

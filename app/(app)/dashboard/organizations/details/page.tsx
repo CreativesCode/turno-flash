@@ -10,6 +10,7 @@ import {
 import { LicensePaymentsCard } from "@/components/organizations/LicensePaymentsCard";
 import { LicensePlanCard } from "@/components/organizations/LicensePlanCard";
 import { ModulesCard } from "@/components/organizations/ModulesCard";
+import { OrgActivityCard } from "@/components/organizations/OrgActivityCard";
 import { WhatsAppOrgSection } from "@/components/organizations/WhatsAppOrgSection";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Avatar, Button, Card } from "@/components/ui";
@@ -605,6 +606,17 @@ function OrganizationDetailsContent() {
                 dismissible={false}
               />
             )}
+
+          {/* Activity of the business — admin only (TUR0006) */}
+          {isAdmin && (
+            <OrgActivityCard
+              organizationId={organizationId}
+              timezone={organization.timezone}
+              currency={organization.currency}
+              appointmentsEnabled={organization.appointments_module_enabled}
+              tripsEnabled={organization.trips_module_enabled}
+            />
+          )}
 
           {/* Módulos del negocio — el owner los ve, solo el admin los cambia */}
           <div className="mb-4">

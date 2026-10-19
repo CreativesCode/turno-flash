@@ -1,4 +1,9 @@
-import type { OrganizationAnalytics, PlatformStats } from "@/types/analytics";
+import type {
+  OrganizationActivity,
+  OrganizationActivityRow,
+  OrganizationAnalytics,
+  PlatformStats,
+} from "@/types/analytics";
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
 
@@ -65,6 +70,61 @@ export class AnalyticsService {
         success: false,
         error: "Error inesperado al cargar las estadísticas de la plataforma",
       };
+    }
+  }
+  /**
+   * Activity of one business for its admin details page (migration 089).
+   * Without dates it covers all time.
+   */
+  static async getOrganizationActivity(
+    organizationId: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<{ success: boolean; data?: OrganizationActivity; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc(
+        "get_admin_organization_activity",
+        {
+          p_organization_id: organizationId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+        }
+      );
+
+      if (error) {
+        void Logger.error("Error fetching organization activity:", error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data: data as unknown as OrganizationActivity };
+    } catch (error) {
+      void Logger.error("Unexpected error fetching organization activity:", error);
+      return { success: false, error: "Error inesperado al cargar la actividad" };
+    }
+  }
+
+  /** One activity line per business for the admin organizations list. */
+  static async getOrganizationsActivity(): Promise<{
+    success: boolean;
+    data?: OrganizationActivityRow[];
+    error?: string;
+  }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc(
+        "get_admin_organizations_activity"
+      );
+
+      if (error) {
+        void Logger.error("Error fetching organizations activity:", error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data: data ?? [] };
+    } catch (error) {
+      void Logger.error("Unexpected error fetching organizations activity:", error);
+      return { success: false, error: "Error inesperado al cargar la actividad" };
     }
   }
 }

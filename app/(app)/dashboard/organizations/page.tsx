@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { Button, ConfirmSheet, ListGroup } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks";
+import { useOrganizationsActivity } from "@/hooks/useAnalytics.query";
 import { OrganizationWithOwner } from "@/types/organization";
 import { Logger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
@@ -18,6 +19,11 @@ export default function OrganizationsPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
+  const { data: activityRows } = useOrganizationsActivity();
+  const activityByOrg = useMemo(
+    () => new Map(activityRows?.map((row) => [row.organization_id, row])),
+    [activityRows]
+  );
 
   const [organizations, setOrganizations] = useState<OrganizationWithOwner[]>(
     []
@@ -245,6 +251,7 @@ export default function OrganizationsPage() {
                 <OrganizationCard
                   key={org.id}
                   org={org}
+                  activity={activityByOrg.get(org.id)}
                   onViewDetails={handleViewDetails}
                   onDelete={setOrganizationToDelete}
                 />

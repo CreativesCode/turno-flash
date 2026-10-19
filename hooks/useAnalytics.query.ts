@@ -10,6 +10,9 @@ export const analyticsKeys = {
   organization: (orgId: string, startDate: string, endDate: string) =>
     [...analyticsKeys.all, "organization", { orgId, startDate, endDate }] as const,
   platform: () => [...analyticsKeys.all, "platform"] as const,
+  orgActivity: (orgId: string, startDate?: string, endDate?: string) =>
+    [...analyticsKeys.all, "org-activity", { orgId, startDate, endDate }] as const,
+  orgsActivity: () => [...analyticsKeys.all, "orgs-activity"] as const,
 };
 
 /**
@@ -57,6 +60,53 @@ export function usePlatformStats() {
         throw new Error(
           result.error || "Error al cargar las estadísticas de la plataforma"
         );
+      }
+      return result.data;
+    },
+    enabled: profile?.role === "admin",
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+/**
+ * Activity of one business for /dashboard/organizations/details (admin only).
+ * Without dates it covers all time.
+ */
+export function useOrganizationActivity(
+  organizationId: string,
+  startDate?: string,
+  endDate?: string
+) {
+  const { profile } = useAuth();
+
+  return useQuery({
+    queryKey: analyticsKeys.orgActivity(organizationId, startDate, endDate),
+    queryFn: async () => {
+      const result = await AnalyticsService.getOrganizationActivity(
+        organizationId,
+        startDate,
+        endDate
+      );
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Error al cargar la actividad");
+      }
+      return result.data;
+    },
+    enabled: !!organizationId && profile?.role === "admin",
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+/** One activity line per business for /dashboard/organizations (admin only). */
+export function useOrganizationsActivity() {
+  const { profile } = useAuth();
+
+  return useQuery({
+    queryKey: analyticsKeys.orgsActivity(),
+    queryFn: async () => {
+      const result = await AnalyticsService.getOrganizationsActivity();
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Error al cargar la actividad");
       }
       return result.data;
     },

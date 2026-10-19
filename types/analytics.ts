@@ -170,3 +170,53 @@ export interface PlatformStats {
   whatsapp_30d: WhatsappStats;
   errors: ErrorStats;
 }
+
+// ───────────────────────────────────────────────────────────
+// Activity of one business, for the platform admin (migration 089)
+// ───────────────────────────────────────────────────────────
+
+export interface OrgActivityAppointments {
+  total: number;
+  pending: number;
+  /** Left pending and was not cancelled (only the current status is stored). */
+  accepted: number;
+  client_confirmed: number;
+  completed: number;
+  cancelled: number;
+  no_show: number;
+  online: number;
+  panel: number;
+  revenue: number;
+}
+
+export interface OrgActivityTrips {
+  departures: number;
+  bookings: number;
+  pending: number;
+  confirmed: number;
+  cancelled: number;
+  seats: number;
+  collected: number;
+}
+
+export interface OrganizationActivity {
+  organization_id: string;
+  start_date: string | null;
+  end_date: string | null;
+  appointments: OrgActivityAppointments;
+  customers: { total: number; new: number };
+  trips: OrgActivityTrips;
+  whatsapp_sent: number;
+  setup: { staff: number; services: number };
+  last_appointment_at: string | null;
+  last_trip_booking_at: string | null;
+  owner_last_sign_in_at: string | null;
+}
+
+/** One line per business in the organizations list. */
+export interface OrganizationActivityRow {
+  organization_id: string;
+  appointments: number;
+  trip_bookings: number;
+  last_activity_at: string | null;
+}
