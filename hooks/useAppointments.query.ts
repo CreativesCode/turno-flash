@@ -24,6 +24,7 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { ZodError } from "zod";
+import type { DepositAction } from "@/utils/deposit";
 
 /**
  * Filters for appointments query
@@ -648,3 +649,26 @@ export function useInfiniteAppointments(
     ...options,
   });
 }
+
+/** Verify, waive or refund the deposit of an appointment (owner or admin). */
+export function useSetAppointmentDeposit() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      appointmentId,
+      action,
+    }: {
+      appointmentId: string;
+      action: DepositAction;
+    }) => {
+      const result = await AppointmentService.setDeposit(appointmentId, action);
+      if (!result.success) throw new Error(result.error);
+      return result;
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
+    },
+  });
+}
+

@@ -20,6 +20,12 @@ import type {
   StaffMember,
 } from "@/types/appointments";
 import { CustomerPicker } from "@/components/appointments/CustomerPicker";
+import {
+  DepositChoice,
+  DepositPanel,
+  type DepositChoiceValue,
+} from "@/components/appointments/DepositPanel";
+import { depositOpen, serviceDepositAmount, type DepositAction } from "@/utils/deposit";
 import { NEXT_ACTIONS } from "@/utils/appointment-status";
 import { formatDateForDisplay, parseLocalDate } from "@/utils/date";
 import { toInternationalPhone } from "@/utils/phone";
@@ -95,6 +101,10 @@ export function AppointmentCreateModal({
     [services, categories]
   );
   const showServiceHeadings = hasCategoryGroups(serviceGroups);
+  const selectedService = services.find((s) => s.id === formData.service_id);
+  const depositAmount = selectedService
+    ? serviceDepositAmount(selectedService)
+    : null;
 
   return (
     <Sheet open={open} onClose={onClose} title="Nuevo turno">
@@ -286,6 +296,25 @@ export function AppointmentCreateModal({
           )}
         </Field>
 
+        {depositAmount && (
+          <DepositChoice
+            amount={depositAmount}
+            value={
+              formData.deposit_waived
+                ? "waived"
+                : formData.deposit_status === "verified"
+                  ? "verified"
+                  : "pending"
+            }
+            onChange={(value: DepositChoiceValue) =>
+              onChange({
+                deposit_status: value === "verified" ? "verified" : undefined,
+                deposit_waived: value === "waived",
+              })
+            }
+          />
+        )}
+
         {/* Staff */}
         <Field label="Profesional (opcional)">
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
@@ -391,6 +420,9 @@ export interface AppointmentDetailModalProps {
   onCancel: () => void | Promise<void>;
   onMarkNoShow?: () => void | Promise<void>;
   onEdit?: () => void;
+  /** Verify, waive or refund the deposit (owner or admin). */
+  onDeposit: (action: DepositAction) => void | Promise<void>;
+  isDepositBusy?: boolean;
   /** Look up service color (hex) for the dot in the detail grid. */
   serviceColor?: string | null;
   /** Look up staff color (hex) for the dot in the detail grid. */
@@ -406,13 +438,17 @@ export function AppointmentDetailModal({
   onCancel,
   onMarkNoShow,
   onEdit,
+  onDeposit,
+  isDepositBusy = false,
   serviceColor,
   staffColor,
   isProcessing = false,
 }: AppointmentDetailModalProps) {
   const { format: money } = useMoney();
   const status = (a.status ?? "pending") as AppointmentStatus;
-  const next = NEXT_ACTIONS[status];
+  // A pending appointment waiting for its deposit is confirmed from the deposit panel
+  const waitsForDeposit = status === "pending" && depositOpen(a.deposit_status);
+  const next = waitsForDeposit ? null : NEXT_ACTIONS[status];
   // Opens a chat with the customer; the automatic reminders go on their own
   const whatsappUrl = a.customer_phone
     ? `https://wa.me/${toInternationalPhone(a.customer_phone).slice(1)}`
@@ -516,6 +552,8 @@ export function AppointmentDetailModal({
           <p className="mt-[3px] text-body text-foreground">{a.notes}</p>
         </div>
       )}
+
+      <DepositPanel appointment={a} onAction={onDeposit} busy={isDepositBusy} />
 
       {/* Actions */}
       {!isTerminal && (

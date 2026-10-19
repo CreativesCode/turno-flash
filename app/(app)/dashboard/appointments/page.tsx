@@ -1,5 +1,6 @@
 "use client";
 
+import type { DepositAction } from "@/utils/deposit";
 import { ApptRow } from "@/components/appointments/ApptRow";
 import {
   AppointmentCreateModal,
@@ -37,6 +38,7 @@ import {
   useNormalizedData,
   useRescheduleAppointment,
   useToast,
+  useSetAppointmentDeposit,
   useUpdateAppointmentStatus,
   useBusinessSettings,
 } from "@/hooks";
@@ -327,6 +329,7 @@ function AppointmentsContent() {
 
   const createAppointmentMutation = useCreateAppointment();
   const updateAppointmentStatusMutation = useUpdateAppointmentStatus();
+  const setDepositMutation = useSetAppointmentDeposit();
   const rescheduleMutation = useRescheduleAppointment();
   const createCustomerMutation = useCreateCustomer();
 
@@ -566,6 +569,52 @@ function AppointmentsContent() {
       }
     },
     [updateAppointmentStatusMutation, toast, selectedAppointment]
+  );
+
+  /** Verify, waive or refund the deposit of the open appointment. */
+  const handleDeposit = useCallback(
+    async (action: DepositAction) => {
+      if (!selectedAppointment) return;
+      try {
+        await setDepositMutation.mutateAsync({
+          appointmentId: selectedAppointment.id,
+          action,
+        });
+        const confirmed =
+          selectedAppointment.status === "pending" && action !== "refund"
+            ? "confirmed"
+            : selectedAppointment.status;
+        setSelectedAppointment({
+          ...selectedAppointment,
+          status: confirmed,
+          ...(action === "verify" && {
+            deposit_status: "verified",
+            deposit_verified_by: profile?.user_id ?? null,
+            deposit_verified_at: new Date().toISOString(),
+          }),
+          ...(action === "waive" && {
+            deposit_amount: null,
+            deposit_status: null,
+            deposit_waived: true,
+          }),
+          ...(action === "refund" && { deposit_status: "refunded" }),
+        });
+        toast.success(
+          action === "verify"
+            ? "Anticipo recibido"
+            : action === "waive"
+              ? "Anticipo perdonado"
+              : "Anticipo devuelto",
+          action === "refund" ? undefined : "El turno quedó confirmado"
+        );
+      } catch (err) {
+        toast.error(
+          "No se pudo guardar el anticipo",
+          err instanceof Error ? err.message : undefined
+        );
+      }
+    },
+    [selectedAppointment, setDepositMutation, profile?.user_id, toast]
   );
 
   /* ── List filtering / grouping ───────────────────────────── */
@@ -1064,6 +1113,8 @@ function AppointmentsContent() {
           serviceColor={detailServiceColor}
           staffColor={detailStaffColor}
           onAdvance={(to) => updateStatus(selectedAppointment.id, to)}
+          onDeposit={handleDeposit}
+          isDepositBusy={setDepositMutation.isPending}
           onEdit={
             canManageAppointments &&
             RESCHEDULABLE.includes(selectedAppointment.status ?? "")

@@ -18,6 +18,7 @@ export {
   useInfiniteAppointments,
   useRescheduleAppointment,
   useSendReminder,
+  useSetAppointmentDeposit,
   useUpdateAppointmentStatus,
 } from "./useAppointments.query";
 

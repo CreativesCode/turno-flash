@@ -16,3 +16,29 @@ export function serviceDepositAmount(service: {
   }
   return amount > 0 ? amount : null;
 }
+
+export type DepositAction = "verify" | "waive" | "refund";
+
+export type DepositStatus =
+  | "pending"
+  | "requested"
+  | "paid"
+  | "verified"
+  | "cancelled"
+  | "refunded";
+
+/** What each deposit status means for the owner. */
+export const DEPOSIT_STATUS_LABEL: Record<DepositStatus, string> = {
+  pending: "Pendiente",
+  requested: "Instrucciones enviadas",
+  paid: "El cliente avisó que pagó",
+  verified: "Recibido",
+  cancelled: "Cancelado",
+  refunded: "Devuelto",
+};
+
+/** The deposit is still owed: the appointment waits for it. */
+export function depositOpen(status: string | null | undefined): boolean {
+  return status === "pending" || status === "requested" || status === "paid";
+}
+

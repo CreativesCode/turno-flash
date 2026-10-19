@@ -83,6 +83,8 @@ export const appointmentFormSchema = z
       .optional(),
     was_paid: z.boolean().optional().default(false),
     payment_method: z.string().max(50).optional(),
+    deposit_status: z.literal("verified").optional(),
+    deposit_waived: z.boolean().optional(),
   })
   .refine(
     (data) => {

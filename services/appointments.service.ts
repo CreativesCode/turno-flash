@@ -9,6 +9,7 @@ import { getTimestamp } from "@/utils/date";
 import { fromZonedTime } from "date-fns-tz";
 import { createClient } from "@/utils/supabase/client";
 import { Logger } from "@/utils/logger";
+import type { DepositAction } from "@/utils/deposit";
 
 /**
  * Service Layer for Appointment Management
@@ -403,6 +404,14 @@ export class AppointmentService {
           success: false,
           error:
             "No se guardó el cambio. Puede que el turno haya cambiado; si no, revisa tu licencia o tus permisos.",
+        };
+      }
+
+      if (updateError?.message.includes("deposit_not_verified")) {
+        return {
+          success: false,
+          error:
+            "Este turno espera el anticipo: márcalo como recibido para confirmarlo.",
         };
       }
 
@@ -898,4 +907,35 @@ export class AppointmentService {
       };
     }
   }
+
+  /**
+   * What the owner or admin does with the deposit of an appointment
+   * (set_appointment_deposit, migration 090). Verifying or waiving it
+   * confirms a pending appointment.
+   */
+  static async setDeposit(
+    appointmentId: string,
+    action: DepositAction
+  ): Promise<{ success: boolean; error?: string }> {
+    const supabase = createClient();
+    const { error } = await supabase.rpc("set_appointment_deposit", {
+      p_appointment_id: appointmentId,
+      p_action: action,
+    });
+    if (!error) return { success: true };
+
+    const message = error.message;
+    if (message.includes("deposit_forbidden")) {
+      return { success: false, error: "Solo el dueño puede gestionar el anticipo." };
+    }
+    if (message.includes("deposit_invalid_transition")) {
+      return {
+        success: false,
+        error: "El anticipo ya cambió. Actualiza la pantalla e inténtalo de nuevo.",
+      };
+    }
+    void Logger.error("Error setting appointment deposit:", error);
+    return { success: false, error: "No se pudo guardar el anticipo: " + message };
+  }
+
 }

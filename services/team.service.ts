@@ -28,6 +28,17 @@ export class TeamService {
     return { data: data ?? [] };
   }
 
+  /** Name of someone of the team (e.g. who verified a deposit); null if hidden by RLS. */
+  static async displayName(userId: string): Promise<string | null> {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("user_profiles")
+      .select("full_name, email")
+      .eq("user_id", userId)
+      .maybeSingle();
+    return data?.full_name || data?.email || null;
+  }
+
   /** Removes (isActive=false) or restores the access of an employee. */
   static async setAccess(
     userId: string,

@@ -148,6 +148,9 @@ export interface AppointmentFormData {
   price_charged?: number | null;
   was_paid?: boolean;
   payment_method?: string;
+  /** Loaded from the dashboard: the owner already got the deposit, or waives it. */
+  deposit_status?: "verified";
+  deposit_waived?: boolean;
 }
 
 export interface AppointmentWithDetails extends Appointment {

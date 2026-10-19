@@ -2,6 +2,7 @@
 
 import { ListRow, StatusBadge, TimeBlock } from "@/components/ui";
 import type { AppointmentWithDetails } from "@/types/appointments";
+import { depositOpen } from "@/utils/deposit";
 import { fmtDuration } from "@/utils/format";
 
 interface ApptRowProps {
@@ -51,7 +52,16 @@ export function ApptRow({ appointment: a, onOpen, serviceColor }: ApptRowProps) 
           </span>
         )
       }
-      subtitle={[a.service_name, staff].filter(Boolean).join(" · ")}
+      subtitle={[
+        a.service_name,
+        staff,
+        // Still waiting for the deposit: it is what confirms the appointment
+        !DONE.includes(status) && depositOpen(a.deposit_status)
+          ? "Falta anticipo"
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" · ")}
       subtitleDot={serviceColor ?? undefined}
       trailing={<StatusBadge status={status} />}
       dimmed={DONE.includes(status)}
