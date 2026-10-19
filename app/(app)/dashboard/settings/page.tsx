@@ -3,6 +3,7 @@
 import { PageMetadata } from "@/components/page-metadata";
 import { ProtectedRoute } from "@/components/protected-route";
 import { BookingPageDetails } from "@/components/settings/BookingPageDetails";
+import { DepositInstructionsCard } from "@/components/settings/DepositInstructionsCard";
 import { TripBookingDetails } from "@/components/settings/TripBookingDetails";
 import { ExceptionsEditor } from "@/components/staff/ExceptionsEditor";
 import { CurrencyCard } from "@/components/organizations/CurrencyCard";
@@ -92,12 +93,13 @@ export default function SettingsPage() {
         daily_summary_time: summaryTime,
         calendar_start_hour: calendarStart,
         calendar_end_hour: calendarEnd,
+        // Shared by trip and appointment deposits (TUR0003)
+        deposit_instructions: depositInstructions.trim() || null,
         // Only sent by a business that runs the seat booking module: for the
         // rest these columns stay untouched at their defaults.
         ...(modules.trips
           ? {
               seat_booking_enabled: seatBookingEnabled,
-              deposit_instructions: depositInstructions.trim() || null,
               seat_booking_hold_hours: holdHours,
             }
           : {}),
@@ -183,6 +185,14 @@ export default function SettingsPage() {
                     }
                   />
                 </Card>
+              )}
+
+              {/* Anticipo de los turnos: with trips it lives in the trips card */}
+              {modules.appointments && !modules.trips && (
+                <DepositInstructionsCard
+                  value={depositInstructions}
+                  onChange={(value) => patchDraft({ deposit_instructions: value })}
+                />
               )}
 
               {/* Moneda del negocio */}
