@@ -184,6 +184,13 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           customer_id: string
+          deposit_amount: number | null
+          deposit_status:
+            | Database["public"]["Enums"]["appointment_deposit_status"]
+            | null
+          deposit_verified_at: string | null
+          deposit_verified_by: string | null
+          deposit_waived: boolean
           end_time: string
           feedback: string | null
           id: string
@@ -219,6 +226,13 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           customer_id: string
+          deposit_amount?: number | null
+          deposit_status?:
+            | Database["public"]["Enums"]["appointment_deposit_status"]
+            | null
+          deposit_verified_at?: string | null
+          deposit_verified_by?: string | null
+          deposit_waived?: boolean
           end_time: string
           feedback?: string | null
           id?: string
@@ -256,6 +270,13 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           customer_id?: string
+          deposit_amount?: number | null
+          deposit_status?:
+            | Database["public"]["Enums"]["appointment_deposit_status"]
+            | null
+          deposit_verified_at?: string | null
+          deposit_verified_by?: string | null
+          deposit_waived?: boolean
           end_time?: string
           feedback?: string | null
           id?: string
@@ -1086,6 +1107,8 @@ export type Database = {
           color: string | null
           created_at: string | null
           currency: string | null
+          deposit_type: string | null
+          deposit_value: number | null
           description: string | null
           duration_minutes: number
           id: string
@@ -1108,6 +1131,8 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           currency?: string | null
+          deposit_type?: string | null
+          deposit_value?: number | null
           description?: string | null
           duration_minutes?: number
           id?: string
@@ -1130,6 +1155,8 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           currency?: string | null
+          deposit_type?: string | null
+          deposit_value?: number | null
           description?: string | null
           duration_minutes?: number
           id?: string
@@ -2080,6 +2107,13 @@ export type Database = {
           customer_id: string | null
           customer_last_name: string | null
           customer_phone: string | null
+          deposit_amount: number | null
+          deposit_status:
+            | Database["public"]["Enums"]["appointment_deposit_status"]
+            | null
+          deposit_verified_at: string | null
+          deposit_verified_by: string | null
+          deposit_waived: boolean | null
           duration_minutes: number | null
           end_time: string | null
           feedback: string | null
@@ -2493,6 +2527,14 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      service_deposit_amount: {
+        Args: { p_service_id: string }
+        Returns: number
+      }
+      set_appointment_deposit: {
+        Args: { p_action: string; p_appointment_id: string }
+        Returns: Database["public"]["Enums"]["appointment_deposit_status"]
+      }
       trip_booking_window_open: {
         Args: { p_trip_id: string }
         Returns: boolean
@@ -2522,6 +2564,13 @@ export type Database = {
       }
     }
     Enums: {
+      appointment_deposit_status:
+        | "pending"
+        | "requested"
+        | "paid"
+        | "verified"
+        | "cancelled"
+        | "refunded"
       appointment_source: "web" | "whatsapp" | "phone" | "walk_in" | "admin"
       appointment_status:
         | "pending"
@@ -2719,6 +2768,14 @@ export const Constants = {
   },
   public: {
     Enums: {
+      appointment_deposit_status: [
+        "pending",
+        "requested",
+        "paid",
+        "verified",
+        "cancelled",
+        "refunded",
+      ],
       appointment_source: ["web", "whatsapp", "phone", "walk_in", "admin"],
       appointment_status: [
         "pending",

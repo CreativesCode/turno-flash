@@ -69,6 +69,11 @@ export function normalizeAppointments(
       // dashboard never uses them
       booking_request_key: null,
       rescheduled_at: null,
+      deposit_amount: aptWithDetails.deposit_amount,
+      deposit_status: aptWithDetails.deposit_status,
+      deposit_waived: aptWithDetails.deposit_waived ?? false,
+      deposit_verified_by: aptWithDetails.deposit_verified_by,
+      deposit_verified_at: aptWithDetails.deposit_verified_at,
       customer_id: aptWithDetails.customer_id,
       service_id: aptWithDetails.service_id,
       staff_id: aptWithDetails.staff_id,
