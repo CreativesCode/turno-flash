@@ -2311,6 +2311,23 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: string
       }
+      get_admin_organization_activity: {
+        Args: {
+          p_end_date?: string
+          p_organization_id: string
+          p_start_date?: string
+        }
+        Returns: Json
+      }
+      get_admin_organizations_activity: {
+        Args: never
+        Returns: {
+          appointments: number
+          last_activity_at: string
+          organization_id: string
+          trip_bookings: number
+        }[]
+      }
       get_admin_platform_stats: { Args: never; Returns: Json }
       get_error_stats: {
         Args: { p_days?: number; p_organization_id?: string }
