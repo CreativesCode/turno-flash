@@ -170,9 +170,15 @@ export function ServiceStep({
                         {fmtMoney(service.price, undefined, service.currency ?? undefined)}
                       </span>
                     )}
-                    {service.requires_approval && (
+                    {service.requires_approval && !service.deposit_amount && (
                       <span className="rounded-full bg-warning-100 px-1.5 py-px text-caption font-semibold text-warning-700 dark:bg-warning-900 dark:text-warning-400">
                         Sujeto a aprobación
+                      </span>
+                    )}
+                    {service.deposit_amount != null && (
+                      <span className="rounded-full bg-warning-100 px-1.5 py-px text-caption font-semibold text-warning-700 dark:bg-warning-900 dark:text-warning-400">
+                        Anticipo{" "}
+                        {fmtMoney(service.deposit_amount, undefined, service.currency ?? undefined)}
                       </span>
                     )}
                   </span>

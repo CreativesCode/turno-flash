@@ -13,6 +13,8 @@ export interface PublicService {
   /** One of SERVICE_BADGES keys; anything else is ignored */
   badge: string | null;
   requires_approval: boolean;
+  /** Deposit asked to book it (migration 090); null = none. */
+  deposit_amount: number | null;
   max_advance_booking_days: number;
   staff_ids: string[];
 }
@@ -82,6 +84,10 @@ export interface PublicBookingRequest {
 export interface PublicBookingConfirmation {
   status: "confirmed" | "pending";
   appointment_number?: string;
+  /** The booking waits for this deposit (migration 090). */
+  deposit_amount?: number | null;
+  /** How to pay it, as the business wrote it in Ajustes (WhatsApp format). */
+  deposit_instructions?: string | null;
   staff_id?: string;
   date?: string;
   start_time?: string;

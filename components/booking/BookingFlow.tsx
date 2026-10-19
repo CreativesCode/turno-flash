@@ -16,6 +16,7 @@ import {
   BusinessTimeNote,
 } from "@/components/booking/BusinessInfo";
 import { Button, Card, Logo } from "@/components/ui";
+import { RichText } from "@/components/ui/rich-text";
 import { guessPhoneCountry } from "@/config/phone-countries";
 // Not the "@/hooks" barrel: it drags the whole dashboard into the public page
 import { useToast } from "@/hooks/useToast";
@@ -34,7 +35,7 @@ import type {
   PublicService,
   PublicSlot,
 } from "@/types/public-booking";
-import { fmtDuration } from "@/utils/format";
+import { fmtDuration, fmtMoney } from "@/utils/format";
 import { UNCATEGORIZED_LABEL, groupServices } from "@/utils/group-services";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -109,6 +110,8 @@ export function BookingFlow({
     null
   );
   const [draft, setDraft] = useSessionState<DetailsDraft | null>(`${storageKey}:draft`, null);
+  // The server says what it saved; before the edge function sends it, the service tells
+  const depositAmount = confirmation?.deposit_amount ?? service?.deposit_amount ?? null;
 
   // A failed background refresh keeps the last data: only a page that never
   // loaded shows an error, so a signal drop does not wipe the form.
@@ -363,6 +366,16 @@ export function BookingFlow({
         </Card>
       )}
 
+      {view === "details" && service?.deposit_amount != null && (
+        <p className="mb-3 rounded-xl bg-warning-50 px-3.5 py-3 text-sm text-warning-800 dark:bg-warning-900 dark:text-warning-300">
+          Para reservar, {info.organization.name} pide un anticipo de{" "}
+          <strong>
+            {fmtMoney(service.deposit_amount, undefined, service.currency ?? undefined)}
+          </strong>
+          . Tu turno queda reservado cuando lo reciba; te diremos cómo pagarlo.
+        </p>
+      )}
+
       {view === "details" && (
         <DetailsStep
           defaultCountry={guessPhoneCountry(info.organization.timezone)}
@@ -381,13 +394,37 @@ export function BookingFlow({
             <Hourglass className="mx-auto h-12 w-12 text-warning-600" />
           )}
           <h2 className="mt-3 text-xl font-semibold tracking-tight text-foreground">
-            {confirmation.status === "confirmed" ? "¡Turno confirmado!" : "Solicitud enviada"}
+            {confirmation.status === "confirmed"
+              ? "¡Turno confirmado!"
+              : depositAmount != null
+                ? "Reserva recibida"
+                : "Solicitud enviada"}
           </h2>
           <p className="mt-1 text-sm text-foreground-muted">
             {confirmation.status === "confirmed"
               ? `Te esperamos en ${info.organization.name}.`
-              : `${info.organization.name} revisará tu solicitud y te contactará para confirmarla.`}
+              : depositAmount != null
+                ? `Tu turno queda reservado cuando ${info.organization.name} reciba el anticipo de ${fmtMoney(depositAmount, undefined, service.currency ?? undefined)}.`
+                : `${info.organization.name} revisará tu solicitud y te contactará para confirmarla.`}
           </p>
+          {depositAmount != null && confirmation.status !== "confirmed" && (
+            <div className="mt-4 rounded-xl border border-border p-4 text-left text-sm">
+              <p className="font-semibold text-foreground">Cómo pagar el anticipo</p>
+              {confirmation.deposit_instructions ? (
+                <RichText
+                  text={confirmation.deposit_instructions}
+                  className="mt-1 text-foreground-muted"
+                />
+              ) : (
+                <p className="mt-1 text-foreground-muted">
+                  {info.organization.name} te dirá cómo pagarlo.
+                </p>
+              )}
+              <p className="mt-2 text-xs text-foreground-subtle">
+                Cuando pagues, avísale respondiendo al WhatsApp de tu reserva.
+              </p>
+            </div>
+          )}
 
           <dl className="mt-5 grid gap-2 rounded-xl bg-surface-2 p-4 text-left text-sm">
             <SummaryRow label="Servicio" value={service.name} />
