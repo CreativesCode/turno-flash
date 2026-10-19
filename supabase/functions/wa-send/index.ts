@@ -31,6 +31,7 @@ import { isServiceRole } from "../_shared/auth.ts";
 import {
   type FrameOptions,
   frameCustomerMessage,
+  money,
 } from "../_shared/wa-message.ts";
 
 // Which customer messages carry the business contact ("¿Dudas? Escribe a…").
@@ -52,6 +53,7 @@ const CUSTOMER_FRAME: Partial<Record<Intent, FrameOptions>> = {
   rating_request: { contact: false, reply: "rating" },
   rating_ack: { contact: false, reply: "none" },
   waitlist_slot: { contact: true, reply: "none" },
+  deposit_paid_ack: { contact: false, reply: "none" },
 };
 
 type Intent =
@@ -70,7 +72,15 @@ type Intent =
   | "rating_ack"
   | "waitlist_slot"
   | "approved"
-  | "rescheduled";
+  | "rescheduled"
+  | "deposit_paid_ack"
+  | "notify_business_deposit_paid";
+
+/** The deposit the appointment still waits for (090), with how to pay it. */
+interface DepositInfo {
+  amount: string;
+  instructions: string | null;
+}
 
 interface AppointmentRow {
   id: string;
@@ -87,6 +97,8 @@ interface AppointmentRow {
   staff_first_name: string | null;
   organization_name: string;
   organization_timezone: string;
+  deposit_amount: number | null;
+  deposit_status: string | null;
 }
 
 const corsHeaders = {
@@ -166,11 +178,12 @@ Deno.serve(async (req) => {
     // 2. Cargar configuración WA del negocio
     const { data: settings, error: settingsErr } = await supabase
       .from("business_settings")
-      .select("openwa_session_id, whatsapp_integration_enabled")
+      .select("openwa_session_id, whatsapp_integration_enabled, deposit_instructions")
       .eq("organization_id", appt.organization_id)
       .single<{
         openwa_session_id: string | null;
         whatsapp_integration_enabled: boolean;
+        deposit_instructions: string | null;
       }>();
 
     if (settingsErr || !settings?.whatsapp_integration_enabled) {
@@ -281,8 +294,27 @@ Deno.serve(async (req) => {
       intent === "clarify_which"
         ? await openAppointmentsList(supabase, appt.customer_id, appt.organization_id)
         : "";
-    const body = buildMessage(appt, intent, waitlistCustomerName, openList);
-    const frame = CUSTOMER_FRAME[intent];
+    // The deposit still owed is part of the booking message (090)
+    const depositOwed =
+      appt.deposit_amount != null &&
+      (appt.deposit_status === "pending" || appt.deposit_status === "requested");
+    let deposit: DepositInfo | null = null;
+    if (depositOwed) {
+      const { data: orgCurrency } = await supabase
+        .from("organizations")
+        .select("currency")
+        .eq("id", appt.organization_id)
+        .single<{ currency: string | null }>();
+      deposit = {
+        amount: money(Number(appt.deposit_amount), orgCurrency?.currency ?? "USD"),
+        instructions: settings.deposit_instructions?.trim() || null,
+      };
+    }
+    const body = buildMessage(appt, intent, waitlistCustomerName, openList, deposit);
+    const frame: FrameOptions | undefined =
+      intent === "confirm" && deposit
+        ? { contact: true, reply: "deposit" }
+        : CUSTOMER_FRAME[intent];
     let text = body;
     if (frame) {
       const { data: org } = await supabase
@@ -347,6 +379,14 @@ Deno.serve(async (req) => {
           .from("appointments")
           .update({ confirmation_sent_at: new Date().toISOString() })
           .eq("id", appointmentId);
+        // The customer now has the amount and how to pay it
+        if (deposit) {
+          await supabase
+            .from("appointments")
+            .update({ deposit_status: "requested" })
+            .eq("id", appointmentId)
+            .eq("deposit_status", "pending");
+        }
       } else if (
         intent === "reminder_24h" ||
         intent === "reminder_1h" ||
@@ -526,7 +566,8 @@ function buildMessage(
   appt: AppointmentRow,
   intent: Intent,
   waitlistCustomerName = "",
-  openList = ""
+  openList = "",
+  deposit: DepositInfo | null = null
 ): string {
   const date = new Date(`${appt.appointment_date}T${appt.start_time}`);
   const fechaLarga = date.toLocaleDateString("es-CU", {
@@ -545,6 +586,25 @@ function buildMessage(
 
   switch (intent) {
     case "confirm":
+      // A service with a deposit: the time is held until the business gets it
+      if (appt.status === "pending" && deposit) {
+        return [
+          `Hola ${cliente}! 👋`,
+          ``,
+          `Recibimos tu reserva:`,
+          ``,
+          `📅 ${fechaLarga}`,
+          `⏰ ${hora}`,
+          `💇 ${servicio}${staff}`,
+          `🎫 N° ${numero}`,
+          ``,
+          `💵 Para confirmarla falta el anticipo de *${deposit.amount}*.`,
+          ...(deposit.instructions ? [deposit.instructions] : []),
+          ``,
+          `Cuando pagues, responde *PAGUÉ ${numero}* o manda la foto del comprobante.`,
+          `❌ Si ya no puedes ir, responde *CANCELAR ${numero}*.`,
+        ].join("\n");
+      }
       // Web bookings of services that need approval: it is a request, not a
       // booked time yet, so the customer is not asked to confirm with OK.
       if (appt.status === "pending") {
@@ -579,7 +639,9 @@ function buildMessage(
 
     case "approved":
       return [
-        `✅ Hola ${cliente}! Aprobamos tu solicitud. Tu turno está confirmado:`,
+        appt.deposit_status === "verified"
+          ? `✅ Hola ${cliente}! Recibimos tu anticipo. Tu turno está confirmado:`
+          : `✅ Hola ${cliente}! Aprobamos tu solicitud. Tu turno está confirmado:`,
         ``,
         `📅 ${fechaLarga}`,
         `⏰ ${hora}`,
@@ -738,6 +800,20 @@ function buildMessage(
         `${appt.customer_first_name} ${appt.customer_last_name}`,
         `📅 ${fechaLarga} ⏰ ${hora}`,
         `N° ${numero}`,
+      ].join("\n");
+
+    case "deposit_paid_ack":
+      return `¡Gracias ${cliente}! Le avisamos al negocio que pagaste el anticipo del turno N° ${numero}. Te confirmamos por aquí cuando lo reciba.`;
+
+    case "notify_business_deposit_paid":
+      return [
+        `💵 *El cliente dice que pagó el anticipo*`,
+        ``,
+        `${appt.customer_first_name} ${appt.customer_last_name}`,
+        `📅 ${fechaLarga} ⏰ ${hora}`,
+        `N° ${numero}`,
+        ``,
+        `Revisa que te llegó y márcalo como recibido en el turno para confirmarlo.`,
       ].join("\n");
 
     case "notify_business_confirm":

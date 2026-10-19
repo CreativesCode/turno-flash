@@ -234,8 +234,13 @@ async function handleMessageReceived(
   // A voice note cannot be read: it goes on as an unintelligible reply, so
   // the customer is asked to answer in writing (the usual clarify, 1 per 12h)
   const isVoiceNote = data.type === "ptt" || data.type === "audio";
+  // A photo or a file is usually the receipt of a deposit transfer (090); it
+  // only counts when the appointment owes one, otherwise it is ignored as before
+  const isReceipt = data.type === "image" || data.type === "document";
   if (isVoiceNote) {
     data.body = "[nota de voz]";
+  } else if (isReceipt) {
+    data.body = data.body?.trim() || "[comprobante]";
   } else if (data.type && data.type !== "chat") {
     console.log(`[wa-inbound] skip: type=${data.type} (no es chat)`);
     return { result: `skip: type=${data.type}` };
@@ -465,6 +470,19 @@ async function handleMessageReceived(
   );
 
   const appointmentId = lastOutbound.appointment_id;
+
+  // The customer says they paid the deposit: "PAGUÉ" or a photo of the receipt
+  if (isReceipt || isPaymentNotice(data.body)) {
+    const paid = await markDepositPaid(supabase, named ? [appointmentId] : openIds, appointmentId);
+    if (paid) {
+      await invokeWaSend(paid, "deposit_paid_ack");
+      await invokeWaSend(paid, "notify_business_deposit_paid");
+      return { organizationId, result: `deposit paid for ${paid}` };
+    }
+    if (isReceipt) {
+      return { organizationId, result: `skip: media for ${appointmentId}, no deposit owed` };
+    }
+  }
 
   // Several open appointments and no number: cancelling the latest one may
   // cancel the wrong appointment. Ask which one instead.
@@ -879,6 +897,58 @@ async function tryApplyRating(
  *  - "No puedo", "cancelar por favor"     → cancel
  *  - "Hola, queria preguntar..."          → null
  */
+/**
+ * "Ya pagué", "transferí", "pago hecho"… — the customer says the deposit is paid.
+ * "No pagué todavía" is not.
+ */
+function isPaymentNotice(body: string): boolean {
+  const normalized = body
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (/\bNO (HE |LO )?(PAGUE|PAGADO|TRANSFERI)\b/.test(normalized)) return false;
+  return /\b(PAGUE|PAGADO|PAGO HECHO|PAGO REALIZADO|LISTO EL PAGO|TRANSFERI|TRANSFERIDO|TRANSFERENCIA HECHA|DEPOSITE|ENVIE EL PAGO)\b/.test(
+    normalized
+  );
+}
+
+/**
+ * Marks as paid the deposit the customer is talking about: among their open
+ * appointments, the only one that owes a deposit, or else the latest one.
+ * Returns the appointment, or null when none owes a deposit.
+ */
+async function markDepositPaid(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  candidateIds: string[],
+  latestId: string
+): Promise<string | null> {
+  const { data: owing } = await supabase
+    .from("appointments")
+    .select("id")
+    .in("id", candidateIds.length ? candidateIds : [latestId])
+    .in("deposit_status", ["pending", "requested"]);
+  const rows = (owing ?? []) as { id: string }[];
+  const target =
+    rows.length === 1
+      ? rows[0].id
+      : rows.some((row) => row.id === latestId)
+        ? latestId
+        : null;
+  if (!target) return null;
+
+  const { data: updated } = await supabase
+    .from("appointments")
+    .update({ deposit_status: "paid" })
+    .eq("id", target)
+    .in("deposit_status", ["pending", "requested"])
+    .select("id");
+  return updated?.length ? target : null;
+}
+
 function classifyReply(body: string): "confirm" | "cancel" | null {
   // A thumbs-up on its own (any skin tone) is a yes
   if (
