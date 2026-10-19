@@ -5,9 +5,9 @@ import { z } from "zod";
 export const SERVICE_DESCRIPTION_MAX = 1000;
 
 /**
- * Service Form Data Schema
+ * Service Form Data Schema (without the cross-field rules, so it can be made partial)
  */
-export const serviceFormSchema = z.object({
+const serviceFormBaseSchema = z.object({
   category_id: z
     .string()
     .uuid({
@@ -81,6 +81,12 @@ export const serviceFormSchema = z.object({
     .default("#3B82F6"),
   is_active: z.boolean().optional().default(true),
   requires_approval: z.boolean().optional().default(false),
+  deposit_type: z.enum(["fixed", "percent"]).nullable().optional(),
+  deposit_value: z
+    .number()
+    .positive({ message: "El anticipo debe ser mayor que 0" })
+    .nullable()
+    .optional(),
   max_advance_booking_days: z
     .number()
     .int()
@@ -120,6 +126,43 @@ export const serviceFormSchema = z.object({
     .nullable()
     .optional(),
 });
+
+type DepositFields = {
+  deposit_type?: "fixed" | "percent" | null;
+  deposit_value?: number | null;
+  price?: number | null;
+};
+
+/** The deposit rules of migration 090: a fixed one up to the price, a percentage 1-100. */
+function checkDeposit(data: DepositFields, ctx: z.RefinementCtx) {
+  if (!data.deposit_type) return;
+  const value = data.deposit_value;
+  if (value == null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["deposit_value"],
+      message: "Indica el importe o el porcentaje del anticipo",
+    });
+  } else if (data.deposit_type === "percent" && value > 100) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["deposit_value"],
+      message: "El porcentaje no puede superar 100",
+    });
+  } else if (
+    data.deposit_type === "fixed" &&
+    data.price != null &&
+    value > data.price
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["deposit_value"],
+      message: "El anticipo no puede ser mayor que el precio",
+    });
+  }
+}
+
+export const serviceFormSchema = serviceFormBaseSchema.superRefine(checkDeposit);
 
 /**
  * Service Category Schema
@@ -162,7 +205,9 @@ export const serviceCategoryFormSchema = z.object({
 /**
  * Service Update Schema (for partial updates)
  */
-export const serviceUpdateSchema = serviceFormSchema.partial();
+export const serviceUpdateSchema = serviceFormBaseSchema
+  .partial()
+  .superRefine(checkDeposit);
 
 /**
  * Service Filter Schema

@@ -42,6 +42,9 @@ export interface ServiceFormData {
   color?: string;
   is_active?: boolean;
   requires_approval?: boolean;
+  /** Deposit asked to book it: an amount or a percentage of the price. */
+  deposit_type?: "fixed" | "percent" | null;
+  deposit_value?: number | null;
   max_advance_booking_days?: number;
   min_advance_booking_hours?: number;
   available_for_online_booking?: boolean;

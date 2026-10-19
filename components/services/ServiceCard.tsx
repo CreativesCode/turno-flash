@@ -41,6 +41,11 @@ export function ServiceCard({
       : null,
     service.available_for_online_booking ? "Reserva online" : null,
     service.requires_approval ? "Requiere aprobación" : null,
+    service.deposit_type === "percent"
+      ? `Anticipo ${service.deposit_value}%`
+      : service.deposit_type === "fixed"
+        ? `Anticipo ${fmtMoney(service.deposit_value, undefined, service.currency ?? undefined)}`
+        : null,
     isActive ? null : "Pausado",
   ].filter(Boolean);
 

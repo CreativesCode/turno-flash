@@ -46,6 +46,8 @@ const EMPTY_FORM: ServiceFormData = {
   color: "#3b82f6",
   is_active: true,
   requires_approval: false,
+  deposit_type: null,
+  deposit_value: null,
   max_advance_booking_days: 60,
   min_advance_booking_hours: 2,
   available_for_online_booking: true,
@@ -147,6 +149,11 @@ function ServicesContent() {
       color: service.color ?? "#3b82f6",
       is_active: service.is_active ?? true,
       requires_approval: service.requires_approval ?? false,
+      deposit_type:
+        service.deposit_type === "fixed" || service.deposit_type === "percent"
+          ? service.deposit_type
+          : null,
+      deposit_value: service.deposit_value ?? null,
       max_advance_booking_days: service.max_advance_booking_days ?? 60,
       min_advance_booking_hours: service.min_advance_booking_hours ?? 2,
       available_for_online_booking: service.available_for_online_booking ?? true,

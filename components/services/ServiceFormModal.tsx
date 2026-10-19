@@ -12,12 +12,14 @@ import {
   SERVICE_BADGES,
   isServiceBadge,
 } from "@/config/service-badges";
+import { useMoney } from "@/hooks/useMoney";
 import { SERVICE_DESCRIPTION_MAX } from "@/schemas/service.schema";
 import type {
   Service,
   ServiceCategory,
   ServiceFormData,
 } from "@/types/appointments";
+import { serviceDepositAmount } from "@/utils/deposit";
 import { Copy } from "lucide-react";
 import { FormEvent } from "react";
 
@@ -209,7 +211,28 @@ export function ServiceFormModal({
               Requiere aprobación manual
             </span>
           </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={!!formData.deposit_type}
+              onChange={(e) =>
+                onChange(
+                  e.target.checked
+                    ? { deposit_type: "percent", deposit_value: null }
+                    : { deposit_type: null, deposit_value: null }
+                )
+              }
+              className="h-4 w-4 rounded border-border text-info focus:ring-info-500"
+            />
+            <span className="text-sm text-foreground">
+              Pedir anticipo para reservar
+            </span>
+          </label>
         </div>
+
+        {formData.deposit_type && (
+          <DepositFields formData={formData} onChange={onChange} />
+        )}
 
         {editing && (
           <button
@@ -248,5 +271,69 @@ export function ServiceFormModal({
         </div>
       </form>
     </Sheet>
+  );
+}
+
+/**
+ * How much the deposit is. The appointment waits as pending until the owner
+ * marks the deposit as received (migration 090).
+ */
+function DepositFields({
+  formData,
+  onChange,
+}: {
+  formData: ServiceFormData;
+  onChange: (patch: Partial<ServiceFormData>) => void;
+}) {
+  const { format: money } = useMoney();
+  const percent = formData.deposit_type === "percent";
+  const amount = serviceDepositAmount(formData);
+
+  return (
+    <div className="flex flex-col gap-3 rounded-card border border-border bg-surface-2 p-3">
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Tipo de anticipo">
+          <Select
+            value={formData.deposit_type ?? "percent"}
+            onChange={(e) =>
+              onChange({
+                deposit_type: e.target.value === "fixed" ? "fixed" : "percent",
+                deposit_value: null,
+              })
+            }
+          >
+            <option value="percent">Porcentaje del precio</option>
+            <option value="fixed">Importe fijo</option>
+          </Select>
+        </Field>
+        <Field label={percent ? "Porcentaje (%)" : "Importe"}>
+          <input
+            type="number"
+            required
+            min={percent ? 1 : 0.01}
+            max={percent ? 100 : (formData.price ?? undefined)}
+            step={percent ? 1 : 0.01}
+            value={formData.deposit_value ?? ""}
+            onChange={(e) =>
+              onChange({
+                deposit_value: e.target.value
+                  ? parseFloat(e.target.value)
+                  : null,
+              })
+            }
+            className={inputClasses}
+            placeholder={percent ? "30" : "0"}
+          />
+        </Field>
+      </div>
+      <p className="text-meta text-foreground-muted">
+        {amount
+          ? `El cliente paga ${money(amount)} de anticipo al reservar.`
+          : percent && !formData.price
+            ? "Pon un precio al servicio para calcular el porcentaje."
+            : "Indica cuánto es el anticipo."}{" "}
+        El turno queda pendiente hasta que marques el anticipo como recibido.
+      </p>
+    </div>
   );
 }
