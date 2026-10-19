@@ -1,6 +1,6 @@
 # PRP-006: Anticipos en turnos (TUR0003)
 
-> **Estado**: APROBADO (Claudia, 2026-10-19) — EN PROGRESO
+> **Estado**: COMPLETADO (2026-10-19) — falta la prueba con un WhatsApp real
 > **Fecha**: 2026-10-19
 > **Proyecto**: Turno Flash
 > **Tarea**: TUR0003 «Implementar cobro de anticipos en turnos» (estimación 3-5 días)
@@ -52,18 +52,18 @@ cubanos conocen (transferencia + aviso por WhatsApp, sin pasarela de pago).
 - Reportes de ingresos por anticipos: **fuera** de esta tarea.
 
 ### Criterios de Éxito
-- [ ] En Servicios, el dueño activa el anticipo en un servicio como fijo o porcentaje (validado con Zod: fijo ≤ precio, porcentaje 1-100).
-- [ ] Al reservar ese servicio (web o panel) el turno nace *pendiente* con el importe calculado y el anticipo *pendiente*.
-- [ ] El cliente recibe por WhatsApp importe e instrucciones y el anticipo pasa a *solicitado*.
-- [ ] El cliente responde «ya pagué» o manda una foto → *pagado* y aviso al negocio.
-- [ ] El dueño verifica → *verificado*, con quién y cuándo; el turno pasa a *confirmado* y el cliente recibe la confirmación.
-- [ ] Ningún recordatorio sale para un turno con el anticipo sin verificar.
-- [ ] Cancelar un turno con anticipo sin cobrar → *cancelado*; con anticipo cobrado, el dueño puede marcar *devuelto*.
-- [ ] El dueño puede perdonar el anticipo de un turno concreto.
-- [ ] `/book` muestra el importe del anticipo del servicio antes de confirmar la reserva.
-- [ ] Un servicio sin anticipo funciona exactamente igual que hoy (web, panel, WhatsApp).
-- [ ] El empleado ve el estado del anticipo; verificar/devolver/perdonar es de dueño y admin.
-- [ ] Manual de usuario actualizado (texto y foto).
+- [x] En Servicios, el dueño activa el anticipo en un servicio como fijo o porcentaje (validado con Zod: fijo ≤ precio, porcentaje 1-100).
+- [x] Al reservar ese servicio (web o panel) el turno nace *pendiente* con el importe calculado y el anticipo *pendiente*.
+- [x] El cliente recibe por WhatsApp importe e instrucciones y el anticipo pasa a *solicitado*.
+- [x] El cliente responde «ya pagué» o manda una foto → *pagado* y aviso al negocio. *(Código y mensajes probados por partes; la prueba con un WhatsApp real queda pendiente: `wa-inbound` exige la firma del webhook.)*
+- [x] El dueño verifica → *verificado*, con quién y cuándo; el turno pasa a *confirmado* y el cliente recibe la confirmación.
+- [x] Ningún recordatorio sale para un turno con el anticipo sin verificar.
+- [x] Cancelar un turno con anticipo sin cobrar → *cancelado*; con anticipo cobrado, el dueño puede marcar *devuelto*.
+- [x] El dueño puede perdonar el anticipo de un turno concreto.
+- [x] `/book` muestra el importe del anticipo del servicio antes de confirmar la reserva.
+- [x] Un servicio sin anticipo funciona exactamente igual que hoy (web, panel, WhatsApp).
+- [x] El empleado ve el estado del anticipo; verificar/devolver/perdonar es de dueño y admin.
+- [x] Manual de usuario actualizado (texto y foto).
 
 ---
 
@@ -128,12 +128,27 @@ confirma al pagar el anticipo» y las instrucciones.
 
 ### Fase 6: Validación final y documentación
 **Validación**:
-- [ ] `npx tsc --noEmit` y `npx eslint` de lo tocado pasan
-- [ ] `npm run build:next` exitoso
-- [ ] Criterios de éxito cumplidos
-- [ ] Manual (texto y foto) y memoria al día; despliegue registrado en Tasknic
+- [x] `npx tsc --noEmit` y `npx eslint` de lo tocado pasan
+- [x] `npm run build:next` exitoso
+- [x] Criterios de éxito cumplidos
+- [x] Manual (texto y foto) y memoria al día; despliegue registrado en Tasknic
 
 ---
+
+## Cómo quedó
+
+- **Base de datos:** 090 (columnas, `service_deposit_amount`, triggers `compute_appointment_deposit` y
+  `guard_appointment_deposit`, RPC `set_appointment_deposit(id, 'verify'|'waive'|'refund')`, reserva pública con el
+  anticipo), 091 (`appointments_with_details` con las columnas del anticipo), 092 (intents de WhatsApp y el guard
+  reconoce a las edge por su rol de base de datos).
+- **App:** Servicios (anticipo fijo o %), ficha del turno (`DepositPanel`), alta desde el panel (`DepositChoice`),
+  «Falta anticipo» en la lista, `/book` (importe antes de reservar, «Reserva recibida» con instrucciones) y Ajustes
+  (tarjeta «Cómo se paga el anticipo» para negocios de solo turnos).
+- **Edge:** `public-booking` v7, `wa-send` v36, `wa-inbound` v49.
+- **Manual:** «Pedir un anticipo» en Servicios + 7 secciones tocadas; foto nueva `deposit.webp`.
+- **Límites conocidos:** el anticipo pasa a *solicitado* solo si OpenWA responde OK (con sus 500 que igual entregan,
+  puede quedarse en *pendiente*; no cambia nada para el cliente). `wa-trip-send` conserva su propia copia de
+  `money()`; la de `_shared/wa-message.ts` es la nueva.
 
 ## Aprendizajes
 
@@ -142,6 +157,19 @@ confirma al pagar el anticipo» y las instrucciones.
   sin definir es NULL, así que `v_allowed` era NULL y `IF NOT v_allowed AND …` nunca se cumplía.
 - **Fix**: `COALESCE(current_setting(...) = 'on', false)` (y lo mismo con `auth.role()` y `auth_user_role() IN (…)`).
 - **Aplicar en**: cualquier trigger o RPC que decida permisos con settings, claims o roles que pueden faltar.
+
+### 2026-10-19: `appointments_with_details` tiene las columnas congeladas
+- **Error**: el panel lee los turnos de esa vista y no traía las columnas nuevas de `appointments` (la vista se creó
+  con `a.*`, que Postgres expande al crearla).
+- **Fix**: 091, `CREATE OR REPLACE VIEW` con las columnas nuevas **al final** (así se puede reemplazar sin perder
+  los permisos) y `security_invoker = true`. Mapearlas también en `utils/normalized-state.ts`.
+- **Aplicar en**: cualquier columna nueva de `appointments` que el panel o `wa-send` necesiten.
+
+### 2026-10-19: un campo de Ajustes que solo existía para pasajes
+- **Error**: las instrucciones del anticipo vivían en la tarjeta de pasajes y solo se guardaban con `modules.trips`;
+  un negocio de solo turnos no podía escribirlas.
+- **Fix**: `DepositInstructionsCard` para negocios sin pasajes y `deposit_instructions` siempre en el guardado.
+- **Aplicar en**: antes de reutilizar un ajuste de un módulo en otro, comprobar dónde se muestra y cuándo se guarda.
 
 ### 2026-10-19: la RPC de reserva pública no se ensaya como `anon`
 - `create_public_booking_once` no tiene EXECUTE para `anon`: la llama la edge `public-booking` con la clave de

@@ -194,3 +194,9 @@ ids, así que un `@lid` nuevo no se puede traducir. Solución propia que funcion
 consultan `org_license_usable` y salen con `license_blocked` (en `wa-inbound` queda en `wa_processed_events.result`
 como `skip: license_blocked`), igual que `daily-summary` y `wa-campaign`. `license-notices` **no** se corta: es
 el aviso al dueño de cómo pagar. Ver [[license-enforcement]].
+
+**Anticipos de turnos (2026-10-19, TUR0003):** `wa-send` v36 y `wa-inbound` v49; intents `deposit_paid_ack` y
+`notify_business_deposit_paid` (092). Al añadir un intent, **siempre** el `ALTER TYPE wa_outbound_intent ADD VALUE`
+antes de publicar la función (lección de la 081). Pie del mensaje con anticipo: modo `deposit` de
+`frameCustomerMessage`. Ver [[anticipos-turnos]].
+

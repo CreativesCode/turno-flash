@@ -64,3 +64,8 @@ Ojo al sembrar pasajes: los puntos de recogida tienen su propio precio (por defe
   `calendar-hours.webp`, sacada con **puppeteer-core + Chrome local** (390x700 @2x, `prefers-color-scheme: light` emulado,
   `nextjs-portal` oculto por CSS) y reducida a 520 px con sharp; el MCP de Playwright va a DPR 1 y en oscuro, no sirve
   para fotos. Ver [[horario-calendario]].
+- **2026-10-19 (TUR0003):** h3 «Pedir un anticipo» en Servicios y anticipo en Crear un turno, estados, reserva online,
+  WhatsApp (envíos y respuestas), límites y guía del personal; 20.ª foto `deposit.webp` (ficha de un turno con el
+  anticipo pendiente), con puppeteer-core + sharp instalados en el scratchpad y un negocio desechable renombrado
+  «Estudio Luz» para la foto (borrado al terminar).
+
