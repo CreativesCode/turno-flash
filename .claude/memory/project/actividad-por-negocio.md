@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-TUR0006 (pedido de Roberto) **implementado 2026-10-19**, migración **089** en producción. **Roberto lo subió y lo dio por bueno el 2026-10-19** (`eac99ce`); TUR0006 en Hecho y despliegue registrado en Tasknic (web sin verificar en Vercel, migración verificada).
+TUR0006 (pedido de Roberto) **implementado 2026-10-19**, migración **089** en producción. **Roberto lo subió y lo dio por bueno el 2026-10-19** (`eac99ce`); TUR0006 en Hecho y despliegue registrado en Tasknic (web publicada en Vercel y **comprobada en producción por Roberto el 2026-10-19**; migración verificada).
 
 - **Ficha de la organización** (solo admin): tarjeta «Actividad» con 30 días / 90 días / Siempre
   (`components/organizations/OrgActivityCard.tsx`). Turnos por estado, online vs panel, ingresos,
