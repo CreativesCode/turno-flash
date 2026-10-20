@@ -195,3 +195,4 @@ Los fiables por ser recientes: `PLAN-DASHBOARDS-Y-MEJORAS.md`, `PLAN-GOOGLE-PLAY
   Ya no existen los 6 negocios con la licencia vencida hace >100 días: en producción quedan 7 organizaciones
   (Organización test, Barbería Demo, Espiral Studio, Dulceria y 3 `QA *`), todas usables.
   Lo de arriba que seguía como «falta push» ya está subido.
+- **2026-10-20:** 6 avisos de error de la «Organización test» (Turnos, Chrome) eran cargas canceladas (`AbortError`), no fallos: `Logger` ya no las registra ni avisa (ver [[convenciones-de-codigo]]). Filas marcadas como resueltas en `error_logs`; arreglo subido a `main`.

@@ -145,3 +145,5 @@ Relacionado: [[arquitectura-static-export]], [[rediseno-ui-migracion]].
   equipo, en `TeamService.listStaff()` con la query key `["team", orgId]` (compartida por TeamCard y Profesionales).
 - **Lint:** quedan errores previos en `theme-context` (setState en efecto), `appointments.service` (3 `any`) y el
   aviso de `roleLabel` sin uso en `dashboard/page.tsx`. No son de este trabajo; no «arreglarlos» de paso.
+
+- **Cargas canceladas no son errores (2026-10-20):** `Logger.error` descarta los `AbortError` (también dentro del `cause`). Si un servicio registra el error y lanza otro propio, lo lanza con `{ cause: error }` para que el `catch` exterior sepa que fue una cancelación. Origen: 6 avisos falsos de la «Organización test» el 20 oct.
