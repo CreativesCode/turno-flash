@@ -333,7 +333,7 @@ export class ServiceService {
 
       if (error) {
         void Logger.error("Error fetching paginated services:", error);
-        throw new Error("Error al cargar los servicios");
+        throw new Error("Error al cargar los servicios", { cause: error });
       }
 
       return data || [];

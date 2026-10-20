@@ -339,7 +339,7 @@ export class StaffService {
 
       if (error) {
         void Logger.error("Error fetching paginated staff members:", error);
-        throw new Error("Error al cargar los miembros del staff");
+        throw new Error("Error al cargar los miembros del staff", { cause: error });
       }
 
       return data || [];

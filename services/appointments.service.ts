@@ -704,7 +704,7 @@ export class AppointmentService {
 
       if (error) {
         void Logger.error("Error fetching paginated appointments:", error);
-        throw new Error("Error al cargar los turnos");
+        throw new Error("Error al cargar los turnos", { cause: error });
       }
 
       return (data || []).map((apt: any) =>

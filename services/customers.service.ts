@@ -411,7 +411,7 @@ export class CustomerService {
 
       if (error) {
         void Logger.error("Error fetching paginated customers:", error);
-        throw new Error("Error al cargar los clientes");
+        throw new Error("Error al cargar los clientes", { cause: error });
       }
 
       return data || [];
@@ -459,7 +459,7 @@ export class CustomerService {
 
       if (error) {
         void Logger.error("Error fetching paginated customers:", error);
-        throw new Error("Error al cargar los clientes");
+        throw new Error("Error al cargar los clientes", { cause: error });
       }
 
       return data || [];

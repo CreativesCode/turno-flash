@@ -16,6 +16,17 @@ import { createClient } from "@/utils/supabase/client";
 const DEDUP_MS = 60_000;
 const lastLogged = new Map<string, number>();
 
+// A cancelled request (page reloaded or left, connection cut) is not a bug.
+// Walks `cause` so a service's rethrown wrapper is recognised too.
+function isAbort(error: unknown): boolean {
+  for (let e = error; e && typeof e === "object"; e = (e as Error).cause) {
+    const { name, message } = e as { name?: unknown; message?: unknown };
+    if (name === "AbortError") return true;
+    if (typeof message === "string" && message.startsWith("AbortError")) return true;
+  }
+  return false;
+}
+
 export class Logger {
   /**
    * Registra un error en `error_logs`. Fire-and-forget: nunca lanza.
@@ -38,6 +49,7 @@ export class Logger {
 
     // Offline the insert can't arrive, and usually the error is the network
     if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    if (isAbort(error)) return;
     const now = Date.now();
     if (now - (lastLogged.get(message) ?? 0) < DEDUP_MS) return;
     lastLogged.set(message, now);
