@@ -80,6 +80,8 @@ type Intent =
 interface DepositInfo {
   amount: string;
   instructions: string | null;
+  /** "22 de octubre, 10:00" in the business time zone; null = no deadline (093). */
+  dueAt: string | null;
 }
 
 interface AppointmentRow {
@@ -99,6 +101,9 @@ interface AppointmentRow {
   organization_timezone: string;
   deposit_amount: number | null;
   deposit_status: string | null;
+  deposit_due_at: string | null;
+  payment_terms: string | null;
+  timezone: string | null;
 }
 
 const corsHeaders = {
@@ -308,6 +313,15 @@ Deno.serve(async (req) => {
       deposit = {
         amount: money(Number(appt.deposit_amount), orgCurrency?.currency ?? "USD"),
         instructions: settings.deposit_instructions?.trim() || null,
+        dueAt: appt.deposit_due_at
+          ? new Date(appt.deposit_due_at).toLocaleString("es", {
+              day: "numeric",
+              month: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: appt.timezone || appt.organization_timezone || "America/Havana",
+            })
+          : null,
       };
     }
     const body = buildMessage(appt, intent, waitlistCustomerName, openList, deposit);
@@ -598,8 +612,11 @@ function buildMessage(
           `💇 ${servicio}${staff}`,
           `🎫 N° ${numero}`,
           ``,
-          `💵 Para confirmarla falta el anticipo de *${deposit.amount}*.`,
+          deposit.dueAt
+            ? `💵 Para confirmarla falta el anticipo de *${deposit.amount}*, antes del *${deposit.dueAt}*.`
+            : `💵 Para confirmarla falta el anticipo de *${deposit.amount}*.`,
           ...(deposit.instructions ? [deposit.instructions] : []),
+          ...(appt.payment_terms ? [``, `📋 *Condiciones:* ${appt.payment_terms}`] : []),
           ``,
           `Cuando pagues, responde *PAGUÉ ${numero}* o manda la foto del comprobante.`,
           `❌ Si ya no puedes ir, responde *CANCELAR ${numero}*.`,

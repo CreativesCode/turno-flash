@@ -189,6 +189,8 @@ Deno.serve(async (req) => {
       appointment_number?: string;
       deposit_amount?: number | null;
       deposit_instructions?: string | null;
+      deposit_due_at?: string | null;
+      payment_terms?: string | null;
       staff_id?: string;
       date?: string;
       start_time?: string;
@@ -212,6 +214,8 @@ Deno.serve(async (req) => {
       appointment_number: result.appointment_number,
       deposit_amount: result.deposit_amount ?? null,
       deposit_instructions: result.deposit_instructions ?? null,
+      deposit_due_at: result.deposit_due_at ?? null,
+      payment_terms: result.payment_terms ?? null,
       staff_id: result.staff_id,
       date: result.date,
       start_time: String(result.start_time).slice(0, 5),

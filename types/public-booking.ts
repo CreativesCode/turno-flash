@@ -15,6 +15,10 @@ export interface PublicService {
   requires_approval: boolean;
   /** Deposit asked to book it (migration 090); null = none. */
   deposit_amount: number | null;
+  /** The deposit is due this many hours before the appointment (093). */
+  deposit_due_hours: number | null;
+  /** What the price includes, cancellation and refunds (093). */
+  payment_terms: string | null;
   max_advance_booking_days: number;
   staff_ids: string[];
 }
@@ -88,6 +92,9 @@ export interface PublicBookingConfirmation {
   deposit_amount?: number | null;
   /** How to pay it, as the business wrote it in Ajustes (WhatsApp format). */
   deposit_instructions?: string | null;
+  /** ISO: last moment to pay the deposit (093). */
+  deposit_due_at?: string | null;
+  payment_terms?: string | null;
   staff_id?: string;
   date?: string;
   start_time?: string;

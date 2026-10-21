@@ -373,7 +373,18 @@ export function BookingFlow({
             {fmtMoney(service.deposit_amount, undefined, service.currency ?? undefined)}
           </strong>
           . Tu turno queda reservado cuando lo reciba; te diremos cómo pagarlo.
+          {service.deposit_due_hours != null &&
+            ` Hay que pagarlo hasta ${service.deposit_due_hours} h antes del turno.`}
         </p>
+      )}
+
+      {view === "details" && service?.payment_terms && (
+        <div className="mb-3 rounded-xl border border-border px-3.5 py-3 text-sm">
+          <p className="font-semibold text-foreground">Condiciones</p>
+          <p className="mt-1 whitespace-pre-line text-foreground-muted">
+            {service.payment_terms}
+          </p>
+        </div>
       )}
 
       {view === "details" && (
@@ -420,8 +431,29 @@ export function BookingFlow({
                   {info.organization.name} te dirá cómo pagarlo.
                 </p>
               )}
+              {confirmation.deposit_due_at && (
+                <p className="mt-2 font-semibold text-foreground">
+                  Págalo antes del{" "}
+                  {new Date(confirmation.deposit_due_at).toLocaleString("es", {
+                    day: "numeric",
+                    month: "long",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    timeZone: info.organization.timezone,
+                  })}
+                  .
+                </p>
+              )}
               <p className="mt-2 text-xs text-foreground-subtle">
                 Cuando pagues, avísale respondiendo al WhatsApp de tu reserva.
+              </p>
+            </div>
+          )}
+          {(confirmation.payment_terms ?? service.payment_terms) && (
+            <div className="mt-4 rounded-xl border border-border p-4 text-left text-sm">
+              <p className="font-semibold text-foreground">Condiciones</p>
+              <p className="mt-1 whitespace-pre-line text-foreground-muted">
+                {confirmation.payment_terms ?? service.payment_terms}
               </p>
             </div>
           )}
