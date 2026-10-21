@@ -3,6 +3,7 @@
 import { ListRow, StatusBadge, TimeBlock } from "@/components/ui";
 import type { AppointmentWithDetails } from "@/types/appointments";
 import { depositOpen, depositOverdue } from "@/utils/deposit";
+import { PAYMENT_STATUS_LABEL } from "@/utils/payment";
 import { fmtDuration } from "@/utils/format";
 
 interface ApptRowProps {
@@ -60,6 +61,10 @@ export function ApptRow({ appointment: a, onOpen, serviceColor }: ApptRowProps) 
           ? depositOverdue(a.deposit_status, a.deposit_due_at)
             ? "Anticipo vencido"
             : "Falta anticipo"
+          : null,
+        // Only once something was paid: "Sin pagar" on every row is noise
+        status !== "cancelled" && a.payment_status && a.payment_status !== "unpaid"
+          ? PAYMENT_STATUS_LABEL[a.payment_status]
           : null,
       ]
         .filter(Boolean)

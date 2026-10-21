@@ -2,6 +2,7 @@
 
 import { TermsSheet } from "@/components/appointments/AppointmentTerms";
 import type { DepositAction } from "@/utils/deposit";
+import { PAYMENT_STATUS_LABEL } from "@/utils/payment";
 import { ApptRow } from "@/components/appointments/ApptRow";
 import {
   AppointmentCreateModal,
@@ -373,6 +374,9 @@ function AppointmentsContent() {
         "Estado",
         "Precio",
         "Pagado",
+        "Importe pagado",
+        "Pendiente",
+        "Estado del pago",
         "Origen",
         "N°",
       ],
@@ -386,6 +390,9 @@ function AppointmentsContent() {
         a.status,
         a.price_charged ?? a.service_price ?? "",
         a.was_paid ? "Sí" : "No",
+        a.amount_paid ?? 0,
+        a.amount_pending ?? "",
+        PAYMENT_STATUS_LABEL[a.payment_status ?? "unpaid"],
         a.source ?? "",
         a.appointment_number ?? "",
       ])
