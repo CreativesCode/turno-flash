@@ -4,6 +4,9 @@ import { z } from "zod";
 /** Long enough for a full package or price list, one item per line. */
 export const SERVICE_DESCRIPTION_MAX = 1000;
 
+/** Conditions of a service (migration 093). */
+export const SERVICE_TERMS_MAX = 1000;
+
 /**
  * Service Form Data Schema (without the cross-field rules, so it can be made partial)
  */
@@ -85,6 +88,20 @@ const serviceFormBaseSchema = z.object({
   deposit_value: z
     .number()
     .positive({ message: "El anticipo debe ser mayor que 0" })
+    .nullable()
+    .optional(),
+  deposit_due_hours: z
+    .number()
+    .int({ message: "Las horas deben ser un número entero" })
+    .min(1, { message: "Mínimo 1 hora antes del turno" })
+    .max(720, { message: "Máximo 720 horas (30 días) antes del turno" })
+    .nullable()
+    .optional(),
+  payment_terms: z
+    .string()
+    .max(SERVICE_TERMS_MAX, {
+      message: `Las condiciones no pueden superar los ${SERVICE_TERMS_MAX} caracteres`,
+    })
     .nullable()
     .optional(),
   max_advance_booking_days: z

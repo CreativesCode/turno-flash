@@ -13,7 +13,10 @@ import {
   isServiceBadge,
 } from "@/config/service-badges";
 import { useMoney } from "@/hooks/useMoney";
-import { SERVICE_DESCRIPTION_MAX } from "@/schemas/service.schema";
+import {
+  SERVICE_DESCRIPTION_MAX,
+  SERVICE_TERMS_MAX,
+} from "@/schemas/service.schema";
 import type {
   Service,
   ServiceCategory,
@@ -219,7 +222,7 @@ export function ServiceFormModal({
                 onChange(
                   e.target.checked
                     ? { deposit_type: "percent", deposit_value: null }
-                    : { deposit_type: null, deposit_value: null }
+                    : { deposit_type: null, deposit_value: null, deposit_due_hours: null }
                 )
               }
               className="h-4 w-4 rounded border-border text-info focus:ring-info-500"
@@ -233,6 +236,20 @@ export function ServiceFormModal({
         {formData.deposit_type && (
           <DepositFields formData={formData} onChange={onChange} />
         )}
+
+        <Field
+          label="Condiciones (opcional)"
+          hint={`Qué incluye y qué no el precio, cancelación y devolución. Lo ve el cliente al reservar. ${(formData.payment_terms ?? "").length}/${SERVICE_TERMS_MAX}`}
+        >
+          <textarea
+            rows={3}
+            maxLength={SERVICE_TERMS_MAX}
+            value={formData.payment_terms ?? ""}
+            onChange={(e) => onChange({ payment_terms: e.target.value || null })}
+            className={inputClasses}
+            placeholder={"Ej:\nNo incluye el álbum impreso.\nSi cancelas con 48 h de antelación, te devolvemos el anticipo."}
+          />
+        </Field>
 
         {editing && (
           <button
@@ -326,6 +343,27 @@ function DepositFields({
           />
         </Field>
       </div>
+      <Field
+        label="Plazo para pagarlo (opcional)"
+        hint="Horas antes del turno. Si pasa sin pagar, el turno se marca «Anticipo vencido»."
+      >
+        <input
+          type="number"
+          min={1}
+          max={720}
+          step={1}
+          value={formData.deposit_due_hours ?? ""}
+          onChange={(e) =>
+            onChange({
+              deposit_due_hours: e.target.value
+                ? parseInt(e.target.value, 10)
+                : null,
+            })
+          }
+          className={inputClasses}
+          placeholder="Ej: 24"
+        />
+      </Field>
       <p className="text-meta text-foreground-muted">
         {amount
           ? `El cliente paga ${money(amount)} de anticipo al reservar.`

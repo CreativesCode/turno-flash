@@ -48,6 +48,8 @@ const EMPTY_FORM: ServiceFormData = {
   requires_approval: false,
   deposit_type: null,
   deposit_value: null,
+  deposit_due_hours: null,
+  payment_terms: null,
   max_advance_booking_days: 60,
   min_advance_booking_hours: 2,
   available_for_online_booking: true,
@@ -154,6 +156,8 @@ function ServicesContent() {
           ? service.deposit_type
           : null,
       deposit_value: service.deposit_value ?? null,
+      deposit_due_hours: service.deposit_due_hours ?? null,
+      payment_terms: service.payment_terms ?? null,
       max_advance_booking_days: service.max_advance_booking_days ?? 60,
       min_advance_booking_hours: service.min_advance_booking_hours ?? 2,
       available_for_online_booking: service.available_for_online_booking ?? true,

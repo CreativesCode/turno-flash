@@ -45,6 +45,10 @@ export interface ServiceFormData {
   /** Deposit asked to book it: an amount or a percentage of the price. */
   deposit_type?: "fixed" | "percent" | null;
   deposit_value?: number | null;
+  /** The deposit is due this many hours before the appointment; null = no deadline. */
+  deposit_due_hours?: number | null;
+  /** What the price includes, cancellation and refunds (shown when booking). */
+  payment_terms?: string | null;
   max_advance_booking_days?: number;
   min_advance_booking_hours?: number;
   available_for_online_booking?: boolean;
