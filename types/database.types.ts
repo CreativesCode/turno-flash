@@ -60,6 +60,92 @@ export type Database = {
         }
         Relationships: []
       }
+      appointment_payments: {
+        Row: {
+          amount: number
+          appointment_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_deposit: boolean
+          method: Database["public"]["Enums"]["appointment_payment_method"]
+          method_other: string | null
+          notes: string | null
+          organization_id: string
+          paid_at: string
+          receipt_path: string | null
+          reference: string | null
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          amount: number
+          appointment_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_deposit?: boolean
+          method: Database["public"]["Enums"]["appointment_payment_method"]
+          method_other?: string | null
+          notes?: string | null
+          organization_id: string
+          paid_at?: string
+          receipt_path?: string | null
+          reference?: string | null
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_deposit?: boolean
+          method?: Database["public"]["Enums"]["appointment_payment_method"]
+          method_other?: string | null
+          notes?: string | null
+          organization_id?: string
+          paid_at?: string
+          receipt_path?: string | null
+          reference?: string | null
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_payments_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_payments_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments_with_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_with_license_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_requests: {
         Row: {
           alternative_dates: Json | null
@@ -2117,6 +2203,8 @@ export type Database = {
         Row: {
           actual_end_time: string | null
           actual_start_time: string | null
+          amount_paid: number | null
+          amount_pending: number | null
           appointment_date: string | null
           appointment_number: string | null
           cancellation_reason: string | null
@@ -2151,6 +2239,7 @@ export type Database = {
           organization_name: string | null
           organization_timezone: string | null
           payment_method: string | null
+          payment_status: string | null
           payment_terms: string | null
           price_charged: number | null
           rating: number | null
@@ -2273,6 +2362,10 @@ export type Database = {
           p_store: string
         }
         Returns: Json
+      }
+      appointment_amount_paid: {
+        Args: { p_appointment_id: string }
+        Returns: number
       }
       auth_org_usable: { Args: never; Returns: boolean }
       auth_user_org_id: { Args: never; Returns: string }
@@ -2516,6 +2609,24 @@ export type Database = {
         }
         Returns: Json
       }
+      refresh_appointment_was_paid: {
+        Args: { p_appointment_id: string }
+        Returns: undefined
+      }
+      register_appointment_payment: {
+        Args: {
+          p_amount: number
+          p_appointment_id: string
+          p_is_deposit: boolean
+          p_method: Database["public"]["Enums"]["appointment_payment_method"]
+          p_method_other: string
+          p_notes: string
+          p_paid_at: string
+          p_receipt_path: string
+          p_reference: string
+        }
+        Returns: string
+      }
       release_expired_trip_holds: { Args: never; Returns: number }
       renumber_appointments_for_prefix: {
         Args: { org_id: string }
@@ -2600,6 +2711,10 @@ export type Database = {
         }[]
       }
       trip_seats_taken: { Args: { p_trip_id: string }; Returns: number }
+      void_appointment_payment: {
+        Args: { p_payment_id: string; p_reason: string }
+        Returns: undefined
+      }
       wa_appointments_in_window: {
         Args: { p_end: string; p_start: string }
         Returns: {
@@ -2620,6 +2735,7 @@ export type Database = {
         | "verified"
         | "cancelled"
         | "refunded"
+      appointment_payment_method: "cash" | "transfer" | "card" | "other"
       appointment_source: "web" | "whatsapp" | "phone" | "walk_in" | "admin"
       appointment_status:
         | "pending"
@@ -2827,6 +2943,7 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
+      appointment_payment_method: ["cash", "transfer", "card", "other"],
       appointment_source: ["web", "whatsapp", "phone", "walk_in", "admin"],
       appointment_status: [
         "pending",
