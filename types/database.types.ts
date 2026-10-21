@@ -185,9 +185,12 @@ export type Database = {
           created_by: string | null
           customer_id: string
           deposit_amount: number | null
+          deposit_due_at: string | null
           deposit_status:
             | Database["public"]["Enums"]["appointment_deposit_status"]
             | null
+          deposit_type: string | null
+          deposit_value: number | null
           deposit_verified_at: string | null
           deposit_verified_by: string | null
           deposit_waived: boolean
@@ -198,6 +201,7 @@ export type Database = {
           notes: string | null
           organization_id: string
           payment_method: string | null
+          payment_terms: string | null
           price_charged: number | null
           rating: number | null
           reminder_method: Database["public"]["Enums"]["reminder_method"] | null
@@ -208,6 +212,8 @@ export type Database = {
           staff_id: string | null
           start_time: string
           status: Database["public"]["Enums"]["appointment_status"] | null
+          terms_updated_at: string | null
+          terms_updated_by: string | null
           timezone: string | null
           updated_at: string | null
           was_paid: boolean | null
@@ -227,9 +233,12 @@ export type Database = {
           created_by?: string | null
           customer_id: string
           deposit_amount?: number | null
+          deposit_due_at?: string | null
           deposit_status?:
             | Database["public"]["Enums"]["appointment_deposit_status"]
             | null
+          deposit_type?: string | null
+          deposit_value?: number | null
           deposit_verified_at?: string | null
           deposit_verified_by?: string | null
           deposit_waived?: boolean
@@ -240,6 +249,7 @@ export type Database = {
           notes?: string | null
           organization_id: string
           payment_method?: string | null
+          payment_terms?: string | null
           price_charged?: number | null
           rating?: number | null
           reminder_method?:
@@ -252,6 +262,8 @@ export type Database = {
           staff_id?: string | null
           start_time: string
           status?: Database["public"]["Enums"]["appointment_status"] | null
+          terms_updated_at?: string | null
+          terms_updated_by?: string | null
           timezone?: string | null
           updated_at?: string | null
           was_paid?: boolean | null
@@ -271,9 +283,12 @@ export type Database = {
           created_by?: string | null
           customer_id?: string
           deposit_amount?: number | null
+          deposit_due_at?: string | null
           deposit_status?:
             | Database["public"]["Enums"]["appointment_deposit_status"]
             | null
+          deposit_type?: string | null
+          deposit_value?: number | null
           deposit_verified_at?: string | null
           deposit_verified_by?: string | null
           deposit_waived?: boolean
@@ -284,6 +299,7 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           payment_method?: string | null
+          payment_terms?: string | null
           price_charged?: number | null
           rating?: number | null
           reminder_method?:
@@ -296,6 +312,8 @@ export type Database = {
           staff_id?: string | null
           start_time?: string
           status?: Database["public"]["Enums"]["appointment_status"] | null
+          terms_updated_at?: string | null
+          terms_updated_by?: string | null
           timezone?: string | null
           updated_at?: string | null
           was_paid?: boolean | null
@@ -1107,6 +1125,7 @@ export type Database = {
           color: string | null
           created_at: string | null
           currency: string | null
+          deposit_due_hours: number | null
           deposit_type: string | null
           deposit_value: number | null
           description: string | null
@@ -1118,6 +1137,7 @@ export type Database = {
           min_advance_booking_hours: number | null
           name: string
           organization_id: string
+          payment_terms: string | null
           price: number | null
           requires_approval: boolean | null
           sort_order: number | null
@@ -1131,6 +1151,7 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           currency?: string | null
+          deposit_due_hours?: number | null
           deposit_type?: string | null
           deposit_value?: number | null
           description?: string | null
@@ -1142,6 +1163,7 @@ export type Database = {
           min_advance_booking_hours?: number | null
           name: string
           organization_id: string
+          payment_terms?: string | null
           price?: number | null
           requires_approval?: boolean | null
           sort_order?: number | null
@@ -1155,6 +1177,7 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           currency?: string | null
+          deposit_due_hours?: number | null
           deposit_type?: string | null
           deposit_value?: number | null
           description?: string | null
@@ -1166,6 +1189,7 @@ export type Database = {
           min_advance_booking_hours?: number | null
           name?: string
           organization_id?: string
+          payment_terms?: string | null
           price?: number | null
           requires_approval?: boolean | null
           sort_order?: number | null
@@ -2108,9 +2132,12 @@ export type Database = {
           customer_last_name: string | null
           customer_phone: string | null
           deposit_amount: number | null
+          deposit_due_at: string | null
           deposit_status:
             | Database["public"]["Enums"]["appointment_deposit_status"]
             | null
+          deposit_type: string | null
+          deposit_value: number | null
           deposit_verified_at: string | null
           deposit_verified_by: string | null
           deposit_waived: boolean | null
@@ -2124,6 +2151,7 @@ export type Database = {
           organization_name: string | null
           organization_timezone: string | null
           payment_method: string | null
+          payment_terms: string | null
           price_charged: number | null
           rating: number | null
           reminder_method: Database["public"]["Enums"]["reminder_method"] | null
@@ -2138,6 +2166,8 @@ export type Database = {
           staff_nickname: string | null
           start_time: string | null
           status: Database["public"]["Enums"]["appointment_status"] | null
+          terms_updated_at: string | null
+          terms_updated_by: string | null
           timezone: string | null
           updated_at: string | null
           was_paid: boolean | null
@@ -2340,6 +2370,14 @@ export type Database = {
         }
         Returns: Json
       }
+      deposit_amount_for: {
+        Args: { p_price: number; p_type: string; p_value: number }
+        Returns: number
+      }
+      deposit_due_from: {
+        Args: { p_date: string; p_hours: number; p_start: string; p_tz: string }
+        Returns: string
+      }
       generate_appointment_number: { Args: { org_id: string }; Returns: string }
       generate_trip_booking_number: {
         Args: { p_org_id: string }
@@ -2535,6 +2573,17 @@ export type Database = {
         Args: { p_action: string; p_appointment_id: string }
         Returns: Database["public"]["Enums"]["appointment_deposit_status"]
       }
+      set_appointment_terms: {
+        Args: {
+          p_appointment_id: string
+          p_deposit_due_at: string
+          p_deposit_type: string
+          p_deposit_value: number
+          p_payment_terms: string
+          p_price: number
+        }
+        Returns: undefined
+      }
       trip_booking_window_open: {
         Args: { p_trip_id: string }
         Returns: boolean
@@ -2631,6 +2680,8 @@ export type Database = {
         | "trip_departure_cancelled"
         | "clarify_which"
         | "rescheduled"
+        | "deposit_paid_ack"
+        | "notify_business_deposit_paid"
       wa_outbound_status: "pending" | "sent" | "delivered" | "read" | "failed"
       waitlist_status:
         | "active"
@@ -2840,6 +2891,8 @@ export const Constants = {
         "trip_departure_cancelled",
         "clarify_which",
         "rescheduled",
+        "deposit_paid_ack",
+        "notify_business_deposit_paid",
       ],
       wa_outbound_status: ["pending", "sent", "delivered", "read", "failed"],
       waitlist_status: ["active", "notified", "booked", "expired", "cancelled"],
