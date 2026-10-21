@@ -22,6 +22,11 @@ export {
   useSetAppointmentTerms,
   useUpdateAppointmentStatus,
 } from "./useAppointments.query";
+export {
+  useAppointmentPayments,
+  useRegisterAppointmentPayment,
+  useVoidAppointmentPayment,
+} from "./useAppointmentPayments.query";
 
 // Customer hooks (React Query powered)
 // Export the wrapper version as default for backward compatibility

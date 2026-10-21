@@ -1131,6 +1131,7 @@ function AppointmentsContent() {
           onAdvance={(to) => updateStatus(selectedAppointment.id, to)}
           onDeposit={handleDeposit}
           isDepositBusy={setDepositMutation.isPending}
+          onAppointmentChange={setSelectedAppointment}
           onEditTerms={() => setShowTerms(true)}
           onEdit={
             canManageAppointments &&

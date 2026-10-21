@@ -19,10 +19,10 @@ import type {
   Service,
   StaffMember,
 } from "@/types/appointments";
+import { AppointmentMoney } from "@/components/appointments/AppointmentPayments";
 import { CustomerPicker } from "@/components/appointments/CustomerPicker";
 import {
   DepositChoice,
-  DepositPanel,
   type DepositChoiceValue,
 } from "@/components/appointments/DepositPanel";
 import {
@@ -499,6 +499,8 @@ export interface AppointmentDetailModalProps {
   /** Opens "Precio y condiciones" (owner or admin). */
   onEditTerms?: () => void;
   isDepositBusy?: boolean;
+  /** The appointment after a payment changed it (totals, deposit, status). */
+  onAppointmentChange?: (fresh: AppointmentWithDetails) => void;
   /** Look up service color (hex) for the dot in the detail grid. */
   serviceColor?: string | null;
   /** Look up staff color (hex) for the dot in the detail grid. */
@@ -517,6 +519,7 @@ export function AppointmentDetailModal({
   onDeposit,
   onEditTerms,
   isDepositBusy = false,
+  onAppointmentChange,
   serviceColor,
   staffColor,
   isProcessing = false,
@@ -634,7 +637,12 @@ export function AppointmentDetailModal({
         </div>
       )}
 
-      <DepositPanel appointment={a} onAction={onDeposit} busy={isDepositBusy} />
+      <AppointmentMoney
+        appointment={a}
+        onDeposit={onDeposit}
+        isDepositBusy={isDepositBusy}
+        onAppointmentChange={onAppointmentChange}
+      />
       <TermsBlock appointment={a} onEdit={onEditTerms} />
 
       {/* Actions */}

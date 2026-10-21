@@ -163,7 +163,18 @@ export interface AppointmentFormData {
   payment_terms?: string | null;
 }
 
-export interface AppointmentWithDetails extends Appointment {
+export type PaymentStatus = "unpaid" | "partial" | "paid";
+
+/** What the payments of an appointment add up to (appointments_with_details, 095). */
+export interface AppointmentPaymentTotals {
+  amount_paid: number;
+  amount_pending: number;
+  payment_status: PaymentStatus;
+}
+
+export interface AppointmentWithDetails
+  extends Appointment,
+    Partial<AppointmentPaymentTotals> {
   customer_first_name: string;
   customer_last_name: string;
   customer_phone: string;

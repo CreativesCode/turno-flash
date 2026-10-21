@@ -21,6 +21,7 @@
 
 import {
   Appointment,
+  AppointmentPaymentTotals,
   AppointmentWithDetails,
   Customer,
   Service,
@@ -31,8 +32,11 @@ import {
  * Normalized state structure
  * Entities are stored in maps keyed by their IDs for O(1) lookup
  */
+/** The appointment row plus the payment totals of the view (095). */
+type StoredAppointment = Appointment & Partial<AppointmentPaymentTotals>;
+
 export interface NormalizedState {
-  appointments: Record<string, Appointment>;
+  appointments: Record<string, StoredAppointment>;
   customers: Record<string, Customer>;
   services: Record<string, Service>;
   staff: Record<string, StaffMember>;
@@ -61,7 +65,7 @@ export function normalizeAppointments(
 
   for (const aptWithDetails of appointmentsWithDetails) {
     // Extract and store appointment (without nested data)
-    const appointment: Appointment = {
+    const appointment: StoredAppointment = {
       id: aptWithDetails.id,
       organization_id: aptWithDetails.organization_id,
       appointment_number: aptWithDetails.appointment_number,
@@ -80,6 +84,9 @@ export function normalizeAppointments(
       payment_terms: aptWithDetails.payment_terms,
       terms_updated_by: aptWithDetails.terms_updated_by,
       terms_updated_at: aptWithDetails.terms_updated_at,
+      amount_paid: aptWithDetails.amount_paid,
+      amount_pending: aptWithDetails.amount_pending,
+      payment_status: aptWithDetails.payment_status,
       customer_id: aptWithDetails.customer_id,
       service_id: aptWithDetails.service_id,
       staff_id: aptWithDetails.staff_id,
@@ -186,7 +193,7 @@ export function mergeNormalizedState(
  * Useful for backward compatibility with existing code
  */
 export function denormalizeAppointment(
-  appointment: Appointment,
+  appointment: StoredAppointment,
   state: NormalizedState
 ): AppointmentWithDetails | null {
   const customer = state.customers[appointment.customer_id];
@@ -218,7 +225,7 @@ export function denormalizeAppointment(
  * Denormalize multiple appointments
  */
 export function denormalizeAppointments(
-  appointments: Appointment[],
+  appointments: StoredAppointment[],
   state: NormalizedState
 ): AppointmentWithDetails[] {
   return appointments

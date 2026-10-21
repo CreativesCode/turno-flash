@@ -74,17 +74,24 @@ export function DepositChoice({
 }
 
 /**
- * The deposit of an appointment in its detail: how much, where it stands and,
- * for the owner, what to do with it.
+ * The deposit of an appointment in its detail: how much, where it stands and
+ * what to do with it. Receiving it registers its payment (TUR0008): the owner
+ * verifies it at once, anyone else leaves it for the owner to verify.
  */
 export function DepositPanel({
   appointment: a,
   onAction,
   busy = false,
+  hasDepositPayment = false,
+  onRegisterDeposit,
 }: {
   appointment: AppointmentWithDetails;
   onAction: (action: DepositAction) => void | Promise<void>;
   busy?: boolean;
+  /** Someone already registered the payment of this deposit. */
+  hasDepositPayment?: boolean;
+  /** Opens "Registrar anticipo". */
+  onRegisterDeposit?: () => void;
 }) {
   const { profile } = useAuth();
   const { format: money } = useMoney();
@@ -138,7 +145,9 @@ export function DepositPanel({
         </div>
       </div>
       <p className="mt-[3px] text-body font-medium text-foreground">
-        {DEPOSIT_STATUS_LABEL[status]}
+        {status === "paid" && hasDepositPayment
+          ? "Pago registrado, falta verificarlo"
+          : DEPOSIT_STATUS_LABEL[status]}
         {a.deposit_type === "percent" && a.deposit_value != null && (
           <span className="font-normal text-foreground-muted">
             {" "}
@@ -168,18 +177,34 @@ export function DepositPanel({
       )}
       {depositOpen(status) && !cancelled && (
         <p className="mt-1 text-caption text-foreground-muted">
-          El turno se confirma cuando marques el anticipo como recibido.
+          {hasDepositPayment
+            ? canManage
+              ? "Comprueba que el dinero llegó y verifícalo: el turno queda confirmado."
+              : "El pago ya está registrado: falta que el dueño lo verifique."
+            : canManage
+              ? "El turno se confirma cuando marques el anticipo como recibido."
+              : "El turno se confirma cuando el dueño marque el anticipo como recibido."}
         </p>
+      )}
+
+      {!canManage && depositOpen(status) && !cancelled && !hasDepositPayment && onRegisterDeposit && (
+        <Button onClick={onRegisterDeposit} disabled={busy} className="mt-3 w-full">
+          Registrar anticipo
+        </Button>
       )}
 
       {canManage && depositOpen(status) && !cancelled && (
         <div className="mt-3 flex flex-col gap-2">
           <Button
-            onClick={() => void onAction("verify")}
+            onClick={() =>
+              hasDepositPayment || !onRegisterDeposit
+                ? void onAction("verify")
+                : onRegisterDeposit()
+            }
             disabled={busy}
             className="w-full"
           >
-            Anticipo recibido
+            {hasDepositPayment ? "Verificar anticipo" : "Anticipo recibido"}
           </Button>
           <Button
             variant="secondary"
