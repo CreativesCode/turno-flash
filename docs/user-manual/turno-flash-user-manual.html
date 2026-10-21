@@ -565,6 +565,7 @@
     <ul>
       <li>Si eliges un profesional, la app comprueba que no tenga otro turno a esa hora. Si lo tiene, verás <em>El profesional ya tiene un turno en ese horario</em>.</li>
       <li>El turno que creas tú nace <span class="chip st-confirmed">Confirmado</span>, aunque el servicio requiera aprobación: la aprobación es para las reservas que llegan por la web.</li>
+      <li>Debajo del servicio, <span class="ui">Precio y condiciones</span> trae los valores del servicio y te deja cambiarlos solo para este turno: precio, anticipo, fecha límite y condiciones.</li>
       <li>Si el servicio pide <strong>anticipo</strong>, eliges <span class="ui">Falta cobrarlo</span> (el turno queda pendiente hasta que lo recibas), <span class="ui">Ya lo cobré</span> o <span class="ui">Sin anticipo esta vez</span>.</li>
       <li>Con WhatsApp conectado, al crear el turno el cliente recibe la confirmación y el negocio recibe un aviso de <em>Nuevo turno</em>.</li>
     </ul>
@@ -582,6 +583,15 @@
 
   <h3>Mover un turno</h3>
   <p>Si el cliente necesita otro día u otra hora, abre el turno y toca <span class="ui">Mover</span>. Elige la nueva fecha, la hora y, si quieres, otro profesional, y pulsa <span class="ui">Mover turno</span>. La duración se mantiene. Con WhatsApp conectado, el cliente recibe <em>Tu turno cambió de horario</em> y se le pide que confirme de nuevo; también le llegará el recordatorio de la nueva hora.</p>
+
+  <h3>Cambiar el precio o las condiciones de un turno</h3>
+  <p>Cada turno toma el precio, el anticipo, el plazo y las condiciones de su servicio, pero puedes cambiarlos solo para ese turno (un descuento, un anticipo distinto, otra fecha límite). Abre el turno y, en el bloque <em>Condiciones</em>, toca <span class="ui">Precio y condiciones</span>. Cambia lo que necesites y pulsa <span class="ui">Guardar</span>. En el turno queda anotado cuándo se cambió.</p>
+  <ul>
+    <li>Si el anticipo es un porcentaje y aún no está pagado, al cambiar el precio el anticipo se recalcula solo.</li>
+    <li>Un anticipo que ya se pagó no se puede cambiar (ni su importe ni su plazo); el precio sí.</li>
+    <li>Elegir <span class="ui">Sin anticipo</span> en un turno que lo debe es lo mismo que <span class="ui">Perdonar anticipo</span>: el turno queda confirmado.</li>
+    <li>Solo el dueño cambia estas condiciones; tu equipo las ve.</li>
+  </ul>
 
   <h3>Los estados de un turno</h3>
   <div class="table-wrap">
@@ -673,9 +683,11 @@
   <ol class="steps">
     <li>Abre el servicio y marca <span class="ui">Pedir anticipo para reservar</span>.</li>
     <li>Elige <span class="ui">Porcentaje del precio</span> (por ejemplo, 30) o <span class="ui">Importe fijo</span>. Debajo ves cuánto pagará el cliente.</li>
+    <li>Opcional: en <span class="ui">Plazo para pagarlo</span> pon cuántas horas antes del turno tiene que estar pagado (por ejemplo, 24).</li>
     <li>Pulsa <span class="ui">Guardar cambios</span>. En la lista, el servicio muestra <em>Anticipo 30%</em> o el importe.</li>
   </ol>
   <p>Escribe en <span class="path">Ajustes <i>›</i> Cómo se paga el anticipo</span> a qué tarjeta transferir y a nombre de quién: se le muestra al cliente al reservar y le llega por WhatsApp. Si también vendes pasajes, ese texto está dentro de <em>Página de reservas de viajes</em> y vale para los dos.</p>
+  <p>En el mismo formulario, <span class="ui">Condiciones</span> es un texto libre con lo que incluye y no incluye el precio y cómo es la cancelación o la devolución (por ejemplo, <em>Si cancelas con 48 h te devolvemos el anticipo</em>). Tus clientes lo ven antes de reservar y en el WhatsApp de su reserva. Sirve también para servicios sin anticipo.</p>
   <p>Así funciona un turno con anticipo:</p>
   <ol class="steps">
     <li>Al reservar, el turno queda <span class="chip st-pending">Pendiente</span> y en la lista ves <em>Falta anticipo</em>. El horario queda guardado para ese cliente.</li>
@@ -683,7 +695,7 @@
     <li>Cuando paga, responde <strong>PAGUÉ</strong> o manda la foto del comprobante, y tú recibes el aviso <em>El cliente dice que pagó el anticipo</em>.</li>
     <li>Comprueba que te llegó el dinero, abre el turno y pulsa <span class="ui">Anticipo recibido</span>. El turno pasa a <span class="chip st-confirmed">Confirmado</span>, el cliente recibe <em>Recibimos tu anticipo</em> y desde ahí le llegan los recordatorios. Queda anotado quién lo marcó y cuándo.</li>
   </ol>
-  <figure class="shot"><img src="/images/help/deposit.webp" alt="Un turno pendiente con su anticipo de 500 US$ y los botones «Anticipo recibido» y «Perdonar anticipo»." width="520" height="933" loading="lazy"><figcaption>Un turno que espera su anticipo: al pulsar «Anticipo recibido» queda confirmado.</figcaption></figure>
+  <figure class="shot"><img src="/images/help/deposit.webp" alt="Un turno pendiente: anticipo de 600 US$ (30 % del precio) con su fecha límite, los botones «Anticipo recibido» y «Perdonar anticipo», y debajo las condiciones con el botón «Precio y condiciones»." width="520" height="933" loading="lazy"><figcaption>Un turno que espera su anticipo, con su fecha límite y sus condiciones. Al pulsar «Anticipo recibido» queda confirmado.</figcaption></figure>
   <div class="callout note">
     <span class="tag">Bueno saber</span>
     <ul>
@@ -692,6 +704,8 @@
       <li>Si cancelas un turno cuyo anticipo ya recibiste, aparece <span class="ui">Marcar anticipo devuelto</span> para dejar anotado que se lo devolviste.</li>
       <li>Solo tú (el dueño) marcas, perdonas o devuelves un anticipo. Tu equipo ve en qué estado está.</li>
       <li>Si cambias el precio o el anticipo de un servicio, los turnos ya reservados conservan el importe que tenían.</li>
+      <li>Si pasa la fecha límite sin que el cliente pague, el turno muestra <em>Anticipo vencido</em> en rojo. No se cancela solo: decides tú.</li>
+      <li>Si alguien reserva cuando el plazo ya pasó (por ejemplo, para mañana con un plazo de 24 h), tiene hasta la hora del turno para pagar.</li>
     </ul>
   </div>
 
@@ -739,7 +753,8 @@
     <li>En <em>Elige día y horario</em> ve los próximos días en una tira; para fechas más lejanas toca <span class="ui">Más fechas</span>, que abre un calendario del mes con todos los días que se pueden reservar.</li>
     <li>Solo ve horarios realmente libres, calculados con el horario de cada profesional, sus turnos, sus días libres y los cierres del negocio.</li>
     <li>En <em>Tus datos</em> deja nombre, teléfono de WhatsApp (con selector de país) y, si quiere, apellido, email y una nota para el negocio. Su teléfono recuerda el nombre y el número para la próxima reserva.</li>
-    <li>Si el servicio pide anticipo, lo ve en la lista de servicios y antes de dejar sus datos. Al final ve <strong>Reserva recibida</strong> con tus instrucciones de pago.</li>
+    <li>Si el servicio pide anticipo, lo ve en la lista de servicios y antes de dejar sus datos, con el plazo para pagarlo. Al final ve <strong>Reserva recibida</strong> con tus instrucciones de pago y la fecha límite.</li>
+    <li>Si el servicio tiene <strong>condiciones</strong>, las ve antes de dejar sus datos y al final.</li>
     <li>Al final ve <strong>¡Turno confirmado!</strong> o, si el servicio requiere aprobación, <strong>Solicitud enviada</strong>, con su número de turno. Si cargaste el WhatsApp del negocio en <span class="path">Ajustes</span>, también ve el botón <span class="ui">Escribir al negocio</span>.</li>
   </ul>
   <div class="callout note">
@@ -765,7 +780,7 @@
       <tbody>
         <tr><td>Al crear un turno</td><td class="wrap">Cliente y negocio</td><td class="wrap">Al cliente, los datos del turno con opción de responder OK o CANCELAR seguido del código del turno. Si está pendiente de aprobación, le dice que su solicitud se recibió. Al negocio, un aviso de <em>Nuevo turno</em>.</td></tr>
         <tr><td>Al aprobar un pendiente</td><td class="wrap">Cliente</td><td class="wrap">Que el negocio aprobó su solicitud y el turno está confirmado.</td></tr>
-        <tr><td>Al reservar un servicio con anticipo</td><td class="wrap">Cliente</td><td class="wrap">El importe del anticipo, tus instrucciones de pago y que responda PAGUÉ o mande la foto del comprobante cuando pague.</td></tr>
+        <tr><td>Al reservar un servicio con anticipo</td><td class="wrap">Cliente</td><td class="wrap">El importe del anticipo y hasta cuándo pagarlo, tus instrucciones de pago, las condiciones del servicio y que responda PAGUÉ o mande la foto del comprobante cuando pague.</td></tr>
         <tr><td>Cuando el cliente avisa que pagó</td><td class="wrap">Cliente y negocio</td><td class="wrap">Al cliente, que le avisamos al negocio. Al negocio, <em>El cliente dice que pagó el anticipo</em>.</td></tr>
         <tr><td>Al marcar el anticipo recibido</td><td class="wrap">Cliente</td><td class="wrap">Que recibimos su anticipo y el turno está confirmado.</td></tr>
         <tr><td>24 horas antes</td><td class="wrap">Cliente</td><td class="wrap">Recordatorio para confirmar con OK o cancelar.</td></tr>
@@ -907,6 +922,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
     <li><strong>Cobrar el anticipo dentro de la app</strong>: el cliente paga por transferencia o en mano y tú lo marcas como recibido.</li>
     <li><strong>Que un turno sin anticipo se cancele solo</strong>: si el cliente no paga, cancélalo tú.</li>
     <li><strong>Ver los anticipos en los reportes</strong>.</li>
+    <li><strong>Cobrar un turno en otra moneda</strong>: todo el negocio usa la moneda de <span class="path">Ajustes</span>.</li>
   </ul>
 </article>
 
