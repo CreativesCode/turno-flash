@@ -7,7 +7,10 @@ import {
   checkAvailabilitySchema,
   sendReminderSchema,
 } from "@/schemas";
-import { AppointmentService } from "@/services/appointments.service";
+import {
+  AppointmentService,
+  type AppointmentTerms,
+} from "@/services/appointments.service";
 import {
   AppointmentFormData,
   AppointmentStatus,
@@ -672,3 +675,24 @@ export function useSetAppointmentDeposit() {
   });
 }
 
+/** Price, deposit, deadline and conditions of one appointment (owner or admin). */
+export function useSetAppointmentTerms() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      appointmentId,
+      terms,
+    }: {
+      appointmentId: string;
+      terms: AppointmentTerms;
+    }) => {
+      const result = await AppointmentService.setTerms(appointmentId, terms);
+      if (!result.success) throw new Error(result.error);
+      return AppointmentService.getWithDetails(appointmentId);
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
+    },
+  });
+}

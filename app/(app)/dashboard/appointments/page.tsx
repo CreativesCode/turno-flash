@@ -1,5 +1,6 @@
 "use client";
 
+import { TermsSheet } from "@/components/appointments/AppointmentTerms";
 import type { DepositAction } from "@/utils/deposit";
 import { ApptRow } from "@/components/appointments/ApptRow";
 import {
@@ -39,6 +40,7 @@ import {
   useRescheduleAppointment,
   useToast,
   useSetAppointmentDeposit,
+  useSetAppointmentTerms,
   useUpdateAppointmentStatus,
   useBusinessSettings,
 } from "@/hooks";
@@ -330,6 +332,8 @@ function AppointmentsContent() {
   const createAppointmentMutation = useCreateAppointment();
   const updateAppointmentStatusMutation = useUpdateAppointmentStatus();
   const setDepositMutation = useSetAppointmentDeposit();
+  const setTermsMutation = useSetAppointmentTerms();
+  const [showTerms, setShowTerms] = useState(false);
   const rescheduleMutation = useRescheduleAppointment();
   const createCustomerMutation = useCreateCustomer();
 
@@ -404,13 +408,25 @@ function AppointmentsContent() {
 
   const handleServiceChange = useCallback(
     (serviceId: string) => {
+      const service = services.find((s) => s.id === serviceId);
       setFormData((prev) => ({
         ...prev,
         service_id: serviceId,
         end_time: calculateEndTime(prev.start_time, serviceId),
+        // The conditions of the service, editable for this appointment (TUR0007)
+        price_charged: null,
+        deposit_type:
+          service?.deposit_type === "fixed" || service?.deposit_type === "percent"
+            ? service.deposit_type
+            : null,
+        deposit_value: service?.deposit_value ?? null,
+        deposit_due_at: null,
+        payment_terms: service?.payment_terms ?? null,
+        deposit_status: undefined,
+        deposit_waived: false,
       }));
     },
-    [calculateEndTime]
+    [calculateEndTime, services]
   );
 
   const handleStartTimeChange = useCallback(
@@ -1115,6 +1131,7 @@ function AppointmentsContent() {
           onAdvance={(to) => updateStatus(selectedAppointment.id, to)}
           onDeposit={handleDeposit}
           isDepositBusy={setDepositMutation.isPending}
+          onEditTerms={() => setShowTerms(true)}
           onEdit={
             canManageAppointments &&
             RESCHEDULABLE.includes(selectedAppointment.status ?? "")
@@ -1131,6 +1148,31 @@ function AppointmentsContent() {
           }
           onCancel={() => setPendingTerminal("cancelled")}
           isProcessing={updateAppointmentStatusMutation.isPending}
+        />
+      )}
+
+      {selectedAppointment && showTerms && (
+        <TermsSheet
+          open={showTerms}
+          onClose={() => setShowTerms(false)}
+          appointment={selectedAppointment}
+          busy={setTermsMutation.isPending}
+          onSave={async (terms) => {
+            try {
+              const fresh = await setTermsMutation.mutateAsync({
+                appointmentId: selectedAppointment.id,
+                terms,
+              });
+              if (fresh) setSelectedAppointment(fresh);
+              setShowTerms(false);
+              toast.success("Condiciones guardadas");
+            } catch (err) {
+              toast.error(
+                "No se pudieron guardar",
+                err instanceof Error ? err.message : undefined
+              );
+            }
+          }}
         />
       )}
 

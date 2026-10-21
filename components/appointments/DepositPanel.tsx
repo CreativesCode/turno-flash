@@ -9,6 +9,7 @@ import type { AppointmentWithDetails } from "@/types/appointments";
 import {
   DEPOSIT_STATUS_LABEL,
   depositOpen,
+  depositOverdue,
   type DepositAction,
   type DepositStatus,
 } from "@/utils/deposit";
@@ -37,7 +38,7 @@ export function DepositChoice({
   return (
     <div className="flex flex-col gap-2 rounded-card border border-border bg-surface-2 p-3">
       <p className="text-meta text-foreground">
-        Este servicio pide un anticipo de <strong>{money(amount)}</strong>.
+        Este turno pide un anticipo de <strong>{money(amount)}</strong>.
       </p>
       {canManage ? (
         <div className="flex flex-wrap gap-2">
@@ -138,7 +139,30 @@ export function DepositPanel({
       </div>
       <p className="mt-[3px] text-body font-medium text-foreground">
         {DEPOSIT_STATUS_LABEL[status]}
+        {a.deposit_type === "percent" && a.deposit_value != null && (
+          <span className="font-normal text-foreground-muted">
+            {" "}
+            · {Number(a.deposit_value)} % del precio
+          </span>
+        )}
       </p>
+      {a.deposit_due_at && depositOpen(status) && (
+        <p
+          className={`text-caption ${
+            depositOverdue(status, a.deposit_due_at)
+              ? "font-semibold text-danger-600 dark:text-danger-400"
+              : "text-foreground-muted"
+          }`}
+        >
+          {depositOverdue(status, a.deposit_due_at) ? "Vencido: había que pagarlo antes del " : "Pagar antes del "}
+          {new Date(a.deposit_due_at).toLocaleString("es", {
+            day: "numeric",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+      )}
       {verifiedLine && (
         <p className="text-caption text-foreground-muted">{verifiedLine}</p>
       )}

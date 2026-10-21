@@ -155,6 +155,12 @@ export interface AppointmentFormData {
   /** Loaded from the dashboard: the owner already got the deposit, or waives it. */
   deposit_status?: "verified";
   deposit_waived?: boolean;
+  /** Owner's conditions for this appointment (093); the service gives the defaults. */
+  deposit_type?: "fixed" | "percent" | null;
+  deposit_value?: number | null;
+  /** ISO; null = the service deadline (hours before the appointment). */
+  deposit_due_at?: string | null;
+  payment_terms?: string | null;
 }
 
 export interface AppointmentWithDetails extends Appointment {

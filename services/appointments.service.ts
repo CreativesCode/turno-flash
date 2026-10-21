@@ -9,7 +9,19 @@ import { getTimestamp } from "@/utils/date";
 import { fromZonedTime } from "date-fns-tz";
 import { createClient } from "@/utils/supabase/client";
 import { Logger } from "@/utils/logger";
+import type { Database } from "@/types/database.types";
 import type { DepositAction } from "@/utils/deposit";
+
+/** What the owner sets on one appointment (093). */
+export interface AppointmentTerms {
+  /** null = the service price */
+  price: number | null;
+  depositType: "fixed" | "percent" | null;
+  depositValue: number | null;
+  /** ISO */
+  depositDueAt: string | null;
+  paymentTerms: string | null;
+}
 
 /**
  * Service Layer for Appointment Management
@@ -936,6 +948,55 @@ export class AppointmentService {
     }
     void Logger.error("Error setting appointment deposit:", error);
     return { success: false, error: "No se pudo guardar el anticipo: " + message };
+  }
+
+
+  /**
+   * Price, deposit, deadline and conditions of one appointment
+   * (set_appointment_terms, migration 093). Owner or admin.
+   */
+  static async setTerms(
+    appointmentId: string,
+    terms: AppointmentTerms
+  ): Promise<{ success: boolean; error?: string }> {
+    const supabase = createClient();
+    // Every argument but the id may be NULL in SQL; the generated types do not say so
+    const args = {
+      p_appointment_id: appointmentId,
+      p_price: terms.price,
+      p_deposit_type: terms.depositType,
+      p_deposit_value: terms.depositValue,
+      p_deposit_due_at: terms.depositDueAt,
+      p_payment_terms: terms.paymentTerms,
+    } as unknown as Database["public"]["Functions"]["set_appointment_terms"]["Args"];
+    const { error } = await supabase.rpc("set_appointment_terms", args);
+    if (!error) return { success: true };
+
+    const known: Record<string, string> = {
+      terms_forbidden: "Solo el dueño puede cambiar el precio y las condiciones.",
+      deposit_locked: "El anticipo ya se pagó: no se puede cambiar su importe ni su plazo.",
+      deposit_above_price: "El anticipo no puede ser mayor que el precio.",
+      invalid_deposit: "Revisa el anticipo: un porcentaje va de 1 a 100 y un importe debe ser mayor que 0.",
+      deposit_not_allowed: "Un turno terminado o cancelado no puede pedir anticipo.",
+      invalid_price: "El precio no puede ser negativo.",
+    };
+    const code = Object.keys(known).find((key) => error.message.includes(key));
+    if (code) return { success: false, error: known[code] };
+    void Logger.error("Error setting appointment terms:", error);
+    return { success: false, error: "No se pudieron guardar las condiciones: " + error.message };
+  }
+
+  /** One appointment as the dashboard shows it, after changing it. */
+  static async getWithDetails(
+    appointmentId: string
+  ): Promise<AppointmentWithDetails | null> {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("appointments_with_details")
+      .select("*")
+      .eq("id", appointmentId)
+      .maybeSingle();
+    return data ? this.mapToAppointmentWithDetails(data) : null;
   }
 
 }

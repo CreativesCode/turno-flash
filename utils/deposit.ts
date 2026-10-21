@@ -42,3 +42,32 @@ export function depositOpen(status: string | null | undefined): boolean {
   return status === "pending" || status === "requested" || status === "paid";
 }
 
+/** A deposit for a given price, the way deposit_amount_for (093) computes it. */
+export function depositFor(
+  type: string | null | undefined,
+  value: number | null | undefined,
+  price: number | null | undefined
+): number | null {
+  return serviceDepositAmount({ deposit_type: type, deposit_value: value, price });
+}
+
+/** The deadline passed and the deposit is still owed. */
+export function depositOverdue(
+  status: string | null | undefined,
+  dueAt: string | null | undefined
+): boolean {
+  return depositOpen(status) && !!dueAt && new Date(dueAt).getTime() < Date.now();
+}
+
+/** ISO date → value of a `datetime-local` input, in local time (never toISOString). */
+export function toLocalDateTimeInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+}
+
+/** Value of a `datetime-local` input (local time) → ISO, or null when empty. */
+export function fromLocalDateTimeInput(value: string): string | null {
+  return value ? new Date(value).toISOString() : null;
+}

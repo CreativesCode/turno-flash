@@ -25,7 +25,20 @@ import {
   DepositPanel,
   type DepositChoiceValue,
 } from "@/components/appointments/DepositPanel";
-import { depositOpen, serviceDepositAmount, type DepositAction } from "@/utils/deposit";
+import {
+  TermsBlock,
+  TermsFields,
+  type TermsDraft,
+} from "@/components/appointments/AppointmentTerms";
+import { useAuth } from "@/contexts/auth-context";
+import {
+  depositFor,
+  depositOpen,
+  fromLocalDateTimeInput,
+  serviceDepositAmount,
+  toLocalDateTimeInput,
+  type DepositAction,
+} from "@/utils/deposit";
 import { NEXT_ACTIONS } from "@/utils/appointment-status";
 import { formatDateForDisplay, parseLocalDate } from "@/utils/date";
 import { toInternationalPhone } from "@/utils/phone";
@@ -101,10 +114,38 @@ export function AppointmentCreateModal({
     [services, categories]
   );
   const showServiceHeadings = hasCategoryGroups(serviceGroups);
+  const { profile } = useAuth();
+  const canManage = profile?.role === "owner" || profile?.role === "admin";
   const selectedService = services.find((s) => s.id === formData.service_id);
-  const depositAmount = selectedService
+  const serviceDeposit = selectedService
     ? serviceDepositAmount(selectedService)
     : null;
+  // The owner may change price and deposit of this appointment (TUR0007)
+  const price = formData.price_charged ?? selectedService?.price ?? null;
+  const depositAmount = formData.deposit_waived
+    ? serviceDeposit
+    : depositFor(formData.deposit_type, formData.deposit_value, price);
+  const termsDraft: TermsDraft = {
+    price: formData.price_charged != null ? String(formData.price_charged) : "",
+    depositType:
+      formData.deposit_waived || !formData.deposit_type ? "none" : formData.deposit_type,
+    depositValue: formData.deposit_value != null ? String(formData.deposit_value) : "",
+    dueAt: toLocalDateTimeInput(formData.deposit_due_at),
+    terms: formData.payment_terms ?? "",
+  };
+  const patchTerms = (patch: Partial<TermsDraft>) => {
+    const next = { ...termsDraft, ...patch };
+    onChange({
+      price_charged: next.price !== "" ? Number(next.price) : null,
+      deposit_type: next.depositType === "none" ? null : next.depositType,
+      deposit_value:
+        next.depositType === "none" ? null : Number(next.depositValue) || null,
+      // "Sin anticipo" on a service that asks for one waives it
+      deposit_waived: next.depositType === "none" && serviceDeposit != null,
+      deposit_due_at: fromLocalDateTimeInput(next.dueAt),
+      payment_terms: next.terms || null,
+    });
+  };
 
   return (
     <Sheet open={open} onClose={onClose} title="Nuevo turno">
@@ -296,6 +337,26 @@ export function AppointmentCreateModal({
           )}
         </Field>
 
+        {canManage && selectedService && (
+          <details className="rounded-card border border-border px-3.5 py-3">
+            <summary className="cursor-pointer text-meta font-semibold text-foreground">
+              Precio y condiciones
+            </summary>
+            <div className="mt-3">
+              <TermsFields
+                draft={termsDraft}
+                onChange={patchTerms}
+                servicePrice={selectedService.price}
+                dueHint={
+                  selectedService.deposit_due_hours
+                    ? `Vacío = ${selectedService.deposit_due_hours} h antes del turno, como dice el servicio.`
+                    : undefined
+                }
+              />
+            </div>
+          </details>
+        )}
+
         {depositAmount && (
           <DepositChoice
             amount={depositAmount}
@@ -307,10 +368,23 @@ export function AppointmentCreateModal({
                   : "pending"
             }
             onChange={(value: DepositChoiceValue) =>
-              onChange({
-                deposit_status: value === "verified" ? "verified" : undefined,
-                deposit_waived: value === "waived",
-              })
+              onChange(
+                value === "waived"
+                  ? { deposit_status: undefined, deposit_waived: true, deposit_type: null, deposit_value: null }
+                  : {
+                      deposit_status: value === "verified" ? "verified" : undefined,
+                      deposit_waived: false,
+                      // Back from "Sin anticipo": the service deposit again
+                      ...(formData.deposit_waived && {
+                        deposit_type:
+                          selectedService?.deposit_type === "fixed" ||
+                          selectedService?.deposit_type === "percent"
+                            ? selectedService.deposit_type
+                            : null,
+                        deposit_value: selectedService?.deposit_value ?? null,
+                      }),
+                    }
+              )
             }
           />
         )}
@@ -422,6 +496,8 @@ export interface AppointmentDetailModalProps {
   onEdit?: () => void;
   /** Verify, waive or refund the deposit (owner or admin). */
   onDeposit: (action: DepositAction) => void | Promise<void>;
+  /** Opens "Precio y condiciones" (owner or admin). */
+  onEditTerms?: () => void;
   isDepositBusy?: boolean;
   /** Look up service color (hex) for the dot in the detail grid. */
   serviceColor?: string | null;
@@ -439,6 +515,7 @@ export function AppointmentDetailModal({
   onMarkNoShow,
   onEdit,
   onDeposit,
+  onEditTerms,
   isDepositBusy = false,
   serviceColor,
   staffColor,
@@ -540,7 +617,11 @@ export function AppointmentDetailModal({
         <DetailItem label="Duración" value={fmtDuration(a.duration_minutes)} />
         <DetailItem
           label="Precio"
-          value={a.service_price != null ? money(a.service_price) : "—"}
+          value={
+            (a.price_charged ?? a.service_price) != null
+              ? money(a.price_charged ?? a.service_price)
+              : "—"
+          }
           mono
         />
       </div>
@@ -554,6 +635,7 @@ export function AppointmentDetailModal({
       )}
 
       <DepositPanel appointment={a} onAction={onDeposit} busy={isDepositBusy} />
+      <TermsBlock appointment={a} onEdit={onEditTerms} />
 
       {/* Actions */}
       {!isTerminal && (

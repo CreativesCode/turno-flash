@@ -2,7 +2,7 @@
 
 import { ListRow, StatusBadge, TimeBlock } from "@/components/ui";
 import type { AppointmentWithDetails } from "@/types/appointments";
-import { depositOpen } from "@/utils/deposit";
+import { depositOpen, depositOverdue } from "@/utils/deposit";
 import { fmtDuration } from "@/utils/format";
 
 interface ApptRowProps {
@@ -57,7 +57,9 @@ export function ApptRow({ appointment: a, onOpen, serviceColor }: ApptRowProps) 
         staff,
         // Still waiting for the deposit: it is what confirms the appointment
         !DONE.includes(status) && depositOpen(a.deposit_status)
-          ? "Falta anticipo"
+          ? depositOverdue(a.deposit_status, a.deposit_due_at)
+            ? "Anticipo vencido"
+            : "Falta anticipo"
           : null,
       ]
         .filter(Boolean)

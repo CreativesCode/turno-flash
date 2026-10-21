@@ -85,6 +85,10 @@ export const appointmentFormSchema = z
     payment_method: z.string().max(50).optional(),
     deposit_status: z.literal("verified").optional(),
     deposit_waived: z.boolean().optional(),
+    deposit_type: z.enum(["fixed", "percent"]).nullable().optional(),
+    deposit_value: z.number().positive().nullable().optional(),
+    deposit_due_at: z.string().datetime({ offset: true }).nullable().optional(),
+    payment_terms: z.string().max(1000).nullable().optional(),
   })
   .refine(
     (data) => {
