@@ -31,3 +31,19 @@ metadata:
 - **Panel:** `appointments_with_details` incluye las columnas del anticipo desde la 091 (la vista tenía las
   columnas congeladas); `DepositPanel` en la ficha; «Falta anticipo» en la lista.
 - **Fuera de esta tarea:** reportes de anticipos, cobro dentro de la app, cancelación automática.
+
+## Precio y condiciones de cada turno (TUR0007, 2026-10-21)
+
+PRP `.claude/PRPs/prp-appointment-terms.md`; migraciones **093-094**, `public-booking` v8, `wa-send` v37.
+- **El servicio da los valores y el turno los ajusta** (Claudia): `services.deposit_due_hours` (horas antes del
+  turno) y `services.payment_terms` (texto libre, ≤ 1000). Cada turno copia al crearse `deposit_type/value`,
+  `deposit_due_at` (con la zona del negocio) y `payment_terms`; el precio del turno es `price_charged`
+  (NULL = el del servicio; los reportes ya lo usan).
+- Solo dueño/admin cambian condiciones: al crear (el trigger respeta sus valores; los del empleado o la web se
+  ignoran) y después con la RPC `set_appointment_terms` (recalcula un % que aún se debe; anticipo pagado,
+  verificado o devuelto bloqueado → `deposit_locked`; sin tipo sobre uno que se debe = perdonar).
+- **Moneda: una por negocio** (decidido). **Al vencer el plazo no pasa nada** salvo «Anticipo vencido» en ficha y
+  lista. **Reserva hecha con el plazo ya pasado → paga antes de la hora del turno** (094). Mover un turno mueve el
+  plazo de un anticipo que se debe (con las horas del servicio).
+- Último cambio: `terms_updated_by/_at`. El historial completo de movimientos económicos es TUR0008.
+

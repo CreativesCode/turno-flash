@@ -1,6 +1,6 @@
 # PRP-007: Precio y condiciones económicas de cada turno (TUR0007)
 
-> **Estado**: APROBADO (Claudia, 2026-10-21) — EN PROGRESO
+> **Estado**: COMPLETADO (2026-10-21)
 > **Fecha**: 2026-10-20
 > **Proyecto**: Turno Flash
 > **Tarea**: TUR0007 «Configurar precio y condiciones económicas del turno» (estimación 2-3 días)
@@ -46,18 +46,18 @@ concreto, al crearlo o después.
   completo de cambios económicos va con TUR0008.
 
 ### Criterios de Éxito
-- [ ] En Servicios: «Plazo para pagar el anticipo (horas antes del turno)» y «Condiciones» (texto, hasta 1000).
-- [ ] Al crear un turno (web o panel) se copian del servicio: anticipo (tipo, valor, importe), fecha límite calculada
+- [x] En Servicios: «Plazo para pagar el anticipo (horas antes del turno)» y «Condiciones» (texto, hasta 1000).
+- [x] Al crear un turno (web o panel) se copian del servicio: anticipo (tipo, valor, importe), fecha límite calculada
       con la zona horaria del negocio y condiciones.
-- [ ] Al crear un turno desde el panel el dueño puede cambiar precio, anticipo, fecha límite y condiciones.
-- [ ] En la ficha de un turno el dueño ve y edita precio, anticipo, fecha límite y condiciones; el empleado solo las ve.
-- [ ] Cambiar el precio recalcula un anticipo porcentual que aún se debe; un anticipo pagado o verificado no cambia.
-- [ ] La ficha y la lista marcan «Anticipo vencido» cuando pasó la fecha límite y el anticipo se sigue debiendo.
-- [ ] `/book` muestra las condiciones del servicio antes de reservar y la fecha límite al final.
-- [ ] El WhatsApp de la reserva incluye la fecha límite y las condiciones.
-- [ ] Los reportes cuentan el precio del turno (ya usan `price_charged`).
-- [ ] Un servicio sin plazo ni condiciones funciona exactamente igual que hoy.
-- [ ] Manual de usuario actualizado (texto y foto si cambia la ficha).
+- [x] Al crear un turno desde el panel el dueño puede cambiar precio, anticipo, fecha límite y condiciones.
+- [x] En la ficha de un turno el dueño ve y edita precio, anticipo, fecha límite y condiciones; el empleado solo las ve.
+- [x] Cambiar el precio recalcula un anticipo porcentual que aún se debe; un anticipo pagado o verificado no cambia.
+- [x] La ficha y la lista marcan «Anticipo vencido» cuando pasó la fecha límite y el anticipo se sigue debiendo.
+- [x] `/book` muestra las condiciones del servicio antes de reservar y la fecha límite al final.
+- [x] El WhatsApp de la reserva incluye la fecha límite y las condiciones.
+- [x] Los reportes cuentan el precio del turno (ya usan `price_charged`).
+- [x] Un servicio sin plazo ni condiciones funciona exactamente igual que hoy.
+- [x] Manual de usuario actualizado (texto y foto si cambia la ficha).
 
 ---
 
@@ -110,12 +110,35 @@ edición con recálculo, guard ampliado, vista con las columnas nuevas y reserva
 **Validación**: Playwright en `/book`; mensaje armado con una sesión falsa.
 
 ### Fase 5: Validación final y documentación
-- [ ] `npx tsc --noEmit`, `npx eslint` de lo tocado y `npm run build:next`
-- [ ] Criterios de éxito cumplidos
-- [ ] Manual, memoria, despliegues en Tasknic y comentario en TUR0007
+- [x] `npx tsc --noEmit`, `npx eslint` de lo tocado y `npm run build:next`
+- [x] Criterios de éxito cumplidos
+- [x] Manual, memoria, despliegues en Tasknic y comentario en TUR0007
 
 ---
 
+## Cómo quedó
+
+- **Base de datos:** 093 (columnas, `deposit_amount_for`, `deposit_due_from`, `compute_appointment_deposit` y
+  `guard_appointment_deposit` ampliados, RPC `set_appointment_terms`, vista y reserva pública) y 094 (si el plazo ya
+  pasó al reservar, la fecha límite es la hora del turno; decisión de Claudia).
+- **App:** Servicios (plazo y condiciones), alta del turno con «Precio y condiciones» plegable (dueño/admin), ficha
+  con precio del turno, % y fecha límite del anticipo, bloque «Condiciones» y hoja de edición (`AppointmentTerms.tsx`),
+  «Anticipo vencido» en ficha y lista, `/book` con plazo y condiciones.
+- **Edge:** `public-booking` v8, `wa-send` v37.
+- **Manual:** sección nueva «Cambiar el precio o las condiciones de un turno» + 6 secciones tocadas; `deposit.webp`
+  rehecha.
+
 ## Aprendizajes
 
-(se completa durante la implementación)
+### 2026-10-21: el plazo «horas antes» puede caer en el pasado
+- **Error**: con `GREATEST(plazo, now())` una reserva para mañana con plazo de 24 h quedaba vencida al instante.
+- **Fix**: 094, el plazo pasa a ser la hora del turno (decisión de negocio, preguntada).
+- **Aplicar en**: cualquier fecha derivada «X antes del turno» (recordatorios de pago de TUR0009).
+
+### 2026-10-21: los tipos generados no admiten NULL en argumentos de RPC
+- `supabase gen types` declara cada argumento como obligatorio y no nulo aunque la función SQL acepte NULL. Para
+  `set_appointment_terms` los argumentos se arman y se convierten una vez a su tipo `Args`, con un comentario.
+
+### 2026-10-21: el MCP de Playwright estaba ocupado
+- Se probó con `ui.cjs` (puppeteer-core + Chrome local, en el scratchpad): login, `go`, `click` por texto, `fill` por
+  etiqueta (setter nativo + eventos para React) y `shot` a webp. Sirve también para las fotos del manual.

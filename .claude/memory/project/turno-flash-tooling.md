@@ -40,6 +40,8 @@ En turno-flash (gestión de turnos, Next.js 16 + Supabase + Capacitor):
 - Suele haber ya un `npm run dev` en el puerto 3000 con este mismo árbol: un segundo falla por el lock de
   `.next/dev`; usar el que está.
 - No hay navegadores de `ms-playwright`: usar el MCP de Playwright (deja `.playwright-mcp/`, ya ignorado por git).
+  Si el MCP dice «Browser is already in use», usar `ui.cjs` (puppeteer-core + sharp en el scratchpad, Chrome de
+  `C:/Program Files/Google/Chrome/Application/chrome.exe`): ver los aprendizajes de PRP-007.
 - `supabase functions deploy` respeta `verify_jwt` de `config.toml` (`wa-inbound` y `revenuecat-webhook` en false).
 
 ## Probar en navegador y medir (2026-10-06)
