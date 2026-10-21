@@ -47,3 +47,19 @@ PRP `.claude/PRPs/prp-appointment-terms.md`; migraciones **093-094**, `public-bo
   plazo de un anticipo que se debe (con las horas del servicio).
 - Último cambio: `terms_updated_by/_at`. El historial completo de movimientos económicos es TUR0008.
 
+## Pagos de cada turno (TUR0008, 2026-10-21)
+
+PRP `.claude/PRPs/prp-appointment-payments.md`; migración **095**; sin cambios en Edge Functions.
+- Tabla `appointment_payments` (importe, fecha, método `cash|transfer|card|other` + texto, referencia, notas,
+  comprobante, `is_deposit`, quién/cuándo, anulación con motivo). **Nunca se borra**: se anula (solo dueño/admin) y deja
+  de sumar. Se escribe solo con `register_appointment_payment` / `void_appointment_payment`.
+- Comprobantes: bucket **privado** `appointment-receipts/<org>/<turno>/<archivo>`, enlace firmado.
+- **El anticipo es un pago más** (Claudia): registrar el pago del anticipo lo verifica si lo hace el dueño (confirma el
+  turno) o lo deja `paid` si lo hace un empleado (luego «Verificar anticipo»). Anular ese pago → anticipo `pending`.
+  `set_appointment_deposit('verify')` sigue existiendo para verificar un pago ya registrado.
+- Vista: `amount_paid`, `amount_pending`, `payment_status` (`unpaid|partial|paid`; precio = `price_charged` o el del
+  servicio). Cobrar de más está permitido. `was_paid` lo mantienen las RPC y un trigger al cambiar el precio (solo en
+  turnos con pagos; el valor manual antiguo se respeta).
+- Pendientes de la épica de finanzas: recordatorios de pago (TUR0009), devoluciones con importe (TUR0010), panel e
+  informes (TUR0011).
+
