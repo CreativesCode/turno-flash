@@ -26,3 +26,29 @@ empezar una tarea de la memoria, comprobar en el código y en producción que si
 - Contestar desde el número propio de cada negocio: se mantiene, para no sobrecargar OpenWA.
 
 **Descartado:** pedidos de fotos sueltas por tamaño y reportes por categoría.
+
+## Épica de finanzas de turnos (tablero Tasknic, desde 2026-10-19)
+
+Claudia elige la tarea del board («procede con la tarea N»): PRP → aprobación → bucle-agentico → push,
+comentario y despliegues en Tasknic **solo cuando ella lo pide** → tarea a `in_review`.
+- TUR0003 anticipos — en revisión (prueba real con WhatsApp hecha 2026-10-21, OT-0065).
+- TUR0007 precio y condiciones — en revisión, asignada a Claudia.
+- **TUR0008 pagos de cada turno — HECHO EN LOCAL, PAUSADO el 2026-10-22 antes de entregar** (ver abajo).
+- Siguientes del board: TUR0009 recordatorios de pago, TUR0010 devoluciones, TUR0011 panel e informes
+  (TUR0012 pasarelas de pago).
+
+### Estado al pausar (2026-10-22) — retomar aquí
+- **5 commits de TUR0008 en `main` sin subir** (`fefac01`..`f0fae54`). La migración **095 ya está aplicada en
+  producción**; las pantallas salen al hacer push. No hay Edge Functions que desplegar.
+- **Pregunta abierta a Claudia:** «¿Subo los 5 commits, dejo el comentario en Tasknic a tu nombre, registro el
+  despliegue (migración 095 + web) y paso TUR0008 a En revisión, asignada a ti?». Plantilla del script:
+  `tasknic_tur0007.py` del scratchpad de la sesión (o rehacerla con la API de [[tasknic]]).
+- Ofrecimientos anteriores sin respuesta:
+  - completar la tabla de resultados de la nota de prueba de TUR0003 en Tasknic y marcar verificado el despliegue
+    de `wa-inbound`;
+  - marcar el anticipo como «requested» aunque OpenWA dé un falso fallo;
+  - limpiar Organización test: quitar el anticipo de «QA Consulta con aprobación», cancelar OT-0065 (ahora tiene un
+    pago de 200,01 del backfill de 095), decidir qué hacer con «Tunro con adelanto»;
+  - que Roberto revise el otro sistema que responde en la línea de WhatsApp compartida.
+- No quedan negocios `qa-fixture-*` en producción (comprobado al pausar).
+

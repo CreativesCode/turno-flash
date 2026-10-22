@@ -1,6 +1,6 @@
 # PRP-008: Estado económico y pagos de cada turno (TUR0008)
 
-> **Estado**: COMPLETADO (2026-10-21)
+> **Estado**: COMPLETADO (2026-10-21) — entrega pendiente (pausa 2026-10-22)
 > **Fecha**: 2026-10-21
 > **Proyecto**: Turno Flash
 > **Tarea**: TUR0008 «Gestionar estado económico y pagos de cada reserva» (estimación 3-5 días)
@@ -114,6 +114,12 @@ anular, comprobante.
 - [x] Manual (texto y foto), memoria, despliegues en Tasknic y comentario en TUR0008
 
 ---
+
+## Entrega (pendiente, pausa del 2026-10-22)
+
+- Hecho: migración 095 aplicada en producción; 5 commits en `main` (`fefac01`..`f0fae54`) **sin subir**.
+- Falta, cuando Claudia lo apruebe: push; comentario en TUR0008 a su nombre; despliegues en Tasknic (`migrations`
+  095 verificado; `web` sin verificar en Vercel); TUR0008 a `in_review` asignada a ella.
 
 ## Cómo quedó
 
