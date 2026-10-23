@@ -63,3 +63,16 @@ PRP `.claude/PRPs/prp-appointment-payments.md`; migración **095**; sin cambios 
 - Pendientes de la épica de finanzas: recordatorios de pago (TUR0009), devoluciones con importe (TUR0010), panel e
   informes (TUR0011).
 
+
+## Recordatorios y avisos de pago (TUR0009, 2026-10-23)
+
+PRP `.claude/PRPs/prp-payment-reminders.md`; migración **096**, `wa-send` v38, `send-reminders` v15, `wa-inbound` v50.
+- Interruptor `business_settings.enable_payment_reminders` (encendido por defecto) para los 3 avisos; lo de antes
+  (mensaje de reserva, PAGUÉ, «Recibimos tu anticipo») no depende de él.
+- **24 h antes del plazo** (`deposit_due_reminder`), solo si reservó con más de 24 h de margen y se debe (pending/requested).
+- **Al vencer** (`deposit_overdue` al cliente + `notify_business_deposit_overdue`), solo plazos vencidos en las últimas
+  24 h y turnos que aún no pasaron. El turno no se cancela.
+- **Acuse de cada pago** (`payment_received`, trigger en `appointment_payments`), salvo el anticipo que registra el dueño
+  en un turno pendiente (ya sale `approved`). Anular no avisa.
+- «Una vez por plazo» se lee de `wa_outbound_messages`; el acuse, de `appointment_payments.ack_sent_at`.
+- Falta: probar con un WhatsApp real.

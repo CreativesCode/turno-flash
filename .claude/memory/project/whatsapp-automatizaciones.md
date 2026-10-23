@@ -200,3 +200,8 @@ el aviso al dueño de cómo pagar. Ver [[license-enforcement]].
 antes de publicar la función (lección de la 081). Pie del mensaje con anticipo: modo `deposit` de
 `frameCustomerMessage`. Ver [[anticipos-turnos]].
 
+
+**Avisos de pago (2026-10-23, TUR0009, 096):** `wa-send` v38, `send-reminders` v15, `wa-inbound` v50. Intents
+`deposit_due_reminder`, `deposit_overdue`, `notify_business_deposit_overdue` (cron cada 15 min) y `payment_received`
+(trigger en `appointment_payments`). **Orden de despliegue de un intent que dispara un trigger:** migración y `wa-send`
+en el mismo comando, `wa-inbound` después de la migración. Ver [[anticipos-turnos]].
