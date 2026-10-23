@@ -28,6 +28,7 @@ import {
   MessageSquare,
   Star,
   Sunrise,
+  Undo2,
 } from "lucide-react";
 import { DEFAULT_HOUR_RANGE } from "@/utils/calendar-hours";
 import { useState } from "react";
@@ -64,6 +65,7 @@ export default function SettingsPage() {
     draft.enable_daily_summary ?? settings?.enable_daily_summary ?? false;
   const paymentRemindersEnabled =
     draft.enable_payment_reminders ?? settings?.enable_payment_reminders ?? true;
+  const refundsEnabled = draft.refunds_enabled ?? settings?.refunds_enabled ?? true;
   const summaryTime = (
     draft.daily_summary_time ??
     settings?.daily_summary_time ??
@@ -94,6 +96,7 @@ export default function SettingsPage() {
         enable_rating_request: ratingEnabled,
         enable_daily_summary: summaryEnabled,
         enable_payment_reminders: paymentRemindersEnabled,
+        refunds_enabled: refundsEnabled,
         daily_summary_time: summaryTime,
         calendar_start_hour: calendarStart,
         calendar_end_hour: calendarEnd,
@@ -285,6 +288,14 @@ export default function SettingsPage() {
                     loading={isLoading}
                     checked={paymentRemindersEnabled}
                     onChange={(v) => patchDraft({ enable_payment_reminders: v })}
+                  />
+                  <SettingRow
+                    icon={Undo2}
+                    title="Hacemos devoluciones"
+                    description="En un turno cancelado o en el que el cliente no vino puedes devolver todo o una parte de lo que pagó. Apágalo si tu negocio no devuelve dinero."
+                    loading={isLoading}
+                    checked={refundsEnabled}
+                    onChange={(v) => patchDraft({ refunds_enabled: v })}
                   />
                   <SettingRow
                     icon={Sunrise}

@@ -95,7 +95,7 @@ export function DepositPanel({
 }) {
   const { profile } = useAuth();
   const { format: money } = useMoney();
-  const [confirming, setConfirming] = useState<"waive" | "refund" | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const canManage = profile?.role === "owner" || profile?.role === "admin";
   const status = a.deposit_status as DepositStatus | null;
   const verifiedBy = a.deposit_verified_by;
@@ -208,7 +208,7 @@ export function DepositPanel({
           </Button>
           <Button
             variant="secondary"
-            onClick={() => setConfirming("waive")}
+            onClick={() => setConfirming(true)}
             disabled={busy}
             className="w-full"
           >
@@ -216,34 +216,21 @@ export function DepositPanel({
           </Button>
         </div>
       )}
-      {canManage && status === "verified" && cancelled && (
-        <Button
-          variant="secondary"
-          onClick={() => setConfirming("refund")}
-          disabled={busy}
-          className="mt-3 w-full"
-        >
-          Marcar anticipo devuelto
-        </Button>
-      )}
-
+      {/* Refunds (cancelled appointments) live in the money block: AppointmentRefunds (097) */}
       <ConfirmSheet
-        open={!!confirming}
-        onClose={() => setConfirming(null)}
+        open={confirming}
+        onClose={() => setConfirming(false)}
         onConfirm={async () => {
-          if (!confirming) return;
-          await onAction(confirming);
-          setConfirming(null);
+          await onAction("waive");
+          setConfirming(false);
         }}
-        title={confirming === "refund" ? "Anticipo devuelto" : "Perdonar anticipo"}
-        confirmLabel={confirming === "refund" ? "Sí, lo devolví" : "Perdonar"}
+        title="Perdonar anticipo"
+        confirmLabel="Perdonar"
         busyLabel="Guardando…"
         busy={busy}
       >
         <p className="text-sm text-foreground-muted">
-          {confirming === "refund"
-            ? `Marca que le devolviste al cliente los ${money(a.deposit_amount)} del anticipo.`
-            : "El turno queda confirmado sin anticipo. No se puede deshacer."}
+          El turno queda confirmado sin anticipo. No se puede deshacer.
         </p>
       </ConfirmSheet>
     </div>

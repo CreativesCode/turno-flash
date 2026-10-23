@@ -170,6 +170,9 @@ export interface AppointmentPaymentTotals {
   amount_paid: number;
   amount_pending: number;
   payment_status: PaymentStatus;
+  /** Refunds processed and waiting for a decision (097). */
+  amount_refunded: number;
+  amount_refund_pending: number;
 }
 
 export interface AppointmentWithDetails

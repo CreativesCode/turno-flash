@@ -35,6 +35,7 @@ const RPC_ERRORS: Record<string, string> = {
   deposit_already_registered: "El anticipo de este turno ya está registrado.",
   invalid_reason: "Escribe el motivo.",
   payment_already_voided: "Ese pago ya estaba anulado.",
+  payment_refunded: "Ese dinero ya se devolvió o tiene una devolución pendiente. Rechaza antes la devolución pendiente.",
 };
 
 function rpcError(message: string, fallback: string): string {

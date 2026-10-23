@@ -23,7 +23,7 @@ import { useState } from "react";
 
 type Errors = Partial<Record<"amount" | "paidAt" | "methodOther" | "reference" | "notes" | "receipt", string>>;
 
-const METHOD_OPTIONS: { value: PaymentMethod; label: string }[] = [
+export const METHOD_OPTIONS: { value: PaymentMethod; label: string }[] = [
   { value: "cash", label: "Efectivo" },
   { value: "transfer", label: "Transferencia (Transfermóvil / EnZona)" },
   { value: "card", label: "Tarjeta" },
@@ -233,7 +233,7 @@ export function RegisterPaymentSheet({
   );
 }
 
-function FieldError({ message }: { message?: string }) {
+export function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
     <p className="mt-1 text-caption text-danger-600 dark:text-danger-400">{message}</p>

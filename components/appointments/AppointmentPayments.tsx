@@ -1,5 +1,6 @@
 "use client";
 
+import { AppointmentRefunds } from "@/components/appointments/AppointmentRefunds";
 import { DepositPanel } from "@/components/appointments/DepositPanel";
 import { RegisterPaymentSheet } from "@/components/appointments/RegisterPaymentSheet";
 import { Button, ConfirmSheet, sheetInputClasses as inputClasses } from "@/components/ui";
@@ -76,6 +77,7 @@ export function AppointmentMoney({
         onRegister={(deposit) => setRegistering(deposit ? "deposit" : "payment")}
         onChange={refresh}
       />
+      <AppointmentRefunds appointment={a} onChange={refresh} />
       {registering && (
         <RegisterPaymentSheet
           open
@@ -169,7 +171,7 @@ function PaymentsBlock({
 }
 
 /** Name of a team member, "ti" for the one looking. */
-function useMemberName(userId: string | null): string | null {
+export function useMemberName(userId: string | null): string | null {
   const { profile } = useAuth();
   const me = !!userId && userId === profile?.user_id;
   const { data } = useQuery({

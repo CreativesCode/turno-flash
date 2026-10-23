@@ -1,4 +1,5 @@
 import type { PaymentMethod } from "@/services/appointment-payments.service";
+import type { RefundStatus } from "@/services/appointment-refunds.service";
 import type { PaymentStatus } from "@/types/appointments";
 
 /** Payment status of an appointment (appointments_with_details, 095). */
@@ -13,6 +14,13 @@ export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
   transfer: "Transferencia",
   card: "Tarjeta",
   other: "Otro",
+};
+
+/** Status of a refund (097). */
+export const REFUND_STATUS_LABEL: Record<RefundStatus, string> = {
+  pending: "Pendiente",
+  processed: "Devuelta",
+  rejected: "Rechazada",
 };
 
 /** The method as a payment shows it: "Otro" says which one. */
