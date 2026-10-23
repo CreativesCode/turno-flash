@@ -258,6 +258,90 @@ export type Database = {
           },
         ]
       }
+      appointment_refund_events: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          refund_id: string
+          status: Database["public"]["Enums"]["appointment_refund_status"]
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          refund_id?: string
+          status?: Database["public"]["Enums"]["appointment_refund_status"]
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          refund_id?: string
+          status?: Database["public"]["Enums"]["appointment_refund_status"]
+        }
+        Relationships: []
+      }
+      appointment_refunds: {
+        Row: {
+          amount: number
+          appointment_id: string
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          method: Database["public"]["Enums"]["appointment_payment_method"] | null
+          method_other: string | null
+          notice_sent_at: string | null
+          organization_id: string
+          reason: string
+          refunded_at: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["appointment_refund_status"]
+        }
+        Insert: {
+          amount?: number
+          appointment_id?: string
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          method?: Database["public"]["Enums"]["appointment_payment_method"] | null
+          method_other?: string | null
+          notice_sent_at?: string | null
+          organization_id?: string
+          reason?: string
+          refunded_at?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["appointment_refund_status"]
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          method?: Database["public"]["Enums"]["appointment_payment_method"] | null
+          method_other?: string | null
+          notice_sent_at?: string | null
+          organization_id?: string
+          reason?: string
+          refunded_at?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["appointment_refund_status"]
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           actual_end_time: string | null
@@ -265,6 +349,7 @@ export type Database = {
           appointment_date: string
           appointment_number: string | null
           booking_request_key: string | null
+          cancellation_category: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -313,6 +398,7 @@ export type Database = {
           appointment_date: string
           appointment_number?: string | null
           booking_request_key?: string | null
+          cancellation_category?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -363,6 +449,7 @@ export type Database = {
           appointment_date?: string
           appointment_number?: string | null
           booking_request_key?: string | null
+          cancellation_category?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -2633,6 +2720,18 @@ export type Database = {
         }
         Returns: string
       }
+      register_appointment_refund: {
+        Args: {
+          p_amount: number
+          p_appointment_id: string
+          p_method: Database["public"]["Enums"]["appointment_payment_method"]
+          p_method_other: string
+          p_processed: boolean
+          p_reason: string
+          p_refunded_at: string
+        }
+        Returns: string
+      }
       release_expired_trip_holds: { Args: never; Returns: number }
       renumber_appointments_for_prefix: {
         Args: { org_id: string }
@@ -2685,6 +2784,17 @@ export type Database = {
       service_deposit_amount: {
         Args: { p_service_id: string }
         Returns: number
+      }
+      set_appointment_refund_status: {
+        Args: {
+          p_method: Database["public"]["Enums"]["appointment_payment_method"]
+          p_method_other: string
+          p_note: string
+          p_refund_id: string
+          p_refunded_at: string
+          p_status: string
+        }
+        Returns: undefined
       }
       set_appointment_deposit: {
         Args: { p_action: string; p_appointment_id: string }
@@ -2755,6 +2865,7 @@ export type Database = {
         | "verified"
         | "cancelled"
         | "refunded"
+      appointment_refund_status: "pending" | "processed" | "rejected"
       appointment_payment_method: "cash" | "transfer" | "card" | "other"
       appointment_source: "web" | "whatsapp" | "phone" | "walk_in" | "admin"
       appointment_status:
@@ -2967,6 +3078,7 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
+      appointment_refund_status: ["pending", "processed", "rejected"],
       appointment_payment_method: ["cash", "transfer", "card", "other"],
       appointment_source: ["web", "whatsapp", "phone", "walk_in", "admin"],
       appointment_status: [

@@ -27,6 +27,7 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { ZodError } from "zod";
+import type { CancellationCategory } from "@/utils/cancellation";
 import type { DepositAction } from "@/utils/deposit";
 
 /**
@@ -224,10 +225,12 @@ export function useUpdateAppointmentStatus() {
       appointmentId,
       newStatus,
       reason,
+      cancellationCategory,
     }: {
       appointmentId: string;
       newStatus: AppointmentStatus;
       reason?: string;
+      cancellationCategory?: CancellationCategory;
     }) => {
       if (!profile?.organization_id) {
         throw new Error("No se encontró la información de la organización");
@@ -239,6 +242,7 @@ export function useUpdateAppointmentStatus() {
           appointmentId,
           newStatus,
           reason,
+          cancellationCategory,
         });
 
         const result = await AppointmentService.updateStatus(
@@ -246,7 +250,8 @@ export function useUpdateAppointmentStatus() {
           validatedData.newStatus,
           profile.organization_id,
           profile?.user_id,
-          validatedData.reason
+          validatedData.reason,
+          validatedData.cancellationCategory
         );
 
         if (!result.success) {

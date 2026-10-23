@@ -104,6 +104,7 @@ export function normalizeAppointments(
       reminder_method: aptWithDetails.reminder_method,
       notes: aptWithDetails.notes,
       internal_notes: aptWithDetails.internal_notes,
+      cancellation_category: aptWithDetails.cancellation_category ?? null,
       cancellation_reason: aptWithDetails.cancellation_reason,
       cancelled_by: aptWithDetails.cancelled_by,
       cancelled_at: aptWithDetails.cancelled_at,

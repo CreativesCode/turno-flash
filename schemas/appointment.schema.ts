@@ -1,3 +1,4 @@
+import { CANCELLATION_CATEGORIES } from "@/utils/cancellation";
 import { getLocalDateString } from "@/utils/date";
 import { z } from "zod";
 
@@ -123,18 +124,30 @@ export const appointmentFormSchema = z
 /**
  * Appointment Update Status Schema
  */
-export const appointmentUpdateStatusSchema = z.object({
-  appointmentId: z.string().uuid({
-    message: "ID de turno inválido",
-  }),
-  newStatus: appointmentStatusSchema,
-  reason: z
-    .string()
-    .max(200, {
-      message: "La razón no puede superar los 200 caracteres",
-    })
-    .optional(),
-});
+export const appointmentUpdateStatusSchema = z
+  .object({
+    appointmentId: z.string().uuid({
+      message: "ID de turno inválido",
+    }),
+    newStatus: appointmentStatusSchema,
+    reason: z
+      .string()
+      .trim()
+      .max(200, {
+        message: "La razón no puede superar los 200 caracteres",
+      })
+      .optional(),
+    // Required to cancel from the dashboard (097); "other" needs the reason
+    cancellationCategory: z.enum(CANCELLATION_CATEGORIES).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.newStatus === "cancelled" && !value.cancellationCategory) {
+      ctx.addIssue({ code: "custom", path: ["cancellationCategory"], message: "Elige el motivo" });
+    }
+    if (value.cancellationCategory === "other" && !value.reason) {
+      ctx.addIssue({ code: "custom", path: ["reason"], message: "Escribe el motivo" });
+    }
+  });
 
 /**
  * Reschedule Schema (P1-03): new date, time and professional

@@ -11,6 +11,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Logger } from "@/utils/logger";
 import type { Database } from "@/types/database.types";
 import type { DepositAction } from "@/utils/deposit";
+import type { CancellationCategory } from "@/utils/cancellation";
 
 /** What the owner sets on one appointment (093). */
 export interface AppointmentTerms {
@@ -338,7 +339,8 @@ export class AppointmentService {
     newStatus: AppointmentStatus,
     organizationId: string,
     userId?: string,
-    reason?: string
+    reason?: string,
+    cancellationCategory?: CancellationCategory
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createClient();
@@ -382,6 +384,7 @@ export class AppointmentService {
       if (newStatus === APPOINTMENT_STATUS.CANCELLED) {
         updateData.cancelled_at = getTimestamp();
         updateData.cancelled_by = userId;
+        updateData.cancellation_category = cancellationCategory;
         if (reason) {
           updateData.cancellation_reason = reason;
         }

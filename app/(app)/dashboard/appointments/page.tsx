@@ -4,6 +4,7 @@ import { TermsSheet } from "@/components/appointments/AppointmentTerms";
 import type { DepositAction } from "@/utils/deposit";
 import { PAYMENT_STATUS_LABEL } from "@/utils/payment";
 import { ApptRow } from "@/components/appointments/ApptRow";
+import { CancelAppointmentSheet } from "@/components/appointments/CancelAppointmentSheet";
 import {
   AppointmentCreateModal,
   AppointmentDetailModal,
@@ -52,6 +53,7 @@ import {
   AppointmentWithDetails,
   CustomerFormData,
 } from "@/types/appointments";
+import type { CancellationCategory } from "@/utils/cancellation";
 import { downloadCsv } from "@/utils/csv";
 import { DEFAULT_HOUR_RANGE } from "@/utils/calendar-hours";
 import { getLocalDateString } from "@/utils/date";
@@ -562,7 +564,11 @@ function AppointmentsContent() {
   }, [newCustomerData, createCustomerMutation, toast]);
 
   const updateStatus = useCallback(
-    async (appointmentId: string, newStatus: AppointmentStatus) => {
+    async (
+      appointmentId: string,
+      newStatus: AppointmentStatus,
+      cancel?: { category: CancellationCategory; reason?: string }
+    ) => {
       if (!newStatus) {
         toast.error("Error", "El estado no puede estar vacío");
         return;
@@ -572,6 +578,8 @@ function AppointmentsContent() {
         await updateAppointmentStatusMutation.mutateAsync({
           appointmentId,
           newStatus,
+          reason: cancel?.reason,
+          cancellationCategory: cancel?.category,
         });
         toast.dismiss(loadingToast);
         toast.success("Estado actualizado", "El turno fue actualizado");
@@ -579,6 +587,12 @@ function AppointmentsContent() {
           setSelectedAppointment({
             ...selectedAppointment,
             status: newStatus,
+            ...(cancel && {
+              cancellation_category: cancel.category,
+              cancellation_reason: cancel.reason ?? null,
+              cancelled_at: new Date().toISOString(),
+              cancelled_by: profile?.user_id ?? null,
+            }),
           });
         }
       } catch (err) {
@@ -591,7 +605,7 @@ function AppointmentsContent() {
         setLocalError("Error al actualizar estado");
       }
     },
-    [updateAppointmentStatusMutation, toast, selectedAppointment]
+    [updateAppointmentStatusMutation, toast, selectedAppointment, profile?.user_id]
   );
 
   /** Verify, waive or refund the deposit of the open appointment. */
@@ -1185,27 +1199,33 @@ function AppointmentsContent() {
       )}
 
       <ConfirmSheet
-        open={!!pendingTerminal && !!selectedAppointment}
+        open={pendingTerminal === "no_show" && !!selectedAppointment}
         onClose={() => setPendingTerminal(null)}
         onConfirm={async () => {
-          if (!selectedAppointment || !pendingTerminal) return;
-          await updateStatus(
-            selectedAppointment.id,
-            pendingTerminal as AppointmentStatus
-          );
+          if (!selectedAppointment) return;
+          await updateStatus(selectedAppointment.id, "no_show");
           setPendingTerminal(null);
         }}
-        title={pendingTerminal === "no_show" ? "Marcar que no vino" : "Cancelar turno"}
-        confirmLabel={pendingTerminal === "no_show" ? "No vino" : "Cancelar turno"}
+        title="Marcar que no vino"
+        confirmLabel="No vino"
         busyLabel="Guardando…"
         busy={updateAppointmentStatusMutation.isPending}
       >
         <p className="text-sm text-foreground-muted">
-          {pendingTerminal === "no_show"
-            ? "El turno queda marcado como no asistió. No se puede deshacer."
-            : "El horario queda libre y, si tienes WhatsApp conectado, le avisamos al cliente. No se puede deshacer."}
+          El turno queda marcado como no asistió. No se puede deshacer.
         </p>
       </ConfirmSheet>
+
+      <CancelAppointmentSheet
+        open={pendingTerminal === "cancelled" && !!selectedAppointment}
+        onClose={() => setPendingTerminal(null)}
+        onConfirm={async (category, reason) => {
+          if (!selectedAppointment) return;
+          await updateStatus(selectedAppointment.id, "cancelled", { category, reason });
+          setPendingTerminal(null);
+        }}
+        busy={updateAppointmentStatusMutation.isPending}
+      />
 
       {selectedAppointment && showReschedule && (
         <AppointmentRescheduleSheet

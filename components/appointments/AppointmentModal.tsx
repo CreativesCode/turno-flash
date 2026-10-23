@@ -20,6 +20,7 @@ import type {
   StaffMember,
 } from "@/types/appointments";
 import { AppointmentMoney } from "@/components/appointments/AppointmentPayments";
+import { CancellationNote } from "@/components/appointments/CancelAppointmentSheet";
 import { CustomerPicker } from "@/components/appointments/CustomerPicker";
 import {
   DepositChoice,
@@ -602,6 +603,7 @@ export function AppointmentDetailModal({
           </span>
         )}
       </div>
+      <CancellationNote appointment={a} />
 
       {/* Detail grid: the hairlines are the 1px gaps over the border colour */}
       <div className="mt-[18px] grid grid-cols-2 gap-px overflow-hidden rounded-[18px] border border-border bg-border">
