@@ -566,6 +566,7 @@ async function handleMessageReceived(
           status: "cancelled",
           cancelled_at: new Date().toISOString(),
           cancellation_reason: "Cancelado por cliente vía WhatsApp",
+          cancellation_category: "customer",
         },
         { count: "exact" }
       )

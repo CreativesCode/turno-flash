@@ -24,6 +24,8 @@
 //   deposit_due_reminder / deposit_overdue / notify_business_deposit_overdue
 //   (send-reminders) and payment_received (trigger on appointment_payments,
 //   paymentId required).
+//   Refunds (097), same switch: refund_processed / refund_rejected (trigger on
+//   appointment_refunds, refundId required).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -62,6 +64,8 @@ const CUSTOMER_FRAME: Partial<Record<Intent, FrameOptions>> = {
   deposit_due_reminder: { contact: false, reply: "deposit" },
   deposit_overdue: { contact: true, reply: "deposit" },
   payment_received: { contact: false, reply: "none" },
+  refund_processed: { contact: false, reply: "none" },
+  refund_rejected: { contact: true, reply: "none" },
 };
 
 const PAYMENT_NOTICES: Intent[] = [
@@ -69,6 +73,8 @@ const PAYMENT_NOTICES: Intent[] = [
   "deposit_overdue",
   "notify_business_deposit_overdue",
   "payment_received",
+  "refund_processed",
+  "refund_rejected",
 ];
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
@@ -99,7 +105,9 @@ type Intent =
   | "deposit_due_reminder"
   | "deposit_overdue"
   | "notify_business_deposit_overdue"
-  | "payment_received";
+  | "payment_received"
+  | "refund_processed"
+  | "refund_rejected";
 
 /** The payment a payment_received receipt is about, with the appointment totals. */
 interface PaymentInfo {
@@ -107,6 +115,13 @@ interface PaymentInfo {
   method: string;
   paid: string;
   pending: string;
+}
+
+/** The refund of refund_processed / refund_rejected (097). */
+interface RefundInfo {
+  amount: string;
+  method: string;
+  rejectionReason: string | null;
 }
 
 /** The deposit the appointment still waits for (090), with how to pay it. */
@@ -153,11 +168,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { appointmentId, intent, waitlistId, paymentId } = (await req.json()) as {
+    const { appointmentId, intent, waitlistId, paymentId, refundId } = (await req.json()) as {
       appointmentId: string;
       intent: Intent;
       waitlistId?: string;
       paymentId?: string;
+      refundId?: string;
     };
 
     if (!appointmentId || !intent) {
@@ -178,6 +194,13 @@ Deno.serve(async (req) => {
       return json(400, {
         success: false,
         error: "paymentId is required for intent=payment_received",
+      });
+    }
+
+    if ((intent === "refund_processed" || intent === "refund_rejected") && !refundId) {
+      return json(400, {
+        success: false,
+        error: `refundId is required for intent=${intent}`,
       });
     }
 
@@ -262,7 +285,7 @@ Deno.serve(async (req) => {
     }
 
     // 3a. Payment notices: once per deadline (096) and once per payment
-    const skipReason = await paymentNoticeSkipReason(supabase, appt, intent, paymentId);
+    const skipReason = await paymentNoticeSkipReason(supabase, appt, intent, paymentId, refundId);
     if (skipReason) {
       return json(200, { success: true, skipped: true, reason: skipReason });
     }
@@ -365,8 +388,10 @@ Deno.serve(async (req) => {
       (appt.deposit_status === "pending" || appt.deposit_status === "requested");
     let deposit: DepositInfo | null = null;
     let payment: PaymentInfo | null = null;
+    let refund: RefundInfo | null = null;
     let currency = "USD";
-    if (depositOwed || intent === "payment_received") {
+    const isRefund = intent === "refund_processed" || intent === "refund_rejected";
+    if (depositOwed || intent === "payment_received" || isRefund) {
       const { data: orgCurrency } = await supabase
         .from("organizations")
         .select("currency")
@@ -387,6 +412,23 @@ Deno.serve(async (req) => {
         pending: money(Number(appt.amount_pending ?? 0), currency),
       };
     }
+    if (isRefund) {
+      const { data: ref } = await supabase
+        .from("appointment_refunds")
+        .select("amount, method, method_other, rejection_reason")
+        .eq("id", refundId!)
+        .single<{
+          amount: number;
+          method: string | null;
+          method_other: string | null;
+          rejection_reason: string | null;
+        }>();
+      refund = {
+        amount: money(Number(ref?.amount ?? 0), currency),
+        method: ref?.method_other?.trim() || PAYMENT_METHOD_LABEL[ref?.method ?? ""] || "",
+        rejectionReason: ref?.rejection_reason?.trim() || null,
+      };
+    }
     if (depositOwed) {
       deposit = {
         amount: money(Number(appt.deposit_amount), currency),
@@ -402,7 +444,7 @@ Deno.serve(async (req) => {
           : null,
       };
     }
-    const body = buildMessage(appt, intent, waitlistCustomerName, openList, deposit, payment);
+    const body = buildMessage(appt, intent, waitlistCustomerName, openList, deposit, payment, refund);
     const frame: FrameOptions | undefined =
       intent === "confirm" && deposit
         ? { contact: true, reply: "deposit" }
@@ -458,6 +500,7 @@ Deno.serve(async (req) => {
       });
 
       if (intent === "payment_received") await markReceiptSent(supabase, paymentId!);
+      if (isRefund) await markRefundNoticeSent(supabase, refundId!);
 
       // Marcar la entrada de waitlist como notificada
       if (intent === "waitlist_slot" && waitlistId) {
@@ -534,6 +577,7 @@ Deno.serve(async (req) => {
     });
     // OpenWA can answer HTTP 500 after delivering: never send a receipt twice
     if (intent === "payment_received") await markReceiptSent(supabase, paymentId!);
+    if (isRefund) await markRefundNoticeSent(supabase, refundId!);
 
     return json(502, {
       success: false,
@@ -636,8 +680,22 @@ async function paymentNoticeSkipReason(
   supabase: any,
   appt: AppointmentRow,
   intent: Intent,
-  paymentId?: string
+  paymentId?: string,
+  refundId?: string
 ): Promise<string | null> {
+  if (intent === "refund_processed" || intent === "refund_rejected") {
+    const { data: ref } = await supabase
+      .from("appointment_refunds")
+      .select("status, notice_sent_at")
+      .eq("id", refundId)
+      .maybeSingle<{ status: string; notice_sent_at: string | null }>();
+    if (!ref) return "Refund not found";
+    if (ref.status !== (intent === "refund_processed" ? "processed" : "rejected")) {
+      return `Refund is ${ref.status}`;
+    }
+    return ref.notice_sent_at ? "Refund notice already sent" : null;
+  }
+
   if (intent === "payment_received") {
     const { data: pay } = await supabase
       .from("appointment_payments")
@@ -679,6 +737,14 @@ async function markReceiptSent(supabase: any, paymentId: string) {
     .eq("id", paymentId);
 }
 
+// deno-lint-ignore no-explicit-any
+async function markRefundNoticeSent(supabase: any, refundId: string) {
+  await supabase
+    .from("appointment_refunds")
+    .update({ notice_sent_at: new Date().toISOString() })
+    .eq("id", refundId);
+}
+
 /** "• T-0045 · martes 8 de octubre, 10:00" lines of the customer's open appointments. */
 async function openAppointmentsList(
   // deno-lint-ignore no-explicit-any
@@ -718,7 +784,8 @@ function buildMessage(
   waitlistCustomerName = "",
   openList = "",
   deposit: DepositInfo | null = null,
-  payment: PaymentInfo | null = null
+  payment: PaymentInfo | null = null,
+  refund: RefundInfo | null = null
 ): string {
   const date = new Date(`${appt.appointment_date}T${appt.start_time}`);
   const fechaLarga = date.toLocaleDateString("es-CU", {
@@ -1018,6 +1085,15 @@ function buildMessage(
         ``,
         `Pagado: *${payment?.paid}*`,
         `Pendiente: *${payment?.pending}*`,
+      ].join("\n");
+
+    case "refund_processed":
+      return `💸 Hola ${cliente}! Te devolvimos *${refund?.amount}*${refund?.method ? ` (${refund.method})` : ""} del turno N° ${numero} (${fechaLarga}, ${hora}).`;
+
+    case "refund_rejected":
+      return [
+        `Hola ${cliente}, revisamos tu devolución de *${refund?.amount}* del turno N° ${numero} (${fechaLarga}, ${hora}) y no procede.`,
+        ...(refund?.rejectionReason ? [``, `Motivo: ${refund.rejectionReason}`] : []),
       ].join("\n");
 
     case "notify_business_confirm":
