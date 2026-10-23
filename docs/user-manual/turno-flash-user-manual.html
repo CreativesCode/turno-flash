@@ -601,6 +601,7 @@
     <li>Si quieres, anota la referencia de la transferencia, alguna observación y adjunta la foto o el PDF del comprobante.</li>
     <li>Pulsa <span class="ui">Registrar</span>. Cuando lo pagado cubre el precio, el turno queda <em>Pagado</em> y en la lista lo ves al lado del servicio.</li>
   </ol>
+  <p>Con WhatsApp conectado, el cliente recibe un acuse de cada pago: cuánto pagó, cómo, el total pagado y lo que falta. Le sirve de recibo.</p>
   <figure class="shot"><img src="/images/help/payments.webp" alt="El bloque «Pagos» de un turno: pagado 1.450 US$ de 2.000 US$, falta 550 US$, un anticipo anulado tachado con su motivo y tres pagos con el botón «Anular»." width="520" height="933" loading="lazy"><figcaption>Los pagos de un turno: lo pagado, lo que falta y cada pago. El anticipo anulado queda tachado, con quién lo anuló y por qué.</figcaption></figure>
   <div class="callout note">
     <span class="tag">Bueno saber</span>
@@ -608,6 +609,7 @@
       <li>Tu equipo también registra pagos. <strong>Solo tú los anulas</strong>: pulsa <span class="ui">Anular</span> en el pago y escribe el motivo. El pago no se borra: queda tachado, deja de sumar y se ve quién lo anuló y cuándo.</li>
       <li>El comprobante solo lo ve tu negocio. Se abre con <span class="ui">Ver comprobante</span>.</li>
       <li>Puedes cobrar más que el precio (una propina, un extra): el turno queda <em>Pagado</em> y se ve lo cobrado de más.</li>
+      <li>Si registras el anticipo y con eso confirmas el turno, el cliente recibe solo <em>Recibimos tu anticipo</em>, sin un acuse aparte. Anular un pago no le manda nada.</li>
     </ul>
   </div>
 
@@ -709,7 +711,7 @@
   <p>Así funciona un turno con anticipo:</p>
   <ol class="steps">
     <li>Al reservar, el turno queda <span class="chip st-pending">Pendiente</span> y en la lista ves <em>Falta anticipo</em>. El horario queda guardado para ese cliente.</li>
-    <li>Con WhatsApp conectado, el cliente recibe el importe y tus instrucciones de pago.</li>
+    <li>Con WhatsApp conectado, el cliente recibe el importe y tus instrucciones de pago. Si tiene más de un día para pagar, 24 horas antes del plazo le llega un recordatorio con lo mismo.</li>
     <li>Cuando paga, responde <strong>PAGUÉ</strong> o manda la foto del comprobante, y tú recibes el aviso <em>El cliente dice que pagó el anticipo</em>.</li>
     <li>Comprueba que te llegó el dinero, abre el turno y pulsa <span class="ui">Anticipo recibido</span>. Anota cómo te pagó (importe, método, referencia y, si quieres, el comprobante) y pulsa <span class="ui">Registrar</span>. El anticipo cuenta como un pago más del turno, y el turno pasa a <span class="chip st-confirmed">Confirmado</span>, el cliente recibe <em>Recibimos tu anticipo</em> y desde ahí le llegan los recordatorios. Queda anotado quién lo marcó y cuándo.</li>
   </ol>
@@ -723,7 +725,7 @@
       <li>Tu equipo puede registrar el pago del anticipo con <span class="ui">Registrar anticipo</span>: queda como <em>Pago registrado, falta verificarlo</em> hasta que tú compruebes el dinero y pulses <span class="ui">Verificar anticipo</span>. Solo tú confirmas, perdonas o devuelves un anticipo.</li>
       <li>Si anulas el pago del anticipo (por ejemplo, la transferencia no llegó), el anticipo vuelve a quedar pendiente.</li>
       <li>Si cambias el precio o el anticipo de un servicio, los turnos ya reservados conservan el importe que tenían.</li>
-      <li>Si pasa la fecha límite sin que el cliente pague, el turno muestra <em>Anticipo vencido</em> en rojo. No se cancela solo: decides tú.</li>
+      <li>Si pasa la fecha límite sin que el cliente pague, el turno muestra <em>Anticipo vencido</em> en rojo. No se cancela solo: decides tú. Con WhatsApp conectado, en ese momento el cliente recibe un aviso de que venció el plazo y tú, <em>Anticipo vencido</em> con sus datos, para que lo canceles, le des más plazo o perdones el anticipo.</li>
       <li>Si alguien reserva cuando el plazo ya pasó (por ejemplo, para mañana con un plazo de 24 h), tiene hasta la hora del turno para pagar.</li>
     </ul>
   </div>
@@ -800,8 +802,11 @@
         <tr><td>Al crear un turno</td><td class="wrap">Cliente y negocio</td><td class="wrap">Al cliente, los datos del turno con opción de responder OK o CANCELAR seguido del código del turno. Si está pendiente de aprobación, le dice que su solicitud se recibió. Al negocio, un aviso de <em>Nuevo turno</em>.</td></tr>
         <tr><td>Al aprobar un pendiente</td><td class="wrap">Cliente</td><td class="wrap">Que el negocio aprobó su solicitud y el turno está confirmado.</td></tr>
         <tr><td>Al reservar un servicio con anticipo</td><td class="wrap">Cliente</td><td class="wrap">El importe del anticipo y hasta cuándo pagarlo, tus instrucciones de pago, las condiciones del servicio y que responda PAGUÉ o mande la foto del comprobante cuando pague.</td></tr>
+        <tr><td>24 horas antes del plazo del anticipo</td><td class="wrap">Cliente</td><td class="wrap">Recordatorio del anticipo: importe, plazo, tus instrucciones de pago y que responda PAGUÉ. Solo si reservó con más de un día de margen y todavía no avisó que pagó.</td></tr>
+        <tr><td>Al vencer el plazo del anticipo</td><td class="wrap">Cliente y negocio</td><td class="wrap">Al cliente, que venció el plazo, que el turno sigue pendiente y cómo pagar. Al negocio, <em>Anticipo vencido</em> con el cliente y el turno.</td></tr>
         <tr><td>Cuando el cliente avisa que pagó</td><td class="wrap">Cliente y negocio</td><td class="wrap">Al cliente, que le avisamos al negocio. Al negocio, <em>El cliente dice que pagó el anticipo</em>.</td></tr>
         <tr><td>Al marcar el anticipo recibido</td><td class="wrap">Cliente</td><td class="wrap">Que recibimos su anticipo y el turno está confirmado.</td></tr>
+        <tr><td>Al registrar un pago</td><td class="wrap">Cliente</td><td class="wrap">Acuse del pago: importe, método, total pagado y lo que falta.</td></tr>
         <tr><td>24 horas antes</td><td class="wrap">Cliente</td><td class="wrap">Recordatorio para confirmar con OK o cancelar.</td></tr>
         <tr><td>1 hora antes</td><td class="wrap">Cliente</td><td class="wrap">Aviso de que el turno es en una hora.</td></tr>
         <tr><td>Al cancelar</td><td class="wrap">Cliente</td><td class="wrap">Que su turno fue cancelado y que puede escribir para reagendar.</td></tr>
@@ -855,6 +860,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
   <h3>Automatizaciones que puedes encender</h3>
   <ul>
     <li><strong>Pedir valoración al completar un turno:</strong> viene encendida.</li>
+    <li><strong>Recordatorios y avisos de pago:</strong> viene encendida. Manda el recordatorio del anticipo, los avisos de anticipo vencido y el acuse de cada pago. Si la apagas, el mensaje de la reserva con el anticipo y <em>Recibimos tu anticipo</em> se siguen enviando.</li>
     <li><strong>Resumen diario por WhatsApp:</strong> cada mañana, a la hora que elijas (hora local del negocio), llega al WhatsApp del negocio cuántos turnos hay hoy, cuántos faltan confirmar y el ingreso estimado.</li>
   </ul>
   <p>Después de cambiar algo en Ajustes pulsa <span class="ui">Guardar cambios</span>.</p>
@@ -1030,7 +1036,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
     <li>Al terminar, <span class="ui">Terminar</span>. Esto es importante: <strong>solo los turnos terminados cuentan como ingreso</strong> en los reportes del negocio, y es el momento en que al cliente se le pide una valoración.</li>
   </ol>
   <p>Si en un turno ves <em>Falta anticipo</em>, el cliente todavía no pagó el anticipo de ese servicio: el turno sigue pendiente hasta que el dueño lo marque como recibido. Si el cliente te lo paga a ti, abre el turno, pulsa <span class="ui">Registrar anticipo</span> y anota cómo pagó; el dueño lo verifica.</p>
-  <p>Cuando el cliente paga el turno (todo o una parte), abre su ficha y, en <em>Pagos</em>, pulsa <span class="ui">Registrar pago</span>: importe, fecha, método, referencia, observaciones y, si quieres, la foto del comprobante. Si te equivocas, avisa al dueño: solo el dueño puede anular un pago.</p>
+  <p>Cuando el cliente paga el turno (todo o una parte), abre su ficha y, en <em>Pagos</em>, pulsa <span class="ui">Registrar pago</span>: importe, fecha, método, referencia, observaciones y, si quieres, la foto del comprobante. Al cliente le llega por WhatsApp un acuse con lo que pagó y lo que falta. Si te equivocas, avisa al dueño: solo el dueño puede anular un pago.</p>
   <figure class="shot"><img src="/images/help/appointment-detail.webp" alt="Al tocar un turno se abre su ficha. El botón grande es el siguiente paso: aquí, «Marcar llegada»." width="520" height="933" loading="lazy"><figcaption>Al tocar un turno se abre su ficha. El botón grande es el siguiente paso: aquí, «Marcar llegada».</figcaption></figure>
   <p>Tocando el turno abres su detalle, con los botones <span class="ui">WhatsApp</span> (abre un chat con el cliente), <span class="ui">Mover</span> y <span class="ui">Cancelar</span>; <span class="ui">No vino</span> está en el menú <span class="ui">⋮</span> de arriba. Un turno ya <span class="chip st-in_progress">En curso</span> no se puede marcar como No vino, y los turnos terminados, cancelados o marcados como No vino ya no cambian.</p>
 
