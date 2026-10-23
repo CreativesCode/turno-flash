@@ -577,7 +577,7 @@
     <li><span class="ui">Terminar</span>, para cerrarlo de una vez sin pasar por los pasos intermedios.</li>
     <li><span class="ui">WhatsApp</span>: abre un chat con el cliente. Toca su teléfono para llamarlo.</li>
     <li><span class="ui">⋮</span> › <span class="ui">No vino</span>, arriba junto a la X: marca que el cliente no se presentó.</li>
-    <li><span class="ui">Cancelar</span>: cancela el turno. Con WhatsApp conectado, el cliente recibe <em>Tu turno N° … fue cancelado</em>.</li>
+    <li><span class="ui">Cancelar</span>: cancela el turno. Elige el motivo: <em>El cliente canceló</em>, <em>Canceló el negocio</em>, <em>No pagó el anticipo</em> u <em>Otro</em> (escribe cuál). El motivo, quién lo canceló y cuándo quedan a la vista en el turno. Con WhatsApp conectado, el cliente recibe <em>Tu turno N° … fue cancelado</em>.</li>
   </ul>
   <p>No hace falta pasar por todos los pasos: puedes saltar de <span class="chip st-confirmed">Confirmado</span> directamente a <span class="chip st-completed">Terminado</span>, por ejemplo. Lo que no se puede es volver atrás, ni cambiar un turno terminado, cancelado o marcado como No vino.</p>
 
@@ -610,6 +610,26 @@
       <li>El comprobante solo lo ve tu negocio. Se abre con <span class="ui">Ver comprobante</span>.</li>
       <li>Puedes cobrar más que el precio (una propina, un extra): el turno queda <em>Pagado</em> y se ve lo cobrado de más.</li>
       <li>Si registras el anticipo y con eso confirmas el turno, el cliente recibe solo <em>Recibimos tu anticipo</em>, sin un acuse aparte. Anular un pago no le manda nada.</li>
+    </ul>
+  </div>
+
+  <h3>Devolver dinero de un turno cancelado</h3>
+  <p>Si un turno cancelado (o en el que el cliente no vino) tenía pagos, en su ficha aparece el bloque <em>Devoluciones</em> con lo devuelto y lo que queda por devolver.</p>
+  <ol class="steps">
+    <li>Pulsa <span class="ui">Registrar devolución</span>. El importe ya trae todo lo pagado; cámbialo si devuelves una parte. El motivo trae el de la cancelación; puedes cambiarlo.</li>
+    <li>Si ya devolviste el dinero, elige <span class="ui">Ya la devolví</span>, el método (efectivo, transferencia, tarjeta u otro) y la fecha. Si todavía no, elige <span class="ui">Queda pendiente</span>.</li>
+    <li>Pulsa <span class="ui">Registrar</span>. Una devolución pendiente se resuelve después desde el mismo turno con <span class="ui">Marcar devuelta</span> o <span class="ui">Rechazar</span> (con el motivo).</li>
+  </ol>
+  <div class="callout note">
+    <span class="tag">Bueno saber</span>
+    <ul>
+      <li>Nunca se devuelve más de lo pagado. Cuando lo devuelto cubre el anticipo, el anticipo queda <em>Devuelto</em>.</li>
+      <li>Cada devolución guarda su historial: quién la registró, quién la devolvió o la rechazó y cuándo. No se edita ni se borra: si te equivocaste, recházala con el motivo y registra otra.</li>
+      <li>Tu equipo puede registrar devoluciones, pero quedan <em>Pendientes</em> hasta que tú las marques devueltas o las rechaces.</li>
+      <li>Con WhatsApp conectado, el cliente recibe un mensaje cuando la devuelves (<em>Te devolvimos …</em>) o la rechazas (con el motivo). Registrarla como pendiente no le manda nada.</li>
+      <li>Lo pagado del turno no cambia al devolver: el bloque <em>Devoluciones</em> muestra aparte lo devuelto y lo pendiente.</li>
+      <li>No puedes anular un pago cuyo dinero ya devolviste o tiene una devolución pendiente: rechaza antes la devolución pendiente.</li>
+      <li>Si tu negocio no devuelve dinero, apaga <span class="path">Ajustes <i>›</i> Hacemos devoluciones</span> y el botón deja de aparecer. Las devoluciones pendientes que ya había se pueden seguir resolviendo.</li>
     </ul>
   </div>
 
@@ -721,7 +741,7 @@
     <ul>
       <li>Un turno con el anticipo sin recibir <strong>no se puede confirmar</strong> con el botón de siempre: se confirma al marcar el anticipo.</li>
       <li><span class="ui">Perdonar anticipo</span> confirma el turno sin anticipo, por ejemplo para un cliente de confianza.</li>
-      <li>Si cancelas un turno cuyo anticipo ya recibiste, aparece <span class="ui">Marcar anticipo devuelto</span> para dejar anotado que se lo devolviste.</li>
+      <li>Si cancelas un turno cuyo anticipo ya recibiste, devuélvelo con <span class="ui">Registrar devolución</span> (ver <em>Devolver dinero de un turno cancelado</em>): cuando lo devuelto cubre el anticipo, queda <em>Devuelto</em>.</li>
       <li>Tu equipo puede registrar el pago del anticipo con <span class="ui">Registrar anticipo</span>: queda como <em>Pago registrado, falta verificarlo</em> hasta que tú compruebes el dinero y pulses <span class="ui">Verificar anticipo</span>. Solo tú confirmas, perdonas o devuelves un anticipo.</li>
       <li>Si anulas el pago del anticipo (por ejemplo, la transferencia no llegó), el anticipo vuelve a quedar pendiente.</li>
       <li>Si cambias el precio o el anticipo de un servicio, los turnos ya reservados conservan el importe que tenían.</li>
@@ -807,6 +827,7 @@
         <tr><td>Cuando el cliente avisa que pagó</td><td class="wrap">Cliente y negocio</td><td class="wrap">Al cliente, que le avisamos al negocio. Al negocio, <em>El cliente dice que pagó el anticipo</em>.</td></tr>
         <tr><td>Al marcar el anticipo recibido</td><td class="wrap">Cliente</td><td class="wrap">Que recibimos su anticipo y el turno está confirmado.</td></tr>
         <tr><td>Al registrar un pago</td><td class="wrap">Cliente</td><td class="wrap">Acuse del pago: importe, método, total pagado y lo que falta.</td></tr>
+        <tr><td>Al devolver o rechazar una devolución</td><td class="wrap">Cliente</td><td class="wrap">Cuánto le devolviste y cómo, o que la devolución no procede y por qué.</td></tr>
         <tr><td>24 horas antes</td><td class="wrap">Cliente</td><td class="wrap">Recordatorio para confirmar con OK o cancelar.</td></tr>
         <tr><td>1 hora antes</td><td class="wrap">Cliente</td><td class="wrap">Aviso de que el turno es en una hora.</td></tr>
         <tr><td>Al cancelar</td><td class="wrap">Cliente</td><td class="wrap">Que su turno fue cancelado y que puede escribir para reagendar.</td></tr>
@@ -860,7 +881,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
   <h3>Automatizaciones que puedes encender</h3>
   <ul>
     <li><strong>Pedir valoración al completar un turno:</strong> viene encendida.</li>
-    <li><strong>Recordatorios y avisos de pago:</strong> viene encendida. Manda el recordatorio del anticipo, los avisos de anticipo vencido y el acuse de cada pago. Si la apagas, el mensaje de la reserva con el anticipo y <em>Recibimos tu anticipo</em> se siguen enviando.</li>
+    <li><strong>Recordatorios y avisos de pago:</strong> viene encendida. Manda el recordatorio del anticipo, los avisos de anticipo vencido, el acuse de cada pago y los avisos de devolución. Si la apagas, el mensaje de la reserva con el anticipo y <em>Recibimos tu anticipo</em> se siguen enviando.</li>
     <li><strong>Resumen diario por WhatsApp:</strong> cada mañana, a la hora que elijas (hora local del negocio), llega al WhatsApp del negocio cuántos turnos hay hoy, cuántos faltan confirmar y el ingreso estimado.</li>
   </ul>
   <p>Después de cambiar algo en Ajustes pulsa <span class="ui">Guardar cambios</span>.</p>
@@ -886,6 +907,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
       <ul>
         <li>Ver la agenda y crear turnos</li>
         <li>Avanzar estados, marcar No vino y cancelar</li>
+        <li>Registrar pagos y dejar devoluciones pendientes</li>
         <li>Enviar recordatorios por WhatsApp</li>
         <li>Crear, editar y desactivar clientes</li>
         <li>Exportar la agenda y los clientes</li>
@@ -897,6 +919,7 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
         <li>Servicios y Profesionales</li>
         <li>Ajustes, reserva online y moneda</li>
         <li>Reportes</li>
+        <li>Anular pagos y marcar devoluciones devueltas o rechazarlas</li>
         <li>Recuperar clientes</li>
         <li>Invitar gente y gestionar la suscripción</li>
       </ul>
@@ -1037,8 +1060,9 @@ Escribe <b>OK EN-0042</b> para confirmar o <b>CANCELAR EN-0042</b> si no puedes.
   </ol>
   <p>Si en un turno ves <em>Falta anticipo</em>, el cliente todavía no pagó el anticipo de ese servicio: el turno sigue pendiente hasta que el dueño lo marque como recibido. Si el cliente te lo paga a ti, abre el turno, pulsa <span class="ui">Registrar anticipo</span> y anota cómo pagó; el dueño lo verifica.</p>
   <p>Cuando el cliente paga el turno (todo o una parte), abre su ficha y, en <em>Pagos</em>, pulsa <span class="ui">Registrar pago</span>: importe, fecha, método, referencia, observaciones y, si quieres, la foto del comprobante. Al cliente le llega por WhatsApp un acuse con lo que pagó y lo que falta. Si te equivocas, avisa al dueño: solo el dueño puede anular un pago.</p>
+  <p>Si un turno cancelado tenía pagos y hay que devolver el dinero, en su ficha pulsa <span class="ui">Registrar devolución</span>: queda <em>Pendiente</em> hasta que el dueño la marque devuelta o la rechace.</p>
   <figure class="shot"><img src="/images/help/appointment-detail.webp" alt="Al tocar un turno se abre su ficha. El botón grande es el siguiente paso: aquí, «Marcar llegada»." width="520" height="933" loading="lazy"><figcaption>Al tocar un turno se abre su ficha. El botón grande es el siguiente paso: aquí, «Marcar llegada».</figcaption></figure>
-  <p>Tocando el turno abres su detalle, con los botones <span class="ui">WhatsApp</span> (abre un chat con el cliente), <span class="ui">Mover</span> y <span class="ui">Cancelar</span>; <span class="ui">No vino</span> está en el menú <span class="ui">⋮</span> de arriba. Un turno ya <span class="chip st-in_progress">En curso</span> no se puede marcar como No vino, y los turnos terminados, cancelados o marcados como No vino ya no cambian.</p>
+  <p>Tocando el turno abres su detalle, con los botones <span class="ui">WhatsApp</span> (abre un chat con el cliente), <span class="ui">Mover</span> y <span class="ui">Cancelar</span> (te pide el motivo); <span class="ui">No vino</span> está en el menú <span class="ui">⋮</span> de arriba. Un turno ya <span class="chip st-in_progress">En curso</span> no se puede marcar como No vino, y los turnos terminados, cancelados o marcados como No vino ya no cambian.</p>
 
   <h2 id="tp-recordatorios">Recordatorios</h2>
   <p>La app envía sola un recordatorio <strong>24 horas</strong> y otro <strong>1 hora</strong> antes de cada turno. Además, en <span class="path">Recordatorios</span> puedes avisar a mano:</p>
