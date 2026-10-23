@@ -37,12 +37,9 @@ comentario y despliegues en Tasknic **solo cuando ella lo pide** → tarea a `in
 - Siguientes del board: TUR0009 recordatorios de pago, TUR0010 devoluciones, TUR0011 panel e informes
   (TUR0012 pasarelas de pago).
 
-### Estado al pausar (2026-10-22) — retomar aquí
-- **5 commits de TUR0008 en `main` sin subir** (`fefac01`..`f0fae54`). La migración **095 ya está aplicada en
-  producción**; las pantallas salen al hacer push. No hay Edge Functions que desplegar.
-- **Pregunta abierta a Claudia:** «¿Subo los 5 commits, dejo el comentario en Tasknic a tu nombre, registro el
-  despliegue (migración 095 + web) y paso TUR0008 a En revisión, asignada a ti?». Plantilla del script:
-  `tasknic_tur0007.py` del scratchpad de la sesión (o rehacerla con la API de [[tasknic]]).
+### Entrega de TUR0008 (2026-10-23)
+- Claudia aprobó: push a `main` (`19a2f6a`), comentario en TUR0008 a su nombre, despliegues en Tasknic (`migrations`
+  095 verificado; `web` sin verificar en Vercel) y TUR0008 en «En revisión» asignada a ella. Nada pendiente de subir.
 - Ofrecimientos anteriores sin respuesta:
   - completar la tabla de resultados de la nota de prueba de TUR0003 en Tasknic y marcar verificado el despliegue
     de `wa-inbound`;

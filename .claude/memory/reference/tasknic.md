@@ -22,5 +22,5 @@ metadata:
   Roberto a mano). «Qué corre ahora» sí: `POST /projects/Turno%20Flash/deployments` con un `sha` ya pusheado
   (`git rev-parse origin/main`), `status` (solo `success`, `failed` o `rolled_back`), `verified` (true solo si se comprobó en vivo), `target`
   (`web`, `migrations`, `edge-functions/<nombre>`; sin target = todo) y `migrations_applied`.
-  **Registrar cada despliegue a producción al terminarlo.** Primer registro: `2966d61`, sin verificar. 2026-10-16: registrados 087+088, `wa-send`/`wa-trip-send`/`wa-inbound` (verificados) y la web en `8a99af2` (sin verificar en Vercel). 2026-10-20: la web en `da8fe5c` (arreglo del Logger, sin verificar).
+  **Registrar cada despliegue a producción al terminarlo.** Primer registro: `2966d61`, sin verificar. 2026-10-16: registrados 087+088, `wa-send`/`wa-trip-send`/`wa-inbound` (verificados) y la web en `8a99af2` (sin verificar en Vercel). 2026-10-20: la web en `da8fe5c` (arreglo del Logger, sin verificar). 2026-10-23: 095 (verificada) y la web en `19a2f6a` (TUR0008, sin verificar).
   Además hay una nota larga «Despliegue» en Documentos del Espacio.

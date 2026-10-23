@@ -115,11 +115,10 @@ anular, comprobante.
 
 ---
 
-## Entrega (pendiente, pausa del 2026-10-22)
+## Entrega (2026-10-23)
 
-- Hecho: migración 095 aplicada en producción; 5 commits en `main` (`fefac01`..`f0fae54`) **sin subir**.
-- Falta, cuando Claudia lo apruebe: push; comentario en TUR0008 a su nombre; despliegues en Tasknic (`migrations`
-  095 verificado; `web` sin verificar en Vercel); TUR0008 a `in_review` asignada a ella.
+- Migración 095 en producción; push a `main` (`fefac01`..`19a2f6a`); comentario en TUR0008 a nombre de Claudia;
+  despliegues en Tasknic (`migrations` 095 verificado; `web` sin verificar en Vercel); TUR0008 en `in_review`.
 
 ## Cómo quedó
 
