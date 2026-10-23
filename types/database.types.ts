@@ -62,6 +62,7 @@ export type Database = {
       }
       appointment_payments: {
         Row: {
+          ack_sent_at: string | null
           amount: number
           appointment_id: string
           created_at: string
@@ -80,6 +81,7 @@ export type Database = {
           voided_by: string | null
         }
         Insert: {
+          ack_sent_at?: string | null
           amount: number
           appointment_id: string
           created_at?: string
@@ -98,6 +100,7 @@ export type Database = {
           voided_by?: string | null
         }
         Update: {
+          ack_sent_at?: string | null
           amount?: number
           appointment_id?: string
           created_at?: string
@@ -457,6 +460,7 @@ export type Database = {
           default_appointment_color: string | null
           deposit_instructions: string | null
           enable_daily_summary: boolean | null
+          enable_payment_reminders: boolean
           enable_rating_request: boolean | null
           enable_reminders: boolean | null
           enable_waitlist: boolean | null
@@ -488,6 +492,7 @@ export type Database = {
           default_appointment_color?: string | null
           deposit_instructions?: string | null
           enable_daily_summary?: boolean | null
+          enable_payment_reminders?: boolean
           enable_rating_request?: boolean | null
           enable_reminders?: boolean | null
           enable_waitlist?: boolean | null
@@ -519,6 +524,7 @@ export type Database = {
           default_appointment_color?: string | null
           deposit_instructions?: string | null
           enable_daily_summary?: boolean | null
+          enable_payment_reminders?: boolean
           enable_rating_request?: boolean | null
           enable_reminders?: boolean | null
           enable_waitlist?: boolean | null
@@ -2726,6 +2732,20 @@ export type Database = {
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
       }
+      wa_deposits_due_soon: {
+        Args: never
+        Returns: {
+          id: string
+          organization_id: string
+        }[]
+      }
+      wa_deposits_overdue: {
+        Args: never
+        Returns: {
+          id: string
+          organization_id: string
+        }[]
+      }
     }
     Enums: {
       appointment_deposit_status:
@@ -2798,6 +2818,10 @@ export type Database = {
         | "rescheduled"
         | "deposit_paid_ack"
         | "notify_business_deposit_paid"
+        | "deposit_due_reminder"
+        | "deposit_overdue"
+        | "notify_business_deposit_overdue"
+        | "payment_received"
       wa_outbound_status: "pending" | "sent" | "delivered" | "read" | "failed"
       waitlist_status:
         | "active"
@@ -3010,6 +3034,10 @@ export const Constants = {
         "rescheduled",
         "deposit_paid_ack",
         "notify_business_deposit_paid",
+        "deposit_due_reminder",
+        "deposit_overdue",
+        "notify_business_deposit_overdue",
+        "payment_received",
       ],
       wa_outbound_status: ["pending", "sent", "delivered", "read", "failed"],
       waitlist_status: ["active", "notified", "booked", "expired", "cancelled"],
