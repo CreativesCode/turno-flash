@@ -19,6 +19,7 @@ import {
   type BusinessAutomationSettingsPatch,
 } from "@/hooks/useBusinessSettings.query";
 import {
+  BellRing,
   Bus,
   CalendarCheck,
   CalendarOff,
@@ -61,6 +62,8 @@ export default function SettingsPage() {
     draft.enable_rating_request ?? settings?.enable_rating_request ?? true;
   const summaryEnabled =
     draft.enable_daily_summary ?? settings?.enable_daily_summary ?? false;
+  const paymentRemindersEnabled =
+    draft.enable_payment_reminders ?? settings?.enable_payment_reminders ?? true;
   const summaryTime = (
     draft.daily_summary_time ??
     settings?.daily_summary_time ??
@@ -90,6 +93,7 @@ export default function SettingsPage() {
         booking_page_enabled: bookingEnabled,
         enable_rating_request: ratingEnabled,
         enable_daily_summary: summaryEnabled,
+        enable_payment_reminders: paymentRemindersEnabled,
         daily_summary_time: summaryTime,
         calendar_start_hour: calendarStart,
         calendar_end_hour: calendarEnd,
@@ -273,6 +277,14 @@ export default function SettingsPage() {
                     loading={isLoading}
                     checked={ratingEnabled}
                     onChange={(v) => patchDraft({ enable_rating_request: v })}
+                  />
+                  <SettingRow
+                    icon={BellRing}
+                    title="Recordatorios y avisos de pago"
+                    description="Le recordamos al cliente el anticipo 24 h antes del plazo, les avisamos a él y a ti cuando el plazo vence sin pago, y le mandamos un acuse por cada pago que registras."
+                    loading={isLoading}
+                    checked={paymentRemindersEnabled}
+                    onChange={(v) => patchDraft({ enable_payment_reminders: v })}
                   />
                   <SettingRow
                     icon={Sunrise}

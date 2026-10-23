@@ -12,6 +12,8 @@ export interface BusinessAutomationSettings {
   whatsapp_integration_enabled: boolean;
   enable_rating_request: boolean;
   enable_daily_summary: boolean;
+  /** Deposit reminder, overdue deposit notices and payment receipts (096). */
+  enable_payment_reminders: boolean;
   /** Hora local de la organización, formato HH:MM[:SS] */
   daily_summary_time: string | null;
   /** Public online booking page (PRP-001). Opt-in per business. */
@@ -47,7 +49,7 @@ export function useBusinessSettings() {
       const { data, error } = await supabase
         .from("business_settings")
         .select(
-          "organization_id, whatsapp_integration_enabled, enable_rating_request, enable_daily_summary, daily_summary_time, booking_page_enabled, seat_booking_enabled, deposit_instructions, seat_booking_hold_hours, calendar_start_hour, calendar_end_hour"
+          "organization_id, whatsapp_integration_enabled, enable_rating_request, enable_daily_summary, enable_payment_reminders, daily_summary_time, booking_page_enabled, seat_booking_enabled, deposit_instructions, seat_booking_hold_hours, calendar_start_hour, calendar_end_hour"
         )
         .eq("organization_id", orgId)
         .maybeSingle();
