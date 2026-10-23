@@ -416,6 +416,8 @@ async function handleMessageReceived(
     "reminder_manual",
     "approved",
     "rescheduled",
+    "deposit_due_reminder",
+    "deposit_overdue",
   ];
   // A reply only applies to appointments that are still open and ahead
   const OPEN_STATUSES = ["pending", "confirmed", "reminded", "client_confirmed"];
@@ -745,7 +747,16 @@ async function exampleCodeFor(
     .from("wa_outbound_messages")
     .select("organization_id")
     .in("organization_id", organizationIds)
-    .in("intent", ["confirm", "reminder_24h", "reminder_1h", "reminder_manual", "approved", "rescheduled"])
+    .in("intent", [
+      "confirm",
+      "reminder_24h",
+      "reminder_1h",
+      "reminder_manual",
+      "approved",
+      "rescheduled",
+      "deposit_due_reminder",
+      "deposit_overdue",
+    ])
     .order("sent_at", { ascending: false })
     .limit(1)
     .maybeSingle<{ organization_id: string }>();

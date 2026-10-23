@@ -19,6 +19,11 @@
 //   waitlistId es obligatorio para intent=waitlist_slot: el mensaje describe el
 //   hueco liberado (datos del appointment cancelado) pero va al cliente de la
 //   entrada de waitlist, no al del appointment.
+//
+//   Payment notices (096), all behind business_settings.enable_payment_reminders:
+//   deposit_due_reminder / deposit_overdue / notify_business_deposit_overdue
+//   (send-reminders) and payment_received (trigger on appointment_payments,
+//   paymentId required).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -54,6 +59,22 @@ const CUSTOMER_FRAME: Partial<Record<Intent, FrameOptions>> = {
   rating_ack: { contact: false, reply: "none" },
   waitlist_slot: { contact: true, reply: "none" },
   deposit_paid_ack: { contact: false, reply: "none" },
+  deposit_due_reminder: { contact: false, reply: "deposit" },
+  deposit_overdue: { contact: true, reply: "deposit" },
+  payment_received: { contact: false, reply: "none" },
+};
+
+const PAYMENT_NOTICES: Intent[] = [
+  "deposit_due_reminder",
+  "deposit_overdue",
+  "notify_business_deposit_overdue",
+  "payment_received",
+];
+
+const PAYMENT_METHOD_LABEL: Record<string, string> = {
+  cash: "efectivo",
+  transfer: "transferencia",
+  card: "tarjeta",
 };
 
 type Intent =
@@ -74,7 +95,19 @@ type Intent =
   | "approved"
   | "rescheduled"
   | "deposit_paid_ack"
-  | "notify_business_deposit_paid";
+  | "notify_business_deposit_paid"
+  | "deposit_due_reminder"
+  | "deposit_overdue"
+  | "notify_business_deposit_overdue"
+  | "payment_received";
+
+/** The payment a payment_received receipt is about, with the appointment totals. */
+interface PaymentInfo {
+  amount: string;
+  method: string;
+  paid: string;
+  pending: string;
+}
 
 /** The deposit the appointment still waits for (090), with how to pay it. */
 interface DepositInfo {
@@ -104,6 +137,8 @@ interface AppointmentRow {
   deposit_due_at: string | null;
   payment_terms: string | null;
   timezone: string | null;
+  amount_paid: number;
+  amount_pending: number;
 }
 
 const corsHeaders = {
@@ -118,10 +153,11 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { appointmentId, intent, waitlistId } = (await req.json()) as {
+    const { appointmentId, intent, waitlistId, paymentId } = (await req.json()) as {
       appointmentId: string;
       intent: Intent;
       waitlistId?: string;
+      paymentId?: string;
     };
 
     if (!appointmentId || !intent) {
@@ -135,6 +171,13 @@ Deno.serve(async (req) => {
       return json(400, {
         success: false,
         error: "waitlistId is required for intent=waitlist_slot",
+      });
+    }
+
+    if (intent === "payment_received" && !paymentId) {
+      return json(400, {
+        success: false,
+        error: "paymentId is required for intent=payment_received",
       });
     }
 
@@ -183,12 +226,15 @@ Deno.serve(async (req) => {
     // 2. Cargar configuración WA del negocio
     const { data: settings, error: settingsErr } = await supabase
       .from("business_settings")
-      .select("openwa_session_id, whatsapp_integration_enabled, deposit_instructions")
+      .select(
+        "openwa_session_id, whatsapp_integration_enabled, deposit_instructions, enable_payment_reminders"
+      )
       .eq("organization_id", appt.organization_id)
       .single<{
         openwa_session_id: string | null;
         whatsapp_integration_enabled: boolean;
         deposit_instructions: string | null;
+        enable_payment_reminders: boolean;
       }>();
 
     if (settingsErr || !settings?.whatsapp_integration_enabled) {
@@ -205,6 +251,20 @@ Deno.serve(async (req) => {
         skipped: true,
         reason: "openwa_session_id missing in business_settings",
       });
+    }
+
+    if (PAYMENT_NOTICES.includes(intent) && !settings.enable_payment_reminders) {
+      return json(200, {
+        success: false,
+        skipped: true,
+        reason: "Payment reminders disabled for this organization",
+      });
+    }
+
+    // 3a. Payment notices: once per deadline (096) and once per payment
+    const skipReason = await paymentNoticeSkipReason(supabase, appt, intent, paymentId);
+    if (skipReason) {
+      return json(200, { success: true, skipped: true, reason: skipReason });
     }
 
     // 3. Idempotencia: ¿ya mandamos este intent para este appointment?
@@ -304,14 +364,32 @@ Deno.serve(async (req) => {
       appt.deposit_amount != null &&
       (appt.deposit_status === "pending" || appt.deposit_status === "requested");
     let deposit: DepositInfo | null = null;
-    if (depositOwed) {
+    let payment: PaymentInfo | null = null;
+    let currency = "USD";
+    if (depositOwed || intent === "payment_received") {
       const { data: orgCurrency } = await supabase
         .from("organizations")
         .select("currency")
         .eq("id", appt.organization_id)
         .single<{ currency: string | null }>();
+      currency = orgCurrency?.currency ?? "USD";
+    }
+    if (intent === "payment_received") {
+      const { data: pay } = await supabase
+        .from("appointment_payments")
+        .select("amount, method, method_other")
+        .eq("id", paymentId!)
+        .single<{ amount: number; method: string; method_other: string | null }>();
+      payment = {
+        amount: money(Number(pay?.amount ?? 0), currency),
+        method: pay?.method_other?.trim() || PAYMENT_METHOD_LABEL[pay?.method ?? ""] || "",
+        paid: money(Number(appt.amount_paid ?? 0), currency),
+        pending: money(Number(appt.amount_pending ?? 0), currency),
+      };
+    }
+    if (depositOwed) {
       deposit = {
-        amount: money(Number(appt.deposit_amount), orgCurrency?.currency ?? "USD"),
+        amount: money(Number(appt.deposit_amount), currency),
         instructions: settings.deposit_instructions?.trim() || null,
         dueAt: appt.deposit_due_at
           ? new Date(appt.deposit_due_at).toLocaleString("es", {
@@ -324,7 +402,7 @@ Deno.serve(async (req) => {
           : null,
       };
     }
-    const body = buildMessage(appt, intent, waitlistCustomerName, openList, deposit);
+    const body = buildMessage(appt, intent, waitlistCustomerName, openList, deposit, payment);
     const frame: FrameOptions | undefined =
       intent === "confirm" && deposit
         ? { contact: true, reply: "deposit" }
@@ -378,6 +456,8 @@ Deno.serve(async (req) => {
         status: "sent",
         body: text,
       });
+
+      if (intent === "payment_received") await markReceiptSent(supabase, paymentId!);
 
       // Marcar la entrada de waitlist como notificada
       if (intent === "waitlist_slot" && waitlistId) {
@@ -452,6 +532,8 @@ Deno.serve(async (req) => {
       error_code: errorCode,
       error_message: errorMessage,
     });
+    // OpenWA can answer HTTP 500 after delivering: never send a receipt twice
+    if (intent === "payment_received") await markReceiptSent(supabase, paymentId!);
 
     return json(502, {
       success: false,
@@ -543,6 +625,60 @@ async function getCustomerId(supabase: any, appointmentId: string) {
   return data?.customer_id;
 }
 
+/**
+ * Why a payment notice must not go out (096), or null to send it. Deposit
+ * notices go once per deadline: a message sent before the current deadline
+ * window does not count, so a moved deadline gets new ones. A receipt goes
+ * once per payment, and never for a voided one.
+ */
+async function paymentNoticeSkipReason(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  appt: AppointmentRow,
+  intent: Intent,
+  paymentId?: string
+): Promise<string | null> {
+  if (intent === "payment_received") {
+    const { data: pay } = await supabase
+      .from("appointment_payments")
+      .select("voided_at, ack_sent_at")
+      .eq("id", paymentId)
+      .maybeSingle<{ voided_at: string | null; ack_sent_at: string | null }>();
+    if (!pay) return "Payment not found";
+    if (pay.voided_at) return "Payment voided";
+    return pay.ack_sent_at ? "Receipt already sent" : null;
+  }
+
+  const isReminder = intent === "deposit_due_reminder";
+  if (!isReminder && intent !== "deposit_overdue" && intent !== "notify_business_deposit_overdue") {
+    return null;
+  }
+  const owed = appt.deposit_status === "pending" || appt.deposit_status === "requested";
+  if (!owed || !appt.deposit_due_at) return "Deposit not owed";
+  const due = new Date(appt.deposit_due_at).getTime();
+  if (isReminder ? Date.now() >= due : Date.now() < due) {
+    return isReminder ? "Deadline already passed" : "Deadline not passed yet";
+  }
+  const since = new Date(isReminder ? due - 24 * 60 * 60 * 1000 : due).toISOString();
+  const { data: existing } = await supabase
+    .from("wa_outbound_messages")
+    .select("id")
+    .eq("appointment_id", appt.id)
+    .eq("intent", intent)
+    .gte("sent_at", since)
+    .limit(1)
+    .maybeSingle();
+  return existing ? `Already sent for this deadline (intent=${intent})` : null;
+}
+
+// deno-lint-ignore no-explicit-any
+async function markReceiptSent(supabase: any, paymentId: string) {
+  await supabase
+    .from("appointment_payments")
+    .update({ ack_sent_at: new Date().toISOString() })
+    .eq("id", paymentId);
+}
+
 /** "• T-0045 · martes 8 de octubre, 10:00" lines of the customer's open appointments. */
 async function openAppointmentsList(
   // deno-lint-ignore no-explicit-any
@@ -581,7 +717,8 @@ function buildMessage(
   intent: Intent,
   waitlistCustomerName = "",
   openList = "",
-  deposit: DepositInfo | null = null
+  deposit: DepositInfo | null = null,
+  payment: PaymentInfo | null = null
 ): string {
   const date = new Date(`${appt.appointment_date}T${appt.start_time}`);
   const fechaLarga = date.toLocaleDateString("es-CU", {
@@ -831,6 +968,56 @@ function buildMessage(
         `N° ${numero}`,
         ``,
         `Revisa que te llegó y márcalo como recibido en el turno para confirmarlo.`,
+      ].join("\n");
+
+    case "deposit_due_reminder":
+      return [
+        `🔔 Hola ${cliente}! Te recordamos el anticipo de tu turno:`,
+        ``,
+        `📅 ${fechaLarga}`,
+        `⏰ ${hora}`,
+        `💇 ${servicio}${staff}`,
+        `🎫 N° ${numero}`,
+        ``,
+        deposit?.dueAt
+          ? `💵 Falta el anticipo de *${deposit.amount}*, antes del *${deposit.dueAt}*.`
+          : `💵 Falta el anticipo de *${deposit?.amount}*.`,
+        ...(deposit?.instructions ? [deposit.instructions] : []),
+        ...(appt.payment_terms ? [``, `📋 *Condiciones:* ${appt.payment_terms}`] : []),
+        ``,
+        `Cuando pagues, responde *PAGUÉ ${numero}* o manda la foto del comprobante.`,
+        `❌ Si ya no puedes ir, responde *CANCELAR ${numero}*.`,
+      ].join("\n");
+
+    case "deposit_overdue":
+      return [
+        `⏰ Hola ${cliente}, venció el plazo para pagar el anticipo de *${deposit?.amount}* de tu turno N° ${numero} (${fechaLarga}, ${hora}).`,
+        ``,
+        `Tu turno sigue pendiente: el negocio decidirá si lo mantiene. Si todavía quieres ir, paga cuanto antes o escríbele.`,
+        ...(deposit?.instructions ? [``, deposit.instructions] : []),
+        ``,
+        `Cuando pagues, responde *PAGUÉ ${numero}* o manda la foto del comprobante.`,
+        `❌ Si ya no puedes ir, responde *CANCELAR ${numero}*.`,
+      ].join("\n");
+
+    case "notify_business_deposit_overdue":
+      return [
+        `⏰ *Anticipo vencido*`,
+        ``,
+        `${appt.customer_first_name} ${appt.customer_last_name}`,
+        `Tel: ${appt.customer_phone}`,
+        `📅 ${fechaLarga} ⏰ ${hora}`,
+        `N° ${numero} · Anticipo: ${deposit?.amount}`,
+        ``,
+        `El turno sigue pendiente. Desde el turno puedes cancelarlo, darle más plazo o perdonar el anticipo.`,
+      ].join("\n");
+
+    case "payment_received":
+      return [
+        `✅ Hola ${cliente}! Recibimos tu pago de *${payment?.amount}*${payment?.method ? ` (${payment.method})` : ""} del turno N° ${numero} (${fechaLarga}, ${hora}).`,
+        ``,
+        `Pagado: *${payment?.paid}*`,
+        `Pendiente: *${payment?.pending}*`,
       ].join("\n");
 
     case "notify_business_confirm":

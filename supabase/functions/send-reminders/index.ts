@@ -2,6 +2,7 @@
 //
 // Recorre appointments próximos en las ventanas T-24h y T-1h
 // y delega a `wa-send` con el intent correspondiente.
+// También los anticipos que vencen en 24 h o que acaban de vencer (096).
 //
 // Pensada para ejecutarse vía pg_cron cada 15 minutos:
 //   select cron.schedule(
@@ -58,9 +59,19 @@ Deno.serve(async (req) => {
     const targets24h = await loadInWindow(supabase, w24Start, w24End);
     const targets1h = await loadInWindow(supabase, w1Start, w1End);
 
+    // Deposits (096): due within 24 h, or overdue in the last 24 h
+    const depositsDue = await loadDeposits(supabase, "wa_deposits_due_soon");
+    const depositsOverdue = await loadDeposits(supabase, "wa_deposits_overdue");
+
     const results = {
       reminder_24h: await dispatchBatch(targets24h, "reminder_24h"),
       reminder_1h: await dispatchBatch(targets1h, "reminder_1h"),
+      deposit_due_reminder: await dispatchBatch(depositsDue, "deposit_due_reminder"),
+      deposit_overdue: await dispatchBatch(depositsOverdue, "deposit_overdue"),
+      notify_business_deposit_overdue: await dispatchBatch(
+        depositsOverdue,
+        "notify_business_deposit_overdue"
+      ),
     };
 
     return json(200, {
@@ -97,7 +108,19 @@ async function loadInWindow(
   return (data ?? []) as AppointmentRow[];
 }
 
-async function dispatchBatch(rows: AppointmentRow[], intent: string) {
+async function loadDeposits(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  rpc: "wa_deposits_due_soon" | "wa_deposits_overdue"
+): Promise<{ id: string }[]> {
+  const { data, error } = await supabase.rpc(rpc);
+  if (error) {
+    throw error;
+  }
+  return (data ?? []) as { id: string }[];
+}
+
+async function dispatchBatch(rows: { id: string }[], intent: string) {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
