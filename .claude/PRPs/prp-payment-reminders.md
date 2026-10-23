@@ -1,6 +1,6 @@
 # PRP-009: Recordatorios y avisos de pago (TUR0009)
 
-> **Estado**: HECHO (2026-10-23, en producción; falta subir la web)
+> **Estado**: HECHO (2026-10-23, en producción y subido; TUR0009 en «En revisión»)
 > **Fecha**: 2026-10-23
 > **Proyecto**: Turno Flash
 > **Tarea**: TUR0009 «Añadir recordatorios de pago y comunicaciones» (estimación 2-3 días)
